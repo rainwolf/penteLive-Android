@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "342585826732",
+    "project_id": "pente-live"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342585826732:android:a925e92a894a925f",
+        "android_client_info": {
+          "package_name": "be.submanifold.pentelive"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL721NaSCAEVVZrRS2u_D3l5Y0oMeME3k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

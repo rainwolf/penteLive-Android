@@ -1,0 +1,434 @@
+package be.submanifold.pentelive;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
+import android.os.Build;
+import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.util.List;
+
+/**
+ * Created by waliedothman on 15/04/16.
+ */
+public class BoardView extends View {
+    public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
+            keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
+            dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
+            poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
+            boatPenteColor = Color.parseColor("#25BAFF");
+    private Paint blackPaint =  makePaint(blackColor), whitePaint = makePaint(whiteColor), pentePaint = makePaint(penteColor),
+            keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
+            dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
+            poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
+            boatPentePaint = makePaint(boatPenteColor), shadowPaint = makePaint(Color.GRAY);
+    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    private float size;
+    private float scaling = 1;
+    private float translateX = 0, translateY = 0, stoneX, stoneY;
+    private byte myColor, stoneI, stoneJ;
+    public int playedMove = -1;
+
+
+    public int redDot = -1;
+
+
+    public int c6RedDot = -1;
+    public int connect6Move1 = -1;
+    public int dPenteMove1 = -1;
+    public int dPenteMove2 = -1;
+    public int dPenteMove3 = -1;
+
+
+    private boolean replayed = false;
+    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+
+    private Game game;
+
+    public Game getGame() {
+        return game;
+    }
+    public void setGame(Game game) {
+        this.game = game;
+//        this.game.parseGame(this);
+    }
+
+    public boolean isReplayed() {
+        return replayed;
+    }
+    public void setReplayed(boolean replayed) {
+        this.replayed = replayed;
+    }
+    public int getRedDot() {
+        return redDot;
+    }
+    public void setRedDot(int redDot) {
+        this.redDot = redDot;
+    }
+    public int getC6RedDot() {
+        return c6RedDot;
+    }
+    public void setC6RedDot(int c6RedDot) {
+        this.c6RedDot = c6RedDot;
+    }
+
+//    public BoardView(Context context) {
+//        super(context);
+//        scaling = 1;
+//        translateX = 0;
+//        translateY = 0;
+//    }
+    public BoardView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        scaling = 1;
+        translateX = 0;
+        translateY = 0;
+    }
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        size = getWidth();
+        canvas.scale(scaling, scaling);
+        canvas.translate(translateX, translateY);
+        drawBoard(canvas);
+        if (game != null) {
+            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+            ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
+            if (!game.isConnect6() && !game.isGomoku()) {
+                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures);
+            }
+//            parentLayout.setSupportActionBar(toolbar);
+//            if (!game.isConnect6()) {
+//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
+//            } else {
+//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
+//            }
+            if (scaling == 1) {
+                ((TextView) parentLayout.findViewById(R.id.playerInfo)).setText("Opponent: " + game.getOpponentName()
+                        + ", rating: " + game.getOpponentRating() + "\nRemaining Time: " + game.getRemainingTime()
+                        + "\n" + game.getRatedNot() + " and " + game.getPrivateGame() + " game");
+            }
+
+            if (game.dPenteChoice && !game.isActive()) {
+                ((LinearLayout) parentLayout.findViewById(R.id.submitLayout)).setVisibility(GONE);
+                ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).setVisibility(VISIBLE);
+//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
+                return;
+            }
+            if (!game.isActive()) {
+                return;
+            }
+        }
+        if (playedMove == -1) {
+//            playedMove = -1;
+            return;
+        }
+
+        if (game != null && game.getMovesList() != null && game.isConnect6()) {
+            int i = game.getMovesList().size();
+            myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
+        } else if (game != null && game.isDPente() && game.getMovesList().size() == 1) {
+            if (dPenteMove3 > -1) {
+                myColor = (byte) 2;
+            } else if (dPenteMove2 > -1) {
+                myColor = (byte) 2;
+            } else if (dPenteMove1 > -1) {
+                myColor = (byte) 1;
+            } else {
+                myColor = (byte) 2;
+            }
+        } else if (game != null && game.getMovesList() != null) {
+            myColor = (byte) (game.getMovesList().size()%2 + 1);
+        } else {
+            myColor = 1;
+        }
+        if (scaling == 2) {
+            drawZoomedLine(canvas, stoneX, stoneY);
+            drawZoomedStone(canvas, stoneX, stoneY, myColor);
+        }
+//        else {
+//            drawStone(canvas, stoneX, stoneY, myColor);
+//        }
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // TODO Auto-generated method stub
+
+        float x, y;
+        x = event.getX();
+        y = event.getY();
+        float realSize = getWidth();
+        if (x > realSize || y > realSize || x < 0 || y < 0) {
+            playedMove = -1;
+            scaling = 1;
+            translateX = 0;
+            translateY = 0;
+            invalidate();
+            return false;
+        }
+        playedMove = -1;
+        dPenteMove3 = -1;
+        stoneX = x;
+        stoneI = (byte) (19*stoneX/size);
+        stoneY = y;
+        stoneJ = (byte) (19*stoneY/size);
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                game.replayGame(abstractBoard, this);
+                replayed = true;
+                scaling = 2;
+                translateX = -x/2;
+                translateY = -y/2;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                scaling = 2;
+                translateX = -x/2;
+                translateY = -y/2;
+                break;
+            case MotionEvent.ACTION_UP:
+                scaling = 1;
+                translateX = 0;
+                translateY = 0;
+                break;
+        }
+
+        if (game.isActive() && abstractBoard[stoneI][stoneJ] == 0) {
+            playedMove = 19*stoneJ + stoneI;
+        }
+        if (scaling == 1) {
+            if (game.isConnect6() && connect6Move1 == -1) {
+                connect6Move1 = playedMove;
+            }
+            if (game.isDPente() && game.getMovesList().size() == 1) {
+                if (dPenteMove1 == -1) {
+                    dPenteMove1 = playedMove;
+                } else if (dPenteMove2 == -1 && playedMove != dPenteMove1) {
+                    dPenteMove2 = playedMove;
+                } else if (playedMove != dPenteMove1 && playedMove != dPenteMove2){
+                    dPenteMove3 = playedMove;
+                }
+            }
+            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+            if (playedMove == -1 || abstractBoard[stoneI][stoneJ] != 0) {
+                if (!replayed && game.getMovesList() != null) {
+                    System.out.println(" fuck kitty");
+                    game.replayGame(abstractBoard, this);
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit");
+                    replayed = true;
+                }
+                if (game.isConnect6() && connect6Move1 > -1) {
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                                    "-...");
+                }
+            } else if (playedMove > -1){
+                if (game.isConnect6()) {
+                    if (connect6Move1 > -1) {
+                        if (playedMove > -1 && playedMove != connect6Move1) {
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                                    "-" + coordinateLetters[stoneI] + "" + (19 - stoneJ));
+                        } else {
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[stoneI] + "" + (19 - stoneJ) +
+                                    "-...");
+                        }
+                    }
+                } else if (game.isDPente() && game.getMovesList().size() == 1) {
+                    if (dPenteMove3 > -1) {
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
+                                "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)));
+                    } else if (dPenteMove2 > -1) {
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
+                                "-...");
+                    } else {
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                "-...");
+                    }
+                } else {
+                    game.replayGame(abstractBoard, stoneI, stoneJ, this);
+                    replayed = false;
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[stoneI] + "" + (19 - stoneJ));
+                }
+            }
+        }
+        invalidate();
+        return true;
+    }
+
+    private void drawBoard(Canvas canvas) {
+        float step = (float) size / 19, margin = step/2;
+//        canvas.drawPaint(pentePaint);
+        Paint linePaint = blackPaint;
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setStrokeWidth(2);
+        for ( int i = 0; i < 19; i++ ) {
+            canvas.drawLine(margin + step*i, margin, margin + step*i, size - margin, linePaint);
+            canvas.drawLine(margin, margin + step*i, size - margin, margin + step*i, linePaint);
+        }
+        canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
+        canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
+        canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
+        canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
+        canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
+        for ( byte i = 0; i < 19; i++ ) {
+            for ( byte j = 0; j < 19; j++ ) {
+                drawStone(canvas, i, j, abstractBoard[i][j]);
+            }
+        }
+        drawRedDot(canvas);
+        if (game!= null) {
+            if (game.getMovesList() != null && game.isConnect6()) {
+                int i = game.getMovesList().size();
+                myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
+                if (connect6Move1 > -1) {
+                    byte movej = (byte) (connect6Move1/19);
+                    byte movei = (byte) (connect6Move1%19);
+                    drawStone(canvas, movei, movej, myColor);
+                }
+                if (playedMove > -1 && playedMove != connect6Move1) {
+                    byte movej = (byte) (playedMove/19);
+                    byte movei = (byte) (playedMove%19);
+                    drawStone(canvas, movei, movej, myColor);
+                }
+            }
+            if (game.isDPente()) {
+                if (dPenteMove1 > -1) {
+                    byte movej = (byte) (dPenteMove1/19);
+                    byte movei = (byte) (dPenteMove1%19);
+                    drawStone(canvas, movei, movej, (byte) 2);
+                }
+                if (dPenteMove2 > -1) {
+                    byte movej = (byte) (dPenteMove2/19);
+                    byte movei = (byte) (dPenteMove2%19);
+                    drawStone(canvas, movei, movej, (byte) 1);
+                }
+                if (dPenteMove3 > -1) {
+                    byte movej = (byte) (dPenteMove3/19);
+                    byte movei = (byte) (dPenteMove3%19);
+                    drawStone(canvas, movei, movej, (byte) 2);
+                }
+            }
+        }
+
+    }
+
+    private void drawStone(Canvas canvas, float x, float y, byte stoneColor) {
+        if (stoneColor < 1) {
+            return;
+        }
+        float radius = size / 39;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float cgx = cx - size/200, cgy = cy - size/200;
+        Paint stonePaint;
+        stonePaint = new Paint();
+        stonePaint.setStrokeWidth(1);
+        stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        stonePaint.setColor(Color.BLACK);
+        if (stoneColor == 2) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+        } else {
+            stonePaint.setShader(new RadialGradient(cgx,cgy,
+                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        }
+        float shadowOffset = radius/7;
+        shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        canvas.drawCircle(cx, cy, radius, stonePaint);
+    }
+    private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
+        float radius = size / 30;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float cgx = cx - size/200, cgy = cy - size/200;
+        Paint stonePaint;
+        stonePaint = new Paint();
+        stonePaint.setStrokeWidth(1);
+        stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        stonePaint.setColor(Color.BLACK);
+        if (stoneColor == 2) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+        } else {
+            stonePaint.setShader(new RadialGradient(cgx,cgy,
+                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        }
+        float shadowOffset = radius/7;
+        shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        canvas.drawCircle(cx, cy, radius, stonePaint);
+    }
+    private void drawZoomedLine(Canvas canvas, float x, float y) {
+        float radius = size / 30;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        Paint linePaint;
+        linePaint = new Paint();
+        linePaint.setStrokeWidth(4);
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setColor(Color.WHITE);
+        canvas.drawLine(0,cy,size,cy, linePaint);
+        canvas.drawLine(cx,0,cx,size, linePaint);
+    }
+    private void drawStone(Canvas canvas, byte i, byte j, byte stoneColor) {
+        drawStone(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+    }
+
+    private void drawRedDot(Canvas canvas) {
+        Paint stonePaint;
+        stonePaint = new Paint();
+        stonePaint.setStrokeWidth(1);
+        stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        stonePaint.setColor(Color.RED);
+        float radius = size / 100;
+        byte j = (byte) (redDot/19);
+        byte i = (byte) (redDot%19);
+        float cx = size*i/19 + size/38, cy = size*j/19 + size/38;
+        canvas.drawCircle(cx, cy, radius, stonePaint);
+        if (c6RedDot > -1) {
+            j = (byte) (c6RedDot/19);
+            i = (byte) (c6RedDot%19);
+            cx = size*i/19 + size/38;
+            cy = size*j/19 + size/38;
+            canvas.drawCircle(cx, cy, radius, stonePaint);
+        }
+    }
+
+
+    private Paint makePaint(int color) {
+        Paint p = new Paint();
+        p.setColor(color);
+        return(p);
+    }
+
+}

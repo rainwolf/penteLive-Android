@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_cancel_resign"
+        android:icon="@drawable/ic_do_not_disturb"
+        android:title="fav"
+        style="@android:style/Widget.ActionButton"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_new_message"
+        android:icon="@drawable/ic_chat"
+        android:title="fav"
+        style="@android:style/Widget.ActionButton"
+        app:showAsAction="ifRoom"/>
+
+</menu>

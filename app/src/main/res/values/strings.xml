@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">penteLive</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This username or password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="banner_ad_unit_id_dashboard">ca-app-pub-3326997956703582/9406817448</string>
+    <string name="banner_ad_unit_id_board">ca-app-pub-3326997956703582/5986542641</string>
+    <string name="title_activity_board">BoardActivity</string>
+    <string-array name="game_types_array">
+        <item>Pente</item>
+        <item>Keryo-Pente</item>
+        <item>Gomoku</item>
+        <item>D-Pente</item>
+        <item>G-Pente</item>
+        <item>Poof-Pente</item>
+        <item>Connect6</item>
+        <item>Boat-Pente</item>
+    </string-array>
+    <string-array name="timeout_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+    </string-array>
+    <string-array name="restriction_array">
+        <item>of any rating</item>
+        <item>not already playing</item>
+        <item>of lower rating</item>
+        <item>of higher rating</item>
+        <item>of similar rating</item>
+        <item>of same rating class</item>
+    </string-array>
+</resources>
