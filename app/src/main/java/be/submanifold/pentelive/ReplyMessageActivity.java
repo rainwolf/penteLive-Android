@@ -121,6 +121,11 @@ public class ReplyMessageActivity extends AppCompatActivity {
                         DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
                         deleteTask.execute((Void) null);
                         return true;
+                    case R.id.action_challenge:
+                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                        intent.putExtra("opponent", recipient);
+                        startActivity(intent);
+                        return true;
                 }
 
                 return false;
@@ -148,6 +153,18 @@ public class ReplyMessageActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
     }
 
     @Override
@@ -320,41 +337,60 @@ public class ReplyMessageActivity extends AppCompatActivity {
             // TODO: attempt authentication against a network service.
 
             try {
-                String urlParameters  = "command=view&mid=" + messageID + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
-                }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/mymessages";
-                URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
-                try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return  false;
+                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    System.out.println("response code for submit was " + responseCode);
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
-                    output.append(line + System.getProperty("line.separator"));
+                    output.append(line + "\n");
                 }
                 br.close();
 
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+//                System.out.println("submit output: " + output.toString());
+//
+//                String urlParameters  = "command=view&mid=" + messageID + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+//                byte[] postData       = new byte[0];
+//                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+//                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+//                }
+//                int    postDataLength = postData.length;
+//                String request        = "https://www.pente.org/gameServer/mymessages";
+//                URL url            = new URL( request );
+//                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+//                conn.setDoOutput( true );
+//                conn.setInstanceFollowRedirects( false );
+//                conn.setRequestMethod( "POST" );
+//                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+//                conn.setRequestProperty( "charset", "utf-8");
+//                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+//                conn.setUseCaches( false );
+//                try {
+//                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+//                    wr.write( postData );
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return  false;
+//                }
+//
+//                StringBuilder output = new StringBuilder();
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+//                String line = "";
+//                while((line = br.readLine()) != null ) {
+//                    output.append(line + System.getProperty("line.separator"));
+//                }
+//                br.close();
+//
+//                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+////                System.out.println(output);
 
                 String tmpStr1 = output.toString();
 

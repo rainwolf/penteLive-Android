@@ -142,9 +142,20 @@ public class InvitationActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+    }
+
 
     public String getOpponent() {
         return opponent;
@@ -187,6 +198,25 @@ public class InvitationActivity extends AppCompatActivity {
             // TODO: attempt authentication against a network service.
 
             try {
+//                URL url = new URL("https://www.pente.org/gameServer/tb/newGame?mobile=&invitee=" + opponentName + "&game=" + gameType +
+//                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
+//                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+//                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+//                int responseCode = connection.getResponseCode();
+//                if (responseCode != 200) {
+//                    System.out.println("response code for submit was " + responseCode);
+//                    return false;
+//                }
+//
+//                StringBuilder output = new StringBuilder();
+//                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//                System.out.println("output===============" + br);
+//                String line = "";
+//                while((line = br.readLine()) != null ) {
+//                    output.append(line + "\n");
+//                }
+//                br.close();
+
                 String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
                 "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
                         restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;

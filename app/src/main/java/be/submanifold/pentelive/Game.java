@@ -210,7 +210,7 @@ public class Game implements Parcelable {
                 }
                 br.close();
 
-                System.out.println(output);
+//                System.out.println(output);
 
                 mGameString = output.toString();
 
@@ -249,7 +249,7 @@ public class Game implements Parcelable {
                     }
                     br.close();
 
-                    System.out.println(output);
+//                    System.out.println(output);
 
                     mGameString = output.toString();
                 }
@@ -810,7 +810,7 @@ public class Game implements Parcelable {
         }
         byte color = (byte) (1 + (mMovesList.size()%2));
         abstractBoard[moveI][moveJ] = color;
-        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + color);
+//        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + color);
         detectPenteCapture(abstractBoard, moveI, moveJ, color);
     }
 

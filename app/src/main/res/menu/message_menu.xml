@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_challenge"
+        android:icon="@drawable/ic_play_arrow"
+        android:title="fav"
+        style="@android:style/Widget.ActionButton"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_trash"
         android:icon="@drawable/ic_action_trash"
         android:title="fav"

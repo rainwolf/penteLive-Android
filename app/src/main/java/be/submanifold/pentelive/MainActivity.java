@@ -1,7 +1,9 @@
 package be.submanifold.pentelive;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
-                System.out.println("kittycat " + childPosition + " of " + groupPosition );
+//                System.out.println("kittycat " + childPosition + " of " + groupPosition );
                 if (groupPosition == 0) {
                     Intent intent = new Intent(getApplicationContext(), ReplyMessageActivity.class);
                     intent.putExtra("message", player.getMessages().get(childPosition));
@@ -96,24 +99,26 @@ public class MainActivity extends AppCompatActivity {
                                         setID = player.getInvitations().get(childPosition).getGameID();
                                     } else {
                                         // check if enough credit.
-                                        int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
+                                        if (!player.isSubscriber()) {
+                                            int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
 //                                        System.out.println(" remaining credit = " + remainingCredit);
-                                        if (remainingCredit < 1) {
-                                            Snackbar snackbar = Snackbar
-                                                    .make(getCurrentFocus(), "You can accept open invitations again after posting one.", Snackbar.LENGTH_LONG)
-                                                    .setAction("Post now!", new View.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(View view) {
-                                                            Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                                                            startActivity(intent);
-                                                        }
-                                                    });
+                                            if (remainingCredit < 1) {
+                                                Snackbar snackbar = Snackbar
+                                                        .make(getCurrentFocus(), "You can accept open invitations again after posting one.", Snackbar.LENGTH_LONG)
+                                                        .setAction("Post now!", new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View view) {
+                                                                Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                                                                startActivity(intent);
+                                                            }
+                                                        });
 
-                                            snackbar.show();
-                                            return;
-                                        } else {
-                                            remainingCredit -= 1;
-                                            PrefUtils.saveIntToPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
+                                                snackbar.show();
+                                                return;
+                                            } else {
+                                                remainingCredit -= 1;
+                                                PrefUtils.saveIntToPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
+                                            }
                                         }
                                         setID = player.getPublicInvitations().get(childPosition).getGameID();
                                     }
@@ -121,7 +126,12 @@ public class MainActivity extends AppCompatActivity {
                                     if (player.showAds()) {
                                         if (mInterstitialAd.isLoaded()) {
                                             mInterstitialAd.show();
-                                        }                                     }
+                                        }
+                                    }
+                                    viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                    viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                                    viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                                    viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
                                 }
                             });
                             viewWithOpenButtons = v;
@@ -224,10 +234,32 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("message");
+            player.loadPlayer(listAdapter);
+
+            Toast.makeText(MainActivity.this, message,
+                    Toast.LENGTH_SHORT).show();
+        }
+    };
+
     @Override
     public void onResume() {
         super.onResume();
+        MyApplication.activityResumed();
         this.player.loadPlayer(this.listAdapter);
+        (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+        (MainActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
     private void refreshPlayer() {

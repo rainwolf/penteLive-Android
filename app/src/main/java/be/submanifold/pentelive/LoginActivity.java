@@ -149,14 +149,21 @@ public class LoginActivity extends AppCompatActivity
             attemptLogin();
         }
 
+
+
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-// To retrieve values back
+        MyApplication.activityResumed();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+    }
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -383,9 +390,12 @@ public class LoginActivity extends AppCompatActivity
             showProgress(false);
 
             if (success) {
+                Intent intent = new Intent(getApplicationContext(), RegistrationIntentService.class);
+                startService(intent);
+
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, mEmail);
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, mPassword);
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent = new Intent(getApplicationContext(), MainActivity.class);
                 PentePlayer player = new PentePlayer(mEmail, mPassword);
                 intent.putExtra("pentePlayer", player);
                 startActivity(intent);

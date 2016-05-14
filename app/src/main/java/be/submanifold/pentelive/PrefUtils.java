@@ -25,6 +25,8 @@ public class PrefUtils {
     public static final String PREFS_INVITATIONGAME_KEY = "__INVITATIONGAME__" ;
     public static final String PREFS_INVITATIONDAYS_KEY = "__INVITATIONDAYS__" ;
     public static final String PREFS_INVITATIONRESTRICTION_KEY = "__INVITATIONRESTRICTION__" ;
+    public static final String PREFS_TOKEN_KEY = "__TOKEN__" ;
+    public static final String PREFS_TOKENLASTSENT_KEY = "__TOKENLASTSENT__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -71,6 +73,23 @@ public class PrefUtils {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         try {
             return sharedPrefs.getInt(key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    public static void saveLongToPrefs(Context context, String key, long value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(key,value);
+        editor.commit();
+    }
+
+    public static long getLongFromPrefs(Context context, String key, long defaultValue) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        try {
+            return sharedPrefs.getLong(key, defaultValue);
         } catch (Exception e) {
             e.printStackTrace();
             return defaultValue;

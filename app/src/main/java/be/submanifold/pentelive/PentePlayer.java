@@ -20,6 +20,7 @@ public class PentePlayer implements Parcelable {
     public static String mPlayerName;
     public static String mPassword;
     public static Boolean mShowAds;
+    private Boolean mSubscriber;
     List<Game> mInvitations;
     List<Game>  mSentInvitations;
     List<Game>  mActiveGames;
@@ -61,13 +62,24 @@ public class PentePlayer implements Parcelable {
         return this.mMessages;
     }
     public Boolean showAds() { return this.mShowAds; }
+    public Boolean isSubscriber() {
+        return mSubscriber;
+    }
+    public void setSubscriber(Boolean mSubscriber) {
+        this.mSubscriber = mSubscriber;
+    }
 
     private void populatePlayer(String dashString) {
         if (dashString == null) {
             return;
         }
-        if (dashString.indexOf("No Ads") > 0 && dashString.indexOf("No Ads") < 30) {
+        if (dashString.indexOf("No Ads") > -1 && dashString.indexOf("No Ads") < 30) {
             this.mShowAds = false;
+        }
+        if (dashString.indexOf("tb GamesLimit") > -1 || dashString.indexOf("tb GamesLimit") > 30) {
+            this.mSubscriber = false;
+        } else {
+            this.mSubscriber = true;
         }
         String[] dashLines = dashString.split("\n");
         String[] dashLine;
@@ -165,6 +177,8 @@ public class PentePlayer implements Parcelable {
         mPassword = in.readString();
         byte mShowAdsVal = in.readByte();
         mShowAds = mShowAdsVal == 0x02 ? null : mShowAdsVal != 0x00;
+        byte mSubscriberVal = in.readByte();
+        mSubscriber = mSubscriberVal == 0x02 ? null : mSubscriberVal != 0x00;
         if (in.readByte() == 0x01) {
             mInvitations = new ArrayList<Game>();
             in.readList(mInvitations, Game.class.getClassLoader());
@@ -216,6 +230,11 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x02));
         } else {
             dest.writeByte((byte) (mShowAds ? 0x01 : 0x00));
+        }
+        if (mSubscriber == null) {
+            dest.writeByte((byte) (0x02));
+        } else {
+            dest.writeByte((byte) (mSubscriber ? 0x01 : 0x00));
         }
         if (mInvitations == null) {
             dest.writeByte((byte) (0x00));

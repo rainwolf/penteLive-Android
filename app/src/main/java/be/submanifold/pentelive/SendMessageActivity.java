@@ -96,6 +96,18 @@ public class SendMessageActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+    }
+
     private class SendMessageTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String recipient;

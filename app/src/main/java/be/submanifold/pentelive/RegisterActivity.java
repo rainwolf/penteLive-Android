@@ -72,6 +72,18 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+    }
+
     private void attemptRegistration() {
         String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase();
         if (username.length() < 5 || username.length() > 10) {
