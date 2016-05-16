@@ -1,7 +1,9 @@
 package be.submanifold.pentelive;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -25,9 +27,11 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     PentePlayer playerData;
     private LayoutInflater inflater;
     private Activity activity;
+    private boolean asked2GetStarted;
 
     public DashboardListAdapter(PentePlayer player) {
         this.playerData = player;
+        asked2GetStarted = false;
 //        player.loadPlayer();
     }
     public void setInflater(LayoutInflater inflater, Activity activity) {
@@ -86,7 +90,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
-        convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.brown));
+        convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
         String title;
         switch (groupPosition) {
             case 0: title = "Messages (" + playerData.getMessages().size() + ")";
@@ -282,6 +286,11 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
         } else {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
+        }
+
+        if (!asked2GetStarted && (playerData.getActiveGames().size() == 0) && (playerData.getNonActiveGames().size() == 0) && (playerData.getSentInvitations().size() == 0)) {
+            asked2GetStarted = true;
+            ((MainActivity) activity).ask2GetStarted();
         }
     }
 }

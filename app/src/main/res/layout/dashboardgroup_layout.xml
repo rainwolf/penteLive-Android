@@ -2,46 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:tools="http://schemas.android.com/tools"
 android:id="@+id/dashboardGroup"
-android:layout_width="match_parent"
+android:layout_width="fill_parent"
 android:layout_height="30dp"
-android:background="@color/brown"
-android:orientation="vertical"
+android:background="@color/britishracinggreen"
+android:orientation="horizontal"
 android:paddingLeft="10dp"
 tools:context=".MainActivity" >
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="29dp"
-    android:gravity="center_vertical">
-    <RelativeLayout
-        android:layout_width="0dp"
+    <TextView android:id="@+id/textView"
+        android:textColor="#FFFFFF"
         android:gravity="center_vertical"
-        android:layout_height="wrap_content"
-        android:layout_weight="5">
-        <TextView android:id="@+id/textView"
-            android:textColor="#FFFFFF"
-            android:gravity="center_vertical"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </RelativeLayout>
-    <RelativeLayout
+        android:textSize="16sp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:layout_weight="5"
         android:layout_width="0dp"
+        android:layout_height="match_parent"/>
+    <TextView android:id="@+id/collapsedText"
         android:gravity="center_vertical"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
-        <TextView android:id="@+id/collapsedText"
-            android:gravity="center_vertical"
-            android:typeface="monospace"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textAlignment="textEnd"
-            android:layout_marginRight="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
-</LinearLayout>
+        android:typeface="monospace"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_weight="1"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:textAlignment="textEnd"
+        android:layout_marginRight="10dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

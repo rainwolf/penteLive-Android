@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
 
+
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -306,6 +307,19 @@ public class MainActivity extends AppCompatActivity {
         mInterstitialAd.loadAd(adRequest);
     }
 
+    public void ask2GetStarted() {
+        Snackbar snackbar = Snackbar
+                .make(getCurrentFocus(), "Nothing to see here. Post an open invitation to get started?", Snackbar.LENGTH_LONG)
+                .setAction("Post now!", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+        snackbar.show();
+    }
 
 
 
