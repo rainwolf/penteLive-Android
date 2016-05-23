@@ -4,17 +4,24 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
@@ -226,6 +233,34 @@ public class MainActivity extends AppCompatActivity {
                         intent = new Intent(getApplicationContext(), SendMessageActivity.class);
                         startActivity(intent);
                         return true;
+                    case R.id.action_show_stats:
+                        Point size = new Point();
+                        Display display = getWindowManager().getDefaultDisplay();
+                        display.getSize(size);
+
+                        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
+                        popUpView.setBackgroundColor(Color.BLUE);
+                        PopupWindow messageWindow = new PopupWindow(popUpView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                        ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
+                        ratingListView =  (ExpandableListView) messageWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                        RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
+                        adapter.setInflater(inflater, MainActivity.this);
+                        ratingListView.setAdapter(adapter);
+                        ratingListView.expandGroup(0);
+                        ratingListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+                            @Override
+                            public boolean onGroupClick(ExpandableListView parent, View v,
+                                                        int groupPosition, long id) {
+                                return true; // This way the expander cannot be collapsed
+                            }
+                        });
+
+                        messageWindow.setFocusable(true);
+                        messageWindow.setOutsideTouchable(true);
+                        messageWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+
+                        return true;
                 }
 
                 return false;
@@ -291,6 +326,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_new_message:
                 // User chose the "Favorite" action, mark the current item
                 // as a favorite...
+                return true;
+
+            case R.id.action_show_stats:
+
                 return true;
 
             default:

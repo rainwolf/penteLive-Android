@@ -840,7 +840,7 @@ public class Game implements Parcelable {
             detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
             detectKeryoPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
         }
-        byte color = (byte) (1 + ((mMovesList.size() + 1)%2));
+        byte color = (byte) (1 + (mMovesList.size()%2));
         abstractBoard[moveI][moveJ] = color;
         detectPenteCapture(abstractBoard, moveI, moveJ, color);
         detectKeryoPenteCapture(abstractBoard, moveI, moveJ, color);

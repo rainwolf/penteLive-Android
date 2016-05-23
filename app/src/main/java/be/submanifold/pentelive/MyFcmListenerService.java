@@ -9,20 +9,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
-import com.google.android.gms.gcm.GcmListenerService;
+import java.util.Map;
 
-public class MyGcmListenerService extends GcmListenerService {
+public class MyFcmListenerService extends FirebaseMessagingService {
 
-    private static final String TAG = "MyGcmListenerService";
+    private static final String TAG = "MyFcmListenerService";
+    private MediaPlayer mediaPlayer;
 
     /**
      * Called when message is received.
@@ -34,10 +33,13 @@ public class MyGcmListenerService extends GcmListenerService {
      */
     // [START receive_message]
     @Override
-    public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
+    public void onMessageReceived(RemoteMessage message){
+        String from = message.getFrom();
+        Map data = message.getData();
+
+        String messageStr = (String) data.get("message");
         Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
+        Log.d(TAG, "Message: " + messageStr);
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
@@ -57,7 +59,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message);
+        sendNotification(messageStr);
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -89,8 +91,9 @@ public class MyGcmListenerService extends GcmListenerService {
 
             notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
         } else {
-            MediaPlayer mediaPlayer = MediaPlayer.create(MyGcmListenerService.this, R.raw.pentelivenotificationsound);
-            mediaPlayer.start();
+//            mediaPlayer = MediaPlayer.create(MyFcmListenerService.this, R.raw.pentelivenotificationsound);
+//            mediaPlayer.start();
+            MediaPlayer.create(this, R.raw.pentelivenotificationsound).start();
             Intent intent = new Intent("unique_name");
 
             //put whatever data you want to send, if any
@@ -99,19 +102,6 @@ public class MyGcmListenerService extends GcmListenerService {
             //send broadcast
             sendBroadcast(intent);
 
-//            Toast.makeText(MyGcmListenerService.this, message,
-//                    Toast.LENGTH_LONG).show();
-//            Snackbar snackbar = Snackbar
-//                    .make(getCurrentFocus(), "You can accept open invitations again after posting one.", Snackbar.LENGTH_LONG)
-//                    .setAction("Post now!", new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-//                            startActivity(intent);
-//                        }
-//                    });
-//
-//            snackbar.show();
         }
     }
 }

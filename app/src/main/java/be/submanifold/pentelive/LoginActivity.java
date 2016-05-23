@@ -3,9 +3,11 @@ package be.submanifold.pentelive;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.AsyncTask;
@@ -13,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -25,6 +28,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -35,6 +40,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * A login screen that offers login via email/password.
@@ -126,6 +132,7 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
+
         ((ToggleButton) findViewById(R.id.autoLoginToggle)).setChecked(PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false));
 
         ((ToggleButton) findViewById(R.id.autoLoginToggle)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -135,7 +142,7 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        String storedUserName = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
+        final String storedUserName = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
         String storedPassword = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
         if (storedUserName != null) {
 //            mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -145,6 +152,15 @@ public class LoginActivity extends AppCompatActivity
 //            mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setText(storedPassword);
         }
+        ((Button) findViewById(R.id.inviteFriendsButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Play Pente with me?");
+                i.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " +storedUserName));
+                startActivity(Intent.createChooser(i, "Invite Friends"));
+            }
+        });
         if ((storedPassword != null) && (storedUserName != null) && PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false)) {
             attemptLogin();
         }
@@ -390,12 +406,15 @@ public class LoginActivity extends AppCompatActivity
             showProgress(false);
 
             if (success) {
-                Intent intent = new Intent(getApplicationContext(), RegistrationIntentService.class);
-                startService(intent);
+                String token = FirebaseInstanceId.getInstance().getToken();
+                if (token != null) {
+                    SendTokenTask sendTokenTast = new SendTokenTask(token);
+                    sendTokenTast.execute((Void) null);
+                }
 
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, mEmail);
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, mPassword);
-                intent = new Intent(getApplicationContext(), MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 PentePlayer player = new PentePlayer(mEmail, mPassword);
                 intent.putExtra("pentePlayer", player);
                 startActivity(intent);
@@ -412,5 +431,94 @@ public class LoginActivity extends AppCompatActivity
             showProgress(false);
         }
     }
+
+
+
+
+    public class SendTokenTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String token;
+
+
+        SendTokenTask(String token) {
+            this.token = token;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            try {
+                String storedUserName = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
+                String storedPassword = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
+                String storedToken = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKEN_KEY, "");
+
+                Date date = new Date(System.currentTimeMillis()); //or simply new Date();
+                long millisNow = date.getTime();
+                long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
+                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+                    try {
+                        URL url = new URL("https://pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
+                                + "&token=" + token);
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        int responseCode = connection.getResponseCode();
+                        if (responseCode != 200) {
+                            System.out.println("response code for submit was " + responseCode);
+                        }
+
+                        StringBuilder output = new StringBuilder();
+                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        String line = "";
+                        while ((line = br.readLine()) != null) {
+                            output.append(line + "\n");
+                        }
+                        br.close();
+                        System.out.println("output===============" + token + "\n" + output.toString());
+
+                        if (output.toString().indexOf("It seems to have worked") > -1) {
+                            PrefUtils.saveLongToPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, millisNow);
+                            PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_TOKEN_KEY, token);
+                        }
+
+
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+
+                // Add custom implementation, as needed.
+
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+//            for (String credential : DUMMY_CREDENTIALS) {
+//                String[] pieces = credential.split(":");
+//                if (pieces[0].equals(mEmail)) {
+//                    // Account exists, return true if the password matches.
+//                    return pieces[1].equals(mPassword);
+//                }
+//            }
+
+
+            // TODO: register the new account here.
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (success) {
+            } else {
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+            showProgress(false);
+        }
+    }
 }
+
 

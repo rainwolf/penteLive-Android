@@ -27,6 +27,7 @@ public class PentePlayer implements Parcelable {
     List<Game>  mNonActiveGames;
     List<Game>  mPublicInvitations;
     List<Message> mMessages;
+    List<RatingStat> mRatingStats;
 
     public PentePlayer(String playerName, String password) {
         this.mPlayerName = playerName;
@@ -37,6 +38,7 @@ public class PentePlayer implements Parcelable {
         this.mNonActiveGames = new ArrayList<Game>();
         this.mPublicInvitations = new ArrayList<Game>();
         this.mMessages= new ArrayList<Message>();
+        this.mRatingStats = new ArrayList<RatingStat>();
         this.mShowAds = true;
     }
 
@@ -68,6 +70,10 @@ public class PentePlayer implements Parcelable {
     public void setSubscriber(Boolean mSubscriber) {
         this.mSubscriber = mSubscriber;
     }
+    public List<RatingStat> getRatingStats() {
+        return mRatingStats;
+    }
+
 
     private void populatePlayer(String dashString) {
         if (dashString == null) {
@@ -83,8 +89,22 @@ public class PentePlayer implements Parcelable {
         }
         String[] dashLines = dashString.split("\n");
         String[] dashLine;
-        Game game;
         int idx = 0;
+        while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
+            idx += 1;
+        }
+        this.mRatingStats.clear();
+        RatingStat ratingStat;
+        if (dashLines[idx].indexOf("Rating Stats") != -1) {
+            idx += 1;
+            while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
+                dashLine = dashLines[idx].split(";");
+                ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3]);
+                this.mRatingStats.add(ratingStat);
+                idx += 1;
+            }
+        }
+        Game game;
         while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
             idx += 1;
         }
@@ -215,6 +235,12 @@ public class PentePlayer implements Parcelable {
         } else {
             mMessages = null;
         }
+        if (in.readByte() == 0x01) {
+            mRatingStats = new ArrayList<RatingStat>();
+            in.readList(mRatingStats, RatingStat.class.getClassLoader());
+        } else {
+            mRatingStats = null;
+        }
     }
 
     @Override
@@ -272,6 +298,13 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x01));
             dest.writeList(mMessages);
         }
+        if (mRatingStats == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mRatingStats);
+        }
+
     }
 
     @SuppressWarnings("unused")
