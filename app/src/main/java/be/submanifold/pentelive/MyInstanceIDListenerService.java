@@ -42,9 +42,9 @@ public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
 
         Date date = new Date(System.currentTimeMillis()); //or simply new Date();
         long millisNow = date.getTime();
-        long millisLastPing = PrefUtils.getLongFromPrefs(MyInstanceIDListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
-        if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+        if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
             try {
+                PrefUtils.saveLongToPrefs(MyInstanceIDListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
                 URL url = new URL("https://pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
                         + "&token=" + token);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();

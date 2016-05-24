@@ -12,6 +12,7 @@ import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -313,6 +314,7 @@ public class BoardActivity extends AppCompatActivity {
                 messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                 messageWindow.setFocusable(true);
                 messageWindow.setOutsideTouchable(true);
+                messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(BoardActivity.this, R.drawable.border));
 //                        messageWindow.setAnimationStyle(R.anim.animation);
                 messageWindow.showAtLocation(board, Gravity.TOP, 0, 260);
 //                return true;

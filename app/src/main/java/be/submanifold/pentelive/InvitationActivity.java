@@ -2,6 +2,7 @@ package be.submanifold.pentelive;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ public class InvitationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_invitation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Invitations");
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
         Bundle extras = getIntent().getExtras();

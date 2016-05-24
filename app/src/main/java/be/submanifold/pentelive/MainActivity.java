@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private DashboardListAdapter listAdapter;
     private View viewWithOpenButtons = null;
     InterstitialAd mInterstitialAd;
+    private PopupWindow popupWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,9 +244,9 @@ public class MainActivity extends AppCompatActivity {
                         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
                         popUpView.setBackgroundColor(Color.BLUE);
-                        PopupWindow messageWindow = new PopupWindow(popUpView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                        popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                         ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
-                        ratingListView =  (ExpandableListView) messageWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                        ratingListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
                         RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
                         adapter.setInflater(inflater, MainActivity.this);
                         ratingListView.setAdapter(adapter);
@@ -256,9 +259,17 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                        messageWindow.setFocusable(true);
-                        messageWindow.setOutsideTouchable(true);
-                        messageWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                        popupWindow.setFocusable(true);
+                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+                        popupWindow.setOutsideTouchable(true);
+                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                            @Override
+                            public void onDismiss() {
+                                ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
+                            }
+                        });
+                        ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
 
                         return true;
                 }

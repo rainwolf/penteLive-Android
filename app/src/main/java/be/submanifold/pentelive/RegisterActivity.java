@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -51,6 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                 PopupWindow messageWindow = new PopupWindow(policyView, size.x - 50, size.y*3/4, true );
                 messageWindow.setFocusable(true);
                 messageWindow.setOutsideTouchable(true);
+                messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(RegisterActivity.this, R.drawable.border));
                 messageWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
                 ((TextView) policyView.findViewById(R.id.informationView)).setText("Pente.org maintains a rating for you when you play \"rated\" games.  The ratings system is important to help you determine your skill level and to help you find worthy opponents.  Pente.org attempts to ensure that ratings accurately reflect a players skill, and therefore certain guidelines must be followed by all players!\n" +
                         "          \n" +
