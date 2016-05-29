@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,6 +9,12 @@ import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.os.Build;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -134,9 +141,10 @@ public class BoardView extends View {
 //                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
 //            }
             if (scaling == 1) {
-                ((TextView) parentLayout.findViewById(R.id.playerInfo)).setText("Opponent: " + game.getOpponentName()
-                        + ", rating: " + game.getOpponentRating() + "\nRemaining Time: " + game.getRemainingTime()
-                        + "\n" + game.getRatedNot() + " and " + game.getPrivateGame() + " game");
+                String str = "Opponent: <a href=\"https://www.pente.org/gameServer/profile?viewName=" + game.getOpponentName() + "\">" + game.getOpponentName() + "</a>"
+                        + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
+                        + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game";
+                setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
             }
 
             if (game.dPenteChoice && !game.isActive()) {
@@ -430,5 +438,37 @@ public class BoardView extends View {
         p.setColor(color);
         return(p);
     }
+
+    protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span)
+    {
+        int start = strBuilder.getSpanStart(span);
+        int end = strBuilder.getSpanEnd(span);
+        int flags = strBuilder.getSpanFlags(span);
+        ClickableSpan clickable = new ClickableSpan() {
+            public void onClick(View view) {
+
+                String url = span.getURL();
+                Intent intent = new Intent(getContext(), WebViewActivity.class);
+                intent.putExtra("url", url);
+                getContext().startActivity(intent);
+            }
+        };
+        strBuilder.setSpan(clickable, start, end, flags);
+        strBuilder.removeSpan(span);
+    }
+
+    protected void setTextViewHTML(TextView text, String html)
+    {
+        CharSequence sequence = Html.fromHtml(html);
+        SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+        URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+        for(URLSpan span : urls) {
+            makeLinkClickable(strBuilder, span);
+        }
+        text.setText(strBuilder);
+        text.setMovementMethod(new ScrollingMovementMethod());
+        text.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
 
 }

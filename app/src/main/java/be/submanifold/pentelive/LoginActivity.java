@@ -339,6 +339,7 @@ public class LoginActivity extends AppCompatActivity
 //                CookieHandler.setDefault(cookieManager);
                 CookieHandler.setDefault( new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
                 URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
+//                url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 int responseCode = connection.getResponseCode();
                 cookie = connection.getHeaderField("Set-Cookie");

@@ -19,6 +19,7 @@ public class PrefUtils {
     public static final String PREFS_PUBLICINVITATIONS_COLLAPSED_KEY = "__PUBLICINVITATIONSCOLLAPSED__" ;
     public static final String PREFS_SENTINVITATIONS_COLLAPSED_KEY = "__SENTINVITATIONSCOLLAPSED__" ;
     public static final String PREFS_NONACTIVEGAMES_COLLAPSED_KEY = "__NONACTIVEGAMESCOLLAPSED__" ;
+    public static final String PREFS_TOURNAMENTS_COLLAPSED_KEY = "__TOURNAMENTSCOLLAPSED__" ;
     public static final String PREFS_OPENINVITATIONCREDIT_KEY = "__OPENINVITATIONCREDIT__" ;
     public static final String PREFS_AUTOCOMPLETEPLAYERS_KEY = "__AUTOCOMPLETEPLAYERS__" ;
     public static final String PREFS_AUTOLOGIN_KEY = "__AUTOLOGIN__" ;

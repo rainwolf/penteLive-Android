@@ -82,9 +82,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
-                if (groupPosition == 0) {
+                if (groupPosition == DashboardListAdapter.MESSAGESGROUP) {
                     Intent intent = new Intent(getApplicationContext(), ReplyMessageActivity.class);
                     intent.putExtra("message", player.getMessages().get(childPosition));
+                    startActivity(intent);
+                }
+                if (groupPosition == DashboardListAdapter.TOURNAMENTGROUP) {
+                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                    String url = "google.com";
+                    if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
+                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+//                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+
+                    } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
+                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+//                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+
+                    } else {
+                        url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+                        + "&round=" + player.getTournaments().get(childPosition).getRound();
+//                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+//                        + "&round=" + player.getTournaments().get(childPosition).getRound();
+
+                    }
+                    intent.putExtra("url", url);
                     startActivity(intent);
                 }
                 if (viewWithOpenButtons != null && !viewWithOpenButtons.equals(v)) {
@@ -96,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
                     viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
                     viewWithOpenButtons = null;
                 }
-                if (groupPosition == 1 || groupPosition == 3 || groupPosition == 4) {
-                    if (groupPosition < 4) {
+                if (groupPosition == DashboardListAdapter.INVITATIONSGROUP || groupPosition == DashboardListAdapter.PUBLICINVITATIONSGROUP || groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
+                    if (groupPosition != DashboardListAdapter.SENTINVITATIONSGROUP) {
                         if (v.findViewById(R.id.acceptButton).getVisibility() == View.VISIBLE) {
                             v.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                         } else {
@@ -106,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                             button.setOnClickListener(new View.OnClickListener() {
                                 public void onClick(View v) {
                                     String setID;
-                                    if (groupPosition == 1) {
+                                    if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
                                         setID = player.getInvitations().get(childPosition).getGameID();
                                     } else {
                                         // check if enough credit.
@@ -148,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                             viewWithOpenButtons = v;
                         }
                     }
-                    if (groupPosition == 1) {
+                    if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
                         if (v.findViewById(R.id.declineButton).getVisibility() == View.VISIBLE) {
                             v.findViewById(R.id.declineButton).setVisibility(View.GONE);
                         } else {
@@ -161,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                         }
                     }
-                    if (groupPosition == 4) {
+                    if (groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
                         if (v.findViewById(R.id.cancelButton).getVisibility() == View.VISIBLE) {
                             v.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                         } else {
@@ -189,9 +210,9 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 }
-                if (groupPosition == 2 || groupPosition == 5) {
+                if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP || groupPosition == DashboardListAdapter.NONACTIVEGAMESGROUP) {
                     Game game;
-                    if (groupPosition == 2) {
+                    if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP) {
                         game = player.getActiveGames().get(childPosition);
                     } else {
                         game = player.getNonActiveGames().get(childPosition);
@@ -204,22 +225,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(0);
+            expandableList.expandGroup(DashboardListAdapter.MESSAGESGROUP);
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_INVITATIONS_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(1);
+            expandableList.expandGroup(DashboardListAdapter.INVITATIONSGROUP);
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_ACTIVEGAMES_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(2);
+            expandableList.expandGroup(DashboardListAdapter.ACTIVEGAMESGROUP);
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_PUBLICINVITATIONS_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(3);
+            expandableList.expandGroup(DashboardListAdapter.PUBLICINVITATIONSGROUP);
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_SENTINVITATIONS_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(4);
+            expandableList.expandGroup(DashboardListAdapter.SENTINVITATIONSGROUP);
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, false)) {
-            expandableList.expandGroup(5);
+            expandableList.expandGroup(DashboardListAdapter.NONACTIVEGAMESGROUP);
+        }
+        if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, false)) {
+            expandableList.expandGroup(DashboardListAdapter.TOURNAMENTGROUP);
         }
         this.player.loadPlayer(this.listAdapter);
 //        System.out.println("messages " + player.getMessages().size());

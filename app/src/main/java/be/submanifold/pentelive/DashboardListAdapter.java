@@ -3,11 +3,13 @@ package be.submanifold.pentelive;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,15 @@ import com.google.android.gms.ads.AdView;
  * Created by waliedothman on 11/04/16.
  */
 public class DashboardListAdapter extends BaseExpandableListAdapter {
+
+    public static final int MESSAGESGROUP = 0;
+    public static final int INVITATIONSGROUP = 1;
+    public static final int ACTIVEGAMESGROUP = 2;
+    public static final int PUBLICINVITATIONSGROUP = 3;
+    public static final int SENTINVITATIONSGROUP = 5;
+    public static final int NONACTIVEGAMESGROUP = 6;
+    public static final int TOURNAMENTGROUP = 4;
+
 
     PentePlayer playerData;
     private LayoutInflater inflater;
@@ -41,19 +52,20 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getGroupCount() {
-        return 6;
+        return 7;
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
         int count;
         switch (groupPosition) {
-            case 0: count = playerData.getMessages().size(); break;
-            case 1: count = playerData.getInvitations().size(); break;
-            case 2: count = playerData.getActiveGames().size(); break;
-            case 3: count = playerData.getPublicInvitations().size(); break;
-            case 4: count = playerData.getSentInvitations().size(); break;
-            case 5: count = playerData.getNonActiveGames().size(); break;
+            case MESSAGESGROUP: count = playerData.getMessages().size(); break;
+            case INVITATIONSGROUP: count = playerData.getInvitations().size(); break;
+            case ACTIVEGAMESGROUP: count = playerData.getActiveGames().size(); break;
+            case PUBLICINVITATIONSGROUP: count = playerData.getPublicInvitations().size(); break;
+            case SENTINVITATIONSGROUP: count = playerData.getSentInvitations().size(); break;
+            case NONACTIVEGAMESGROUP: count = playerData.getNonActiveGames().size(); break;
+            case TOURNAMENTGROUP: count = playerData.getTournaments().size(); break;
             default: count = 0; break;
         }
         return count;
@@ -93,7 +105,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
         String title;
         switch (groupPosition) {
-            case 0: title = "Messages (" + playerData.getMessages().size() + ")";
+            case MESSAGESGROUP: title = "Messages (" + playerData.getMessages().size() + ")";
                 for (Message message : playerData.getMessages()) {
                     if (message.getUnread().indexOf("unread") > -1) {
                         convertView.setBackgroundColor(Color.BLUE);
@@ -101,19 +113,20 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                     }
                 }
                 break;
-            case 1: title = "Invitations (" + playerData.getInvitations().size() + ")";
+            case INVITATIONSGROUP: title = "Invitations (" + playerData.getInvitations().size() + ")";
                 if (playerData.getInvitations().size() > 0) {
                     convertView.setBackgroundColor(Color.BLUE);
                 }
                 break;
-            case 2: title = "Active Games (" + playerData.getActiveGames().size() + ")";
+            case ACTIVEGAMESGROUP: title = "Active Games (" + playerData.getActiveGames().size() + ")";
                 if (playerData.getActiveGames().size() > 0) {
                     convertView.setBackgroundColor(Color.BLUE);
                 }
                 break;
-            case 3: title = "Public Invitations (" + playerData.getPublicInvitations().size() + ")"; break;
-            case 4: title = "Invitations Sent (" + playerData.getSentInvitations().size() + ")"; break;
-            case 5: title = "Non-Active Games (" + playerData.getNonActiveGames().size() + ")"; break;
+            case PUBLICINVITATIONSGROUP: title = "Public Invitations (" + playerData.getPublicInvitations().size() + ")"; break;
+            case SENTINVITATIONSGROUP: title = "Invitations Sent (" + playerData.getSentInvitations().size() + ")"; break;
+            case NONACTIVEGAMESGROUP: title = "Non-Active Games (" + playerData.getNonActiveGames().size() + ")"; break;
+            case TOURNAMENTGROUP: title = "Tournaments (" + playerData.getTournaments().size() + ")"; break;
             default: title = "uh-oh"; break;
         }
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);
@@ -139,46 +152,58 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
+        ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
         int crown = 0, color = 0;
         Game game = null;
         Message message = null;
+        Tournament tournament = null;
         switch (groupPosition) {
-            case 0: message = playerData.getMessages().get(childPosition);
+            case MESSAGESGROUP: message = playerData.getMessages().get(childPosition);
                 break;
-            case 1: mainText = playerData.getInvitations().get(childPosition).getOpponentName();
-                game = playerData.getInvitations().get(childPosition);
+            case INVITATIONSGROUP: game = playerData.getInvitations().get(childPosition);
                 break;
-            case 2: mainText = playerData.getActiveGames().get(childPosition).getOpponentName();
-                game = playerData.getActiveGames().get(childPosition);
+            case ACTIVEGAMESGROUP: game = playerData.getActiveGames().get(childPosition);
                 break;
-            case 3: mainText = playerData.getPublicInvitations().get(childPosition).getOpponentName();
-                game = playerData.getPublicInvitations().get(childPosition);
+            case PUBLICINVITATIONSGROUP: game = playerData.getPublicInvitations().get(childPosition);
                 break;
-            case 4: mainText = playerData.getSentInvitations().get(childPosition).getOpponentName();
-                game = playerData.getSentInvitations().get(childPosition);
+            case SENTINVITATIONSGROUP: game = playerData.getSentInvitations().get(childPosition);
                 break;
-            case 5: mainText = playerData.getNonActiveGames().get(childPosition).getOpponentName();
-                game = playerData.getNonActiveGames().get(childPosition);
+            case NONACTIVEGAMESGROUP: game = playerData.getNonActiveGames().get(childPosition);
+                break;
+            case TOURNAMENTGROUP: tournament = playerData.getTournaments().get(childPosition);
                 break;
             default: mainText = "uh-oh";
                 detailText = "uh-oh";
                 break;
         }
-        if (groupPosition > 0) {
+        if (groupPosition == MESSAGESGROUP) {
+            mainText = message.getAuthor();
+            detailText = message.getSubject();
+            crown = message.getCrown();
+            color = message.getNameColor();
+        } else if (groupPosition == TOURNAMENTGROUP) {
+            ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+            mainText = "\u2B24  " + tournament.getName();
+            if (tournament.getTournamentState().equals("1")) {
+                detailText = "Registration is open until " + tournament.getDate();
+            } else if (tournament.getTournamentState().equals("2")) {
+                detailText = "Registration closed. Start: " + tournament.getDate();
+            } else {
+                detailText = "Tournament started. Current round: " + tournament.getRound();
+            }
+            ratingText = "(" + tournament.getGame() + ")";
+            crown = 0;
+            color = 0;
+        } else {
             mainText = game.getOpponentName();
             crown = game.getCrown();
             color = game.getNameColor();
             detailText = game.getGameType() + " (" + game.getRatedNot() + ") - " + game.getRemainingTime();
             ratingText = game.getOpponentRating();
-        } else {
-            mainText = message.getAuthor();
-            detailText = message.getSubject();
-            crown = message.getCrown();
-            color = message.getNameColor();
         }
-        if (groupPosition == 2 || groupPosition == 5) {
+        if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
             convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
             ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
             if (game.getMyColor().indexOf("white") > -1) {
@@ -186,7 +211,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             } else {
                 imgVw.setImageResource(R.drawable.black_stone);
             }
-        } else if (groupPosition == 0 && message.unread()) {
+        } else if (groupPosition == MESSAGESGROUP && message.unread()) {
             convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
             ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
             imgVw.setImageResource(R.drawable.unread);
@@ -200,20 +225,38 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             sb.setSpan(fcs, 0, mainText.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             sb.setSpan(bss, 0, mainText.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
-        if (crown > 0) {
-            if (crown == 4) {
-                sb.append(" \u2655");
-            } else if (crown == 1) {
-                sb.append(" \u2654");
-            } else {
-                sb.append(" \u265B");
+        if (groupPosition == TOURNAMENTGROUP) {
+            ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
+            if (tournament.getTournamentState().equals("2")) {
+                fcs = new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.orange));
             }
+            sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        }
+        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
+        Drawable crownIcon = null;
+        switch (crown) {
+            case 1:
+                crownIcon = ContextCompat.getDrawable(activity, R.drawable.crown);
+                break;
+            case 2:
+                crownIcon = ContextCompat.getDrawable(activity, R.drawable.scrown);
+                break;
+            case 3:
+                crownIcon = ContextCompat.getDrawable(activity, R.drawable.bcrown);
+                break;
+            case 4:
+                crownIcon = ContextCompat.getDrawable(activity, R.drawable.kothcrown);
+                break;
+        }
+        if (crown > 0) {
+            crownIcon.setBounds(0, 0, nameTextView.getLineHeight()*2/3,nameTextView.getLineHeight()*2/3);
+            sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
         ((TextView) convertView.findViewById(R.id.detailText)).setText(detailText);
-        ((TextView) convertView.findViewById(R.id.nameText)).setText(sb);
+        nameTextView.setText(sb);
         if (mainText.indexOf("Anyone") == -1) {
             ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
-            if (groupPosition > 0) {
+            if (groupPosition != MESSAGESGROUP && groupPosition != TOURNAMENTGROUP) {
                 sb = new SpannableStringBuilder("\u25A0");
                 int ratingInt = Integer.parseInt(ratingText);
                 ForegroundColorSpan ratingColor = null;new ForegroundColorSpan(color);
@@ -244,17 +287,19 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     @Override
     public void onGroupCollapsed(int groupPosition) {
         switch (groupPosition) {
-            case 0: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, true);
+            case MESSAGESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, true);
                 break;
-            case 1: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_INVITATIONS_COLLAPSED_KEY, true);
+            case INVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_INVITATIONS_COLLAPSED_KEY, true);
                 break;
-            case 2: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_ACTIVEGAMES_COLLAPSED_KEY, true);
+            case ACTIVEGAMESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_ACTIVEGAMES_COLLAPSED_KEY, true);
                 break;
-            case 3: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_PUBLICINVITATIONS_COLLAPSED_KEY, true);
+            case PUBLICINVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_PUBLICINVITATIONS_COLLAPSED_KEY, true);
                 break;
-            case 4: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_SENTINVITATIONS_COLLAPSED_KEY, true);
+            case SENTINVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_SENTINVITATIONS_COLLAPSED_KEY, true);
                 break;
-            case 5: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, true);
+            case NONACTIVEGAMESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, true);
+                break;
+            case TOURNAMENTGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, true);
                 break;
         }
         super.onGroupCollapsed(groupPosition);
@@ -262,17 +307,19 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     @Override
     public void onGroupExpanded(int groupPosition) {
         switch (groupPosition) {
-            case 0: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, false);
+            case MESSAGESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, false);
                 break;
-            case 1: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_INVITATIONS_COLLAPSED_KEY, false);
+            case INVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_INVITATIONS_COLLAPSED_KEY, false);
                 break;
-            case 2: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_ACTIVEGAMES_COLLAPSED_KEY, false);
+            case ACTIVEGAMESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_ACTIVEGAMES_COLLAPSED_KEY, false);
                 break;
-            case 3: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_PUBLICINVITATIONS_COLLAPSED_KEY, false);
+            case PUBLICINVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_PUBLICINVITATIONS_COLLAPSED_KEY, false);
                 break;
-            case 4: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_SENTINVITATIONS_COLLAPSED_KEY, false);
+            case SENTINVITATIONSGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_SENTINVITATIONS_COLLAPSED_KEY, false);
                 break;
-            case 5: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, false);
+            case NONACTIVEGAMESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, false);
+                break;
+            case TOURNAMENTGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, false);
                 break;
         }
         super.onGroupExpanded(groupPosition);

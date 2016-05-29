@@ -29,6 +29,9 @@ public class PentePlayer implements Parcelable {
     List<Message> mMessages;
     List<RatingStat> mRatingStats;
 
+
+    List<Tournament> mTournaments;
+
     public PentePlayer(String playerName, String password) {
         this.mPlayerName = playerName;
         this.mPassword = password;
@@ -39,6 +42,7 @@ public class PentePlayer implements Parcelable {
         this.mPublicInvitations = new ArrayList<Game>();
         this.mMessages= new ArrayList<Message>();
         this.mRatingStats = new ArrayList<RatingStat>();
+        this.mTournaments = new ArrayList<Tournament>();
         this.mShowAds = true;
     }
 
@@ -63,6 +67,7 @@ public class PentePlayer implements Parcelable {
     public List<Message> getMessages() {
         return this.mMessages;
     }
+    public List<Tournament> getTournaments() { return this.mTournaments;    }
     public Boolean showAds() { return this.mShowAds; }
     public Boolean isSubscriber() {
         return mSubscriber;
@@ -95,13 +100,16 @@ public class PentePlayer implements Parcelable {
         }
         this.mRatingStats.clear();
         RatingStat ratingStat;
-        if (dashLines[idx].indexOf("Rating Stats") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 4) {
+                    continue;
+                }
                 ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3]);
                 this.mRatingStats.add(ratingStat);
-                idx += 1;
             }
         }
         Game game;
@@ -109,71 +117,109 @@ public class PentePlayer implements Parcelable {
             idx += 1;
         }
         this.mInvitations.clear();
-        if (dashLines[idx].indexOf("Invitations received") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 9) {
+                    continue;
+                }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
                 this.mInvitations.add(game);
-                idx += 1;
             }
         }
         this.mSentInvitations.clear();
-        if (dashLines[idx].indexOf("Invitations sent") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 9) {
+                    continue;
+                }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
-                idx += 1;
                 this.mSentInvitations.add(game);
             }
         }
         this.mActiveGames.clear();
-        if (dashLines[idx].indexOf("Active Games - My Turn") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 10) {
+                    continue;
+                }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
-                idx += 1;
                 this.mActiveGames.add(game);
             }
         }
         this.mNonActiveGames.clear();
-        if (dashLines[idx].indexOf("Active Games - Opponents Turn") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 10) {
+                    continue;
+                }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
-                idx += 1;
                 this.mNonActiveGames.add(game);
             }
         }
         this.mPublicInvitations.clear();
-        if (dashLines[idx].indexOf("Open Invitation Games") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Messages") == -1) {
                 dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 9) {
+                    continue;
+                }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
-                idx += 1;
                 this.mPublicInvitations.add(game);
             }
         }
         this.mMessages.clear();
         Message message;
-        if (dashLines[idx].indexOf("Messages") != -1) {
+        if (idx < dashLines.length && dashLines[idx].indexOf("Messages") == 0) {
+            idx += 1;
+            while (idx < dashLines.length && dashLines[idx].length() != 0 && dashLines[idx].indexOf("Tournaments") != 0) {
+                dashLine = dashLines[idx].split(";");
+                idx += 1;
+                if (dashLine.length < 7) {
+                    continue;
+                }
+                message = new Message(dashLine[0], dashLine[3], dashLine[2], dashLine[4], dashLine[1], dashLine[5], dashLine[6]);
+                this.mMessages.add(message);
+            }
+        }
+
+        this.mTournaments.clear();
+        Tournament tournament;
+        while (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") != 0) {
+            idx += 1;
+        }
+        if (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].length() != 0) {
                 dashLine = dashLines[idx].split(";");
-                message = new Message(dashLine[0], dashLine[3], dashLine[2], dashLine[4], dashLine[1], dashLine[5], dashLine[6]);
-                this.mMessages.add(message);
                 idx += 1;
+                if (dashLine.length < 6) {
+                    continue;
+                }
+                tournament = new Tournament(dashLine[3], dashLine[0], dashLine[1], dashLine[2], dashLine[4], dashLine[5]);
+                this.mTournaments.add(tournament);
             }
         }
+
+
     }
 
     public void loadPlayer(DashboardListAdapter listAdapter) {
@@ -241,6 +287,12 @@ public class PentePlayer implements Parcelable {
         } else {
             mRatingStats = null;
         }
+        if (in.readByte() == 0x01) {
+            mTournaments = new ArrayList<Tournament>();
+            in.readList(mTournaments, Tournament.class.getClassLoader());
+        } else {
+            mTournaments = null;
+        }
     }
 
     @Override
@@ -304,6 +356,12 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x01));
             dest.writeList(mRatingStats);
         }
+        if (mTournaments == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mTournaments);
+        }
 
     }
 
@@ -337,6 +395,7 @@ public class PentePlayer implements Parcelable {
 
             try {
                 URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+//                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
