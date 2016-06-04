@@ -38,8 +38,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Map data = message.getData();
 
         String messageStr = (String) data.get("message");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + messageStr);
+//        Log.d(TAG, "From: " + from);
+//        Log.d(TAG, "Message: " + messageStr);
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
@@ -59,7 +59,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(messageStr);
+        sendNotification(message);
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -69,7 +69,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
      *
      * @param message GCM message received.
      */
-    private void sendNotification(String message) {
+    private void sendNotification(RemoteMessage message) {
+        String from = message.getFrom();
+        Map data = message.getData();
+
+        String messageStr = (String) data.get("message");
+
+
         if (!MyApplication.isActivityVisible()) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -81,7 +87,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                     .setSmallIcon(R.drawable.ic_radio_button_unchecked)
                     .setContentTitle("Pente Live")
 //                .setContentText(message)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(messageStr))
                     .setAutoCancel(true)
                     .setSound(notificationSoundUri)
                     .setContentIntent(pendingIntent);
@@ -93,14 +99,28 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         } else {
 //            mediaPlayer = MediaPlayer.create(MyFcmListenerService.this, R.raw.pentelivenotificationsound);
 //            mediaPlayer.start();
+//            System.out.println("messageStr : " + messageStr);
             MediaPlayer.create(this, R.raw.pentelivenotificationsound).start();
-            Intent intent = new Intent("unique_name");
+            if (messageStr.contains("your move") && messageStr.contains("against computer")) {
+//                System.out.println("gameID : " + (String) data.get("gameID"));
+                Intent intent = new Intent("unique_name_computer");
+                intent.putExtra("gameID", (String) data.get("gameID"));
+                sendBroadcast(intent);
 
-            //put whatever data you want to send, if any
-            intent.putExtra("message", message);
+                intent = new Intent("unique_name");
+                //put whatever data you want to send, if any
+                intent.putExtra("message", messageStr);
 
-            //send broadcast
-            sendBroadcast(intent);
+                //send broadcast
+                sendBroadcast(intent);
+            } else {
+                Intent intent = new Intent("unique_name");
+                //put whatever data you want to send, if any
+                intent.putExtra("message", messageStr);
+
+                //send broadcast
+                sendBroadcast(intent);
+            }
 
         }
     }

@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.BufferedReader;
@@ -28,118 +29,64 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvitationActivity extends AppCompatActivity {
+public class InviteAIActivity extends AppCompatActivity {
 
-
-    private String opponent = null;
-    private String gameType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_invitation);
+        setContentView(R.layout.activity_invite_ai);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Invitations");
+        toolbar.setTitle("Play Bruce Cropley's AI");
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            this.opponent =  extras.getString("opponent");
-            this.gameType = extras.getString("gameType");
-        }
-        if (getOpponent() != null) {
-            ((AutoCompleteTextView) findViewById(R.id.opponent)).setText(getOpponent());
-        }
-        ((AutoCompleteTextView) findViewById(R.id.opponent)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        ToggleButton toggle =  ((ToggleButton) findViewById(R.id.stayOnBoardToggle));
+        toggle.setChecked(PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, false));
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                PrefUtils.saveBooleanToPrefs(InviteAIActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, isChecked);
             }
         });
 
         Spinner spinner = (Spinner) findViewById(R.id.gameTypeSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.game_types_array, android.R.layout.simple_spinner_item);
+                R.array.ai_game_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner = (Spinner) findViewById(R.id.timeoutSpinner);
+        spinner.setSelection(PrefUtils.getIntFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONGAME_KEY, 0));
+        spinner = (Spinner) findViewById(R.id.difficultySpinner);
         adapter = ArrayAdapter.createFromResource(this,
-                R.array.timeout_array, android.R.layout.simple_spinner_item);
+                R.array.ai_difficulty_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setSelection(6);
-        spinner = (Spinner) findViewById(R.id.restrictionSpinner);
-        adapter = ArrayAdapter.createFromResource(this,
-                R.array.restriction_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        spinner.setSelection(PrefUtils.getIntFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONDIFFICULTY_KEY, 0));
 
         Button button = (Button) findViewById(R.id.sendInvitationButton);
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
                 String gameType = "";
                 switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
                     case 0: gameType = "51"; break;
-                    case 1: gameType = "53"; break;
-                    case 2: gameType = "55"; break;
-                    case 3: gameType = "57"; break;
-                    case 4: gameType = "59"; break;
-                    case 5: gameType = "61"; break;
-                    case 6: gameType = "63"; break;
-                    case 7: gameType = "65"; break;
+                    case 1: gameType = "55"; break;
                 }
-                String timeout =  ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
                 String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
-                String restriction = "";
-                switch (((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition()) {
-                    case 0: restriction = "A"; break;
-                    case 1: restriction = "N"; break;
-                    case 2: restriction = "L"; break;
-                    case 3: restriction = "H"; break;
-                    case 4: restriction = "S"; break;
-                    case 5: restriction = "C"; break;
-                }
                 String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
-                String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked()?"Y":"N";
-                SendInvitationTask submitTask = new SendInvitationTask(opponentName, gameType, timeout, rated, restriction, playAs, privateGame);
+                String difficulty =  "" + (((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition()+1);
+                SendInvitationTask submitTask = new SendInvitationTask(gameType, rated, difficulty, playAs);
                 submitTask.execute((Void) null);
             }
         });
-
-        AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.opponent);
-        ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(InvitationActivity.this)));
-        actv.setAdapter(acAdapter);
-
-        if (getGameType() != null) {
-            try {
-                int gameInt = Integer.parseInt(getGameType());
-                ((Spinner) findViewById(R.id.gameTypeSpinner)).setSelection((gameInt-51)/2);
-            } catch (NumberFormatException e) {
-
-            }
-        } else {
-            ((Spinner) findViewById(R.id.gameTypeSpinner)).setSelection(PrefUtils.getIntFromPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONGAME_KEY, 0));
-            ((Spinner) findViewById(R.id.timeoutSpinner)).setSelection(PrefUtils.getIntFromPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONDAYS_KEY, 6));
-            ((Spinner) findViewById(R.id.restrictionSpinner)).setSelection(PrefUtils.getIntFromPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONRESTRICTION_KEY, 0));
-        }
 
         ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if ((isChecked)) {
                     ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
-                    ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.GONE);
-                    ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.GONE);
                     ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
                 } else {
                     ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
-                    ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.VISIBLE);
-                    ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.VISIBLE);
                     ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
                 }
             }
@@ -159,40 +106,18 @@ public class InvitationActivity extends AppCompatActivity {
     }
 
 
-    public String getOpponent() {
-        return opponent;
-    }
-
-    public void setOpponent(String opponent) {
-        this.opponent = opponent;
-    }
-
-    public String getGameType() {
-        return gameType;
-    }
-
-    public void setGameType(String gameType) {
-        this.gameType = gameType;
-    }
-
     public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String opponentName;
         private final String gameType;
-        private final String timeout;
+        private final String difficulty;
         private final String rated;
-        private final String restriction;
         private final String playAs;
-        private final String privateGame;
 
-        SendInvitationTask(String opponentName, String gameType, String timeout, String rated, String restriction, String playAs, String privateGame) {
-            this.opponentName = opponentName;
+        SendInvitationTask(String gameType, String rated, String difficulty, String playAs) {
             this.gameType = gameType;
-            this.timeout = timeout;
+            this.difficulty = difficulty;
             this.rated = rated;
-            this.restriction = restriction;
             this.playAs = playAs;
-            this.privateGame = privateGame;
         }
 
         @Override
@@ -219,9 +144,8 @@ public class InvitationActivity extends AppCompatActivity {
 //                }
 //                br.close();
 
-                String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
-                "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
-                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                String urlParameters  = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
+                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -257,11 +181,8 @@ public class InvitationActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
                 System.out.println(output);
 
-                if (output.indexOf("Creating set failed: Player not found: " + opponentName) > -1) {
+                if (output.indexOf("against the AI player. You can start a new one after finishing the current one") > -1) {
                     return false;
-                }
-                if (!opponentName.equals("")) {
-                    PrefUtils.savePlayerToPrefs(InvitationActivity.this, opponentName);
                 }
 
                 return true;
@@ -286,18 +207,12 @@ public class InvitationActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
-                if ("".equals(opponentName)) {
-                    int remainingCredit = PrefUtils.getIntFromPrefs(InvitationActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2) + 2;
-                    PrefUtils.saveIntToPrefs(InvitationActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
-                } else {
-                    PrefUtils.savePlayerToPrefs(InvitationActivity.this, opponentName);
-                }
-                PrefUtils.saveIntToPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONDAYS_KEY, ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItemPosition());
-                PrefUtils.saveIntToPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONGAME_KEY, ((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition());
-                PrefUtils.saveIntToPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONRESTRICTION_KEY, ((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition());
+                PrefUtils.saveIntToPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONGAME_KEY, ((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition());
+                PrefUtils.saveIntToPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONDIFFICULTY_KEY, ((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition());
                 finish();
             } else {
-                ((AutoCompleteTextView) findViewById(R.id.opponent)).setError("username does not exist");
+                Toast.makeText(InviteAIActivity.this, "Try again after you finish your current game against the AI player.",
+                        Toast.LENGTH_LONG).show();
             }
 //            mAuthTask = null;
 //            showProgress(false);

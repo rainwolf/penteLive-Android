@@ -127,8 +127,10 @@ public class MainActivity extends AppCompatActivity {
                             button.setOnClickListener(new View.OnClickListener() {
                                 public void onClick(View v) {
                                     String setID;
+                                    String opponentName = "";
                                     if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
                                         setID = player.getInvitations().get(childPosition).getGameID();
+                                        opponentName = player.getInvitations().get(childPosition).getOpponentName();
                                     } else {
                                         // check if enough credit.
                                         if (!player.isSubscriber()) {
@@ -136,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 //                                        System.out.println(" remaining credit = " + remainingCredit);
                                             if (remainingCredit < 1) {
                                                 Snackbar snackbar = Snackbar
-                                                        .make(getCurrentFocus(), "You can accept open invitations again after posting one.", Snackbar.LENGTH_LONG)
+                                                        .make(getCurrentFocus(), "Not enough credit, public invitations have an \"accept 2-post 1\" policy.", Snackbar.LENGTH_LONG)
                                                         .setAction("Post now!", new View.OnClickListener() {
                                                             @Override
                                                             public void onClick(View view) {
@@ -153,8 +155,11 @@ public class MainActivity extends AppCompatActivity {
                                             }
                                         }
                                         setID = player.getPublicInvitations().get(childPosition).getGameID();
+                                        opponentName = player.getPublicInvitations().get(childPosition).getOpponentName();
                                     }
                                     player.respondInvitation(setID, true, listAdapter);
+                                    PrefUtils.savePlayerToPrefs(MainActivity.this, opponentName);
+
                                     if (player.showAds()) {
                                         if (mInterstitialAd.isLoaded()) {
                                             mInterstitialAd.show();
@@ -252,8 +257,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem menuItem) {
                 Intent intent;
                 switch (menuItem.getItemId()){
-                    case R.id.action_new_invitation:
+                    case R.id.play_human:
                         intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                        startActivity(intent);
+                        return true;
+                    case R.id.play_computer:
+                        intent = new Intent(getApplicationContext(), InviteAIActivity.class);
                         startActivity(intent);
                         return true;
                     case R.id.action_new_message:

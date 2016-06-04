@@ -1,8 +1,10 @@
 package be.submanifold.pentelive;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -161,7 +163,14 @@ public class BoardActivity extends AppCompatActivity {
                 }
 
                 game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
-                finish();
+
+                if (game.getOpponentName().equals("computer") && !PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, false)) {
+                    game.setmGameString(null);
+                    game.parseGame(board);
+                    ((Button) findViewById(R.id.submitButton)).setText("submit");
+                } else {
+                    finish();
+                }
             }
         });
         button = (Button) findViewById(R.id.playAsWhiteButton);
@@ -278,9 +287,27 @@ public class BoardActivity extends AppCompatActivity {
         });
     }
 
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("gameID");
+            if (game.getGameID().equals(message)) {
+                game.setmGameString(null);
+                game.parseGame(board);
+            }
+//            System.out.println("gameID = " +message + ".");
+//            System.out.println("gameIDhere = " +game.getGameID() + ".");
+        }
+    };
+
+
     @Override
     protected void onResume() {
         super.onResume();
+        (BoardActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name_computer"));
         MyApplication.activityResumed();
     }
 
@@ -288,6 +315,7 @@ public class BoardActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         MyApplication.activityPaused();
+        (BoardActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override

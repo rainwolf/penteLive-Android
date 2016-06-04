@@ -459,9 +459,9 @@ public class PentePlayer implements Parcelable {
             try {
                 URL url;
                 if (this.accept) {
-                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID);
+                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID + "&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 } else {
-                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID);
+                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID + "&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 }
                 System.out.println("accepting : " + url);
 

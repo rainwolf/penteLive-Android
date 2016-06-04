@@ -117,6 +117,10 @@ public class Game implements Parcelable {
     public void setActive(boolean active) {
         this.mActive = active;
     }
+    public void setmGameString(String mGameString) {
+        this.mGameString = mGameString;
+    }
+
 
 
     protected Game(Parcel in) {

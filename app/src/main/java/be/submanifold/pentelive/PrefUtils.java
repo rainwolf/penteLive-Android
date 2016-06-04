@@ -28,6 +28,9 @@ public class PrefUtils {
     public static final String PREFS_INVITATIONRESTRICTION_KEY = "__INVITATIONRESTRICTION__" ;
     public static final String PREFS_TOKEN_KEY = "__TOKEN__" ;
     public static final String PREFS_TOKENLASTSENT_KEY = "__TOKENLASTSENT__" ;
+    public static final String PREFS_AIINVITATIONGAME_KEY = "__AIGAME__" ;
+    public static final String PREFS_AIINVITATIONDIFFICULTY_KEY = "__AIDIFFICULTY__" ;
+    public static final String PREFS_STAYWITHCOMPUTERGAME_KEY = "__STAYWITHCOMPUTERGAME__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

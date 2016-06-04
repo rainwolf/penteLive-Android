@@ -48,7 +48,8 @@
         <activity
             android:name=".RegisterActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".WebViewActivity"
+        <activity
+            android:name=".WebViewActivity"
             android:screenOrientation="portrait" />
 
         <service android:name=".MyFcmListenerService">
@@ -64,6 +65,7 @@
         </service>
         <!-- [END instanceId_listener] -->
 
+        <activity android:name=".InviteAIActivity"></activity>
     </application>
 
 </manifest>
