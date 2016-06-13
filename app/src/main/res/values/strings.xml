@@ -29,7 +29,7 @@
     </string-array>
     <string-array name="ai_game_types_array">
         <item>Pente</item>
-        <item>Gomoku</item>
+        <!--<item>Gomoku</item>-->
     </string-array>
     <string-array name="timeout_array">
         <item>1</item>
@@ -73,6 +73,20 @@
         <item>7</item>
         <item>8</item>
         <item>9</item>
+    </string-array>
+    <string-array name="mmai_difficulty_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
     </string-array>
     <string-array name="restriction_array">
         <item>of any rating</item>

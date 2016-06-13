@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="be.submanifold.pentelive"
-    android:versionCode="13"
-    android:versionName="1.2.0">
+    android:versionCode="17"
+    android:versionName="1.4.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -51,6 +51,12 @@
         <activity
             android:name=".WebViewActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".InviteAIActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MMAIActivity"
+            android:screenOrientation="portrait" />
 
         <service android:name=".MyFcmListenerService">
             <intent-filter>
@@ -65,7 +71,6 @@
         </service>
         <!-- [END instanceId_listener] -->
 
-        <activity android:name=".InviteAIActivity"></activity>
     </application>
 
 </manifest>

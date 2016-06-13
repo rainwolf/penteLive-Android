@@ -115,26 +115,6 @@
         android:text="send"
         android:layout_below="@id/playAsToggleButton"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Go back after submitting\na move to the AI: "
-        android:id="@+id/stayOnBoardLabel"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-    <ToggleButton
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:background="@android:color/transparent"
-        android:textOn="YES"
-        android:textOff="NO"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/stayOnBoardToggle"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>

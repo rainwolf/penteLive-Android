@@ -30,7 +30,9 @@ public class PrefUtils {
     public static final String PREFS_TOKENLASTSENT_KEY = "__TOKENLASTSENT__" ;
     public static final String PREFS_AIINVITATIONGAME_KEY = "__AIGAME__" ;
     public static final String PREFS_AIINVITATIONDIFFICULTY_KEY = "__AIDIFFICULTY__" ;
-    public static final String PREFS_STAYWITHCOMPUTERGAME_KEY = "__STAYWITHCOMPUTERGAME__" ;
+    public static final String PREFS_STAYWITHGAME_KEY = "__STAYWITHGAME__" ;
+    public static final String PREFS_MMAIDIFFICULTY_KEY = "__MMAIDIFFICULTY__" ;
+    public static final String PREFS_MMAICOLOR_KEY = "__MMAICOLOR__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

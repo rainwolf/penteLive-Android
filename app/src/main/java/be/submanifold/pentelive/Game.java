@@ -804,6 +804,11 @@ public class Game implements Parcelable {
                 }
             }
         }
+        if (mOpponentName.equals("computer") && mGameType.equals("Pente")) {
+            if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+                mActive = false;
+            }
+        }
     }
     private void replayPenteGame(byte[][] abstractBoard, byte moveI, byte moveJ) {
         resetAbstractBoard(abstractBoard);
@@ -1268,7 +1273,121 @@ public class Game implements Parcelable {
                 ++blackCaptures;
             }
         }
-
     }
+
+
+    private boolean detectPente(byte[][] abstractBoard, byte color, int rowCol) {
+        boolean pente = false;
+        int penteCounter = 1;
+        int row = rowCol / 19, col = rowCol % 19, i, j;
+        i = row - 1;
+        j = col;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            i -= 1;
+        }
+        i = row + 1;
+        j = col;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            i += 1;
+        }
+        if (pente) {
+            return pente;
+        }
+        penteCounter = 1;
+        i = row;
+        j = col - 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            j -= 1;
+        }
+        i = row;
+        j = col + 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            j += 1;
+        }
+        if (pente) {
+            return pente;
+        }
+        penteCounter = 1;
+        i = row - 1;
+        j = col - 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            j -= 1;
+            i -= 1;
+        }
+        i = row + 1;
+        j = col + 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            i += 1;
+            j += 1;
+        }
+        if (pente) {
+            return pente;
+        }
+        penteCounter = 1;
+        i = row - 1;
+        j = col + 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            j += 1;
+            i -= 1;
+        }
+        i = row + 1;
+        j = col - 1;
+        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
+            if (color == abstractBoard[i][j]) {
+                penteCounter += 1;
+                pente = (penteCounter > 4);
+            } else {
+                break;
+            }
+            i += 1;
+            j -= 1;
+        }
+
+        return pente;
+    }
+
+
 }
 

@@ -10,8 +10,12 @@
         app:showAsAction="ifRoom">
         <menu>
             <item android:id="@+id/play_computer"
+                android:icon="@drawable/ic_action_cloud"
+                android:title="play the server AI"
+                />
+            <item android:id="@+id/play_mmai"
                 android:icon="@drawable/ic_computer"
-                android:title="play the computer"
+                android:title="play the onboard AI"
                 />
             <item android:id="@+id/play_human"
                 android:icon="@drawable/ic_wc"

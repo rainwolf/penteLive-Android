@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="be.submanifold.pentelive.BoardActivity">
+    tools:context="be.submanifold.pentelive.MMAIActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -16,11 +16,19 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
     <view
-        class="be.submanifold.pentelive.BoardView"
+        class="be.submanifold.pentelive.MMAIBoardView"
         android:id="@+id/boardView"
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:alpha="0.5"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 
     <LinearLayout
         android:id="@+id/submitLayout"
@@ -41,50 +49,20 @@
             android:layout_weight="3"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:text="Submit"
+            android:text="start game"
             android:textStyle="bold"
-            android:id="@+id/submitButton" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:drawableEnd="@drawable/ic_skip_next"
-            android:textStyle="bold"
-            android:id="@+id/forwardButton" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/dPenteLayout"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_below="@id/boardView"
-        android:layout_height="wrap_content">
-
+            android:id="@+id/startButton" />
         <TextView
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_marginLeft="10dp"
-            android:textSize="18dp"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:text="Play as:"/>
-        <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="white"
+            android:textSize="16dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:foregroundGravity="center"
             android:focusable="false"
             android:textStyle="bold"
-            android:id="@+id/playAsWhiteButton" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:text="black"
-            android:textStyle="bold"
-            android:id="@+id/playAsBlackButton" />
+            android:id="@+id/capturesView" />
     </LinearLayout>
 
     <com.google.android.gms.ads.AdView
@@ -95,16 +73,17 @@
         android:layout_height="wrap_content"
         android:gravity="bottom|center"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id_board">
+        ads:adUnitId="ca-app-pub-3326997956703582/6125165443">
     </com.google.android.gms.ads.AdView>
 
     <TextView
         android:layout_width="match_parent"
         android:id="@+id/playerInfo"
         android:layout_marginLeft="5dp"
-        android:gravity="fill_vertical|center"
+        android:gravity="bottom"
         android:layout_marginRight="5dp"
         android:layout_marginBottom="3dp"
+        android:scrollbars="vertical"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingTop="3dp"

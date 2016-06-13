@@ -164,7 +164,7 @@ public class BoardActivity extends AppCompatActivity {
 
                 game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
 
-                if (game.getOpponentName().equals("computer") && !PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, false)) {
+                if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
                     game.setmGameString(null);
                     game.parseGame(board);
                     ((Button) findViewById(R.id.submitButton)).setText("submit");
@@ -280,6 +280,15 @@ public class BoardActivity extends AppCompatActivity {
                         });
                         builder.show();
                         return true;
+                    case R.id.action_lock:
+                        boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
+                        if (staywithgame) {
+                            menuItem.setIcon(R.drawable.ic_action_lock_open);
+                        } else {
+                            menuItem.setIcon(R.drawable.ic_action_lock_closed);
+                        }
+                        PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
+                        return  true;
                 }
 
                 return false;
@@ -354,6 +363,14 @@ public class BoardActivity extends AppCompatActivity {
 //        } else {
 //            System.out.println(" noooooooooot SHIIIIIIIiiiiiiiiiiit ");
 //        }
+
+        MenuItem item = menu.findItem(R.id.action_lock);
+        boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
+        if (staywithgame) {
+            item.setIcon(R.drawable.ic_action_lock_closed);
+        } else {
+            item.setIcon(R.drawable.ic_action_lock_open);
+        }
         return true;
     }
 

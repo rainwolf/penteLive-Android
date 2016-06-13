@@ -3,15 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_lock"
+        android:icon="@drawable/ic_action_lock_open"
+        android:title="back to dashboard after moving"
+        style="@android:style/Widget.ActionButton"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_cancel_resign"
         android:icon="@drawable/ic_do_not_disturb"
-        android:title="fav"
+        android:title="cancel game or resign"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_new_message"
         android:icon="@drawable/ic_chat"
-        android:title="fav"
+        android:title="add message"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="ifRoom"/>
 

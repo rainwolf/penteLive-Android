@@ -41,15 +41,6 @@ public class InviteAIActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-        ToggleButton toggle =  ((ToggleButton) findViewById(R.id.stayOnBoardToggle));
-        toggle.setChecked(PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, false));
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(InviteAIActivity.this, PrefUtils.PREFS_STAYWITHCOMPUTERGAME_KEY, isChecked);
-            }
-        });
-
         Spinner spinner = (Spinner) findViewById(R.id.gameTypeSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.ai_game_types_array, android.R.layout.simple_spinner_item);

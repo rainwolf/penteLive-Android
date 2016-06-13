@@ -101,7 +101,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 //            mediaPlayer.start();
 //            System.out.println("messageStr : " + messageStr);
             MediaPlayer.create(this, R.raw.pentelivenotificationsound).start();
-            if (messageStr.contains("your move") && messageStr.contains("against computer")) {
+            if (messageStr.contains("your move")) {
 //                System.out.println("gameID : " + (String) data.get("gameID"));
                 Intent intent = new Intent("unique_name_computer");
                 intent.putExtra("gameID", (String) data.get("gameID"));
