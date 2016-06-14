@@ -63,6 +63,20 @@ public class MMAIActivity extends AppCompatActivity {
 
         board = (MMAIBoardView) findViewById(R.id.boardView);
         board.setActivity(this);
+        if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente").equals("Pente")) {
+            board.setBackgroundColor(board.penteColor);
+            board.setGame(1);
+        } else {
+            board.setBackgroundColor(board.keryoPenteColor);
+            board.setGame(3);
+        }
+        if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white").equals("white")) {
+            board.setMyColor((byte) 1);
+        } else {
+            board.setMyColor((byte) 2);
+        }
+        board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
+
         toolbar.setTitle("Mark Mammel's AI");
         setSupportActionBar(toolbar);
 
@@ -108,6 +122,24 @@ public class MMAIActivity extends AppCompatActivity {
                 }
             }
         });
+        TextView gameChoice = (TextView) settingsView.findViewById(R.id.gameChoice);
+        gameChoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView tv = (TextView) v;
+                if (tv.getText().equals("Pente")) {
+                    tv.setText("Keryo-Pente");
+                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
+                    board.setBackgroundColor(board.keryoPenteColor);
+                    board.setGame(3);
+                } else {
+                    tv.setText("Pente");
+                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
+                    board.setBackgroundColor(board.penteColor);
+                    board.setGame(1);
+                }
+            }
+        });
         settingsWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -129,7 +161,7 @@ public class MMAIActivity extends AppCompatActivity {
 
             Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
             nativeComputer.init(scs, opnbk, tbl);
-            nativeComputer.setVisualization(false);
+//            nativeComputer.setVisualization(false);
 
             board.setAiPlayer(nativeComputer);
 
@@ -233,8 +265,10 @@ public class MMAIActivity extends AppCompatActivity {
         Spinner spinner = (Spinner) settingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0));
         TextView playAs = (TextView) settingsView.findViewById(R.id.playAsChoice);
-        playAs.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "black"));
-        board.setAlpha(0.25f);
+        playAs.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white"));
+        TextView game = (TextView) settingsView.findViewById(R.id.gameChoice);
+        game.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente"));
+        board.setAlpha(0.75f);
     }
 
     @Override

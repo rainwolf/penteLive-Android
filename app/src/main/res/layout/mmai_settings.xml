@@ -12,9 +12,33 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Play as:"
+        android:textStyle="bold"
+        android:id="@+id/gameLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:layout_toRightOf="@id/gameLabel"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Pente"
+        android:id="@+id/gameChoice"
+        android:layout_alignParentRight="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Difficulty:"
         android:textStyle="bold"
         android:id="@+id/difficultyLabel"
+        android:layout_below="@id/gameLabel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <android.support.v7.widget.AppCompatSpinner
@@ -23,6 +47,7 @@
         android:layout_toRightOf="@id/difficultyLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
+        android:layout_below="@id/gameChoice"
         android:textAlignment="center"
         android:layout_height="45dp"
         android:gravity="center_vertical">

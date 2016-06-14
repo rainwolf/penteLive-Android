@@ -11,11 +11,11 @@ public class Ai {
 	public native long init(int atbl[], int asrc[], int size);
 	public native void privateDestroy(long ptr);
 	public native void toggleCallbacks(long ptr, int callbacks);
-	
+
 	private native void start(long ptr);
 	private native void stop(long ptr);
 	private native int move(long ptr, int moves[], int game, int level, int vct);
-	
+
 	static {
 		System.loadLibrary("Ai");
 	}
@@ -61,7 +61,6 @@ public class Ai {
 	public void init(InputStream scs, InputStream opnbk, InputStream tblIn) 
 	    throws Throwable {
 	    marksAi.init(scs, opnbk, tblIn);
-        marksAi.setSize(size);
         cPtr = init(marksAi.getTbl(), marksAi.getSrc(), size);
 	}
 	
@@ -106,12 +105,12 @@ public class Ai {
 //		}
 	}
 	
-	public void setVisualization(boolean visualization) {
-		toggleCallbacks(cPtr, visualization ? 1 : 0);
-	}
-	
+//	public void setVisualization(boolean visualization) {
+//		toggleCallbacks(cPtr, visualization ? 1 : 0);
+//	}
+
 //	public int getMoveNoThreaded(final int moves[]) {
-//        return move(cPtr, moves, game, level, vct);   
+//        return move(cPtr, moves, game, level, vct);
 //	}
 	public void getMove(final int moves[]) {
 //	    new Throwable().printStackTrace();
@@ -156,6 +155,7 @@ public class Ai {
                     }
         
                     int newMove = move(cPtr, moves, game, level, vct);
+//	    			int newMove = marksAi.getMove();
                     board.processAImove(newMove);
                     if (alive && !destroyed) {
 //                        for (AiListener aiListener : aiListeners) {
@@ -207,60 +207,17 @@ public class Ai {
 //			aiListener.startThinking();
 //		}
 	}
-/*
-    private static final GridCoordinates coordinates = 
-		new AlphaNumericGridCoordinates(19, 19);
-	public static void main(String args[]) {
-		final Ai ai = new Ai(1, 1, 1, 1, -1);
-		ai.addAiListener(new AiListener() { //,184,181,199,182,200,183
-		//ai.getMove(new int[] { 180,181,237,238,199,256,218 }, new AiListener() {
-			public void moveReady(int[] moves, int newMove) {
-				System.out.println("returned move " + newMove+" " +coordinates.getCoordinate(newMove));
-
-//				ai.getMove(new int[] { 180,181,237,238,199,256,218,newMove }, new AiListener() {
-//				public void moveReady(int[] moves, int newMov2) {
-//					System.out.println("returned move " + newMov2+" " + coordinates.getCoordinate(newMov2));
-//					ai.destroy();
-//				}
-//			});
-			}
-			public void aiVisualizationCallBack(int[] bd) {
-				for (int i=0;i<19;i++){
-					for(int j=0;j<19;j++) {
-						int x = bd[i*19+j];
-						if (x == -1) x = 0;
-						System.out.print(x + " ");
-					}
-					System.out.println();
-				}
-				System.out.println();
-			}
-			public void aiEvaluateCallBack() {
-			}
-			public void startThinking() {
-			}
-			public void stopThinking() {
-			}
-		});
-
-		ai.getMove(new int[] { 180,184,181});
-		System.out.println("after calling getmove");
-		//try { Thread.sleep(1000); } catch (InterruptedException e) {}
-		//ai.stopThinking();
-		//System.out.println("after calling stop");
-		
-	}
-	*/
-	
 
 	public void setLevel(int level) {
 		this.level = level;
+		marksAi.setLevel(level);
 	}
 	public void setVct(int vct) {
 		this.vct = vct;
 	}
 	public void setSeat(int seat) {
 		this.seat = seat;
+		marksAi.setSeat(seat);
 	}
 	public boolean isActive() {
 		return active;
@@ -270,6 +227,7 @@ public class Ai {
 	}
 	public void setGame(int game) {
 		this.game = game;
+		marksAi.setGame(game);
 	}
 	public int getLevel() {
 		return level;

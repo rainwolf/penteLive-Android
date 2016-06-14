@@ -33,6 +33,7 @@ public class PrefUtils {
     public static final String PREFS_STAYWITHGAME_KEY = "__STAYWITHGAME__" ;
     public static final String PREFS_MMAIDIFFICULTY_KEY = "__MMAIDIFFICULTY__" ;
     public static final String PREFS_MMAICOLOR_KEY = "__MMAICOLOR__" ;
+    public static final String PREFS_MMAIGAME_KEY = "__MMAIGAME__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
