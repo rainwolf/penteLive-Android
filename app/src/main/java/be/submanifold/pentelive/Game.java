@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.Toolbar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -693,6 +695,35 @@ public class Game implements Parcelable {
 
         if (boardView != null) {
             boardView.invalidate();
+            if (mGameType.equals("Pente") && mOpponentName.equals("computer")) {
+                if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+                    boolean iWon = false;
+                    int myColor = (mMyColor.contains("white")?1:2);
+                    if (whiteCaptures == 10) {
+                        if (myColor == 2) {
+                            iWon = true;
+                        }
+                    } else if (blackCaptures == 10) {
+                        if (myColor == 1) {
+                            iWon = true;
+                        }
+                    } else if (myColor == (2 - mMovesList.size()%2)) {
+                        iWon = true;
+                    }
+                    String msg = "You lost";
+                    if (iWon) {
+                        msg = "You won";
+                    }
+                    Toast toast = Toast.makeText(boardView.getContext(), msg, Toast.LENGTH_LONG);
+                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                    if (iWon) {
+                        v.setTextColor(Color.GREEN);
+                    } else {
+                        v.setTextColor(Color.YELLOW);
+                    }
+                    toast.show();
+                }
+            }
         }
 
     }

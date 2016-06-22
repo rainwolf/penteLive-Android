@@ -295,6 +295,36 @@ public class MainActivity extends AppCompatActivity {
                                 return true; // This way the expander cannot be collapsed
                             }
                         });
+                        ratingListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                            @Override
+                            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                                String username = PentePlayer.mPlayerName;
+                                String game = null;
+                                String ratingGame = player.getRatingStats().get(childPosition).getGame();
+                                if (ratingGame.equals("Pente"))
+                                    game = "51";
+                                if (ratingGame.equals("Gomoku"))
+                                    game = "55";
+                                if (ratingGame.equals("D-Pente"))
+                                    game = "57";
+                                if (ratingGame.equals("G-Pente"))
+                                    game = "59";
+                                if (ratingGame.equals("Boat-Pente"))
+                                    game = "65";
+                                if (ratingGame.equals("Poof-Pente"))
+                                    game = "61";
+                                if (ratingGame.equals("Connect6"))
+                                    game = "63";
+                                if (ratingGame.equals("Keryo-Pente"))
+                                    game = "53";
+                                String url = "https://www.pente.org/gameServer/viewLiveGames?p="+username+"&g="+game;
+                                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                                intent.putExtra("url", url);
+                                startActivity(intent);
+
+                                return true;
+                            }
+                        });
 
                         popupWindow.setFocusable(true);
                         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));

@@ -522,7 +522,7 @@ public class MMAIBoardView extends View {
         ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
         ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
 
-        if (whiteCaptures == 15 || blackCaptures == 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
+        if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
             gameOver = true;
             boolean iWon = false;
             if (whiteCaptures >= 15) {

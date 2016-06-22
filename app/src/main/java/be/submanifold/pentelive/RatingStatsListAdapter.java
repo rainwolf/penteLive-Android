@@ -85,7 +85,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.dashboardrow_layout, null);
+            convertView = inflater.inflate(R.layout.rating_stats_row, null);
         }
         convertView.setBackgroundColor(Color.WHITE);
         RatingStat ratingStat = this.ratingStats.get(childPosition);
@@ -96,7 +96,6 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String ratingText = ratingStat.getRating(), detailText = "";
-        convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
         detailText = "Latest: " + ratingStat.getLastGame() + ", total: " + ratingStat.getTotalGames();
         ((TextView) convertView.findViewById(R.id.detailText)).setText(detailText);
         ((TextView) convertView.findViewById(R.id.nameText)).setText(ratingStat.getGame());
@@ -122,7 +121,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
+        return true;
     }
 
 

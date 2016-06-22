@@ -12,7 +12,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Play as:"
+        android:text="Game:"
         android:textStyle="bold"
         android:id="@+id/gameLabel"
         android:layout_alignParentLeft="true" />

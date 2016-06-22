@@ -22,7 +22,7 @@ int fhn, mvct, lvl, gf, ppd, vct, ferr, erfl, alpha, beta, a1, b1;
 int ciel[20][7], mxnd[20], dx[8], dy[8], sec[3];
 int mxvt[19], mxvf[19];
 
-short *pAs, *pAt, ;//*pPbk, *pKbk, *pPNm, *pPOs, *pKNm, *pKOs;
+short *pAs, *pAt;//*pPbk, *pKbk, *pPNm, *pPOs, *pKNm, *pKOs;
 short AScr[12768], ATbl[3772];//, PObk[12000], KObk[12000];
 
 unsigned int *pHashY, HValX[20], HValY[20], 
