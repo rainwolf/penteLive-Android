@@ -75,7 +75,7 @@ public class MMAIBoardView extends View {
 
     public int redDot = -1;
 
-    private boolean active, rated, gameOver;
+    private boolean active, rated, gameOver, aiThinking = false;
     private List<Integer> movesList;
 
     private Ai aiPlayer;
@@ -218,6 +218,7 @@ public class MMAIBoardView extends View {
                         moves[i] = movesList.get(i).intValue();
                     }
                     active = false;
+                    aiThinking = true;
                     aiPlayer.getMove(moves);
                 }
             }
@@ -228,6 +229,7 @@ public class MMAIBoardView extends View {
 
     public void startGame() {
         gameOver = false;
+        aiThinking = false;
         aiPlayer.setLevel(difficulty);
         aiPlayer.setSeat(3 - myColor);
         aiPlayer.setGame(game);
@@ -240,6 +242,7 @@ public class MMAIBoardView extends View {
             for (int i = 0; i < movesList.size(); ++i ) {
                 moves[i] = movesList.get(i).intValue();
             }
+            aiThinking = true;
             aiPlayer.getMove(moves);
         } else {
             active = true;
@@ -260,13 +263,14 @@ public class MMAIBoardView extends View {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
+                aiThinking = false;
                 ((MMAIActivity) activity).hideThinking();
             }
         });//        aiPlayer.destroy();
     }
 
     public void undoMove() {
-        if (movesList.size()>1) {
+        if (movesList.size()>1 && !aiThinking) {
             movesList.remove(movesList.size() - 1);
             active = myColor == (1 + movesList.size()%2);
             replayGame(abstractBoard);
