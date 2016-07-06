@@ -28,9 +28,9 @@ public class PentePlayer implements Parcelable {
     List<Game>  mPublicInvitations;
     List<Message> mMessages;
     List<RatingStat> mRatingStats;
-
-
+    List<KingOfTheHill> mHills;
     List<Tournament> mTournaments;
+
 
     public PentePlayer(String playerName, String password) {
         this.mPlayerName = playerName;
@@ -43,6 +43,7 @@ public class PentePlayer implements Parcelable {
         this.mMessages= new ArrayList<Message>();
         this.mRatingStats = new ArrayList<RatingStat>();
         this.mTournaments = new ArrayList<Tournament>();
+        this.mHills = new ArrayList<KingOfTheHill>();
         this.mShowAds = true;
     }
 
@@ -78,6 +79,7 @@ public class PentePlayer implements Parcelable {
     public List<RatingStat> getRatingStats() {
         return mRatingStats;
     }
+    public List<KingOfTheHill> getHills() { return mHills; }
 
 
     private void populatePlayer(String dashString) {
@@ -92,9 +94,27 @@ public class PentePlayer implements Parcelable {
         } else {
             this.mSubscriber = true;
         }
+//        System.out.println(dashString);
         String[] dashLines = dashString.split("\n");
         String[] dashLine;
         int idx = 0;
+        while (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == -1) {
+            idx += 1;
+        }
+        this.mHills.clear();
+        KingOfTheHill hill;
+        if (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == 0) {
+            idx += 1;
+            while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
+                dashLine = dashLines[idx].split(";", -1);
+                idx += 1;
+                if (dashLine.length < 5) {
+                    continue;
+                }
+                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4] ,dashLine[2].equals("1"), dashLine[3].equals("1"));
+                this.mHills.add(hill);
+            }
+        }
         while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
             idx += 1;
         }
@@ -293,6 +313,12 @@ public class PentePlayer implements Parcelable {
         } else {
             mTournaments = null;
         }
+        if (in.readByte() == 0x01) {
+            mHills = new ArrayList<KingOfTheHill>();
+            in.readList(mHills, KingOfTheHill.class.getClassLoader());
+        } else {
+            mHills = null;
+        }
     }
 
     @Override
@@ -362,7 +388,12 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x01));
             dest.writeList(mTournaments);
         }
-
+        if (mHills == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mHills);
+        }
     }
 
     @SuppressWarnings("unused")

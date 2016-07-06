@@ -423,7 +423,7 @@ public class Game implements Parcelable {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
+//                System.out.println(output);
 
 
             } catch (IOException e1) {
@@ -698,6 +698,7 @@ public class Game implements Parcelable {
             if (mGameType.equals("Pente") && mOpponentName.equals("computer")) {
                 if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
                     boolean iWon = false;
+                    mActive = false;
                     int myColor = (mMyColor.contains("white")?1:2);
                     if (whiteCaptures == 10) {
                         if (myColor == 2) {

@@ -20,6 +20,7 @@ public class PrefUtils {
     public static final String PREFS_SENTINVITATIONS_COLLAPSED_KEY = "__SENTINVITATIONSCOLLAPSED__" ;
     public static final String PREFS_NONACTIVEGAMES_COLLAPSED_KEY = "__NONACTIVEGAMESCOLLAPSED__" ;
     public static final String PREFS_TOURNAMENTS_COLLAPSED_KEY = "__TOURNAMENTSCOLLAPSED__" ;
+    public static final String PREFS_KOTH_COLLAPSED_KEY = "__KOTHCOLLAPSED__" ;
     public static final String PREFS_OPENINVITATIONCREDIT_KEY = "__OPENINVITATIONCREDIT__" ;
     public static final String PREFS_AUTOCOMPLETEPLAYERS_KEY = "__AUTOCOMPLETEPLAYERS__" ;
     public static final String PREFS_AUTOLOGIN_KEY = "__AUTOLOGIN__" ;
@@ -34,6 +35,7 @@ public class PrefUtils {
     public static final String PREFS_MMAIDIFFICULTY_KEY = "__MMAIDIFFICULTY__" ;
     public static final String PREFS_MMAICOLOR_KEY = "__MMAICOLOR__" ;
     public static final String PREFS_MMAIGAME_KEY = "__MMAIGAME__" ;
+    public static final String PREFS_KOTHTIMEOUT_KEY = "__KOTHTIMEOUT__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

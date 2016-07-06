@@ -82,10 +82,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
+                if (groupPosition == DashboardListAdapter.KOTHGROUP) {
+                    Intent intent = new Intent(getApplicationContext(), KingOfTheHillActivity.class);
+                    intent.putExtra("pentePlayer", player);
+                    intent.putExtra("kothSummary", player.getHills().get(childPosition));
+                    startActivity(intent);
+                    return true;
+                }
                 if (groupPosition == DashboardListAdapter.MESSAGESGROUP) {
                     Intent intent = new Intent(getApplicationContext(), ReplyMessageActivity.class);
                     intent.putExtra("message", player.getMessages().get(childPosition));
                     startActivity(intent);
+                    return true;
                 }
                 if (groupPosition == DashboardListAdapter.TOURNAMENTGROUP) {
                     Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
@@ -249,6 +257,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, false)) {
             expandableList.expandGroup(DashboardListAdapter.TOURNAMENTGROUP);
+        }
+        if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_KOTH_COLLAPSED_KEY, false)) {
+            expandableList.expandGroup(DashboardListAdapter.KOTHGROUP);
         }
         this.player.loadPlayer(this.listAdapter);
 //        System.out.println("messages " + player.getMessages().size());

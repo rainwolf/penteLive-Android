@@ -1,0 +1,528 @@
+package be.submanifold.pentelive;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Point;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.PopupWindow;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class KingOfTheHillActivity extends AppCompatActivity {
+
+    private List<List<KothPlayer>> hill;
+    private PentePlayer player;
+    private KingOfTheHill kothSummary;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private AdView mAdView;
+    private KingOfTheHillListAdapter listAdapter;
+    private PopupWindow popupWindow;
+    private View challengeView;
+    private ExpandableListView expandableList;
+    String challengedUser;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_king_of_the_hill);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        this.player = getIntent().getParcelableExtra("pentePlayer");
+        this.kothSummary = getIntent().getParcelableExtra("kothSummary");
+        myToolbar.setTitle(kothSummary.getGame());
+        setSupportActionBar(myToolbar);
+
+        challengeView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.koth_challenge_layout, null, false);
+
+
+        expandableList = (ExpandableListView) findViewById(R.id.list);
+        listAdapter = new KingOfTheHillListAdapter(this.player);
+        expandableList.setAdapter(listAdapter);
+        listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
+        listAdapter.setKothSummary(kothSummary);
+        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                return true; // This way the expander cannot be collapsed
+            }
+        });
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshKOTH);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        refreshPlayer();
+                    }
+                }
+        );
+        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
+//                System.out.println("kittycat " + childPosition + " of " + groupPosition );
+                if (groupPosition == 0) {
+                    JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(getGameString(kothSummary.getGame()), !kothSummary.isMember());
+                    joinLeaveTask.execute((Void) null);
+                    return true;
+                } else {
+                    if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
+                        challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
+                        ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("Challenge " + challengedUser);
+                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                        expandableList.setAlpha(0.5f);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        LoadHillTask loadTask = new LoadHillTask(getGameString(kothSummary.getGame()));
+        loadTask.execute((Void) null);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        popupWindow = new PopupWindow(challengeView, size.x*2/3, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(KingOfTheHillActivity.this, R.drawable.border));
+//                        messageWindow.setAnimationStyle(R.anim.animation);
+
+        Spinner spinner = (Spinner) challengeView.findViewById(R.id.timeoutSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(KingOfTheHillActivity.this,
+                R.array.timeout_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6));
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PrefUtils.saveIntToPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                expandableList.setAlpha(1.0f);
+            }
+        });
+        ((Button) challengeView.findViewById(R.id.sendChallengeButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, getGameString(kothSummary.getGame()), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1));
+                inviteTask.execute((Void) null);
+                popupWindow.dismiss();
+            }
+        });
+
+    }
+
+
+
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("message");
+
+            Toast.makeText(KingOfTheHillActivity.this, message,
+                    Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+        (KingOfTheHillActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+        (KingOfTheHillActivity.this).unregisterReceiver(mMessageReceiver);
+    }
+
+    private void refreshPlayer() {
+        LoadHillTask loadTask = new LoadHillTask(getGameString(kothSummary.getGame()));
+        loadTask.execute((Void) null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.dashboard_menu, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.action_settings:
+//                // User chose the "Settings" item, show the app settings UI...
+//                return true;
+
+            case R.id.action_new_invitation:
+                // User chose the "Favorite" action, mark the current item
+                // as a favorite...
+                return true;
+
+            case R.id.action_new_message:
+                // User chose the "Favorite" action, mark the current item
+                // as a favorite...
+                return true;
+
+            case R.id.action_show_stats:
+
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    private String getGameString(String inStr) {
+        String gameString= "51";
+        if (inStr.equals("Pente"))
+            gameString = "51";
+        if (inStr.equals("Gomoku"))
+            gameString = "55";
+        if (inStr.equals("D-Pente"))
+            gameString = "57";
+        if (inStr.equals("G-Pente"))
+            gameString = "59";
+        if (inStr.equals("Boat-Pente"))
+            gameString = "65";
+        if (inStr.equals("Poof-Pente"))
+            gameString = "61";
+        if (inStr.equals("Connect6"))
+            gameString = "63";
+        if (inStr.equals("Keryo-Pente"))
+            gameString = "53";
+
+        return gameString;
+    }
+
+    private void loadHill(String htmlString) {
+        hill = new ArrayList<>();
+        List<KothPlayer> step;
+
+        String[] dashLines = htmlString.split("\n");
+        String dashLine;
+        int idx = 0;
+        while (idx < dashLines.length) {
+            dashLine = dashLines[idx];
+            String[] stepPlayers = dashLine.split(";");
+            if (stepPlayers.length > 0) {
+                step = new ArrayList<>();
+            } else {
+                continue;
+            }
+            for (String stepPlayer : stepPlayers) {
+                String[] parsedPlayer = stepPlayer.split(",");
+                if (parsedPlayer.length < 6) {
+                    continue;
+                }
+                KothPlayer player = new KothPlayer(parsedPlayer[0], parsedPlayer[1], parsedPlayer[5], parsedPlayer[2].equals("yes"), Integer.parseInt(parsedPlayer[4]), Integer.parseInt(parsedPlayer[3]));
+                step.add(player);
+            }
+            if (step.size() > 0) {
+                hill.add(step);
+            }
+            idx += 1;
+        }
+        if (htmlString.contains(PentePlayer.mPlayerName)) {
+            kothSummary.setMember(true);
+        } else {
+            kothSummary.setMember(false);
+        }
+        listAdapter.setHill(hill);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private class LoadHillTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mGame;
+        private String htmlString;
+
+        LoadHillTask(String game) {
+            this.mGame = game;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName;
+                byte[] postData       = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                }
+                int    postDataLength = postData.length;
+                String request        = "https://www.pente.org/gameServer/mobile/koth.jsp";
+//                request        = "https://development.pente.org/gameServer/mobile/koth.jsp";
+                URL url            = new URL( request );
+                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty( "charset", "utf-8");
+                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                conn.setUseCaches( false );
+                try {
+                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+                    wr.write( postData );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+
+                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+//                System.out.println(output.toString());
+
+                htmlString = output.toString();
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            loadHill(htmlString);
+            listAdapter.updateList();
+            if (player.showAds()) {
+                ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+                ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            } else {
+                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
+            }
+            for ( int i = 0; i < listAdapter.getGroupCount(); ++i ) {
+                expandableList.expandGroup(i);
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+    private class JoinLeaveHillTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mGame;
+        private boolean join;
+
+        JoinLeaveHillTask(String game, boolean join) {
+            this.mGame = game;
+            this.join = join;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                String urlParameters  = "game=" + mGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                if (join) {
+                    urlParameters += "&join=";
+                }
+                byte[] postData       = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                }
+                int    postDataLength = postData.length;
+                String request        = "https://www.pente.org/gameServer/koth";
+//                request        = "https://development.pente.org/gameServer/koth";
+                URL url            = new URL( request );
+                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty( "charset", "utf-8");
+                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                conn.setUseCaches( false );
+                try {
+                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+                    wr.write( postData );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+
+                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+//                System.out.println(output.toString());
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            LoadHillTask loadTask = new LoadHillTask(mGame);
+            loadTask.execute((Void) null);
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+    public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String opponentName;
+        private final String gameType;
+        private final String timeout;
+
+        SendInvitationTask(String opponentName, String gameType, String timeout) {
+            this.opponentName = opponentName;
+            this.gameType = gameType;
+            this.timeout = timeout;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            try {
+
+                String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
+                        "&daysPerMove=" + timeout + "&rated=Y&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData       = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                }
+                int    postDataLength = postData.length;
+                String request        = "https://www.pente.org/gameServer/tb/newGame";
+//                request        = "https://development.pente.org/gameServer/tb/newGame";
+                URL    url            = new URL( request );
+                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty( "charset", "utf-8");
+                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                conn.setUseCaches( false );
+                try {
+                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+                    wr.write( postData );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+
+                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+//                System.out.println(output.toString());
+
+
+                return true;
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+
+            // TODO: register the new account here.
+//            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                PrefUtils.saveIntToPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, ((Spinner) challengeView.findViewById(R.id.timeoutSpinner)).getSelectedItemPosition());
+                LoadHillTask loadTask = new LoadHillTask(gameType);
+                loadTask.execute((Void) null);
+
+//                finish();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+
+}

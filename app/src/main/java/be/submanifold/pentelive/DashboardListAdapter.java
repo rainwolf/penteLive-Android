@@ -30,9 +30,10 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     public static final int INVITATIONSGROUP = 1;
     public static final int ACTIVEGAMESGROUP = 2;
     public static final int PUBLICINVITATIONSGROUP = 3;
-    public static final int SENTINVITATIONSGROUP = 5;
-    public static final int NONACTIVEGAMESGROUP = 6;
-    public static final int TOURNAMENTGROUP = 4;
+    public static final int SENTINVITATIONSGROUP = 6;
+    public static final int NONACTIVEGAMESGROUP = 7;
+    public static final int TOURNAMENTGROUP = 5;
+    public static final int KOTHGROUP = 4;
 
 
     PentePlayer playerData;
@@ -52,7 +53,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getGroupCount() {
-        return 7;
+        return 8;
     }
 
     @Override
@@ -66,6 +67,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case SENTINVITATIONSGROUP: count = playerData.getSentInvitations().size(); break;
             case NONACTIVEGAMESGROUP: count = playerData.getNonActiveGames().size(); break;
             case TOURNAMENTGROUP: count = playerData.getTournaments().size(); break;
+            case KOTHGROUP: count = playerData.getHills().size(); break;
             default: count = 0; break;
         }
         return count;
@@ -127,6 +129,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case SENTINVITATIONSGROUP: title = "Invitations Sent (" + playerData.getSentInvitations().size() + ")"; break;
             case NONACTIVEGAMESGROUP: title = "Non-Active Games (" + playerData.getNonActiveGames().size() + ")"; break;
             case TOURNAMENTGROUP: title = "Tournaments (" + playerData.getTournaments().size() + ")"; break;
+            case KOTHGROUP: title = "King of the Hill (" + playerData.getHills().size() + ")"; break;
             default: title = "uh-oh"; break;
         }
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);
@@ -159,6 +162,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         Game game = null;
         Message message = null;
         Tournament tournament = null;
+        KingOfTheHill hill = null;
         switch (groupPosition) {
             case MESSAGESGROUP: message = playerData.getMessages().get(childPosition);
                 break;
@@ -174,6 +178,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 break;
             case TOURNAMENTGROUP: tournament = playerData.getTournaments().get(childPosition);
                 break;
+            case KOTHGROUP: hill = playerData.getHills().get(childPosition);
+                break;
             default: mainText = "uh-oh";
                 detailText = "uh-oh";
                 break;
@@ -183,6 +189,18 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             detailText = message.getSubject();
             crown = message.getCrown();
             color = message.getNameColor();
+        } else if (groupPosition == KOTHGROUP) {
+            mainText = "\u2B24  " + hill.getGame();
+            crown = 0;
+            if (hill.isKing()) {
+                crown = 4;
+            }
+            if (hill.getCurrentKing().length() == 0) {
+                detailText = "Number of players: " + hill.getNumPlayers();
+            } else {
+                detailText = hill.getNumPlayers() + " players ruled by " + hill.getCurrentKing();
+            }
+            color = 0;
         } else if (groupPosition == TOURNAMENTGROUP) {
             ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
             mainText = "\u2B24  " + tournament.getName();
@@ -232,7 +250,15 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             }
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
+        if (groupPosition == KOTHGROUP) {
+            ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
+            if (!hill.isMember()) {
+                fcs = new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.orange));
+            }
+            sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        }
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
+        TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         Drawable crownIcon = null;
         switch (crown) {
             case 1:
@@ -252,11 +278,18 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             crownIcon.setBounds(0, 0, nameTextView.getLineHeight()*2/3,nameTextView.getLineHeight()*2/3);
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
-        ((TextView) convertView.findViewById(R.id.detailText)).setText(detailText);
+        detailTextView.setText(detailText);
         nameTextView.setText(sb);
+        if (groupPosition == KOTHGROUP && hill.getCurrentKing().length() > 1) {
+            sb = new SpannableStringBuilder(detailText);
+            crownIcon = ContextCompat.getDrawable(activity, R.drawable.kothcrown);
+            crownIcon.setBounds(0, 0, detailTextView.getLineHeight()*2/3,detailTextView.getLineHeight()*2/3);
+            sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
+            detailTextView.setText(sb);
+        }
         if (mainText.indexOf("Anyone") == -1) {
             ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
-            if (groupPosition != MESSAGESGROUP && groupPosition != TOURNAMENTGROUP) {
+            if (groupPosition != MESSAGESGROUP && groupPosition != TOURNAMENTGROUP && groupPosition != KOTHGROUP) {
                 sb = new SpannableStringBuilder("\u25A0");
                 int ratingInt = Integer.parseInt(ratingText);
                 ForegroundColorSpan ratingColor = null;new ForegroundColorSpan(color);
@@ -301,6 +334,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 break;
             case TOURNAMENTGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, true);
                 break;
+            case KOTHGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_KOTH_COLLAPSED_KEY, true);
+                break;
         }
         super.onGroupCollapsed(groupPosition);
     }
@@ -320,6 +355,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case NONACTIVEGAMESGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_NONACTIVEGAMES_COLLAPSED_KEY, false);
                 break;
             case TOURNAMENTGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_TOURNAMENTS_COLLAPSED_KEY, false);
+                break;
+            case KOTHGROUP: PrefUtils.saveBooleanToPrefs(activity, PrefUtils.PREFS_KOTH_COLLAPSED_KEY, false);
                 break;
         }
         super.onGroupExpanded(groupPosition);
