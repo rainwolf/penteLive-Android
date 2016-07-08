@@ -151,6 +151,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.acceptButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.dismissButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.declineButton).setVisibility(View.GONE);
+        convertView.findViewById(R.id.cancelButton).setVisibility(View.GONE);
 
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");

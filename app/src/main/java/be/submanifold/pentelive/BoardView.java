@@ -331,6 +331,15 @@ public class BoardView extends View {
                     drawStone(canvas, movei, movej, myColor);
                 }
             }
+            if (game.getMovesList() != null && game.isGomoku()) {
+                int i = game.getMovesList().size();
+                myColor = (byte) (1 + (i%2));
+                if (playedMove > -1) {
+                    byte movej = (byte) (playedMove/19);
+                    byte movei = (byte) (playedMove%19);
+                    drawStone(canvas, movei, movej, myColor);
+                }
+            }
             if (game.isDPente()) {
                 if (dPenteMove1 > -1) {
                     byte movej = (byte) (dPenteMove1/19);
