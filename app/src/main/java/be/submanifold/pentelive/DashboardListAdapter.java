@@ -110,26 +110,33 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case MESSAGESGROUP: title = "Messages (" + playerData.getMessages().size() + ")";
                 for (Message message : playerData.getMessages()) {
                     if (message.getUnread().indexOf("unread") > -1) {
-                        convertView.setBackgroundColor(Color.BLUE);
+                        convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                         break;
                     }
                 }
                 break;
             case INVITATIONSGROUP: title = "Invitations (" + playerData.getInvitations().size() + ")";
                 if (playerData.getInvitations().size() > 0) {
-                    convertView.setBackgroundColor(Color.BLUE);
+                    convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
             case ACTIVEGAMESGROUP: title = "Active Games (" + playerData.getActiveGames().size() + ")";
                 if (playerData.getActiveGames().size() > 0) {
-                    convertView.setBackgroundColor(Color.BLUE);
+                    convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
             case PUBLICINVITATIONSGROUP: title = "Public Invitations (" + playerData.getPublicInvitations().size() + ")"; break;
             case SENTINVITATIONSGROUP: title = "Invitations Sent (" + playerData.getSentInvitations().size() + ")"; break;
             case NONACTIVEGAMESGROUP: title = "Non-Active Games (" + playerData.getNonActiveGames().size() + ")"; break;
             case TOURNAMENTGROUP: title = "Tournaments (" + playerData.getTournaments().size() + ")"; break;
-            case KOTHGROUP: title = "King of the Hill (" + playerData.getHills().size() + ")"; break;
+            case KOTHGROUP: title = "King of the Hill (" + playerData.getHills().size() + ")";
+                for (KingOfTheHill player : playerData.getHills() ) {
+                    if (player.isKing()) {
+                        convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
+                        break;
+                    }
+                }
+                break;
             default: title = "uh-oh"; break;
         }
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);

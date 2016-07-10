@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="orange">#ffa500</color>
+    <color name="orangeDash">#FF8100</color>
     <color name="green">#00ff00</color>
     <color name="brown">#67240A</color>
     <color name="britishracinggreen">#08341D</color>

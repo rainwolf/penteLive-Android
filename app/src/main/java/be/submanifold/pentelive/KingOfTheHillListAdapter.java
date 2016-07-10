@@ -100,6 +100,14 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
+        if (groupPosition > 0) {
+            for (KothPlayer player : hill.get(groupPosition - 1) ) {
+                if (PentePlayer.mPlayerName.equals(player.getName())) {
+                    convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
+                    break;
+                }
+            }
+        }
         String title;
         String collapsedStr = "(+)";
         switch (groupPosition) {
@@ -148,6 +156,14 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         int crown = 0, color = 0;
         KothPlayer player = null;
         player = hill.get(groupPosition - 1).get(childPosition);
+        if (player.getName().equals(PentePlayer.mPlayerName)){
+            convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
+            ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+            imgVw.setImageResource(R.drawable.unread);
+        } else {
+            convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
+        }
+
         mainText  = player.getName();
         crown = player.getCrown();
         color = player.getColor();
