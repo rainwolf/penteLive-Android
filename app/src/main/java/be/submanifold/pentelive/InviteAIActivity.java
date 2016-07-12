@@ -87,7 +87,7 @@ public class InviteAIActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        MyApplication.activityResumed();
+        MyApplication.activityResumed(this);
     }
 
     @Override

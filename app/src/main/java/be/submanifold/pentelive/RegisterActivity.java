@@ -77,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        MyApplication.activityResumed();
+        MyApplication.activityResumed(this);
     }
 
     @Override

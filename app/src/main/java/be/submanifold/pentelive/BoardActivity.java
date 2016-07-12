@@ -317,7 +317,7 @@ public class BoardActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         (BoardActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name_computer"));
-        MyApplication.activityResumed();
+        MyApplication.activityResumed(this);
     }
 
     @Override

@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        MyApplication.activityResumed();
+        MyApplication.activityResumed(this);
         this.player.loadPlayer(this.listAdapter);
         (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }

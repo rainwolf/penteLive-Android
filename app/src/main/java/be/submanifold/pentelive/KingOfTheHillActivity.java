@@ -175,7 +175,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        MyApplication.activityResumed();
+        MyApplication.activityResumed(this);
         (KingOfTheHillActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }
     @Override
