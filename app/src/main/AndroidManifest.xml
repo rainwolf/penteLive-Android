@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="be.submanifold.pentelive"
-    android:versionCode="27"
-    android:versionName="1.5.5">
+    android:versionCode="28"
+    android:versionName="1.6.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -57,7 +57,8 @@
         <activity
             android:name=".MMAIActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".KingOfTheHillActivity"
+        <activity
+            android:name=".KingOfTheHillActivity"
             android:screenOrientation="portrait" />
 
         <service android:name=".MyFcmListenerService">
@@ -73,6 +74,7 @@
         </service>
         <!-- [END instanceId_listener] -->
 
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

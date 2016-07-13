@@ -2,6 +2,7 @@ package be.submanifold.pentelive;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.Snackbar;
@@ -229,18 +230,30 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             detailText = game.getGameType() + " (" + game.getRatedNot() + ") - " + game.getRemainingTime();
             ratingText = game.getOpponentRating();
         }
-        if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
+        if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP ||
+                groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP ||
+                groupPosition == PUBLICINVITATIONSGROUP || groupPosition == MESSAGESGROUP) {
             convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
             ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
-            if (game.getMyColor().indexOf("white") > -1) {
-                imgVw.setImageResource(R.drawable.white_stone);
+            Bitmap avatar = null;
+            if (groupPosition == MESSAGESGROUP) {
+                avatar = PentePlayer.avatars.get(message.getAuthor());
             } else {
-                imgVw.setImageResource(R.drawable.black_stone);
+                avatar = PentePlayer.avatars.get(game.getOpponentName());
             }
-        } else if (groupPosition == MESSAGESGROUP && message.unread()) {
-            convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
-            ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
-            imgVw.setImageResource(R.drawable.unread);
+            if (groupPosition == MESSAGESGROUP && message.unread()) {
+                imgVw.setImageResource(R.drawable.unread);
+            } else if (avatar != null) {
+                imgVw.setImageBitmap(avatar);
+            } else  if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
+                if (game.getMyColor().indexOf("white") > -1) {
+                    imgVw.setImageResource(R.drawable.white_stone);
+                } else {
+                    imgVw.setImageResource(R.drawable.black_stone);
+                }
+            } else {
+                imgVw.setVisibility(View.GONE);
+            }
         } else {
             convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
         }

@@ -1,16 +1,21 @@
 package be.submanifold.pentelive;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by waliedothman on 10/04/16.
@@ -21,15 +26,20 @@ public class PentePlayer implements Parcelable {
     public static String mPassword;
     public static Boolean mShowAds;
     private Boolean mSubscriber;
-    List<Game> mInvitations;
-    List<Game>  mSentInvitations;
-    List<Game>  mActiveGames;
-    List<Game>  mNonActiveGames;
-    List<Game>  mPublicInvitations;
-    List<Message> mMessages;
-    List<RatingStat> mRatingStats;
-    List<KingOfTheHill> mHills;
-    List<Tournament> mTournaments;
+    private List<Game> mInvitations;
+    private List<Game>  mSentInvitations;
+    private List<Game>  mActiveGames;
+    private List<Game>  mNonActiveGames;
+    private List<Game>  mPublicInvitations;
+    private List<Message> mMessages;
+    private List<RatingStat> mRatingStats;
+    private List<KingOfTheHill> mHills;
+    private List<Tournament> mTournaments;
+
+    public static List<String> pendingAvatarChecks;
+    public static Map<String, Bitmap> avatars;
+
+    private boolean loadAvatars;
 
 
     public PentePlayer(String playerName, String password) {
@@ -45,6 +55,8 @@ public class PentePlayer implements Parcelable {
         this.mTournaments = new ArrayList<Tournament>();
         this.mHills = new ArrayList<KingOfTheHill>();
         this.mShowAds = true;
+        pendingAvatarChecks = new ArrayList<String>();
+        avatars = new HashMap<String, Bitmap>();
     }
 
     public String getPlayerName() {
@@ -94,6 +106,7 @@ public class PentePlayer implements Parcelable {
         } else {
             this.mSubscriber = true;
         }
+
 //        System.out.println(dashString);
         String[] dashLines = dashString.split("\n");
         String[] dashLine;
@@ -147,6 +160,9 @@ public class PentePlayer implements Parcelable {
                 }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
                 this.mInvitations.add(game);
             }
         }
@@ -161,6 +177,9 @@ public class PentePlayer implements Parcelable {
                 }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
                 this.mSentInvitations.add(game);
             }
         }
@@ -175,6 +194,9 @@ public class PentePlayer implements Parcelable {
                 }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
                 this.mActiveGames.add(game);
             }
         }
@@ -189,6 +211,9 @@ public class PentePlayer implements Parcelable {
                 }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
                 this.mNonActiveGames.add(game);
             }
         }
@@ -203,6 +228,9 @@ public class PentePlayer implements Parcelable {
                 }
                 game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
                         , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
                 this.mPublicInvitations.add(game);
             }
         }
@@ -217,6 +245,9 @@ public class PentePlayer implements Parcelable {
                     continue;
                 }
                 message = new Message(dashLine[0], dashLine[3], dashLine[2], dashLine[4], dashLine[1], dashLine[5], dashLine[6]);
+                if (loadAvatars && message.getNameColor() != 0) {
+                    addUserAvatar(message.getAuthor());
+                }
                 this.mMessages.add(message);
             }
         }
@@ -238,11 +269,22 @@ public class PentePlayer implements Parcelable {
                 this.mTournaments.add(tournament);
             }
         }
-
-
     }
 
-    public void loadPlayer(DashboardListAdapter listAdapter) {
+    public void addUserAvatar(String user) {
+        if (pendingAvatarChecks != null && pendingAvatarChecks.contains(user)) {
+            return;
+        }
+        if (pendingAvatarChecks == null) {
+            pendingAvatarChecks = new ArrayList<String>();
+        }
+        pendingAvatarChecks.add(user);
+        LoadAvatarTask avatarTask = new LoadAvatarTask(user);
+        avatarTask.execute((Void) null);
+    }
+
+    public void loadPlayer(DashboardListAdapter listAdapter, boolean loadAvatars) {
+        this.loadAvatars = loadAvatars;
         if (this.mPassword == null || this.mPlayerName == null) {
             return;
         }
@@ -319,6 +361,17 @@ public class PentePlayer implements Parcelable {
         } else {
             mHills = null;
         }
+//        if (in.readByte() == 0x01) {
+//            pendingAvatarChecks = new ArrayList<String>();
+//            in.readList(pendingAvatarChecks, String.class.getClassLoader());
+//        } else {
+//            pendingAvatarChecks = null;
+//        }
+//        if (in.readByte() == 0x01) {
+//            avatars = in.readHashMap(Bitmap.class.getClassLoader());
+//        } else {
+//            avatars = null;
+//        }
     }
 
     @Override
@@ -394,6 +447,18 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x01));
             dest.writeList(mHills);
         }
+//        if (pendingAvatarChecks == null) {
+//            dest.writeByte((byte) (0x00));
+//        } else {
+//            dest.writeByte((byte) (0x01));
+//            dest.writeList(pendingAvatarChecks);
+//        }
+//        if (avatars == null) {
+//            dest.writeByte((byte) (0x00));
+//        } else {
+//            dest.writeByte((byte) (0x01));
+//            dest.writeMap(avatars);
+//        }
     }
 
     @SuppressWarnings("unused")
@@ -408,6 +473,59 @@ public class PentePlayer implements Parcelable {
             return new PentePlayer[size];
         }
     };
+
+    private class LoadAvatarTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String mUsername;
+        private Bitmap avatar;
+
+        LoadAvatarTask(String username) {
+            this.mUsername= username;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                avatar = null;
+                URL url = new URL("https://pente.org/gameServer/avatar?name="+mUsername);
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    System.out.println("response code for loadplayer was " + responseCode);
+                    return false;
+                }
+
+                InputStream input = connection.getInputStream();
+                avatar = BitmapFactory.decodeStream(input);
+
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            // TODO: register the new account here.
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (avatar != null) {
+                if (avatars == null) {
+                    avatars = new HashMap<String, Bitmap>();
+                }
+                avatars.put(mUsername, avatar);
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
 
 
     private class LoadPlayerTask extends AsyncTask<Void, Void, Boolean> {
@@ -524,7 +642,7 @@ public class PentePlayer implements Parcelable {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            loadPlayer(listAdapter);
+            loadPlayer(listAdapter, loadAvatars);
         }
 
         @Override
@@ -577,7 +695,7 @@ public class PentePlayer implements Parcelable {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            loadPlayer(listAdapter);
+            loadPlayer(listAdapter, loadAvatars);
         }
 
         @Override

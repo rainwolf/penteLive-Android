@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_KOTH_COLLAPSED_KEY, false)) {
             expandableList.expandGroup(DashboardListAdapter.KOTHGROUP);
         }
-        this.player.loadPlayer(this.listAdapter);
+        this.player.loadPlayer(this.listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
 //        System.out.println("messages " + player.getMessages().size());
         myToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -366,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
-            player.loadPlayer(listAdapter);
+            player.loadPlayer(listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
 
             Toast.makeText(MainActivity.this, message,
                     Toast.LENGTH_SHORT).show();
@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
-        this.player.loadPlayer(this.listAdapter);
+        this.player.loadPlayer(this.listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
         (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }
     @Override
@@ -388,7 +388,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshPlayer() {
-        player.loadPlayer(listAdapter);
+        player.loadPlayer(listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
+//        player.loadPlayer(listAdapter, true);
         swipeRefreshLayout.setRefreshing(false);
     }
 

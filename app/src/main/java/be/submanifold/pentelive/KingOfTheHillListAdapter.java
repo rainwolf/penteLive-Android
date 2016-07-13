@@ -2,6 +2,7 @@ package be.submanifold.pentelive;
 
         import android.app.Activity;
         import android.content.Intent;
+        import android.graphics.Bitmap;
         import android.graphics.Color;
         import android.graphics.drawable.Drawable;
         import android.support.design.widget.Snackbar;
@@ -156,12 +157,18 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         int crown = 0, color = 0;
         KothPlayer player = null;
         player = hill.get(groupPosition - 1).get(childPosition);
+        ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+        imgVw.setVisibility(View.VISIBLE);
         if (player.getName().equals(PentePlayer.mPlayerName)){
-            convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
-            ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
             imgVw.setImageResource(R.drawable.unread);
         } else {
-            convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
+            Bitmap avatar = null;
+            avatar = PentePlayer.avatars.get(player.getName());
+            if (avatar == null) {
+                imgVw.setVisibility(View.GONE);
+            } else {
+                imgVw.setImageBitmap(avatar);
+            }
         }
 
         mainText  = player.getName();

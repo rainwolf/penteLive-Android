@@ -165,6 +165,13 @@ public class LoginActivity extends AppCompatActivity
             attemptLogin();
         }
 
+        ((Button) findViewById(R.id.moreSettingsButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
     }
