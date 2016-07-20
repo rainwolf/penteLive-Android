@@ -261,6 +261,9 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     continue;
                 }
                 KothPlayer player = new KothPlayer(parsedPlayer[0], parsedPlayer[1], parsedPlayer[5], parsedPlayer[2].equals("yes"), Integer.parseInt(parsedPlayer[4]), Integer.parseInt(parsedPlayer[3]));
+                if (PentePlayer.loadAvatars && player.getColor() != 0) {
+                    this.player.addUserAvatar(player.getName());
+                }
                 step.add(player);
             }
             if (step.size() > 0) {

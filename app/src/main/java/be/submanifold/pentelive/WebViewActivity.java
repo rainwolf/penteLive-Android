@@ -68,6 +68,7 @@ public class WebViewActivity extends AppCompatActivity {
             webview.getSettings().setUseWideViewPort(true);
             String urlStr = extras.getString("url");
             webview.loadUrl(urlStr);
+//                    System.out.println("hello " + url);
         }
 
     }

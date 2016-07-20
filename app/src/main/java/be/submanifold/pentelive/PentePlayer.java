@@ -25,7 +25,7 @@ public class PentePlayer implements Parcelable {
     public static String mPlayerName;
     public static String mPassword;
     public static Boolean mShowAds;
-    private Boolean mSubscriber;
+    public static Boolean mSubscriber;
     private List<Game> mInvitations;
     private List<Game>  mSentInvitations;
     private List<Game>  mActiveGames;
@@ -35,11 +35,12 @@ public class PentePlayer implements Parcelable {
     private List<RatingStat> mRatingStats;
     private List<KingOfTheHill> mHills;
     private List<Tournament> mTournaments;
+    public static int myColor;
 
     public static List<String> pendingAvatarChecks;
     public static Map<String, Bitmap> avatars;
 
-    private boolean loadAvatars;
+    public static boolean loadAvatars;
 
 
     public PentePlayer(String playerName, String password) {
@@ -57,6 +58,7 @@ public class PentePlayer implements Parcelable {
         this.mShowAds = true;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
+        myColor = 0;
     }
 
     public String getPlayerName() {
@@ -92,6 +94,13 @@ public class PentePlayer implements Parcelable {
         return mRatingStats;
     }
     public List<KingOfTheHill> getHills() { return mHills; }
+    public int getMyColor() {
+        return myColor;
+    }
+    public void setMyColor(int myColor) {
+        this.myColor = myColor;
+    }
+
 
 
     private void populatePlayer(String dashString) {
@@ -111,6 +120,14 @@ public class PentePlayer implements Parcelable {
         String[] dashLines = dashString.split("\n");
         String[] dashLine;
         int idx = 0;
+        while (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) != 0) {
+            idx += 1;
+        }
+        if (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) == 0) {
+            dashLine = dashLines[idx].split(";", -1);
+            myColor = Integer.parseInt(dashLine[1]);
+        }
+
         while (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == -1) {
             idx += 1;
         }
@@ -372,6 +389,7 @@ public class PentePlayer implements Parcelable {
 //        } else {
 //            avatars = null;
 //        }
+        myColor = in.readInt();
     }
 
     @Override
@@ -459,6 +477,7 @@ public class PentePlayer implements Parcelable {
 //            dest.writeByte((byte) (0x01));
 //            dest.writeMap(avatars);
 //        }
+        dest.writeInt(myColor);
     }
 
     @SuppressWarnings("unused")

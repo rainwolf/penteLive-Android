@@ -159,7 +159,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         player = hill.get(groupPosition - 1).get(childPosition);
         ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
-        if (player.getName().equals(PentePlayer.mPlayerName)){
+        if (player.getName().equals(PentePlayer.mPlayerName) && PentePlayer.avatars.get(player.getName())==null){
             imgVw.setImageResource(R.drawable.unread);
         } else {
             Bitmap avatar = null;
