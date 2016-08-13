@@ -513,7 +513,7 @@ public class PentePlayer implements Parcelable {
                 connection.connect();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
-                    System.out.println("response code for loadplayer was " + responseCode);
+                    System.out.println("response code for LoadAvatarTask was " + responseCode);
                     return false;
                 }
 

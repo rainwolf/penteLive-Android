@@ -233,8 +233,9 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP ||
                 groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP ||
                 groupPosition == PUBLICINVITATIONSGROUP || groupPosition == MESSAGESGROUP) {
-            convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
             ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+            imgVw.setVisibility(View.VISIBLE);
+            imgVw.setAlpha(1f);
             Bitmap avatar = null;
             if (groupPosition == MESSAGESGROUP) {
                 avatar = PentePlayer.avatars.get(message.getAuthor());
@@ -245,7 +246,10 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 imgVw.setImageResource(R.drawable.unread);
             } else if (avatar != null) {
                 imgVw.setImageBitmap(avatar);
-            } else  if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
+            } else if (PentePlayer.loadAvatars && (groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP)) {
+                imgVw.setAlpha(0.25f);
+                imgVw.setImageResource(R.drawable.ic_action_android);
+            } else if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
                 if (game.getMyColor().indexOf("white") > -1) {
                     imgVw.setImageResource(R.drawable.white_stone);
                 } else {

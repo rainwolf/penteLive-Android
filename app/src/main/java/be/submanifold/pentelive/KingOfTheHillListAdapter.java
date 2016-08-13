@@ -81,12 +81,12 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public long getGroupId(int groupPosition) {
-        return 0;
+        return groupPosition;
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return 0;
+        return childPosition;
     }
 
     @Override
@@ -143,14 +143,17 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
+        ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
         TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         if (groupPosition == 0) {
-            nameTextView.setText("Tap to " + (kothSummary.isMember()?"leave":"join") + " this hill");
+            nameTextView.setText("Tap and hold to " + (kothSummary.isMember()?"leave":"join") + " this hill");
             detailTextView.setText("Warning: only subscribers can join multiple hills");
+            ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
+            ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
             return convertView;
         }
 
@@ -159,16 +162,20 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         player = hill.get(groupPosition - 1).get(childPosition);
         ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
+        imgVw.setAlpha(1f);
         if (player.getName().equals(PentePlayer.mPlayerName) && PentePlayer.avatars.get(player.getName())==null){
             imgVw.setImageResource(R.drawable.unread);
-        } else {
+        } else if (PentePlayer.loadAvatars){
             Bitmap avatar = null;
             avatar = PentePlayer.avatars.get(player.getName());
             if (avatar == null) {
-                imgVw.setVisibility(View.GONE);
+                imgVw.setAlpha(0.25f);
+                imgVw.setImageResource(R.drawable.ic_action_android);
             } else {
                 imgVw.setImageBitmap(avatar);
             }
+        } else {
+            imgVw.setVisibility(View.GONE);
         }
 
         mainText  = player.getName();

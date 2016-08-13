@@ -94,11 +94,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
-                if (groupPosition == 0) {
-                    JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(getGameString(kothSummary.getGame()), !kothSummary.isMember());
-                    joinLeaveTask.execute((Void) null);
-                    return true;
-                } else {
+                if (groupPosition > 0) {
                     if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
                         challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
                         ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("Challenge " + challengedUser);
@@ -107,6 +103,20 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                         return true;
                     }
                 }
+                return false;
+            }
+        });
+        expandableList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                int groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                if (groupPosition == 0) {
+                    JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(getGameString(kothSummary.getGame()), !kothSummary.isMember());
+                    joinLeaveTask.execute((Void) null);
+
+                    return true;
+                }
+
                 return false;
             }
         });
