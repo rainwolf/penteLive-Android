@@ -503,10 +503,11 @@ public class Game implements Parcelable {
                 String playerName = dashLine.substring(8).split(",")[0];
                 if (playerName.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     if (this.mMovesList != null) {
-                        if (isDPente() && mMovesList.size() == 1) {
-                            this.mActive = true;
-
-                        } else if (isConnect6()) {
+//                        if (isDPente() && mMovesList.size() == 1) {
+//                            this.mActive = true;
+//
+//                        } else
+                        if (isConnect6()) {
                             if ((((mMovesList.size() % 4) == 0) || ((mMovesList.size() % 4) == 3))) {
                                 this.mActive = true;
                             } else {
@@ -527,9 +528,10 @@ public class Game implements Parcelable {
                 String playerName = dashLine.substring(8).split(",")[0];
                 if (playerName.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     if (this.mMovesList != null) {
-                        if (isDPente() && mMovesList.size() == 1) {
-                            this.mActive = false;
-                        } else if (isConnect6()) {
+//                        if (isDPente() && mMovesList.size() == 1) {
+//                            this.mActive = false;
+//                        } else
+                        if (isConnect6()) {
                             if ((((mMovesList.size() % 4) == 1) || ((mMovesList.size() % 4) == 2))) {
                                 this.mActive = true;
                             } else {
@@ -559,9 +561,11 @@ public class Game implements Parcelable {
                     this.mMovesList.add(Integer.parseInt(movesString[i]));
                 }
             }
+            if (isDPente() && (dashLine.indexOf("dPenteState=2") > -1 || dashLine.contains("dPenteState=1"))) {
+                this.mActive = !mActive;
+            }
             if (dashLine.indexOf("dPenteState=2") > -1) {
                 this.dPenteChoice = true;
-                this.mActive = false;
             }
             if (dashLine.indexOf("cancel="+getOpponentName()) == 0) {
                 final Activity host = (Activity) boardView.getContext();

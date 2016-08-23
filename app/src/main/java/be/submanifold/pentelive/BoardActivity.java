@@ -146,7 +146,7 @@ public class BoardActivity extends AppCompatActivity {
                     } else {
                         moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3;
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 4) {
+                } else if (game.isDPente() && game.dPenteChoice) {
                     if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, "No move played yet.",
                                 Toast.LENGTH_LONG).show();
@@ -155,7 +155,7 @@ public class BoardActivity extends AppCompatActivity {
                         moves = "1," + board.playedMove;
                     }
                 } else if (board.playedMove == -1) {
-                    Toast.makeText(BoardActivity.this, "No move played yet.",
+                    Toast.makeText(BoardActivity.this, "No move played yet  .",
                             Toast.LENGTH_LONG).show();
                     return;
                 } else {
@@ -176,10 +176,10 @@ public class BoardActivity extends AppCompatActivity {
         button = (Button) findViewById(R.id.playAsWhiteButton);
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ((LinearLayout) findViewById(R.id.dPenteLayout)).setVisibility(View.GONE);
+                ((LinearLayout) findViewById(R.id.dPenteLayout)).setVisibility(View.INVISIBLE);
                 ((LinearLayout) findViewById(R.id.submitLayout)).setVisibility(View.VISIBLE);
+                board.dPenteChosen = true;
 //                ((TextView) findViewById(R.id.capturesLabel)).setVisibility(View.VISIBLE);
-                game.setActive(true);
                 Toast.makeText(BoardActivity.this, "Place a stone and submit.",
                         Toast.LENGTH_LONG).show();
             }
@@ -202,18 +202,17 @@ public class BoardActivity extends AppCompatActivity {
                         board.dPenteMove3 = -1;
                         ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
                                 "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
-                                "-" + coordinateLetters[board.dPenteMove3%19] + "" + (19 - (board.dPenteMove3/19)));
+                                "-...");
                     }  else if (board.dPenteMove2 > -1) {
                         board.dPenteMove2 = -1;
                         ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                                "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
                                 "-...");
                     } else if (board.dPenteMove1 > -1) {
                         board.dPenteMove1 = -1;
-                        ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                                "-...");
+                        ((Button) findViewById(R.id.submitButton)).setText("submit");
                     }
                     board.invalidate();
+                    return;
                 } else if (game.getUntilMove() > 1) {
                     if (game.isConnect6()) {
                         game.setUntilMove(game.getUntilMove() - 2);

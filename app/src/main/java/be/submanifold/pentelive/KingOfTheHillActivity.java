@@ -110,7 +110,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 int groupPosition = ExpandableListView.getPackedPositionGroup(id);
-                if (groupPosition == 0) {
+                int childPosition = ExpandableListView.getPackedPositionChild(id);
+                if (groupPosition == 0 && childPosition == 0) {
                     JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(getGameString(kothSummary.getGame()), !kothSummary.isMember());
                     joinLeaveTask.execute((Void) null);
 
@@ -204,9 +205,12 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.koth_menu, menu);
+        if (!kothSummary.canIchallenge()) {
+            menu.findItem(R.id.action_post_open_koth).setEnabled(false);
+            menu.findItem(R.id.action_post_open_koth).setVisible(false);
+        }
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -219,7 +223,12 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 startActivity(intent);
 
                 return true;
-
+            case R.id.action_post_open_koth:
+                ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("send open challenge");
+                challengedUser = "";
+                popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                expandableList.setAlpha(0.5f);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

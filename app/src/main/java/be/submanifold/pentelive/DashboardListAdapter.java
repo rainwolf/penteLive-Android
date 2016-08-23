@@ -282,6 +282,12 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             }
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
+        convertView.setBackgroundColor(Color.WHITE);
+        if (groupPosition == PUBLICINVITATIONSGROUP) {
+            if (game.getRatedNot().contains("KotH")) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            }
+        }
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
         TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         Drawable crownIcon = null;

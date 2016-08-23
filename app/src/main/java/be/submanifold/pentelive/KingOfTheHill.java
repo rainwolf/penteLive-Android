@@ -12,13 +12,15 @@ public class KingOfTheHill implements Parcelable {
     private String currentKing;
     private boolean member;
     private boolean king;
+    private boolean canIchallenge;
 
-    public KingOfTheHill(String game, String numPlayers, String currentKing, boolean member, boolean king) {
+    public KingOfTheHill(String game, String numPlayers, String currentKing, boolean member, boolean king, boolean canIchallenge) {
         this.game = game;
         this.numPlayers = numPlayers;
         this.currentKing = currentKing;
         this.member = member;
         this.king = king;
+        this.canIchallenge = canIchallenge;
     }
 
     public String getGame() {
@@ -61,12 +63,18 @@ public class KingOfTheHill implements Parcelable {
         this.king = king;
     }
 
+
+    public boolean canIchallenge() { return canIchallenge; }
+
+    public void setCanIchallenge(boolean canIchallenge) { this.canIchallenge = canIchallenge; }
+
     protected KingOfTheHill(Parcel in) {
         game = in.readString();
         numPlayers = in.readString();
         currentKing = in.readString();
         member = in.readByte() != 0x00;
         king = in.readByte() != 0x00;
+        canIchallenge = in.readByte() != 0x00;
     }
 
     @Override
@@ -81,6 +89,7 @@ public class KingOfTheHill implements Parcelable {
         dest.writeString(currentKing);
         dest.writeByte((byte) (member ? 0x01 : 0x00));
         dest.writeByte((byte) (king ? 0x01 : 0x00));
+        dest.writeByte((byte) (canIchallenge ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")

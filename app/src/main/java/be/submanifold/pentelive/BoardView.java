@@ -38,7 +38,7 @@ public class BoardView extends View {
             keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
             dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
             poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
-            boatPentePaint = makePaint(boatPenteColor), shadowPaint = makePaint(Color.GRAY);
+            boatPentePaint = makePaint(boatPenteColor), shadowPaint = makePaint(Color.BLACK);
     public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -73,7 +73,7 @@ public class BoardView extends View {
     public int dPenteMove1 = -1;
     public int dPenteMove2 = -1;
     public int dPenteMove3 = -1;
-
+    public boolean dPenteChosen = false;
 
     private boolean replayed = false;
     private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
@@ -147,9 +147,11 @@ public class BoardView extends View {
                 setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
             }
 
-            if (game.dPenteChoice && !game.isActive()) {
-                ((LinearLayout) parentLayout.findViewById(R.id.submitLayout)).setVisibility(GONE);
+//            if (game.dPenteChoice && !game.isActive()) {
+            if (game.dPenteChoice && game.isActive() && !dPenteChosen) {
+//                System.out.println("kitten here");
                 ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).setVisibility(VISIBLE);
+                ((LinearLayout) parentLayout.findViewById(R.id.submitLayout)).setVisibility(INVISIBLE);
 //                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
                 return;
             }
@@ -284,6 +286,8 @@ public class BoardView extends View {
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-...");
                     }
+                } else if (game.isDPente() && game.dPenteChoice && ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).getVisibility()==VISIBLE) {
+                    playedMove = -1;
                 } else {
                     game.replayGame(abstractBoard, stoneI, stoneJ, this);
                     replayed = false;
@@ -291,6 +295,7 @@ public class BoardView extends View {
                 }
             }
         }
+
         invalidate();
         return true;
     }
@@ -380,8 +385,9 @@ public class BoardView extends View {
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
         }
-        float shadowOffset = radius/7;
+        float shadowOffset = radius/5;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        shadowPaint.setAlpha(110);
         canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
@@ -401,8 +407,9 @@ public class BoardView extends View {
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
         }
-        float shadowOffset = radius/7;
+        float shadowOffset = radius/5;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        shadowPaint.setAlpha(110);
         canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }

@@ -26,8 +26,10 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -128,9 +130,13 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         RegisterTask(String username, String password, String email) {
-            this.username = username;
+            this.username = username.toLowerCase();
             this.password = password;
-            this.email = email;
+            try {
+                this.email = URLEncoder.encode(email,"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override

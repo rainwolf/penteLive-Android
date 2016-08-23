@@ -24,6 +24,8 @@ package be.submanifold.pentelive;
 
         import java.util.List;
 
+        import static android.view.View.TEXT_ALIGNMENT_CENTER;
+
 /**
  * Created by waliedothman on 11/04/16.
  */
@@ -150,11 +152,13 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
         TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         if (groupPosition == 0) {
-            nameTextView.setText("Tap and hold to " + (kothSummary.isMember()?"leave":"join") + " this hill");
-            detailTextView.setText("Warning: only subscribers can join multiple hills");
-            ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
-            ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
-            return convertView;
+            if (childPosition == 0) {
+                nameTextView.setText("Tap and hold to " + (kothSummary.isMember()?"leave":"join") + " this hill");
+                detailTextView.setText("Warning: only subscribers can join multiple hills");
+                ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
+                ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+                return convertView;
+            }
         }
 
         int crown = 0, color = 0;
