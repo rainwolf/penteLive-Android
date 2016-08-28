@@ -36,6 +36,7 @@ public class PrefUtils {
     public static final String PREFS_MMAICOLOR_KEY = "__MMAICOLOR__" ;
     public static final String PREFS_MMAIGAME_KEY = "__MMAIGAME__" ;
     public static final String PREFS_KOTHTIMEOUT_KEY = "__KOTHTIMEOUT__" ;
+    public static final String PREFS_KOTHRESTRICTION_KEY = "__KOTHRESTRICTION__" ;
     public static final String PREFS_LOADAVATARS_KEY = "__LOADAVATARS__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {

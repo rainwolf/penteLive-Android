@@ -160,6 +160,9 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.dismissButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.declineButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+        convertView.findViewById(R.id.ratingText).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
+        convertView.setBackgroundColor(Color.WHITE);
 
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
@@ -243,6 +246,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 avatar = PentePlayer.avatars.get(game.getOpponentName());
             }
             if (groupPosition == MESSAGESGROUP && message.unread()) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
                 imgVw.setImageResource(R.drawable.unread);
             } else if (avatar != null) {
                 imgVw.setImageBitmap(avatar);
@@ -260,6 +264,10 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             }
         } else {
             convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
+        }
+        if (groupPosition == SENTINVITATIONSGROUP) {
+            convertView.findViewById(R.id.ratingText).setVisibility(View.GONE);
+            convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
         }
         SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
         if (color != 0) {

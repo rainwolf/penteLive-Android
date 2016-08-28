@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.Layout;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -98,7 +101,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
                         challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
                         ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("Challenge " + challengedUser);
-                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                        ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
+                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
                         expandableList.setAlpha(0.5f);
                         return true;
                     }
@@ -128,7 +132,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        popupWindow = new PopupWindow(challengeView, size.x*2/3, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+        popupWindow = new PopupWindow(challengeView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
         popupWindow.setFocusable(true);
         popupWindow.setOutsideTouchable(true);
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(KingOfTheHillActivity.this, R.drawable.border));
@@ -151,6 +155,23 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             }
         });
+        spinner = (Spinner) challengeView.findViewById(R.id.restrictionSpinner);
+        adapter = ArrayAdapter.createFromResource(KingOfTheHillActivity.this,
+                R.array.restriction_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0));
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PrefUtils.saveIntToPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -160,7 +181,17 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         ((Button) challengeView.findViewById(R.id.sendChallengeButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, getGameString(kothSummary.getGame()), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1));
+                String restriction = "A";
+                switch (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0)) {
+                    case 0: restriction = "A"; break;
+                    case 1: restriction = "N"; break;
+                    case 2: restriction = "L"; break;
+                    case 3: restriction = "H"; break;
+                    case 4: restriction = "S"; break;
+                    case 5: restriction = "C"; break;
+                }
+
+                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, getGameString(kothSummary.getGame()), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
                 inviteTask.execute((Void) null);
                 popupWindow.dismiss();
             }
@@ -227,6 +258,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("send open challenge");
                 challengedUser = "";
                 popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);
                 expandableList.setAlpha(0.5f);
                 return true;
             default:
@@ -457,11 +489,13 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         private final String opponentName;
         private final String gameType;
         private final String timeout;
+        private final String restriction;
 
-        SendInvitationTask(String opponentName, String gameType, String timeout) {
+        SendInvitationTask(String opponentName, String gameType, String timeout, String restriction) {
             this.opponentName = opponentName;
             this.gameType = gameType;
             this.timeout = timeout;
+            this.restriction = restriction;
         }
 
         @Override
@@ -471,7 +505,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             try {
 
                 String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
-                        "&daysPerMove=" + timeout + "&rated=Y&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
