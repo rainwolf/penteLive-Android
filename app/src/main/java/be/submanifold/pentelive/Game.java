@@ -611,6 +611,9 @@ public class Game implements Parcelable {
             }
             idx += 1;
         }
+        if (mGameString.indexOf("state=active") == -1) {
+            mActive = false;
+        }
 
         messages = new HashMap<Integer, String>();
         if (messagesArray != null && messagesArray.length > 0) {
