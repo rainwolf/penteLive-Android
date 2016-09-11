@@ -25,6 +25,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -180,6 +181,11 @@ public class LoginActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
+        if (PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, false)) {
+            ((LinearLayout) findViewById(R.id.registerLayout)).setVisibility(View.GONE);
+            ((AutoCompleteTextView) findViewById(R.id.email)).setEnabled(false);
+            ((EditText) findViewById(R.id.password)).setEnabled(false);
+        }
     }
 
     @Override

@@ -21,23 +21,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:textSize="15dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Loading avatars takes more data, use this option if your connection is fast enough."
-        android:id="@+id/infoLabel"
-        android:layout_below="@id/my_toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Load avatars:"
+        android:textStyle="bold"
         android:id="@+id/avatarLabel"
-        android:layout_below="@id/infoLabel"
+        android:layout_below="@id/my_toolbar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <ToggleButton
@@ -48,26 +37,26 @@
         android:textOn="Yes"
         android:textOff="No"
         android:id="@+id/avatarToggleButton"
-        android:layout_below="@+id/infoLabel"
+        android:layout_below="@+id/my_toolbar"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="45dp"
         android:textSize="15dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="More preferences, such as email settings can be changed at pente.org."
-        android:id="@+id/infoLabel2"
+        android:text="Loading avatars takes more data, use this option if your connection is fast enough."
+        android:id="@+id/infoLabel"
         android:layout_below="@id/avatarLabel"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp"/>
+        android:layout_alignParentStart="true" />
     <Button
         android:layout_width="match_parent"
         android:id="@+id/preferencesButton"
         android:layout_height="wrap_content"
-        android:layout_below="@id/infoLabel2"
+        android:layout_below="@id/infoLabel"
         android:text="Preferences @ pente.org"
         android:layout_marginTop="5dp"/>
     <TextView
@@ -76,17 +65,17 @@
         android:textSize="15dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Name color and avatar are subscriber-only features"
-        android:id="@+id/infoLabel3"
+        android:text="More preferences, such as email settings, can be changed at pente.org."
+        android:id="@+id/infoLabel2"
         android:layout_below="@id/preferencesButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginBottom="20dp"/>
     <Button
         android:layout_width="match_parent"
         android:id="@+id/colorButton"
         android:layout_height="wrap_content"
-        android:layout_below="@id/infoLabel3"
+        android:layout_below="@id/infoLabel2"
         android:text="Change name color"
         android:layout_marginTop="5dp"/>
     <Button
@@ -96,6 +85,18 @@
         android:layout_below="@id/colorButton"
         android:text="change avatar"
         android:layout_marginTop="5dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:textSize="15dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Name color and avatar are subscriber-only features"
+        android:id="@+id/infoLabel3"
+        android:layout_below="@id/avatarButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="20dp"/>
 
     <ImageView
         android:layout_width="wrap_content"

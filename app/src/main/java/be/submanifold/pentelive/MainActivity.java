@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        PrefUtils.saveBooleanToPrefs(MainActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, true);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);

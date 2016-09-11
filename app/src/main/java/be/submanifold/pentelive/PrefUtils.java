@@ -38,6 +38,7 @@ public class PrefUtils {
     public static final String PREFS_KOTHTIMEOUT_KEY = "__KOTHTIMEOUT__" ;
     public static final String PREFS_KOTHRESTRICTION_KEY = "__KOTHRESTRICTION__" ;
     public static final String PREFS_LOADAVATARS_KEY = "__LOADAVATARS__" ;
+    public static final String PREFS_REGISTRATIONSUCCESSFUL_KEY = "__REGISTRATIONSUCCESSFUL__" ;
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
