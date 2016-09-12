@@ -38,6 +38,11 @@
         android:title="new message"
         android:icon="@drawable/ic_chat"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/moreSettings"
+        android:title="Settings"
+        android:icon="@drawable/ic_action_settings"
+        app:showAsAction="never"/>
 
     <!--&lt;!&ndash; Settings, should always be in the overflow &ndash;&gt;-->
     <!--<item android:id="@+id/action_settings"-->

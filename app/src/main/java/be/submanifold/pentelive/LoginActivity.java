@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +73,7 @@ public class LoginActivity extends AppCompatActivity
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         myToolbar.setTitle("penteLive");
+        myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
 
         ((Button) findViewById(R.id.registerButton)).setOnClickListener(new OnClickListener() {
@@ -160,6 +162,14 @@ public class LoginActivity extends AppCompatActivity
                 i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Play Pente with me?");
                 i.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " +storedUserName));
                 startActivity(Intent.createChooser(i, "Invite Friends"));
+            }
+        });
+        ((Button) findViewById(R.id.getHelpButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Android Pente Live help for " + storedUserName);
+                startActivity(Intent.createChooser(i, "Get Help"));
             }
         });
         if ((storedPassword != null) && (storedUserName != null) && PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false)) {

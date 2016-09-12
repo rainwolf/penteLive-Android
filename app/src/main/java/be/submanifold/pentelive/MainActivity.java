@@ -286,6 +286,10 @@ public class MainActivity extends AppCompatActivity {
                         intent = new Intent(getApplicationContext(), SendMessageActivity.class);
                         startActivity(intent);
                         return true;
+                    case R.id.moreSettings:
+                        intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        startActivity(intent);
+                        return true;
                     case R.id.action_show_stats:
                         Point size = new Point();
                         Display display = getWindowManager().getDefaultDisplay();
