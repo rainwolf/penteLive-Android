@@ -55,6 +55,9 @@ public class Game implements Parcelable {
     private List<Integer> mMovesList;
     public HashMap<Integer, String> messages;
 
+
+    private String movesString = "";
+
     public Game(String gameID, String setID, String gameType, String opponentName, String opponentRating, String myColor,
                 String remainingTime, String ratedNot, String privateGame, String nameColor, String crown) {
         this.mGameID = gameID;
@@ -121,6 +124,10 @@ public class Game implements Parcelable {
     }
     public void setmGameString(String mGameString) {
         this.mGameString = mGameString;
+    }
+
+    public String getMovesString() {
+        return movesString;
     }
 
 
@@ -736,6 +743,7 @@ public class Game implements Parcelable {
         }
 
     }
+    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
     public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
         if (mMovesList == null) {
             return;
@@ -765,6 +773,37 @@ public class Game implements Parcelable {
             boardView.setBackgroundColor(boardView.dPenteColor);
             replayPenteGame(abstractBoard, untilMove);
         }
+
+        movesString = "";
+        if (isConnect6()) {
+            for (int i = 0; i < Math.min(mMovesList.size(), untilMove); i++) {
+                if (i == 0) {
+                    movesString += "<b>1.</b> ";
+                } else {
+                    if (((i - 3) % 4) == 0) {
+                        movesString += " <b>" + ((i >> 2) + 2) + ".</b> ";
+                    } else if (((i - 3) % 4) == 2 || i == 1) {
+                        movesString += " - ";
+                    } else {
+                        movesString += "-";
+                    }
+                }
+                movesString += coordinateLetters[mMovesList.get(i) % 19] + "" + (19 - (mMovesList.get(i) / 19));
+            }
+        } else {
+            for (int i = 0; i < Math.min(mMovesList.size(), untilMove); i++) {
+                if (i%2 == 0) {
+                    movesString += "<b>" + (i/2 + 1) + ".</b> ";
+                }
+                movesString += coordinateLetters[mMovesList.get(i) % 19] + "" + (19 - (mMovesList.get(i) / 19)) + " ";
+                if (i%2 == 0) {
+                    movesString += "- ";
+                } else {
+                    movesString += "  ";
+                }
+            }
+        }
+
 
         if (boardView != null) {
             boardView.setRedDot(this.mMovesList.get(untilMove - 1));

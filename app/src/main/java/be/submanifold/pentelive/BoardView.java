@@ -19,6 +19,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -89,6 +90,8 @@ public class BoardView extends View {
 
     private Game game;
 
+    private TextView textView = null;
+
     public Game getGame() {
         return game;
     }
@@ -151,10 +154,21 @@ public class BoardView extends View {
 //                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
 //            }
             if (scaling == 1) {
+                if (textView == null) {
+                    textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
+                }
                 String str = "Opponent: <a href=\"https://www.pente.org/gameServer/profile?viewName=" + game.getOpponentName() + "\">" + game.getOpponentName() + "</a>"
                         + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
-                        + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game";
-                setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+                        + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
+                int textHeight = textView.getLineCount() * textView.getLineHeight();
+                if (textHeight > textView.getHeight()) {
+                    //Text is truncated because text height is taller than TextView height
+                    textView.setGravity(Gravity.CENTER | Gravity.BOTTOM);
+                } else {
+                    //Text not truncated because text height not taller than TextView height
+                    textView.setGravity(Gravity.FILL_VERTICAL | Gravity.CENTER);
+                }
+                setTextViewHTML(textView, str);
             }
 
 //            if (game.dPenteChoice && !game.isActive()) {

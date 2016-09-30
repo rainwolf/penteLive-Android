@@ -102,7 +102,7 @@
         android:layout_width="match_parent"
         android:id="@+id/playerInfo"
         android:layout_marginLeft="5dp"
-        android:gravity="fill_vertical|center"
+        android:gravity="bottom|center"
         android:layout_marginRight="5dp"
         android:layout_marginBottom="3dp"
         android:paddingLeft="5dp"
