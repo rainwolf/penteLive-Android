@@ -85,6 +85,7 @@ public class BoardActivity extends AppCompatActivity {
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         board = (BoardView) findViewById(R.id.boardView);
+        board.setBoardActivity(this);
         this.game = getIntent().getParcelableExtra("game");
         game.parseGame(board);
         toolbar.setTitle(game.getGameType());
@@ -194,62 +195,13 @@ public class BoardActivity extends AppCompatActivity {
         button = (Button) findViewById(R.id.backButton);
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (game.isConnect6() && board.connect6Move1 > -1) {
-                    board.connect6Move1 = -1;
-                    board.invalidate();
-                } else if (game.isDPente() && game.getMovesList().size() == 1) {
-                    if (board.dPenteMove3 > -1) {
-                        board.dPenteMove3 = -1;
-                        ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                                "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
-                                "-...");
-                    }  else if (board.dPenteMove2 > -1) {
-                        board.dPenteMove2 = -1;
-                        ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                                "-...");
-                    } else if (board.dPenteMove1 > -1) {
-                        board.dPenteMove1 = -1;
-                        ((Button) findViewById(R.id.submitButton)).setText("submit");
-                    }
-                    board.invalidate();
-                    return;
-                } else if (game.getUntilMove() > 1) {
-                    if (game.isConnect6()) {
-                        game.setUntilMove(game.getUntilMove() - 2);
-                    } else {
-                        game.setUntilMove(game.getUntilMove() - 1);
-                    }
-                    game.replayGameUntilMove(board.abstractBoard, board);
-                    board.setReplayed(false);
-                }
-                ((Button) findViewById(R.id.submitButton)).setText("submit");
-//                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
-                board.playedMove = -1;
-                if (game.messages.get(game.getUntilMove()) != null) {
-                    messageIcon.startAnimation(rotation);
-                } else {
-                    messageIcon.clearAnimation();
-                }
+                goBack();
             }
         });
         button = (Button) findViewById(R.id.forwardButton);
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (game.getUntilMove() < game.getMovesList().size()) {
-                    if (game.isConnect6()) {
-                        game.setUntilMove(game.getUntilMove() + 2);
-                    } else {
-                        game.setUntilMove(game.getUntilMove() + 1);
-                    }
-                    game.replayGameUntilMove(board.abstractBoard, board);
-                    board.setReplayed(false);
-//                    ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
-                }
-                if (game.messages.get(game.getUntilMove()) != null) {
-                    messageIcon.startAnimation(rotation);
-                } else {
-                    messageIcon.clearAnimation();
-                }
+                goForward();
             }
         });
 
@@ -312,6 +264,62 @@ public class BoardActivity extends AppCompatActivity {
     };
 
 
+    public void goBack() {
+        if (game.isConnect6() && board.connect6Move1 > -1) {
+            board.connect6Move1 = -1;
+            board.invalidate();
+        } else if (game.isDPente() && game.getMovesList().size() == 1) {
+            if (board.dPenteMove3 > -1) {
+                board.dPenteMove3 = -1;
+                ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                        "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
+                        "-...");
+            }  else if (board.dPenteMove2 > -1) {
+                board.dPenteMove2 = -1;
+                ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                        "-...");
+            } else if (board.dPenteMove1 > -1) {
+                board.dPenteMove1 = -1;
+                ((Button) findViewById(R.id.submitButton)).setText("submit");
+            }
+            board.invalidate();
+            return;
+        } else if (game.getUntilMove() > 1) {
+            if (game.isConnect6()) {
+                game.setUntilMove(game.getUntilMove() - 2);
+            } else {
+                game.setUntilMove(game.getUntilMove() - 1);
+            }
+            game.replayGameUntilMove(board.abstractBoard, board);
+            board.setReplayed(false);
+        }
+        ((Button) findViewById(R.id.submitButton)).setText("submit");
+//                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
+        board.playedMove = -1;
+        if (game.messages.get(game.getUntilMove()) != null) {
+            messageIcon.startAnimation(rotation);
+        } else {
+            messageIcon.clearAnimation();
+        }
+    }
+    public void  goForward() {
+        if (game.getUntilMove() < game.getMovesList().size()) {
+            if (game.isConnect6()) {
+                game.setUntilMove(game.getUntilMove() + 2);
+            } else {
+                game.setUntilMove(game.getUntilMove() + 1);
+            }
+            game.replayGameUntilMove(board.abstractBoard, board);
+            board.setReplayed(false);
+//                    ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
+        }
+        if (game.messages.get(game.getUntilMove()) != null) {
+            messageIcon.startAnimation(rotation);
+        } else {
+            messageIcon.clearAnimation();
+        }
+
+    }
     @Override
     protected void onResume() {
         super.onResume();

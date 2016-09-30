@@ -703,6 +703,7 @@ public class Game implements Parcelable {
         if (boardView != null) {
             boardView.invalidate();
             if (mGameType.equals("Pente") && mOpponentName.equals("computer")) {
+//                System.out.println("what white: " + whiteCaptures + " black: " + blackCaptures + " pente? " + detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1)));
                 if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
                     boolean iWon = false;
                     mActive = false;
@@ -845,6 +846,12 @@ public class Game implements Parcelable {
         }
         if (mOpponentName.equals("computer") && mGameType.equals("Pente")) {
             if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+//                for (int i = 0; i < 19; i++) {
+//                    for (int j = 0; j < 19; j++) {
+//                        System.out.print(abstractBoard[i][j]);
+//                    }
+//                    System.out.println();
+//                }
                 mActive = false;
             }
         }
@@ -1318,7 +1325,8 @@ public class Game implements Parcelable {
     private boolean detectPente(byte[][] abstractBoard, byte color, int rowCol) {
         boolean pente = false;
         int penteCounter = 1;
-        int row = rowCol / 19, col = rowCol % 19, i, j;
+        int row = rowCol % 19, col = rowCol / 19, i, j;
+//        System.out.println("row: " + row + " column: " + col + " color: " + color);
         i = row - 1;
         j = col;
         while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
@@ -1342,6 +1350,7 @@ public class Game implements Parcelable {
             i += 1;
         }
         if (pente) {
+//            System.out.println("rowPente");
             return pente;
         }
         penteCounter = 1;
@@ -1368,6 +1377,7 @@ public class Game implements Parcelable {
             j += 1;
         }
         if (pente) {
+//            System.out.println("columnPente");
             return pente;
         }
         penteCounter = 1;
@@ -1396,6 +1406,7 @@ public class Game implements Parcelable {
             j += 1;
         }
         if (pente) {
+//            System.out.println("rightDiagonalPente");
             return pente;
         }
         penteCounter = 1;
@@ -1423,6 +1434,7 @@ public class Game implements Parcelable {
             i += 1;
             j -= 1;
         }
+//        System.out.println("leftDiagonalPente");
 
         return pente;
     }

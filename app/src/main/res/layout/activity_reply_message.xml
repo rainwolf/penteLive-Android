@@ -78,8 +78,8 @@
             android:layout_weight="1"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
+            android:inputType="textCapSentences|textMultiLine"
             android:background="@drawable/border"
-            android:inputType="textMultiLine"
             android:scrollbars="vertical"
             android:gravity="top"/>
     </LinearLayout>

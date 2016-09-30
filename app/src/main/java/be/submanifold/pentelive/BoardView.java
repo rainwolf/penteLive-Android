@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.os.Build;
+import android.support.v4.view.GestureDetectorCompat;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -16,7 +18,9 @@ import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -29,6 +33,11 @@ import java.util.List;
  * Created by waliedothman on 15/04/16.
  */
 public class BoardView extends View {
+    private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+    boolean dragging = true, swipeLeft = false;
+    static final int SWIPE_THRESHOLD_VELOCITY = 300;
+    private BoardActivity boardActivity;
+
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
             keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
@@ -118,6 +127,7 @@ public class BoardView extends View {
         scaling = 1;
         translateX = 0;
         translateY = 0;
+//        mDetector = new GestureDetectorCompat(context, new MyGestureListener());
     }
 
 
@@ -194,7 +204,9 @@ public class BoardView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // TODO Auto-generated method stub
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
 
         float x, y;
         x = event.getX();
@@ -216,21 +228,67 @@ public class BoardView extends View {
         stoneJ = (byte) (19*stoneY/size);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                game.replayGame(abstractBoard, this);
-                replayed = true;
+                mVelocityTracker.clear();
+                // Add a user's movement to the tracker.
+                mVelocityTracker.addMovement(event);
+
+                dragging = true;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
                 break;
             case MotionEvent.ACTION_MOVE:
+                mVelocityTracker.addMovement(event);
+                // When you want to determine the velocity, call
+                // computeCurrentVelocity(). Then call getXVelocity()
+                // and getYVelocity() to retrieve the velocity for each pointer ID.
+                mVelocityTracker.computeCurrentVelocity(1000);
+                // Log velocity of pixels per second
+                // Best practice to use VelocityTrackerCompat where possible.
+                double velocityX = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
+
+                if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    if (velocityX < 0) {
+                        swipeLeft = true;
+//                        System.out.println("swipe RightToLeft moving ");
+
+                    } else {
+                        swipeLeft = false;
+//                        System.out.println("swipe LeftToright moving ");
+                    }
+                    playedMove = -1;
+                    dragging = false;
+                    scaling = 1;
+                    translateX = 0;
+                    translateY = 0;
+                    return true;
+                }
+//                System.out.println("dragging");
+                dragging = true;
+                if (!replayed) {
+                    game.replayGame(abstractBoard, BoardView.this);
+                    replayed = true;
+                }
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
                 break;
+            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                if (!dragging) {
+                    if (swipeLeft) {
+                        boardActivity.goBack();
+//                        System.out.println("swipe RightToLeft ");
+                    } else {
+                        boardActivity.goForward();
+//                        System.out.println("swipe LeftToright ");
+                    }
+                    return true;
+                }
+//                mVelocityTracker.recycle();
                 break;
         }
 
@@ -299,6 +357,8 @@ public class BoardView extends View {
         invalidate();
         return true;
     }
+
+
 
     private void drawBoard(Canvas canvas) {
         float step = (float) size / 19, margin = step/2;
@@ -485,6 +545,12 @@ public class BoardView extends View {
         text.setMovementMethod(new ScrollingMovementMethod());
         text.setMovementMethod(LinkMovementMethod.getInstance());
     }
+
+
+    public void setBoardActivity(BoardActivity boardActivity) {
+        this.boardActivity = boardActivity;
+    }
+
 
 
 }

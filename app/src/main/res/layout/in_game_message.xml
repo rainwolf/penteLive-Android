@@ -22,6 +22,7 @@
         android:id="@+id/messageInput"
         android:layout_below="@+id/opponentMessage"
         android:layout_centerHorizontal="true"
+        android:inputType="textCapSentences"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"/>
 </RelativeLayout>
