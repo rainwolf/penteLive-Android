@@ -34,9 +34,9 @@ import java.util.List;
  * Created by waliedothman on 15/04/16.
  */
 public class BoardView extends View {
-    private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
-    boolean dragging = true, swipeLeft = false;
-    static final int SWIPE_THRESHOLD_VELOCITY = 300;
+//    private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+//    boolean dragging = true, swipeLeft = false;
+//    static final int SWIPE_THRESHOLD_VELOCITY = 300;
     private BoardActivity boardActivity;
 
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
@@ -242,47 +242,47 @@ public class BoardView extends View {
         stoneJ = (byte) (19*stoneY/size);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                mVelocityTracker.clear();
-                // Add a user's movement to the tracker.
-                mVelocityTracker.addMovement(event);
-
-                dragging = true;
+                if (!replayed) {
+                    game.replayGame(abstractBoard, BoardView.this);
+                    replayed = true;
+                }
+//                mVelocityTracker.clear();
+//                // Add a user's movement to the tracker.
+//                mVelocityTracker.addMovement(event);
+//
+//                dragging = true;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
                 break;
             case MotionEvent.ACTION_MOVE:
-                mVelocityTracker.addMovement(event);
-                // When you want to determine the velocity, call
-                // computeCurrentVelocity(). Then call getXVelocity()
-                // and getYVelocity() to retrieve the velocity for each pointer ID.
-                mVelocityTracker.computeCurrentVelocity(1000);
-                // Log velocity of pixels per second
-                // Best practice to use VelocityTrackerCompat where possible.
-                double velocityX = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
-
-                if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    if (velocityX < 0) {
-                        swipeLeft = true;
-//                        System.out.println("swipe RightToLeft moving ");
-
-                    } else {
-                        swipeLeft = false;
-//                        System.out.println("swipe LeftToright moving ");
-                    }
-                    playedMove = -1;
-                    dragging = false;
-                    scaling = 1;
-                    translateX = 0;
-                    translateY = 0;
-                    return true;
-                }
-//                System.out.println("dragging");
-                dragging = true;
-                if (!replayed) {
-                    game.replayGame(abstractBoard, BoardView.this);
-                    replayed = true;
-                }
+//                mVelocityTracker.addMovement(event);
+//                // When you want to determine the velocity, call
+//                // computeCurrentVelocity(). Then call getXVelocity()
+//                // and getYVelocity() to retrieve the velocity for each pointer ID.
+//                mVelocityTracker.computeCurrentVelocity(1000);
+//                // Log velocity of pixels per second
+//                // Best practice to use VelocityTrackerCompat where possible.
+//                double velocityX = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
+//
+//                if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+//                    if (velocityX < 0) {
+//                        swipeLeft = true;
+////                        System.out.println("swipe RightToLeft moving ");
+//
+//                    } else {
+//                        swipeLeft = false;
+////                        System.out.println("swipe LeftToright moving ");
+//                    }
+//                    playedMove = -1;
+//                    dragging = false;
+//                    scaling = 1;
+//                    translateX = 0;
+//                    translateY = 0;
+//                    return true;
+//                }
+////                System.out.println("dragging");
+//                dragging = true;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
@@ -292,16 +292,16 @@ public class BoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
-                if (!dragging) {
-                    if (swipeLeft) {
-                        boardActivity.goBack();
-//                        System.out.println("swipe RightToLeft ");
-                    } else {
-                        boardActivity.goForward();
-//                        System.out.println("swipe LeftToright ");
-                    }
-                    return true;
-                }
+//                if (!dragging) {
+//                    if (swipeLeft) {
+//                        boardActivity.goBack();
+////                        System.out.println("swipe RightToLeft ");
+//                    } else {
+//                        boardActivity.goForward();
+////                        System.out.println("swipe LeftToright ");
+//                    }
+//                    return true;
+//                }
 //                mVelocityTracker.recycle();
                 break;
         }
