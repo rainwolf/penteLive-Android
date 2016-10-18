@@ -568,12 +568,26 @@ public class PentePlayer implements Parcelable {
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for loadplayer was " + responseCode);
-                    return false;
+                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    connection = (HttpURLConnection)url.openConnection();
+                    responseCode = connection.getResponseCode();
+                    if (responseCode != 200) {
+                        System.out.println("Logging back in failed");
+                        return false;
+                    } else {
+                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                        connection = (HttpURLConnection)url.openConnection();
+                        responseCode = connection.getResponseCode();
+                        if (responseCode != 200) {
+                            System.out.println("Logging back in and retrieving game failed");
+                            return false;
+                        }
+                    }
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");
@@ -585,6 +599,22 @@ public class PentePlayer implements Parcelable {
                 String dashboardString = output.toString();
                 if (dashboardString.indexOf("Invalid name or password, please try again.") != -1) {
                     return false;
+                } else if (!dashboardString.contains("Invitations sent")) {
+                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    connection = (HttpURLConnection)url.openConnection();
+                    responseCode = connection.getResponseCode();
+                    if (responseCode != 200) {
+                        System.out.println("Logging back in failed");
+                        return false;
+                    } else {
+                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                        connection = (HttpURLConnection)url.openConnection();
+                        responseCode = connection.getResponseCode();
+                        if (responseCode != 200) {
+                            System.out.println("Logging back in and retrieving game failed");
+                            return false;
+                        }
+                    }
                 }
 
                 populatePlayer(dashboardString);
@@ -600,7 +630,10 @@ public class PentePlayer implements Parcelable {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            listAdapter.updateList();
+
+            if (success) {
+                listAdapter.updateList();
+            }
         }
 
         @Override

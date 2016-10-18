@@ -301,11 +301,12 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         while (idx < dashLines.length) {
             dashLine = dashLines[idx];
             String[] stepPlayers = dashLine.split(";");
-            if (stepPlayers.length > 0) {
-                step = new ArrayList<>();
-            } else {
-                continue;
-            }
+//            if (stepPlayers.length > 0) {
+//                step = new ArrayList<>();
+//            } else {
+//                continue;
+//            }
+            step = new ArrayList<>();
             for (String stepPlayer : stepPlayers) {
                 String[] parsedPlayer = stepPlayer.split(",");
                 if (parsedPlayer.length < 6) {
@@ -317,15 +318,19 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 step.add(player);
             }
-            if (step.size() > 0) {
-                hill.add(0, step);
-            }
+//            if (step.size() > 0) {
+//                hill.add(0, step);
+//            }
+            hill.add(0, step);
             idx += 1;
         }
         if (htmlString.contains(PentePlayer.mPlayerName)) {
             kothSummary.setMember(true);
         } else {
             kothSummary.setMember(false);
+        }
+        while (hill.size() > 0 && hill.get(0).size() == 0) {
+            hill.remove(0);
         }
         listAdapter.setHill(hill);
         swipeRefreshLayout.setRefreshing(false);

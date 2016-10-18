@@ -268,6 +268,14 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         if (groupPosition == SENTINVITATIONSGROUP) {
             convertView.findViewById(R.id.ratingText).setVisibility(View.GONE);
             convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
+            if (game.getRatedNot().contains("KotH")) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            }
+        }
+        if (groupPosition == INVITATIONSGROUP) {
+            if (game.getRatedNot().contains("KotH")) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            }
         }
         SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
         if (color != 0) {
@@ -290,9 +298,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             }
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
-        convertView.setBackgroundColor(Color.WHITE);
         if (groupPosition == PUBLICINVITATIONSGROUP) {
             if (game.getRatedNot().contains("KotH")) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            }
+        }
+        if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
+            if (game.getRatedNot().contains("Tournament")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
             }
         }
