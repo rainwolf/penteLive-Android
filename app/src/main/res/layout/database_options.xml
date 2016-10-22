@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Game:"
+        android:textStyle="bold"
+        android:id="@+id/gameLabel"
+        android:layout_alignParentLeft="true" />
+    <android.support.v7.widget.AppCompatSpinner
+        android:spinnerMode="dialog"
+        android:id="@+id/gameSpinner"
+        android:layout_toRightOf="@id/gameLabel"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:textAlignment="center"
+        android:layout_height="45dp"
+        android:gravity="center_vertical">
+    </android.support.v7.widget.AppCompatSpinner>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Sort by"
+        android:textStyle="bold"
+        android:id="@+id/sortLabel"
+        android:layout_below="@id/gameLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:layout_toRightOf="@id/sortLabel"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="popularity"
+        android:layout_below="@id/gameSpinner"
+        android:id="@+id/sortChoice"
+        android:layout_alignParentRight="true" />
+
+</RelativeLayout>

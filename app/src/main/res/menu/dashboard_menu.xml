@@ -25,6 +25,10 @@
                 android:icon="@drawable/ic_wc"
                 android:title="play other humans"
                 />
+            <item android:id="@+id/database"
+                android:icon="@drawable/database"
+                android:title="database"
+                />
         </menu>
 
         </item>

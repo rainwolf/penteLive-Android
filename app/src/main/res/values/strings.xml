@@ -27,6 +27,15 @@
         <item>Connect6</item>
         <item>Boat-Pente</item>
     </string-array>
+    <string-array name="database_game_types_array">
+        <item>Pente</item>
+        <item>Keryo-Pente</item>
+        <item>Gomoku</item>
+        <item>D-Pente</item>
+        <item>G-Pente</item>
+        <item>Poof-Pente</item>
+        <item>Boat-Pente</item>
+    </string-array>
     <string-array name="ai_game_types_array">
         <item>Pente</item>
         <!--<item>Gomoku</item>-->

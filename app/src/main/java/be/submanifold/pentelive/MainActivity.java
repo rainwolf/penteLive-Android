@@ -14,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
@@ -281,6 +283,33 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.play_mmai:
                         intent = new Intent(getApplicationContext(), MMAIActivity.class);
                         startActivity(intent);
+                        return true;
+                    case R.id.database:
+                        if (player != null && player.isSubscriber()) {
+                            intent = new Intent(getApplicationContext(), DatabaseActivity.class);
+                            startActivity(intent);
+                        } else {
+                            Display display = getWindowManager().getDefaultDisplay();
+                            Point size = new Point();
+                            display.getSize(size);
+
+                            View policyView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
+                            policyView.setBackgroundColor(Color.WHITE);
+                            popupWindow = new PopupWindow(policyView, size.x*9/10, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                            popupWindow.setFocusable(true);
+                            popupWindow.setOutsideTouchable(true);
+                            popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                            ((TextView) policyView.findViewById(R.id.informationView)).setText("Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games, practice opening moves, sort the results by most played or highest win percentage.\nMore features like asking the AI what to do next, or more parameters for a search will be added in the future.\n\nThe database is open to subscribers only.");
+                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
+                            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                                @Override
+                                public void onDismiss() {
+                                    ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
+                                }
+                            });
+                            ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+                            popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+                        }
                         return true;
                     case R.id.action_new_message:
                         intent = new Intent(getApplicationContext(), SendMessageActivity.class);
