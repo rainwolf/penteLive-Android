@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -23,11 +24,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class InviteAIActivity extends AppCompatActivity {
 
@@ -119,7 +121,7 @@ public class InviteAIActivity extends AppCompatActivity {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/newGame?mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
 //                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-//                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+//                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
 //                int responseCode = connection.getResponseCode();
 //                if (responseCode != 200) {
 //                    System.out.println("response code for submit was " + responseCode);
@@ -135,8 +137,11 @@ public class InviteAIActivity extends AppCompatActivity {
 //                }
 //                br.close();
 
+//                String urlParameters  = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
+//                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N";
                 String urlParameters  = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
-                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N"
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -144,7 +149,19 @@ public class InviteAIActivity extends AppCompatActivity {
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/newGame";
                 URL    url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );

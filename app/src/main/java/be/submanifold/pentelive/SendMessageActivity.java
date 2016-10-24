@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -25,13 +26,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class SendMessageActivity extends AppCompatActivity {
 
@@ -141,7 +143,9 @@ public class SendMessageActivity extends AppCompatActivity {
             // TODO: attempt authentication against a network service.
 
             try {
-                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+//                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
+                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -149,7 +153,19 @@ public class SendMessageActivity extends AppCompatActivity {
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/mymessages";
                 URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );
@@ -167,7 +183,7 @@ public class SendMessageActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -175,7 +191,7 @@ public class SendMessageActivity extends AppCompatActivity {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
+//                System.out.println(output);
 
                 if (output.indexOf("Error: Player "+recipient+" not found.") > -1) {
                     return false;

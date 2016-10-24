@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -22,11 +23,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class InvitationActivity extends AppCompatActivity {
 
@@ -203,7 +205,7 @@ public class InvitationActivity extends AppCompatActivity {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/newGame?mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
 //                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-//                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+//                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
 //                int responseCode = connection.getResponseCode();
 //                if (responseCode != 200) {
 //                    System.out.println("response code for submit was " + responseCode);
@@ -219,9 +221,13 @@ public class InvitationActivity extends AppCompatActivity {
 //                }
 //                br.close();
 
+//                String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
+//                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
+//                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame;
                 String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
-                "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
-                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
+                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -229,7 +235,19 @@ public class InvitationActivity extends AppCompatActivity {
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/newGame";
                 URL    url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );
@@ -247,7 +265,7 @@ public class InvitationActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -255,7 +273,7 @@ public class InvitationActivity extends AppCompatActivity {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
+//                System.out.println(output);
 
                 if (output.indexOf("Creating set failed: Player not found: " + opponentName) > -1) {
                     return false;

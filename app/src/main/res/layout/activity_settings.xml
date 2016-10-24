@@ -103,5 +103,24 @@
         android:layout_height="wrap_content"
         android:id="@+id/avatarView"
         android:layout_below="@id/avatarButton"/>
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/subscribeButton"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/infoLabel3"
+        android:text="subscribe @ pente.org"
+        android:layout_marginTop="5dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:textSize="15dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Subscribe to lift all restrictions on play, get a name color and avatar, and get access to the database."
+        android:id="@+id/infoLabel4"
+        android:layout_below="@id/subscribeButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="20dp"/>
 
 </RelativeLayout>

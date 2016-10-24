@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,11 +38,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 public class KingOfTheHillActivity extends AppCompatActivity {
@@ -349,7 +351,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName;
+//                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName;
+                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -358,7 +361,19 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 String request        = "https://www.pente.org/gameServer/mobile/koth.jsp";
 //                request        = "https://development.pente.org/gameServer/mobile/koth.jsp";
                 URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );
@@ -430,7 +445,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "game=" + mGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                String urlParameters  = "game=" + mGame+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+//                String urlParameters  = "game=" + mGame+"&name2="+PentePlayer.mPlayerName;
                 if (join) {
                     urlParameters += "&join=";
                 }
@@ -442,7 +458,19 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 String request        = "https://www.pente.org/gameServer/koth";
 //                request        = "https://development.pente.org/gameServer/koth";
                 URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );
@@ -509,8 +537,11 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             try {
 
+//                String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
+//                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y";
                 String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
-                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y"
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -519,7 +550,19 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 String request        = "https://www.pente.org/gameServer/tb/newGame";
 //                request        = "https://development.pente.org/gameServer/tb/newGame";
                 URL    url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
                 conn.setDoOutput( true );
                 conn.setInstanceFollowRedirects( false );
                 conn.setRequestMethod( "POST" );

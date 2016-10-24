@@ -22,6 +22,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.CookieSyncManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -43,6 +44,7 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -361,15 +363,18 @@ public class LoginActivity extends AppCompatActivity
 //                CookieManager cookieManager = new CookieManager();
 //                CookieHandler.setDefault(cookieManager);
                 CookieHandler.setDefault( new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+                CookieSyncManager.createInstance(LoginActivity.this);
+
                 URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
 //                url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 int responseCode = connection.getResponseCode();
                 cookie = connection.getHeaderField("Set-Cookie");
+                System.out.println("cookie: " + cookie);
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));

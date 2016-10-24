@@ -70,6 +70,15 @@ public class SettingsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
+                intent.putExtra("url", url);
+                startActivity(intent);
+            }
+        });
         ((Button) findViewById(R.id.colorButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
