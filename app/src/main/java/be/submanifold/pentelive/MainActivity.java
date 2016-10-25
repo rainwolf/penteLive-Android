@@ -298,9 +298,10 @@ public class MainActivity extends AppCompatActivity {
                             popupWindow = new PopupWindow(policyView, size.x*9/10, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                             popupWindow.setFocusable(true);
                             popupWindow.setOutsideTouchable(true);
+                            popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                             popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
                             ((TextView) policyView.findViewById(R.id.informationView)).setText("Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games, practice opening moves, sort the results by most played or highest win percentage.\nMore features like asking the AI what to do next, or more parameters for a search will be added in the future.\n\nThe database is open to subscribers only.");
-                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
+//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                             popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                                 @Override
                                 public void onDismiss() {
@@ -308,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                             ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
-                            popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                         }
                         return true;
                     case R.id.action_new_message:
