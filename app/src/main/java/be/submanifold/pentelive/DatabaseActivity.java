@@ -213,6 +213,7 @@ public class DatabaseActivity extends AppCompatActivity {
             Button button = (Button) findViewById(R.id.searchButton);
             if (button != null) button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    progressBar.setVisibility(View.VISIBLE);
                     SearchTask searchTask = new SearchTask(board.getMovesString(), board.getGame(), (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2));
                     searchTask.execute((Void) null);
                 }
@@ -342,7 +343,7 @@ public class DatabaseActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");
@@ -369,10 +370,14 @@ public class DatabaseActivity extends AppCompatActivity {
             while (idx < dashLines.length) {
                 dashLine = dashLines[idx];
                 if (dashLine.indexOf("moves=") == 0) {
-                    moves = dashLine.substring(6).split(",");
+                    if (dashLine.contains(",")) {
+                        moves = dashLine.substring(6).split(",");
+                    }
                 }
                 if (dashLine.indexOf("occurrence=") == 0) {
-                    occurrences = dashLine.substring(11).split(";");
+                    if (dashLine.contains(";")) {
+                        occurrences = dashLine.substring(11).split(";");
+                    }
                     break;
                 }
                 idx += 1;
@@ -405,8 +410,12 @@ public class DatabaseActivity extends AppCompatActivity {
 //            System.out.println(searchResults);
             board.setSearchResults(searchResults);
             board.invalidate();
-            board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
-
+            if (searchResults.size() == 0) {
+                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>No search results");
+            } else {
+                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
+            }
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override

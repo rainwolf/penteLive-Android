@@ -20,6 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,6 +36,7 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 public class InviteAIActivity extends AppCompatActivity {
+    InterstitialAd mInterstitialAd;
 
 
     @Override
@@ -84,6 +89,22 @@ public class InviteAIActivity extends AppCompatActivity {
                 }
             }
         });
+        if (PentePlayer.mShowAds) {
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/6524358646");
+
+            mInterstitialAd.setAdListener(new AdListener() {
+//                @Override
+//                public void onAdClosed() {
+//                    requestNewInterstitial();
+//                }
+                @Override
+                public void onAdLoaded() {
+                    mInterstitialAd.show();
+                }
+            });
+            requestNewInterstitial();
+        }
     }
 
     @Override
@@ -245,5 +266,12 @@ public class InviteAIActivity extends AppCompatActivity {
 //            showProgress(false);
         }
     }
+
+    private void requestNewInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+        mInterstitialAd.loadAd(adRequest);
+    }
+
 
 }

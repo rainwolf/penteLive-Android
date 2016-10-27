@@ -56,16 +56,18 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
 
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8120483448");
+        if (player.showAds()) {
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8120483448");
 
-        mInterstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdClosed() {
-                requestNewInterstitial();
-            }
-        });
-        requestNewInterstitial();
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    requestNewInterstitial();
+                }
+            });
+            requestNewInterstitial();
+        }
 
         ExpandableListView expandableList = (ExpandableListView) findViewById(R.id.list);
         listAdapter = new DashboardListAdapter(this.player);

@@ -27,8 +27,10 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 
 import java.io.InputStream;
 
@@ -43,6 +45,7 @@ public class MMAIActivity extends AppCompatActivity {
     public ImageView messageIcon;
 
     private ProgressBar progressBar;
+    InterstitialAd mInterstitialAd;
 
 //    private int untilMove;
 
@@ -257,6 +260,22 @@ public class MMAIActivity extends AppCompatActivity {
                 return false;
             }
         });
+        if (PentePlayer.mShowAds) {
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/9477825047");
+
+            mInterstitialAd.setAdListener(new AdListener() {
+                //                @Override
+//                public void onAdClosed() {
+//                    requestNewInterstitial();
+//                }
+                @Override
+                public void onAdLoaded() {
+                    mInterstitialAd.show();
+                }
+            });
+            requestNewInterstitial();
+        }
 
     }
 
@@ -307,5 +326,10 @@ public class MMAIActivity extends AppCompatActivity {
         this.game = game;
     }
 
+    private void requestNewInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+        mInterstitialAd.loadAd(adRequest);
+    }
 
 }
