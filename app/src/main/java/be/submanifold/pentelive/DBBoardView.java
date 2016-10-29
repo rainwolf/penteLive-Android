@@ -642,14 +642,14 @@ public class DBBoardView extends View {
         }
         invalidate();
         String str = "";
-        for (int i = 0; i < movesList.size(); i++) {
-            if (i%2 == 0) {
-                str = str + " <b>" + (i/2 + 1) + ".</b> ";
-            } else {
-                str = str+"-";
-            }
-            str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
-        }
+//        for (int i = 0; i < movesList.size(); i++) {
+//            if (i%2 == 0) {
+//                str = str + " <b>" + (i/2 + 1) + ".</b> ";
+//            } else {
+//                str = str+"-";
+//            }
+//            str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
+//        }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
     }

@@ -3,11 +3,13 @@ package be.submanifold.pentelive;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Display;
@@ -15,12 +17,15 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -38,6 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +60,7 @@ public class DatabaseActivity extends AppCompatActivity {
         public ImageView messageIcon;
 
         private ProgressBar progressBar;
-
+        private AlertDialog searchPrmtrsWindow;
 //    private int untilMove;
 
 //        private Game game;
@@ -69,6 +75,17 @@ public class DatabaseActivity extends AppCompatActivity {
             toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
             ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
             settingsView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.database_options, null, false);
+            final AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
+            helpBuilder.setTitle("search parameters");
+            helpBuilder.setView(settingsView);
+            searchPrmtrsWindow = helpBuilder.create();
+            searchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    board.setAlpha(1.0f);
+                }
+            });
+            searchPrmtrsWindow.setCanceledOnTouchOutside(true);
 
             progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
@@ -78,14 +95,14 @@ public class DatabaseActivity extends AppCompatActivity {
             toolbar.setTitle("Database");
             setSupportActionBar(toolbar);
 
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            settingsWindow = new PopupWindow(settingsView, size.x*2/3, ViewGroup.LayoutParams.WRAP_CONTENT, true );
-            settingsWindow.setFocusable(true);
-            settingsWindow.setOutsideTouchable(true);
-            settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(DatabaseActivity.this, R.drawable.border));
-//                        messageWindow.setAnimationStyle(R.anim.animation);
+//            Display display = getWindowManager().getDefaultDisplay();
+//            Point size = new Point();
+//            display.getSize(size);
+//            settingsWindow = new PopupWindow(settingsView, size.x*2/3, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+//            settingsWindow.setFocusable(true);
+//            settingsWindow.setOutsideTouchable(true);
+//            settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(DatabaseActivity.this, R.drawable.border));
+////                        messageWindow.setAnimationStyle(R.anim.animation);
 
             Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
@@ -113,10 +130,20 @@ public class DatabaseActivity extends AppCompatActivity {
 
                 }
             });
+            spinner.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    return false;
+                }
+            });
             TextView sortChoice = (TextView) settingsView.findViewById(R.id.sortChoice);
             sortChoice.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     TextView tv = (TextView) v;
                     if (tv.getText().equals("popularity")) {
                         tv.setText("win percentage");
@@ -127,12 +154,28 @@ public class DatabaseActivity extends AppCompatActivity {
                     }
                 }
             });
-            settingsWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            TextView winner = (TextView) settingsView.findViewById(R.id.winner);
+            winner.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onDismiss() {
-                    board.setAlpha(1.0f);
+                public void onClick(View v) {
+                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    TextView tv = (TextView) v;
+                    if (tv.getText().equals("either")) {
+                        tv.setText("player 1");
+                    } else if (tv.getText().equals("player 1")) {
+                        tv.setText("player 2");
+                    } else {
+                        tv.setText("either");
+                    }
                 }
             });
+//            settingsWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//                @Override
+//                public void onDismiss() {
+//                    board.setAlpha(1.0f);
+//                }
+//            });
 
 
 //            InputStream tbl = null;
@@ -214,7 +257,20 @@ public class DatabaseActivity extends AppCompatActivity {
             if (button != null) button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     progressBar.setVisibility(View.VISIBLE);
-                    SearchTask searchTask = new SearchTask(board.getMovesString(), board.getGame(), (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2));
+                    String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
+                    String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
+                    int winner = 0;
+                    if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 1")) {
+                        winner = 1;
+                    } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 2")) {
+                        winner = 2;
+                    }
+                    SearchTask searchTask = new SearchTask(board.getMovesString(),
+                            board.getGame(),
+                            (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
+                            player1,
+                            player2,
+                            winner);
                     searchTask.execute((Void) null);
                 }
             });
@@ -238,17 +294,45 @@ public class DatabaseActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    System.out.println("kitty");
+                    if (!hasFocus) {
+                        InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+            });
+            ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus) {
+                        InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+            });
 
         }
 
         private void showDBSettings() {
-            settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
+
+//            settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
+            searchPrmtrsWindow.show();
+
 
             Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
             spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
             TextView sortOrder = (TextView) settingsView.findViewById(R.id.sortChoice);
             sortOrder.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity"));
-            board.setAlpha(0.75f);
+            AutoCompleteTextView actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player1);
+            ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
+            actv.setAdapter(acAdapter);
+            actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player2);
+            acAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
+            actv.setAdapter(acAdapter);
+//            board.setAlpha(0.75f);
         }
 
         @Override
@@ -290,15 +374,17 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves;
-        private String game;
-        private int sortOrder;
+        private String moves, game, player1, player2;
+        private int sortOrder, winner;
         private String searchResult;
 
-        SearchTask(String moves, String game, int sortOrder) {
+        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner) {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
+            this.player1 = player1.toLowerCase();
+            this.player2 = player2.toLowerCase();
+            this.winner = winner;
         }
 
         @Override
@@ -321,7 +407,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //                System.out.println("getstr: " + tmpStr);
                 getStr = getStr + tmpStr + "&results_order=" + sortOrder + "&filter_data=";
                 try {
-                    tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name=&player_2_name=&game=" + game + "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=0","UTF-8");
+                    tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name="+player1+"&player_2_name="+player2+"&game=" + game + "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner="+winner,"UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
@@ -370,12 +456,12 @@ public class DatabaseActivity extends AppCompatActivity {
             while (idx < dashLines.length) {
                 dashLine = dashLines[idx];
                 if (dashLine.indexOf("moves=") == 0) {
-                    if (dashLine.contains(",")) {
+                    if (dashLine.length() > 6) {
                         moves = dashLine.substring(6).split(",");
                     }
                 }
                 if (dashLine.indexOf("occurrence=") == 0) {
-                    if (dashLine.contains(";")) {
+                    if (dashLine.length() > 11) {
                         occurrences = dashLine.substring(11).split(";");
                     }
                     break;
@@ -413,6 +499,12 @@ public class DatabaseActivity extends AppCompatActivity {
             if (searchResults.size() == 0) {
                 board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>No search results");
             } else {
+                if (player1.length() > 0) {
+                    PrefUtils.savePlayerToPrefs(DatabaseActivity.this, player1);
+                }
+                if (player2.length() > 0) {
+                    PrefUtils.savePlayerToPrefs(DatabaseActivity.this, player2);
+                }
                 board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
             }
             progressBar.setVisibility(View.GONE);

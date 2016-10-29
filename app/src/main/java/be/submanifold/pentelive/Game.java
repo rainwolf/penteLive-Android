@@ -271,7 +271,7 @@ public class Game implements Parcelable {
 
                     output = new StringBuilder();
                     br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    System.out.println("output===============" + br);
+//                    System.out.println("output===============" + br);
                     line = "";
                     while((line = br.readLine()) != null ) {
                         output.append(line + "\n");
