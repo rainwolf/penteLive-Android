@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.PopupWindow;
@@ -32,6 +34,15 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -105,16 +116,16 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
                     String url = "google.com";
                     if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
-                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
 //                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                     } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
-                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
 //                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                     } else {
                         url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
-                        + "&round=" + player.getTournaments().get(childPosition).getRound();
+                        + "&round=" + player.getTournaments().get(childPosition).getRound()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
 //                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
@@ -387,6 +398,14 @@ public class MainActivity extends AppCompatActivity {
                         ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
 
                         return true;
+                    case R.id.onlineUsers:
+                        WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
+                        onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
+
+                        LoadWhosOnlineTask loadWhosOnlineTask = new LoadWhosOnlineTask(player, onlineListAdapter);
+                        loadWhosOnlineTask.execute((Void) null);
+
+                        return true;
                 }
 
                 return false;
@@ -485,6 +504,150 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         snackbar.show();
+    }
+
+    private class LoadWhosOnlineTask extends AsyncTask<Void, Void, Boolean> {
+
+        private WhosOnlineListAdapter listAdapter;
+        String dashboardString;
+        private PentePlayer player;
+
+        LoadWhosOnlineTask(PentePlayer player, WhosOnlineListAdapter listAdapter) {
+            this.listAdapter = listAdapter;
+            this.player = player;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+//                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonline.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+
+//                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+//                System.out.println("cookies: " +cookies);
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    connection.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
+//                connection.addRequestProperty("Cookie", "name2="+mUsername+"; password2="+mPassword+";");
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    return false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + "\n");
+                }
+                br.close();
+
+//                System.out.println(output);
+
+                dashboardString = output.toString();
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            // TODO: register the new account here.
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (success) {
+                final List<KothPlayer> onlinePlayers = new ArrayList<>();
+
+                String[] dashLines = dashboardString.split("\n");
+                String dashLine;
+                int idx = 0;
+                while (idx < dashLines.length) {
+                    dashLine = dashLines[idx];
+                    String[] splitLine = dashLine.split(",");
+                    if (splitLine.length > 4) {
+                        KothPlayer player = new KothPlayer(splitLine[0], splitLine[1], splitLine[4], false, Integer.parseInt(splitLine[3]), Integer.parseInt(splitLine[2]));
+                        if (PentePlayer.loadAvatars && player.getColor() != 0) {
+                            this.player.addUserAvatar(player.getName());
+                        }
+                        onlinePlayers.add(player);
+                    }
+                    idx += 1;
+                }
+                listAdapter.setOnlinePlayers(onlinePlayers);
+                Point size = new Point();
+                Display display = getWindowManager().getDefaultDisplay();
+                display.getSize(size);
+
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
+                popUpView.setBackgroundColor(Color.BLUE);
+//                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                final float scale = getResources().getDisplayMetrics().density;
+                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, onlinePlayers.size()*44))*scale), true );
+//                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
+                ExpandableListView onlineUsersListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
+                onlineUsersListView.setDividerHeight(0);
+                onlineUsersListView.setAdapter(listAdapter);
+                onlineUsersListView.expandGroup(0);
+                onlineUsersListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+                    @Override
+                    public boolean onGroupClick(ExpandableListView parent, View v,
+                                                int groupPosition, long id) {
+                        return true; // This way the expander cannot be collapsed
+                    }
+                });
+                onlineUsersListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                    @Override
+                    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                        if (player.getPlayerName().equals(onlinePlayers.get(childPosition).getName())) {
+                            return false;
+                        }
+                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                        intent.putExtra("opponent", onlinePlayers.get(childPosition).getName());
+                        startActivity(intent);
+
+                        return true;
+                    }
+                });
+
+//                if (totalHeight > size.y*4/5) {
+//                    popupWindow.setHeight(size.y*4/5);
+//                }
+
+                popupWindow.setFocusable(true);
+                popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+                popupWindow.setOutsideTouchable(true);
+                popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                    @Override
+                    public void onDismiss() {
+                        ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
+                    }
+                });
+                ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+
+//                listAdapter.updateList();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
     }
 
 

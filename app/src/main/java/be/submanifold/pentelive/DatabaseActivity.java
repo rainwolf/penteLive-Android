@@ -481,6 +481,10 @@ public class DatabaseActivity extends AppCompatActivity {
                     }
                 }
             }
+            if (max == min) {
+                max = 100.0;
+                min = 0.0;
+            }
             if (moves != null) {
                 for (int i = 0; i < moves.length; i++ ) {
                     double dblValue = (Double.parseDouble(occurrences[i])-min)/(max-min);
