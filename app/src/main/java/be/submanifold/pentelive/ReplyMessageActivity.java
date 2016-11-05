@@ -185,7 +185,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                     String url = span.getURL();
-                    System.out.println(url);
+//                    System.out.println(url);
                     if (url.indexOf("viewLiveGame") > 0) {
                         String gameID = url.substring(url.indexOf("g=") + 2);
                         System.out.println(gameID);
@@ -194,11 +194,14 @@ public class ReplyMessageActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), BoardActivity.class);
                         intent.putExtra("game", game);
                         startActivity(intent);
-                    }
-                    if (url.indexOf("new.jsp?game=") > 0) {
+                    } else if (url.indexOf("new.jsp?game=") > 0) {
                         Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
                         intent.putExtra("opponent", url.substring(url.indexOf("invitee=") + 8));
                         intent.putExtra("gameType", url.substring(url.indexOf("game=") + 5, url.indexOf("game=") + 7));
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                        intent.putExtra("url", url);
                         startActivity(intent);
                     }
                 }

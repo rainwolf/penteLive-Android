@@ -45,7 +45,7 @@ public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
         if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
             try {
                 PrefUtils.saveLongToPrefs(MyInstanceIDListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
-                URL url = new URL("https://pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
+                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
                         + "&token=" + token);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();

@@ -509,7 +509,7 @@ public class PentePlayer implements Parcelable {
 
             try {
                 avatar = null;
-                URL url = new URL("https://pente.org/gameServer/avatar?name="+mUsername);
+                URL url = new URL("https://www.pente.org/gameServer/avatar?name="+mUsername);
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
@@ -575,7 +575,7 @@ public class PentePlayer implements Parcelable {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
                     for (String item: splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
+                        if (item.contains("name2") || item.contains("password2") || item.contains("domain")) {
                             cookieStr += item + ";";
                         }
                     }

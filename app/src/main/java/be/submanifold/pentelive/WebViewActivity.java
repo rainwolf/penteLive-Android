@@ -11,40 +11,14 @@ import java.net.CookieHandler;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        android.webkit.CookieSyncManager webCookieSync =
-                CookieSyncManager.createInstance(this);
-        android.webkit.CookieManager webCookieManager =
-                CookieManager.getInstance();
-        webCookieManager.setAcceptCookie(true);
-
-        // Get cookie manager for HttpURLConnection
-        java.net.CookieStore rawCookieStore = ((java.net.CookieManager)
-                CookieHandler.getDefault()).getCookieStore();
-
-        // Construct URI
-        java.net.URI baseUri = null;
-        try {
-            baseUri = new URI("https://www.pente.org");
-        } catch (URISyntaxException e) {
-            // Handle invalid URI
-        }
-
-        // Copy cookies from HttpURLConnection to WebView
-        List<HttpCookie> cookies = rawCookieStore.get(baseUri);
-        String url = baseUri.toString();
-        for (HttpCookie cookie : cookies) {
-            String setCookie = new StringBuilder(cookie.toString())
-                    .append("; domain=").append(cookie.getDomain())
-                    .append("; path=").append(cookie.getPath())
-                    .toString();
-            webCookieManager.setCookie(url, setCookie);
-        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
@@ -64,9 +38,17 @@ public class WebViewActivity extends AppCompatActivity {
             });
             webview.getSettings().setJavaScriptEnabled(true);
             webview.getSettings().setBuiltInZoomControls(true);
+
+//            cookieMap.put("Cookie", "name2="+PentePlayer.mPlayerName+"; password2="+PentePlayer.mPassword);
+
             webview.getSettings().setLoadWithOverviewMode(true);
             webview.getSettings().setUseWideViewPort(true);
             String urlStr = extras.getString("url");
+            if (urlStr.contains("//pente.org")) {
+//                System.out.println(urlStr);
+                urlStr = urlStr.replace("//pente.org", "//www.pente.org");
+//                System.out.println(urlStr);
+            }
             webview.loadUrl(urlStr);
 //                    System.out.println("hello " + url);
         }

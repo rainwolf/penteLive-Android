@@ -71,6 +71,7 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         // Set up the login form.
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -131,7 +132,7 @@ public class LoginActivity extends AppCompatActivity
         ((Button) findViewById(R.id.rulesButton)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("https://pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
+                Uri uri = Uri.parse("https://www.pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             }
@@ -487,7 +488,7 @@ public class LoginActivity extends AppCompatActivity
                 long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
                 if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
-                        URL url = new URL("https://pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
+                        URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
                                 + "&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         int responseCode = connection.getResponseCode();
