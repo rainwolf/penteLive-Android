@@ -306,14 +306,27 @@ public class MainActivity extends AppCompatActivity {
                             Point size = new Point();
                             display.getSize(size);
 
-                            View policyView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
+                            View policyView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
                             policyView.setBackgroundColor(Color.WHITE);
+                            ((Button) policyView.findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    popupWindow.dismiss();
+                                    String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                                    Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                                    intent.putExtra("url", url);
+                                    startActivity(intent);
+                                }
+                            });
                             popupWindow = new PopupWindow(policyView, size.x*9/10, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                             popupWindow.setFocusable(true);
                             popupWindow.setOutsideTouchable(true);
                             popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                             popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
-                            ((TextView) policyView.findViewById(R.id.informationView)).setText("Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games, practice opening moves, sort the results by most played or highest win percentage.\nMore features like asking the AI what to do next, or more parameters for a search will be added in the future.\n\nThe database is open to subscribers only.");
+                            ((TextView) policyView.findViewById(R.id.informationView)).setText("Level up your game\n\nThe database allows you to search games in the "+
+                                    "pente.org database by position. This powerful tool enables you to study and analyze games and opponents, "+
+                                    "practice opening moves, sort the results by most played or highest win percentage, and filter by player name and winner"+
+                                    ".\nMore features will be added in the future.\n\nThe database is open to subscribers only.");
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                             popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                                 @Override
