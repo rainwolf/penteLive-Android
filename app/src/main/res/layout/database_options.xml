@@ -113,4 +113,51 @@
         android:layout_below="@id/player2"
         android:id="@+id/winner"
         android:layout_alignParentRight="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="After:"
+        android:textStyle="bold"
+        android:id="@+id/afterLabel"
+        android:layout_below="@id/winnerLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@id/winner"
+        android:hint="tap to set"
+        android:layout_toRightOf="@id/afterLabel"
+        android:id="@+id/afterDate"
+        android:layout_alignParentRight="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Before:"
+        android:textStyle="bold"
+        android:id="@+id/beforeLabel"
+        android:layout_below="@id/afterLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:textAlignment="center"
+        android:hint="tap to set"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@id/afterDate"
+        android:layout_toRightOf="@id/beforeLabel"
+        android:id="@+id/beforeDate"
+        android:layout_alignParentRight="true" />
 </RelativeLayout>

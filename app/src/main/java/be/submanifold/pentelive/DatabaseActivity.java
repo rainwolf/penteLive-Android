@@ -2,6 +2,8 @@ package be.submanifold.pentelive;
 
 
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -27,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
@@ -43,7 +46,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,6 +72,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //        private Game game;
         private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
+        private DatePickerDialog afterDatePickerDialog, beforeDatePickerDialog;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -265,12 +272,22 @@ public class DatabaseActivity extends AppCompatActivity {
                     } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 2")) {
                         winner = 2;
                     }
+                    String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
+                    if (!"".equals(afterDate)) {
+                        afterDate = "&after_date="+afterDate;
+                    }
+                    String beforeDate = ((TextView) settingsView.findViewById(R.id.beforeDate)).getText().toString();
+                    if (!"".equals(beforeDate)) {
+                        beforeDate = "&before_date="+beforeDate;
+                    }
                     SearchTask searchTask = new SearchTask(board.getMovesString(),
                             board.getGame(),
                             (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
                             player1,
                             player2,
-                            winner);
+                            winner,
+                            afterDate,
+                            beforeDate);
                     searchTask.execute((Void) null);
                 }
             });
@@ -311,6 +328,56 @@ public class DatabaseActivity extends AppCompatActivity {
                         InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     }
+                }
+            });
+
+            Calendar newCalendar = Calendar.getInstance();
+            afterDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
+
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    Calendar newDate = Calendar.getInstance();
+                    newDate.set(year, monthOfYear, dayOfMonth);
+                    DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+                    ((TextView) settingsView.findViewById(R.id.afterDate)).setText(dateFormatter.format(newDate.getTime()));
+                }
+
+            },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+            afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "clear", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        // Do Stuff
+                        ((TextView) settingsView.findViewById(R.id.afterDate)).setText("");
+                    }
+                }
+            });
+            ((TextView) settingsView.findViewById(R.id.afterDate)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    afterDatePickerDialog.show();
+                }
+            });
+            beforeDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
+
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    Calendar newDate = Calendar.getInstance();
+                    newDate.set(year, monthOfYear, dayOfMonth);
+                    DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+                    ((TextView) settingsView.findViewById(R.id.beforeDate)).setText(dateFormatter.format(newDate.getTime()));
+                }
+
+            },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+            beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "clear", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        // Do Stuff
+                        ((TextView) settingsView.findViewById(R.id.beforeDate)).setText("");
+                    }
+                }
+            });
+            ((TextView) settingsView.findViewById(R.id.beforeDate)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    beforeDatePickerDialog.show();
                 }
             });
 
@@ -374,17 +441,19 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves, game, player1, player2;
+        private String moves, game, player1, player2, afterDate, beforeDate;
         private int sortOrder, winner;
         private String searchResult;
 
-        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner) {
+        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner, String afterDate, String beforeDate) {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
             this.player1 = player1.toLowerCase();
             this.player2 = player2.toLowerCase();
             this.winner = winner;
+            this.afterDate = afterDate;
+            this.beforeDate = beforeDate;
         }
 
         @Override
@@ -407,7 +476,10 @@ public class DatabaseActivity extends AppCompatActivity {
 //                System.out.println("getstr: " + tmpStr);
                 getStr = getStr + tmpStr + "&results_order=" + sortOrder + "&filter_data=";
                 try {
-                    tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name="+player1+"&player_2_name="+player2+"&game=" + game + "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner="+winner,"UTF-8");
+                    tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name="+player1+
+                            "&player_2_name="+player2+"&game=" + game +
+                            "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
+                            winner+afterDate+beforeDate,"UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
@@ -518,5 +590,6 @@ public class DatabaseActivity extends AppCompatActivity {
         protected void onCancelled() {
         }
     }
+
 
 }
