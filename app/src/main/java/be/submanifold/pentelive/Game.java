@@ -548,11 +548,12 @@ public class Game implements Parcelable {
         String[] dashLines = mGameString.split("\n");
         String dashLine;
         int idx = 0;
+        String p1Name = "", p2Name = "";
         while (idx < dashLines.length) {
             dashLine = dashLines[idx];
             if (dashLine.indexOf("player1=") == 0) {
-                String playerName = dashLine.substring(8).split(",")[0];
-                if (playerName.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                p1Name = dashLine.substring(8).split(",")[0];
+                if (p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     if (this.mMovesList != null) {
 //                        if (isDPente() && mMovesList.size() == 1) {
 //                            this.mActive = true;
@@ -571,13 +572,13 @@ public class Game implements Parcelable {
                         }
                     }
                 } else {
-                    this.mOpponentName = playerName;
+                    this.mOpponentName = p1Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 }
             }
             if (dashLine.indexOf("player2=") == 0) {
-                String playerName = dashLine.substring(8).split(",")[0];
-                if (playerName.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                p2Name = dashLine.substring(8).split(",")[0];
+                if (p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     if (this.mMovesList != null) {
 //                        if (isDPente() && mMovesList.size() == 1) {
 //                            this.mActive = false;
@@ -595,7 +596,7 @@ public class Game implements Parcelable {
                         }
                     }
                 } else {
-                    this.mOpponentName = playerName;
+                    this.mOpponentName = p2Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 }
             }
@@ -661,6 +662,9 @@ public class Game implements Parcelable {
                 messageNums = dashLine.substring(12).split(",");
             }
             idx += 1;
+        }
+        if (!p1Name.equals(PentePlayer.mPlayerName.toLowerCase()) && !p2Name.equals(PentePlayer.mPlayerName.toLowerCase())) {
+            this.mOpponentName = p1Name + " vs " + p2Name;
         }
         if (mGameString.indexOf("state=active") == -1) {
             mActive = false;

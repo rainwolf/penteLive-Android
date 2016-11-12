@@ -157,9 +157,18 @@ public class BoardView extends View {
                 if (textView == null) {
                     textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
                 }
-                String str = "Opponent: <a href=\"https://www.pente.org/gameServer/profile?viewName=" + game.getOpponentName() + "\">" + game.getOpponentName() + "</a>"
-                        + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
-                        + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
+                String str;
+                if (game.getOpponentName().contains(" vs ")) {
+                    String players[] = game.getOpponentName().split(" vs ");
+                    str = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "\">" +players[0] + "</a> vs " +
+                            "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "\">" +players[1] + "</a>"
+                            + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
+                            + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
+                } else {
+                    str = "Opponent: <a href=\"https://www.pente.org/gameServer/profile?viewName=" + game.getOpponentName() + "\">" + game.getOpponentName() + "</a>"
+                            + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
+                            + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
+                }
                 int textHeight = textView.getLineCount() * textView.getLineHeight();
                 if (textHeight > textView.getHeight()) {
                     //Text is truncated because text height is taller than TextView height
