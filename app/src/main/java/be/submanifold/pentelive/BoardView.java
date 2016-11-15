@@ -158,7 +158,7 @@ public class BoardView extends View {
                     textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
                 }
                 String str;
-                if (game.getOpponentName().contains(" vs ")) {
+                if (game.getOpponentName() != null && game.getOpponentName().contains(" vs ")) {
                     String players[] = game.getOpponentName().split(" vs ");
                     str = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "\">" +players[0] + "</a> vs " +
                             "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "\">" +players[1] + "</a>"

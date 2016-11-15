@@ -44,7 +44,7 @@
         app:showAsAction="never"/>
     <item
         android:id="@+id/moreSettings"
-        android:title="Settings"
+        android:title="settings"
         android:icon="@drawable/ic_action_settings"
         app:showAsAction="never"/>
     <item
