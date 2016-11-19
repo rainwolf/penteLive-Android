@@ -4,13 +4,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.webkit.CookieManager;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -668,6 +671,21 @@ public class Game implements Parcelable {
         }
         if (mGameString.indexOf("state=active") == -1) {
             mActive = false;
+            if (!getGameType().equals("Connect6") && PentePlayer.mSubscriber) {
+                final BoardActivity host = (BoardActivity) boardView.getContext();
+                ((Button) host.findViewById(R.id.submitButton)).setVisibility(View.GONE);
+                Button dbBtn = (Button) host.findViewById(R.id.searchDBbutton);
+                dbBtn.setVisibility(View.VISIBLE);
+                dbBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(host.getApplicationContext(), DatabaseActivity.class);
+                        intent.putIntegerArrayListExtra("moves", new ArrayList<Integer>(getMovesList().subList(0, untilMove)));
+                        intent.putExtra("game", getGameType());
+                        host.startActivity(intent);
+                    }
+                });
+            }
         }
 
         messages = new HashMap<Integer, String>();

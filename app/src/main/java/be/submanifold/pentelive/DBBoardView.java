@@ -77,9 +77,20 @@ public class DBBoardView extends View {
     public int redDot = -1;
 
     private boolean active, rated, gameOver, aiThinking = false;
+
+
     private List<Integer> movesList = new ArrayList<>();
     private Map<Integer, Integer> searchResults;
 
+    public List<Integer> getMovesList() {
+        return movesList;
+    }
+    public void setMovesList(List<Integer> movesList) {
+        this.movesList = movesList;
+        if (game != null) {
+            replayGame(abstractBoard);
+        }
+    }
     //    private Ai aiPlayer;
 
     public void setActivity(Activity activity) {

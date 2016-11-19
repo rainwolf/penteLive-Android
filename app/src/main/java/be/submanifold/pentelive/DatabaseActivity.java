@@ -99,6 +99,14 @@ public class DatabaseActivity extends AppCompatActivity {
             board = (DBBoardView) findViewById(R.id.boardView);
             board.setActivity(this);
 
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                board.setGame(extras.getString("game"));
+                board.setMovesList(extras.getIntegerArrayList("moves"));
+            }
+
+
+
             toolbar.setTitle("Database");
             setSupportActionBar(toolbar);
 
@@ -255,7 +263,11 @@ public class DatabaseActivity extends AppCompatActivity {
 //                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
                     board.setLayoutParams(params);
 
-                    showDBSettings();
+                    if (board.getMovesList().size() <= 1) {
+                        showDBSettings();
+                    } else {
+                        doSearch();
+                    }
                 }
             });
 
@@ -263,32 +275,7 @@ public class DatabaseActivity extends AppCompatActivity {
             Button button = (Button) findViewById(R.id.searchButton);
             if (button != null) button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
-                    String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
-                    int winner = 0;
-                    if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 1")) {
-                        winner = 1;
-                    } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 2")) {
-                        winner = 2;
-                    }
-                    String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
-                    if (!"".equals(afterDate)) {
-                        afterDate = "&after_date="+afterDate;
-                    }
-                    String beforeDate = ((TextView) settingsView.findViewById(R.id.beforeDate)).getText().toString();
-                    if (!"".equals(beforeDate)) {
-                        beforeDate = "&before_date="+beforeDate;
-                    }
-                    SearchTask searchTask = new SearchTask(board.getMovesString(),
-                            board.getGame(),
-                            (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
-                            player1,
-                            player2,
-                            winner,
-                            afterDate,
-                            beforeDate);
-                    searchTask.execute((Void) null);
+                    doSearch();
                 }
             });
             button = (Button) findViewById(R.id.backButton);
@@ -383,6 +370,34 @@ public class DatabaseActivity extends AppCompatActivity {
 
         }
 
+        private void doSearch() {
+            progressBar.setVisibility(View.VISIBLE);
+            String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
+            String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
+            int winner = 0;
+            if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 1")) {
+                winner = 1;
+            } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 2")) {
+                winner = 2;
+            }
+            String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
+            if (!"".equals(afterDate)) {
+                afterDate = "&after_date="+afterDate;
+            }
+            String beforeDate = ((TextView) settingsView.findViewById(R.id.beforeDate)).getText().toString();
+            if (!"".equals(beforeDate)) {
+                beforeDate = "&before_date="+beforeDate;
+            }
+            SearchTask searchTask = new SearchTask(board.getMovesString(),
+                    board.getGame(),
+                    (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
+                    player1,
+                    player2,
+                    winner,
+                    afterDate,
+                    beforeDate);
+            searchTask.execute((Void) null);
+        }
         private void showDBSettings() {
 
 //            settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
@@ -572,7 +587,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //            System.out.println(searchResults);
             board.setSearchResults(searchResults);
             board.invalidate();
-            if (searchResults.size() == 0) {
+            if (searchResults.size() == 0 && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
                 board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>No search results");
             } else {
                 if (player1.length() > 0) {

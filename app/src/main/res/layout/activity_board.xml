@@ -46,6 +46,16 @@
             android:id="@+id/submitButton" />
         <Button
             android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:drawableStart="@drawable/databasesmall"
+            android:text="search"
+            android:visibility="gone"
+            android:textStyle="bold"
+            android:id="@+id/searchDBbutton" />
+        <Button
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:focusable="false"
