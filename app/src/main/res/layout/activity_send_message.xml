@@ -15,7 +15,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_alignParentTop="true"
-        android:title="New message"
+        android:title="@string/new_message"
         android:background="@color/britishracinggreen"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -28,7 +28,7 @@
         android:id="@+id/recipient"
         android:layout_width="match_parent"
         android:layout_below="@id/toolbar"
-        android:hint="Recipient"
+        android:hint="@string/recipient"
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:maxLines="1"
@@ -37,7 +37,7 @@
         android:id="@+id/subject"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:hint="Subject"
+        android:hint="@string/subject"
         android:layout_below="@id/recipient"
         android:inputType="text"
         android:maxLines="1"
@@ -60,7 +60,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_height="50dp"
         android:layout_above="@id/adView"
-        android:text="send"
+        android:text="@string/send"
         />
 
     <EditText

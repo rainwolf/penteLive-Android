@@ -114,12 +114,12 @@ public class MMAIActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = (TextView) v;
-                if (tv.getText().equals("black")) {
-                    tv.setText("white");
+                if (tv.getText().equals(getString(R.string.black))) {
+                    tv.setText(getString(R.string.white));
                     PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAICOLOR_KEY, "white");
                     board.setMyColor((byte) 1);
                 } else {
-                    tv.setText("black");
+                    tv.setText(getString(R.string.black));
                     PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAICOLOR_KEY, "black");
                     board.setMyColor((byte) 2);
                 }
@@ -234,7 +234,7 @@ public class MMAIActivity extends AppCompatActivity {
         Button button = (Button) findViewById(R.id.startButton);
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ((Button) v).setText("restart game");
+                ((Button) v).setText(getString(R.string.restart_game));
                 board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
                 board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white"))?1:2));
                 board.startGame();
@@ -284,7 +284,11 @@ public class MMAIActivity extends AppCompatActivity {
         Spinner spinner = (Spinner) settingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0));
         TextView playAs = (TextView) settingsView.findViewById(R.id.playAsChoice);
-        playAs.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white"));
+        if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white").equals("white")) {
+            playAs.setText(getString(R.string.white));
+        } else {
+            playAs.setText(getString(R.string.black));
+        }
         TextView game = (TextView) settingsView.findViewById(R.id.gameChoice);
         game.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente"));
         board.setAlpha(0.75f);

@@ -3,6 +3,7 @@ package be.submanifold.pentelive;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -60,8 +61,12 @@ public class Game implements Parcelable {
     private List<Integer> mMovesList;
     public HashMap<Integer, String> messages;
 
+    private String mLocalizedTime;
+    private String mLocalizedRatedNot;
 
     private String movesString = "";
+
+    private String mBoardString;
 
     public Game(String gameID, String setID, String gameType, String opponentName, String opponentRating, String myColor,
                 String remainingTime, String ratedNot, String privateGame, String nameColor, String crown) {
@@ -152,6 +157,8 @@ public class Game implements Parcelable {
         mGameString = in.readString();
         mMovesList = (ArrayList<Integer>) in.readSerializable();
         mActive = in.readByte() != 0;
+        mLocalizedTime = in.readString();
+        mLocalizedRatedNot = in.readString();
     }
 
     @Override
@@ -174,7 +181,10 @@ public class Game implements Parcelable {
         dest.writeInt(mCrown);
         dest.writeString(mGameString);
         dest.writeSerializable((ArrayList<Integer>) mMovesList);
-        dest.writeByte((byte) (mActive ? 1 : 0));      }
+        dest.writeByte((byte) (mActive ? 1 : 0));
+        dest.writeString(mLocalizedTime);
+        dest.writeString(mLocalizedRatedNot);
+    }
 
     @SuppressWarnings("unused")
     public static final Parcelable.Creator<Game> CREATOR = new Parcelable.Creator<Game>() {
@@ -196,6 +206,85 @@ public class Game implements Parcelable {
     public void setUntilMove(int untilMove) {
         this.untilMove = untilMove;
     }
+
+    public String getLocalizedRatedNot() {
+        if (mLocalizedRatedNot == null) {
+            Context ctx = MyApplication.getContext();
+            if (mRatedNot.equals("Rated")) {
+                mLocalizedRatedNot = ctx.getString(R.string.rated);
+            } else if (mRatedNot.equals("Not Rated")) {
+                mLocalizedRatedNot = ctx.getString(R.string.notRated);
+            } else if (mRatedNot.equals("KotH")) {
+                mLocalizedRatedNot = ctx.getString(R.string.koth);
+            } else if (mRatedNot.equals("Tournament")) {
+                mLocalizedRatedNot = ctx.getString(R.string.tournament);
+            }
+        }
+        return mLocalizedRatedNot;
+    }
+
+    public String getLocalizedTime() {
+        if (mLocalizedTime == null) {
+            Context ctx = MyApplication.getContext();
+            if (mRemainingTime.contains("minutes")) {
+                String[] splitTime = mRemainingTime.split(" ");
+                String hour = splitTime[0], minutes = splitTime[2];
+                if (hour.equals("1") && minutes.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.hourminute, hour, minutes);
+                } else if (hour.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.hourminutes, hour, minutes);
+                } else if (minutes.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.hoursminute, hour, minutes);
+                } else {
+                    mLocalizedTime = ctx.getString(R.string.hoursminutes, hour, minutes);
+                }
+            } else if (mRemainingTime.contains("hours")) {
+                String[] splitTime = mRemainingTime.split(" ");
+                String day = splitTime[0], hours = splitTime[2];
+                if (day.equals("1") && hours.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.dayhour, day, hours);
+                } else if (day.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.dayhours, day, hours);
+                } else if (hours.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.dayshour, day, hours);
+                } else {
+                    mLocalizedTime = ctx.getString(R.string.dayshours, day, hours);
+                }
+            } else {
+                String days = mRemainingTime.substring(0, mRemainingTime.indexOf(" days"));
+                if (days.equals("1")) {
+                    mLocalizedTime = ctx.getString(R.string.daypermove, days);
+                } else {
+                    mLocalizedTime = ctx.getString(R.string.dayspermove, days);
+                }
+            }
+
+        }
+        return mLocalizedTime;
+    }
+
+    public String getBoardString() {
+        if (mBoardString == null && mOpponentName != null && mPrivateGame != null) {
+            Context ctx = MyApplication.getContext();
+            String ratingStr = ctx.getString(R.string.rating),
+                    timeStr = ctx.getString(R.string.remainingtime),
+                    privateStr = mPrivateGame.contains("non")?ctx.getString(R.string.non_private):ctx.getString(R.string.private_str),
+                    thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
+            if (mOpponentName != null && mOpponentName.contains(" vs ")) {
+                String players[] = mOpponentName.split(" vs ");
+                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "\">" +players[0] + "</a> vs " +
+                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "\">" +players[1] + "</a>"
+                        + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
+                        + "<br>" + thisGame + "<br><br>";
+            } else {
+                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName + "\">" + mOpponentName + "</a>"
+                        + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
+                        + "<br>" + thisGame + "<br><br>";
+            }
+        }
+        return mBoardString + getMovesString();
+    }
+
 
     public class RetrieveGame extends AsyncTask<Void, Void, Boolean> {
 
@@ -345,7 +434,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");

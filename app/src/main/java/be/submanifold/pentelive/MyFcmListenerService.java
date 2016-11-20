@@ -74,6 +74,19 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Map data = message.getData();
 
         String messageStr = (String) data.get("message");
+        String localMsgStr = "";
+        if (messageStr.contains("device has been registered for notifications")) {
+            localMsgStr = getString(R.string.registered_for_notifications);
+        } else if (messageStr.contains("your move")) {
+            String[] splitStr = messageStr.replace("It's your move in a game of ","").split(" against ");
+            localMsgStr = getString(R.string.is_your_move_against, splitStr[1], splitStr[0]);
+        } else if (messageStr.contains("new message")) {
+            String[] splitStr = messageStr.split(" sent you a new message! ");
+            localMsgStr = getString(R.string.new_message_from, splitStr[0], splitStr[1]);
+        } else if (messageStr.contains("invited you")) {
+            String[] splitStr = messageStr.split(" has invited you to a game of ");
+            localMsgStr = getString(R.string.has_invited_you, splitStr[0], splitStr[1]);
+        }
 
 
         if (!MyApplication.isActivityVisible()) {
@@ -87,7 +100,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                     .setSmallIcon(R.drawable.ic_radio_button_unchecked)
                     .setContentTitle("Pente Live")
 //                .setContentText(message)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(messageStr))
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(localMsgStr))
                     .setAutoCancel(true)
                     .setSound(notificationSoundUri)
                     .setContentIntent(pendingIntent);
@@ -109,14 +122,14 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
                 intent = new Intent("unique_name");
                 //put whatever data you want to send, if any
-                intent.putExtra("message", messageStr);
+                intent.putExtra("message", localMsgStr);
 
                 //send broadcast
                 sendBroadcast(intent);
             } else {
                 Intent intent = new Intent("unique_name");
                 //put whatever data you want to send, if any
-                intent.putExtra("message", messageStr);
+                intent.putExtra("message", localMsgStr);
 
                 //send broadcast
                 sendBroadcast(intent);

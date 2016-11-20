@@ -91,29 +91,29 @@ public class RegisterActivity extends AppCompatActivity {
     private void attemptRegistration() {
         String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase();
         if (username.length() < 5 || username.length() > 10) {
-            ((EditText) findViewById(R.id.username)).setError("username has to be 5-10 characters long");
+            ((EditText) findViewById(R.id.username)).setError(getString(R.string.username_5_10));
             return;
         }
         if (!username.matches("^[a-zA-Z0-9_]+$")) {
-            ((EditText) findViewById(R.id.username)).setError("username can only contain letters, numbers, and underscores");
+            ((EditText) findViewById(R.id.username)).setError(getString(R.string.username_only));
             return;
         }
         String password = ((EditText) findViewById(R.id.password)).getText().toString();
         String password2 = ((EditText) findViewById(R.id.repeatPassword)).getText().toString();
         if (password.length() < 5 || password.length() > 16) {
-            ((EditText) findViewById(R.id.password)).setError("password has to be 5-16 characters long");
+            ((EditText) findViewById(R.id.password)).setError(getString(R.string.password_6_16));
             return;
         }
         if (!password.matches("^[a-zA-Z0-9_]+$")) {
-            ((EditText) findViewById(R.id.password)).setError("password can only contain letters, numbers, and underscores");
+            ((EditText) findViewById(R.id.password)).setError(getString(R.string.password_only));
             return;
         }
         if (!password.equals(password2)) {
-            ((EditText) findViewById(R.id.repeatPassword)).setError("passwords don't match");
+            ((EditText) findViewById(R.id.repeatPassword)).setError(getString(R.string.password_no_match));
             return;
         }
         if (!((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()) {
-            Toast.makeText(RegisterActivity.this, "You can't sign up without accepting the Rated Play Policy.",
+            Toast.makeText(RegisterActivity.this, getString(R.string.accept_policy),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -200,7 +200,7 @@ public class RegisterActivity extends AppCompatActivity {
                 finish();
             } else {
                 if (response.indexOf("Registration failed: Requested name " + username + " is already taken, please choose another.") > -1) {
-                    Toast.makeText(RegisterActivity.this, "The username " + username + " is already taken, please choose another.",
+                    Toast.makeText(RegisterActivity.this, getString(R.string.username_taken, username),
                             Toast.LENGTH_LONG).show();
                 }
             }

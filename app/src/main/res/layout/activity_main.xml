@@ -23,7 +23,7 @@
         android:layout_alignParentBottom="true"
         android:gravity="center"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id_dashboard">
+        ads:adUnitId="ca-app-pub-3326997956703582/9406817448">
     </com.google.android.gms.ads.AdView>
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

@@ -92,6 +92,8 @@ public class BoardView extends View {
 
     private TextView textView = null;
 
+    private String submitStr;
+
     public Game getGame() {
         return game;
     }
@@ -130,6 +132,7 @@ public class BoardView extends View {
         scaling = 1;
         translateX = 0;
         translateY = 0;
+        submitStr = context.getString(R.string.submit);
 //        mDetector = new GestureDetectorCompat(context, new MyGestureListener());
     }
 
@@ -157,18 +160,7 @@ public class BoardView extends View {
                 if (textView == null) {
                     textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
                 }
-                String str;
-                if (game.getOpponentName() != null && game.getOpponentName().contains(" vs ")) {
-                    String players[] = game.getOpponentName().split(" vs ");
-                    str = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "\">" +players[0] + "</a> vs " +
-                            "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "\">" +players[1] + "</a>"
-                            + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
-                            + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
-                } else {
-                    str = "Opponent: <a href=\"https://www.pente.org/gameServer/profile?viewName=" + game.getOpponentName() + "\">" + game.getOpponentName() + "</a>"
-                            + ", rating: " + game.getOpponentRating() + "<br>Remaining Time: " + game.getRemainingTime()
-                            + "<br>" + game.getRatedNot() + " and " + game.getPrivateGame() + " game <br><br>" + game.getMovesString();
-                }
+                String str = game.getBoardString();
                 int textHeight = textView.getLineCount() * textView.getLineHeight();
                 if (textHeight > textView.getHeight()) {
                     //Text is truncated because text height is taller than TextView height
@@ -336,35 +328,35 @@ public class BoardView extends View {
                 if (!replayed && game.getMovesList() != null) {
                     System.out.println(" fuck kitty");
                     game.replayGame(abstractBoard, this);
-                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit");
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr);
                     replayed = true;
                 }
                 if (game.isConnect6() && connect6Move1 > -1) {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
                                     "-...");
                 }
             } else if (playedMove > -1){
                 if (game.isConnect6()) {
                     if (connect6Move1 > -1) {
                         if (playedMove > -1 && playedMove != connect6Move1) {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
                                     "-" + coordinateLetters[stoneI] + "" + (19 - stoneJ));
                         } else {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[stoneI] + "" + (19 - stoneJ) +
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[stoneI] + "" + (19 - stoneJ) +
                                     "-...");
                         }
                     }
                 } else if (game.isDPente() && game.getMovesList().size() == 1) {
                     if (dPenteMove3 > -1) {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
                                 "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)));
                     } else if (dPenteMove2 > -1) {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
                                 "-...");
                     } else {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-...");
                     }
                 } else if (game.isDPente() && game.dPenteChoice && ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).getVisibility()==VISIBLE) {
@@ -372,7 +364,7 @@ public class BoardView extends View {
                 } else {
                     game.replayGame(abstractBoard, stoneI, stoneJ, this);
                     replayed = false;
-                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[stoneI] + "" + (19 - stoneJ));
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[stoneI] + "" + (19 - stoneJ));
                 }
             }
         }

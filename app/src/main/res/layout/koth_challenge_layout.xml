@@ -12,7 +12,7 @@
         android:layout_height="45dp"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Challenge"
+        android:text="challenge"
         android:textAlignment="center"
         android:id="@+id/titleLabel"
         android:layout_alignParentLeft="true"
@@ -23,7 +23,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Days per move:"
+        android:text="@string/days_per_move"
         android:textStyle="bold"
         android:id="@+id/timeoutLabel"
         android:layout_below="@id/titleLabel"
@@ -54,7 +54,7 @@
             android:layout_height="45dp"
             android:gravity="center_vertical"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="To players"
+            android:text="@string/to_players"
             android:textStyle="bold"
             android:id="@+id/restrictionLabel"
             android:layout_alignParentLeft="true"
@@ -76,7 +76,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/restrictionLayout"
         android:id="@+id/sendChallengeButton"
-        android:text="send challenge"/>
+        android:text="@string/send_challenge"/>
 
 
 </RelativeLayout>

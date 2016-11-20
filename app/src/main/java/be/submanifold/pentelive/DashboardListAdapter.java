@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -42,9 +43,30 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     private Activity activity;
     private boolean asked2GetStarted;
 
+    private String messagesStr;
+    private String invitationsStr;
+    private String activeGamesStr;
+    private String publicInvitationsStr;
+    private String sentInvitationsStr;
+    private String nonActiveGamesStr;
+    private String tournamentStr;
+    private String kothStr;
+    private Context ctx;
+
     public DashboardListAdapter(PentePlayer player) {
         this.playerData = player;
         asked2GetStarted = false;
+        ctx = MyApplication.getContext();
+        messagesStr = ctx.getString(R.string.messages);
+        invitationsStr = ctx.getString(R.string.invitations);
+        activeGamesStr = ctx.getString(R.string.activegames);
+        publicInvitationsStr = ctx.getString(R.string.publicinvitations);
+        sentInvitationsStr = ctx.getString(R.string.sentinvitations);
+        nonActiveGamesStr = ctx.getString(R.string.nonactivegames);
+        tournamentStr = ctx.getString(R.string.tournaments);
+        kothStr = ctx.getString(R.string.kingofthehill);
+
+
 //        player.loadPlayer();
     }
     public void setInflater(LayoutInflater inflater, Activity activity) {
@@ -108,7 +130,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
         String title;
         switch (groupPosition) {
-            case MESSAGESGROUP: title = "Messages (" + playerData.getMessages().size() + ")";
+            case MESSAGESGROUP: title = messagesStr + " (" + playerData.getMessages().size() + ")";
                 for (Message message : playerData.getMessages()) {
                     if (message.getUnread().indexOf("unread") > -1) {
                         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
@@ -116,21 +138,21 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                     }
                 }
                 break;
-            case INVITATIONSGROUP: title = "Invitations (" + playerData.getInvitations().size() + ")";
+            case INVITATIONSGROUP: title = invitationsStr + " (" + playerData.getInvitations().size() + ")";
                 if (playerData.getInvitations().size() > 0) {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
-            case ACTIVEGAMESGROUP: title = "Active Games (" + playerData.getActiveGames().size() + ")";
+            case ACTIVEGAMESGROUP: title = activeGamesStr + " (" + playerData.getActiveGames().size() + ")";
                 if (playerData.getActiveGames().size() > 0) {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
-            case PUBLICINVITATIONSGROUP: title = "Public Invitations (" + playerData.getPublicInvitations().size() + ")"; break;
-            case SENTINVITATIONSGROUP: title = "Invitations Sent (" + playerData.getSentInvitations().size() + ")"; break;
-            case NONACTIVEGAMESGROUP: title = "Non-Active Games (" + playerData.getNonActiveGames().size() + ")"; break;
-            case TOURNAMENTGROUP: title = "Tournaments (" + playerData.getTournaments().size() + ")"; break;
-            case KOTHGROUP: title = "King of the Hill (" + playerData.getHills().size() + ")";
+            case PUBLICINVITATIONSGROUP: title = publicInvitationsStr + " (" + playerData.getPublicInvitations().size() + ")"; break;
+            case SENTINVITATIONSGROUP: title = sentInvitationsStr + " (" + playerData.getSentInvitations().size() + ")"; break;
+            case NONACTIVEGAMESGROUP: title = nonActiveGamesStr + " (" + playerData.getNonActiveGames().size() + ")"; break;
+            case TOURNAMENTGROUP: title = tournamentStr + " (" + playerData.getTournaments().size() + ")"; break;
+            case KOTHGROUP: title = kothStr + " (" + playerData.getHills().size() + ")";
                 for (KingOfTheHill player : playerData.getHills() ) {
                     if (player.isKing()) {
                         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
@@ -208,20 +230,20 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 crown = 4;
             }
             if (hill.getCurrentKing().length() == 0) {
-                detailText = "Number of players: " + hill.getNumPlayers();
+                detailText = ctx.getString(R.string.number_of_players, hill.getNumPlayers());
             } else {
-                detailText = hill.getNumPlayers() + " players ruled by " + hill.getCurrentKing();
+                detailText = ctx.getString(R.string.players_ruled_by, hill.getNumPlayers(), hill.getCurrentKing());
             }
             color = 0;
         } else if (groupPosition == TOURNAMENTGROUP) {
             ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
             mainText = "\u2B24  " + tournament.getName();
             if (tournament.getTournamentState().equals("1")) {
-                detailText = "Registration is open until " + tournament.getDate();
+                detailText = ctx.getString(R.string.registration_open_until, tournament.getDate());
             } else if (tournament.getTournamentState().equals("2")) {
-                detailText = "Registration closed. Start: " + tournament.getDate();
+                detailText = ctx.getString(R.string.registration_closed, tournament.getDate());
             } else {
-                detailText = "Tournament started. Current round: " + tournament.getRound();
+                detailText = ctx.getString(R.string.tournament_started, tournament.getRound());
             }
             ratingText = "(" + tournament.getGame() + ")";
             crown = 0;
@@ -230,8 +252,17 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             mainText = game.getOpponentName();
             crown = game.getCrown();
             color = game.getNameColor();
-            detailText = game.getGameType() + " (" + game.getRatedNot() + ") - " + game.getRemainingTime();
+            detailText = game.getGameType() + " (" + game.getLocalizedRatedNot() + ") - " + game.getLocalizedTime();
             ratingText = game.getOpponentRating();
+        }
+        if ((groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP) && game.getRatedNot().contains("Not ")) {
+            String colorStr;
+            if (game.getMyColor().equals("white")) {
+                colorStr = ctx.getString(R.string.white);
+            } else {
+                colorStr = ctx.getString(R.string.black);
+            }
+            detailText = game.getGameType() + " (" + game.getLocalizedRatedNot() + ", " + colorStr + ") - " + game.getLocalizedTime();
         }
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP ||
                 groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP ||

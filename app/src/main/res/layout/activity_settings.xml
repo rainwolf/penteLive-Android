@@ -33,7 +33,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Load avatars:"
+        android:text="@string/load_avatars"
         android:textStyle="bold"
         android:id="@+id/avatarLabel"
         android:layout_alignParentLeft="true"
@@ -43,8 +43,8 @@
         android:layout_height="45dp"
         android:background="@android:color/transparent"
         android:checked="false"
-        android:textOn="Yes"
-        android:textOff="No"
+        android:textOn="@string/yes"
+        android:textOff="@string/no"
         android:id="@+id/avatarToggleButton"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
@@ -55,7 +55,7 @@
         android:layout_marginBottom="10dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Loading avatars takes more data, use this option if your connection is fast enough."
+        android:text="@string/avatar_warning"
         android:id="@+id/infoLabel"
         android:layout_below="@id/avatarLabel"
         android:layout_alignParentLeft="true"
@@ -65,7 +65,7 @@
         android:id="@+id/preferencesButton"
         android:layout_height="wrap_content"
         android:layout_below="@id/infoLabel"
-        android:text="Preferences @ pente.org"
+        android:text="@string/preferences_at_pente_org"
         android:layout_marginTop="5dp"/>
     <TextView
         android:layout_width="wrap_content"
@@ -73,7 +73,7 @@
         android:textSize="15dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="More preferences, such as email settings, can be changed at pente.org."
+        android:text="@string/more_prefs_label"
         android:id="@+id/infoLabel2"
         android:layout_below="@id/preferencesButton"
         android:layout_alignParentLeft="true"
@@ -84,14 +84,14 @@
         android:id="@+id/colorButton"
         android:layout_height="wrap_content"
         android:layout_below="@id/infoLabel2"
-        android:text="Change name color"
+        android:text="@string/change_color"
         android:layout_marginTop="5dp"/>
     <Button
         android:layout_width="match_parent"
         android:id="@+id/avatarButton"
         android:layout_height="wrap_content"
         android:layout_below="@id/colorButton"
-        android:text="change avatar"
+        android:text="@string/change_avatar"
         android:layout_marginTop="5dp"/>
     <TextView
         android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
         android:textSize="15dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Name color and avatar are subscriber-only features"
+        android:text="@string/subscribers_only"
         android:id="@+id/infoLabel3"
         android:layout_below="@id/avatarButton"
         android:layout_alignParentLeft="true"
@@ -116,7 +116,7 @@
         android:id="@+id/subscribeButton"
         android:layout_height="wrap_content"
         android:layout_below="@id/infoLabel3"
-        android:text="subscribe @ pente.org"
+        android:text="@string/subscribe_pente_org"
         android:layout_marginTop="5dp"/>
     <TextView
         android:layout_width="wrap_content"
@@ -124,7 +124,7 @@
         android:textSize="15dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Subscribe to lift all restrictions on play, get a name color and avatar, and get access to the database."
+        android:text="@string/subscribe_info"
         android:id="@+id/infoLabel4"
         android:layout_below="@id/subscribeButton"
         android:layout_alignParentLeft="true"

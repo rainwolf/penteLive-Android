@@ -6,11 +6,11 @@
         android:id="@+id/action_post_open_koth"
         android:title="post open invitation"
         android:icon="@drawable/ic_wc"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
     <item
         android:id="@+id/action_web_koth"
         android:title="view on the web"
         android:icon="@drawable/ic_action_info"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
 </menu>

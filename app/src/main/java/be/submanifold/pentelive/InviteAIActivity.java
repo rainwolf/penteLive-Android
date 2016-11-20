@@ -44,7 +44,7 @@ public class InviteAIActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_ai);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Play Bruce Cropley's AI");
+        toolbar.setTitle("Bruce Cropley's AI");
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
@@ -240,7 +240,7 @@ public class InviteAIActivity extends AppCompatActivity {
                 PrefUtils.saveIntToPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONDIFFICULTY_KEY, ((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition());
                 finish();
             } else {
-                Toast.makeText(InviteAIActivity.this, "Try again after you finish your current game against the AI player.",
+                Toast.makeText(InviteAIActivity.this, getString(R.string.finish_some_ai_games_first),
                         Toast.LENGTH_LONG).show();
             }
 //            mAuthTask = null;

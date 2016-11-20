@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
@@ -25,6 +26,8 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
     List<RatingStat> ratingStats;
     private LayoutInflater inflater;
     private Activity activity;
+
+    private Context ctx = MyApplication.getContext();
 
     public RatingStatsListAdapter(List<RatingStat> ratingStats) {
         this.ratingStats = ratingStats;
@@ -76,7 +79,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(Color.GRAY);
-        ((TextView) convertView.findViewById(R.id.textView)).setText("Rating Stats");
+        ((TextView) convertView.findViewById(R.id.textView)).setText(ctx.getString(R.string.rating_stats));
 
         return convertView;
     }
@@ -96,7 +99,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String ratingText = ratingStat.getRating(), detailText = "";
-        detailText = "Latest: " + ratingStat.getLastGame() + ", total: " + ratingStat.getTotalGames();
+        detailText = ctx.getString(R.string.last_total, ratingStat.getLastGame(), ratingStat.getTotalGames());
         ((TextView) convertView.findViewById(R.id.detailText)).setText(detailText);
         ((TextView) convertView.findViewById(R.id.nameText)).setText(ratingStat.getGame());
         ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);

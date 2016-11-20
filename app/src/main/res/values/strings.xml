@@ -1,8 +1,167 @@
 <resources>
     <string name="app_name">penteLive</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="not_your_turn">It\'s not your turn.</string>
+    <string name="c6_needs_2_moves">Connect6 requires 2 moves per turn.</string>
+    <string name="dpente_needs_3_moves">D-Pente requires 3 opening moves.</string>
+    <string name="no_momve_played_yet">No move played yet.</string>
+    <string name="submit">submit</string>
+    <string name="place_stone_submit">Place a stone and submit.</string>
+    <string name="resign">resign</string>
+    <string name="request_cancel">request set cancellation</string>
+    <string name="dismiss">dismiss</string>
+    <string name="waiting_for_cancel_reply">A cancel request already exists. Waiting for %1$s to reply.</string>
+    <string name="hourminute">%1$s hour, %2$s minute</string>
+    <string name="hourminutes">%1$s hour, %2$s minutes</string>
+    <string name="hoursminute">%1$s hours, %2$s minute</string>
+    <string name="hoursminutes">%1$s hours, %2$s minutes</string>
+    <string name="dayhour">%1$s day, %2$s hour</string>
+    <string name="dayhours">%1$s day, %2$s hours</string>
+    <string name="dayshour">%1$s days, %2$s hour</string>
+    <string name="dayshours">%1$s days, %2$s hours</string>
+    <string name="daypermove">%1$s day per move</string>
+    <string name="dayspermove">%1$s days per move</string>
+    <string name="rated">rated</string>
+    <string name="notRated">not rated</string>
+    <string name="koth">KotH</string>
+    <string name="tournament">Tournament</string>
+    <string name="rating">rating:</string>
+    <string name="remainingtime">Remaining time:</string>
+    <string name="this_is_a_rated_and_private_game">This is a %1$s and %2$s game.</string>
+    <string name="private_str">private</string>
+    <string name="non_private">non-private</string>
+    <string name="messages">messages</string>
+    <string name="invitations">invitations</string>
+    <string name="activegames">my turn</string>
+    <string name="publicinvitations">public invitations</string>
+    <string name="sentinvitations">invitations sent</string>
+    <string name="tournaments">tournaments</string>
+    <string name="kingofthehill">King of the Hill</string>
+    <string name="nonactivegames">opponent\'s turn</string>
+    <string name="number_of_players">Number of players: %1$s</string>
+    <string name="players_ruled_by">%1$s players ruled by %2$s</string>
+    <string name="registration_open_until">Registration is open until %1$s</string>
+    <string name="registration_closed">Registration closed. Start: %1$s</string>
+    <string name="tournament_started">Tournament started. Current round: %1$s</string>
+    <string name="white">white</string>
+    <string name="black">black</string>
+    <string name="search_parameters">search parameters</string>
+    <string name="database">database</string>
+    <string name="popularity">popularity</string>
+    <string name="win_percantage">win percentage</string>
+    <string name="either">either</string>
+    <string name="player1">player 1</string>
+    <string name="player2">player 2</string>
+    <string name="clear">clear</string>
+    <string name="no_search_results">No search results</string>
+    <string name="search">search</string>
+    <string name="play_as">Play as:</string>
+    <string name="opponent">opponent</string>
+    <string-array name="restriction_array">
+        <item>of any rating</item>
+        <item>not already playing</item>
+        <item>of lower rating</item>
+        <item>of higher rating</item>
+        <item>of similar rating</item>
+        <item>of same rating class</item>
+    </string-array>
+    <string name="finish_some_ai_games_first">Try again after you finish your current game against the AI player.</string>
+    <string name="leave_opponent_black">Opponent (Leave blank to invite anyone)</string>
+    <string name="game">Game:</string>
+    <string name="days_per_move">Days per move:</string>
+    <string name="ratedlabel">Rated:</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="to_players">To players</string>
+    <string name="private_label">Private game:</string>
+    <string name="send_invitation">send invitation</string>
+    <string name="difficulty">Difficulty:</string>
+    <string name="play_as_black_and_white">Play as black and white:</string>
+    <string name="send_open_challenge">send open challenge</string>
+    <string name="challenge">challenge %1$s</string>
+    <string name="king_of_the_hill">King of the Hill - %1$s</string>
+    <string name="top_of_the_hill">top of the hill</string>
+    <string name="step">step %1$d</string>
+    <string name="hill_warning">Warning: only subscribers can join multiple hills</string>
+    <string name="leave_hill">Tap and hold to leave this hill</string>
+    <string name="join_hill">Tap and hold to join this hill</string>
+    <string name="last_game_on">Last game Played on %1$s</string>
+    <string name="level_up_your_game">Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games and opponents, practice opening moves, sort the results by most played or highest win percentage, and filter by player name and winner.\nMore features will be added in the future.\n\nThe database is open to subscribers only.</string>
+    <string name="home">home</string>
+    <string name="not_enough_credit">Not enough credit, public invitations have an \"accept 2-post 1\" policy.</string>
+    <string name="post_now">Post now!</string>
+    <string name="nothing_to_see_here">Nothing to see here. Post an open invitation to get started?</string>
+    <string name="cancel">cancel</string>
+    <string name="decline">decline</string>
+    <string name="accept">accept</string>
+    <string name="restart_game">restart game</string>
+    <string name="start_game">start game</string>
+    <string name="color">color</string>
+    <string name="you_lost">You lost</string>
+    <string name="you_won">You won</string>
+    <string name="rating_stats">rating stats</string>
+    <string name="last_total">Last: %1$s, total: %2$s</string>
+    <string name="username_5_10">username has to be 5-10 characters long</string>
+    <string name="username_only">username can only contain letters, numbers, and underscores</string>
+    <string name="password_6_16">password has to be 5-16 characters long</string>
+    <string name="password_only">password can only contain letters, numbers, and underscores</string>
+    <string name="password_no_match">passwords don\'t match</string>
+    <string name="accept_policy">You can\'t sign up without accepting the Rated Play Policy.</string>
+    <string name="username_taken">The username %1$s is already taken, please choose another.</string>
+    <string name="enter_subject">Please enter a subject.</string>
+    <string name="no_such_user">username does not exist</string>
+    <string name="enter_recipient">Please enter a recipient.</string>
+    <string name="new_message">new message</string>
+    <string name="settings">settings</string>
+    <string name="take_photo">take photo</string>
+    <string name="choose_from_library">choose from library</string>
+    <string name="choose_color">choose color</string>
+    <string name="change_avatar">change avatar</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="repeat_password">repeat password</string>
+    <string name="register">register</string>
+    <string name="send">send</string>
+    <string name="email">email</string>
+    <string name="accept_rated_play_policy">Accept the Rated Play Policy?</string>
+    <string name="subject">subject</string>
+    <string name="recipient">recipient</string>
+    <string name="whos_online">who\'s online</string>
+    <string name="total_games">Total games: %1$s</string>
+    <string name="subscribe_now">subscribe now</string>
+    <string name="sign_in">sign in</string>
+    <string name="log_in_automatically">Log in automagically next time:</string>
+    <string name="more_settings">more settings</string>
+    <string name="no_account_yet">No account yet?</string>
+    <string name="register_at_pente_org">Register @ Pente.org</string>
+    <string name="facebook">Find us on Facebook</string>
+    <string name="invite_friends">Invite Friends</string>
+    <string name="game_rules">Game Rules</string>
+    <string name="sort_by">Sort by</string>
+    <string name="player1_label">Player 1:</string>
+    <string name="player2_label">Player 2:</string>
+    <string name="winner">Winner</string>
+    <string name="after">After:</string>
+    <string name="tap_to_set">tap to set</string>
+    <string name="before">Before:</string>
+    <string name="send_challenge">send challenge</string>
+    <string name="other_humans">play other humans</string>
+    <string name="onboard_ai">play the onboard AI</string>
+    <string name="server_ai">play the server AI</string>
+    <string name="load_avatars">Load avatars:</string>
+    <string name="avatar_warning">Loading avatars takes more data, use this option if your connection is fast enough.</string>
+    <string name="preferences_at_pente_org">Preferences @ pente.org</string>
+    <string name="more_prefs_label">More preferences, such as email settings, can be changed at pente.org.</string>
+    <string name="change_color">Change name color</string>
+    <string name="subscribers_only">Name color and avatar are subscriber-only features</string>
+    <string name="subscribe_pente_org">subscribe @ pente.org</string>
+    <string name="subscribe_info">Subscribe to lift all restrictions on play, get a name color and avatar, and get access to the database.</string>
+    <string name="registered_for_notifications">Your device has been registered for push notifications.</string>
+    <string name="is_your_move_against">It\'s your move against %1$s in a game of %2$s.</string>
+    <string name="new_message_from">%1$s sent you a new message!%2$s</string>
+    <string name="has_invited_you">%1$s has invited you to a game of %2$s.</string>
 
-    <!-- Strings related to login -->
+
+
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -14,8 +173,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="banner_ad_unit_id_dashboard">ca-app-pub-3326997956703582/9406817448</string>
-    <string name="banner_ad_unit_id_board">ca-app-pub-3326997956703582/5986542641</string>
     <string name="title_activity_board">BoardActivity</string>
     <string-array name="game_types_array">
         <item>Pente</item>
@@ -92,13 +249,5 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
-    </string-array>
-    <string-array name="restriction_array">
-        <item>of any rating</item>
-        <item>not already playing</item>
-        <item>of lower rating</item>
-        <item>of higher rating</item>
-        <item>of similar rating</item>
-        <item>of same rating class</item>
     </string-array>
 </resources>

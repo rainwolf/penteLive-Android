@@ -73,7 +73,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
-                    Toast.makeText(ReplyMessageActivity.this, "Please enter a subject.",
+                    Toast.makeText(ReplyMessageActivity.this, getString(R.string.enter_subject),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -333,7 +333,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 PrefUtils.savePlayerToPrefs(ReplyMessageActivity.this, recipient);
                 finish();
             } else {
-                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError("username does not exist");
+                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(R.string.no_such_user));
             }
         }
 
@@ -514,7 +514,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -522,7 +522,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
+//                System.out.println(output);
 
                 return true;
 

@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
         import android.app.Activity;
+        import android.content.Context;
         import android.content.Intent;
         import android.graphics.Bitmap;
         import android.graphics.Color;
@@ -37,6 +38,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
 
     PentePlayer playerData;
     private LayoutInflater inflater;
+    private Context ctx = MyApplication.getContext();
 
     public KingOfTheHillListAdapter(PentePlayer player) {
         this.playerData = player;
@@ -114,13 +116,13 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         String title;
         String collapsedStr = "(+)";
         switch (groupPosition) {
-            case 0: title = "King of the Hill - " + kothSummary.getGame();
+            case 0: title = ctx.getString(R.string.king_of_the_hill, kothSummary.getGame());
                 collapsedStr = "(" + kothSummary.getNumPlayers() + ")";
                 break;
-            case 1: title = "top of the hill";
+            case 1: title = ctx.getString(R.string.top_of_the_hill);
                 collapsedStr = "(" + hill.get(groupPosition - 1).size() + ")";
                 break;
-            default: title = "step " + (hill.size() + 1 - groupPosition);
+            default: title = ctx.getString(R.string.step, (hill.size() + 1 - groupPosition));
                 collapsedStr = "(" + hill.get(groupPosition - 1).size() + ")";
                 break;
         }
@@ -153,8 +155,12 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         if (groupPosition == 0) {
             if (childPosition == 0) {
-                nameTextView.setText("Tap and hold to " + (kothSummary.isMember()?"leave":"join") + " this hill");
-                detailTextView.setText("Warning: only subscribers can join multiple hills");
+                if (kothSummary.isMember()) {
+                    nameTextView.setText(ctx.getString(R.string.leave_hill));
+                } else {
+                    nameTextView.setText(ctx.getString(R.string.join_hill));
+                }
+                detailTextView.setText(ctx.getString(R.string.hill_warning));
                 ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
                 ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
                 return convertView;
@@ -185,7 +191,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         mainText  = player.getName();
         crown = player.getCrown();
         color = player.getColor();
-        detailText = "Last game Played on " + player.getLastGame();
+        detailText = ctx.getString(R.string.last_game_on, player.getLastGame());
         ratingText = player.getRating();
         SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
         if (color != 0) {

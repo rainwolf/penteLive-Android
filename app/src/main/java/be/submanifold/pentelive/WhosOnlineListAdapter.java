@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -31,6 +32,8 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
 
     PentePlayer playerData;
     private LayoutInflater inflater;
+
+    Context ctx = MyApplication.getContext();
 
     public WhosOnlineListAdapter(PentePlayer player) {
         this.playerData = player;
@@ -87,7 +90,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(Color.GRAY);
-        ((TextView) convertView.findViewById(R.id.textView)).setText("Who's online?");
+        ((TextView) convertView.findViewById(R.id.textView)).setText(ctx.getString(R.string.whos_online));
 
         return convertView;
     }
@@ -135,7 +138,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         mainText  = player.getName();
         crown = player.getCrown();
         color = player.getColor();
-        detailText = "Total games: " + player.getLastGame();
+        detailText = ctx.getString(R.string.total_games, player.getLastGame());
         ratingText = player.getRating();
         SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
         if (color != 0) {

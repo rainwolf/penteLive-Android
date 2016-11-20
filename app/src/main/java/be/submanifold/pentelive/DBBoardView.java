@@ -665,76 +665,76 @@ public class DBBoardView extends View {
         setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
     }
 
-    private void replayPenteGame(byte[][] abstractBoard) {
-        resetAbstractBoard(abstractBoard);
-        for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
-        }
-        if (rated && (movesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
-                for (int j = 7; j < 12; ++j) {
-                    if (abstractBoard[i][j] == 0) {
-                        abstractBoard[i][j] = -1;
-                    }
-                }
-            }
-        }
-        if (movesList.isEmpty()) {
-            return;
-        } else {
-            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
-            for (int i = 0; i < movesList.size(); i++) {
-                if (i%2 == 0) {
-                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
-                } else {
-                    str = str+"-";
-                }
-                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
-            }
-
-            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
-            redDot = movesList.get(movesList.size() - 1);
-        }
-        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
-
-        invalidate();
-    }
-    private void replayKeryoPenteGame(byte[][] abstractBoard) {
-        resetAbstractBoard(abstractBoard);
-        for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
-            detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
-        }
-        if (movesList.isEmpty()) {
-            return;
-        } else {
-            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
-            for (int i = 0; i < movesList.size(); i++) {
-                if (i%2 == 0) {
-                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
-                } else {
-                    str = str+"-";
-                }
-                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
-            }
-
-            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
-            redDot = movesList.get(movesList.size() - 1);
-        }
-        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
-
-        invalidate();
-    }
+//    private void replayPenteGame(byte[][] abstractBoard) {
+//        resetAbstractBoard(abstractBoard);
+//        for (int i = 0; i < movesList.size(); i++) {
+//            byte color = (byte) (1 + (i%2));
+//            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
+//            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
+//        }
+//        if (rated && (movesList.size() == 2)) {
+//            for( int i = 7; i < 12; ++i) {
+//                for (int j = 7; j < 12; ++j) {
+//                    if (abstractBoard[i][j] == 0) {
+//                        abstractBoard[i][j] = -1;
+//                    }
+//                }
+//            }
+//        }
+//        if (movesList.isEmpty()) {
+//            return;
+//        } else {
+//            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
+//            for (int i = 0; i < movesList.size(); i++) {
+//                if (i%2 == 0) {
+//                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
+//                } else {
+//                    str = str+"-";
+//                }
+//                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
+//            }
+//
+//            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+//            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+//            redDot = movesList.get(movesList.size() - 1);
+//        }
+//        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+//        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
+//        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+//
+//        invalidate();
+//    }
+//    private void replayKeryoPenteGame(byte[][] abstractBoard) {
+//        resetAbstractBoard(abstractBoard);
+//        for (int i = 0; i < movesList.size(); i++) {
+//            byte color = (byte) (1 + (i%2));
+//            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
+//            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
+//            detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
+//        }
+//        if (movesList.isEmpty()) {
+//            return;
+//        } else {
+//            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
+//            for (int i = 0; i < movesList.size(); i++) {
+//                if (i%2 == 0) {
+//                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
+//                } else {
+//                    str = str+"-";
+//                }
+//                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
+//            }
+//
+//            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+//            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+//            redDot = movesList.get(movesList.size() - 1);
+//        }
+//        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+//        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
+//        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+//
+//        invalidate();
+//    }
 
     private void resetAbstractBoard(byte[][] abstractBoard) {
         whiteCaptures = 0;

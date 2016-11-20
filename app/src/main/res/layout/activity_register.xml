@@ -23,7 +23,7 @@
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:hint="username"
+        android:hint="@string/username"
         android:maxLines="1"
         android:maxLength="10"
         android:singleLine="true" />
@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_below="@id/username"
-        android:hint="password"
+        android:hint="@string/password"
         android:maxLength="16"
         android:inputType="textPassword"
         android:maxLines="1"
@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:maxLength="16"
         android:layout_height="45dp"
-        android:hint="repeat password"
+        android:hint="@string/repeat_password"
         android:inputType="textPassword"
         android:maxLines="1"
         android:singleLine="true" />
@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_below="@id/repeatPassword"
-        android:hint="email"
+        android:hint="@string/email"
         android:maxLines="1"
         android:singleLine="true" />
     <TextView
@@ -60,7 +60,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Accept the Rated Play Policy?"
+        android:text="@string/accept_rated_play_policy"
         android:id="@+id/ratedLabel"
         android:layout_below="@id/email"
         android:layout_alignParentLeft="true"
@@ -70,8 +70,8 @@
         android:layout_height="45dp"
         android:background="@android:color/transparent"
         android:checked="true"
-        android:textOn="Yes"
-        android:textOff="No"
+        android:textOn="@string/yes"
+        android:textOff="@string/no"
         android:id="@+id/ratedToggleButton"
         android:layout_below="@id/email"
         android:layout_alignParentRight="true"
@@ -81,7 +81,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/registerButton"
-        android:text="register"
+        android:text="@string/register"
         android:layout_below="@id/ratedLabel"/>
 
     <Button

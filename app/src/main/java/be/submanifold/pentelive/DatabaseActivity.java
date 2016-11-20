@@ -67,6 +67,7 @@ public class DatabaseActivity extends AppCompatActivity {
 
         private ProgressBar progressBar;
         private AlertDialog searchPrmtrsWindow;
+        private Context ctx = MyApplication.getContext();
 //    private int untilMove;
 
 //        private Game game;
@@ -83,7 +84,7 @@ public class DatabaseActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
             settingsView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.database_options, null, false);
             final AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
-            helpBuilder.setTitle("search parameters");
+            helpBuilder.setTitle(ctx.getString(R.string.search_parameters));
             helpBuilder.setView(settingsView);
             searchPrmtrsWindow = helpBuilder.create();
             searchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -107,7 +108,7 @@ public class DatabaseActivity extends AppCompatActivity {
 
 
 
-            toolbar.setTitle("Database");
+            toolbar.setTitle(ctx.getString(R.string.database));
             setSupportActionBar(toolbar);
 
 //            Display display = getWindowManager().getDefaultDisplay();
@@ -160,11 +161,11 @@ public class DatabaseActivity extends AppCompatActivity {
                     InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     TextView tv = (TextView) v;
-                    if (tv.getText().equals("popularity")) {
-                        tv.setText("win percentage");
+                    if (tv.getText().equals(ctx.getString(R.string.popularity))) {
+                        tv.setText(ctx.getString(R.string.win_percantage));
                         PrefUtils.saveToPrefs(DatabaseActivity.this,PrefUtils.PREFS_DBSORT_KEY, "win percentage");
                     } else {
-                        tv.setText("popularity");
+                        tv.setText(ctx.getString(R.string.popularity));
                         PrefUtils.saveToPrefs(DatabaseActivity.this,PrefUtils.PREFS_DBSORT_KEY, "popularity");
                     }
                 }
@@ -176,12 +177,12 @@ public class DatabaseActivity extends AppCompatActivity {
                     InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     TextView tv = (TextView) v;
-                    if (tv.getText().equals("either")) {
-                        tv.setText("player 1");
-                    } else if (tv.getText().equals("player 1")) {
-                        tv.setText("player 2");
+                    if (tv.getText().equals(ctx.getString(R.string.either))) {
+                        tv.setText(ctx.getString(R.string.player1));
+                    } else if (tv.getText().equals(ctx.getString(R.string.player1))) {
+                        tv.setText(ctx.getString(R.string.player2));
                     } else {
-                        tv.setText("either");
+                        tv.setText(ctx.getString(R.string.either));
                     }
                 }
             });
@@ -301,7 +302,7 @@ public class DatabaseActivity extends AppCompatActivity {
             ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    System.out.println("kitty");
+//                    System.out.println("kitty");
                     if (!hasFocus) {
                         InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -329,7 +330,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
 
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-            afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "clear", new DialogInterface.OnClickListener() {
+            afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, ctx.getString(R.string.clear), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_NEGATIVE) {
                         // Do Stuff
@@ -353,7 +354,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
 
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-            beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "clear", new DialogInterface.OnClickListener() {
+            beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, ctx.getString(R.string.clear), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_NEGATIVE) {
                         // Do Stuff
@@ -375,9 +376,9 @@ public class DatabaseActivity extends AppCompatActivity {
             String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
             String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
             int winner = 0;
-            if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 1")) {
+            if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(ctx.getString(R.string.player1))) {
                 winner = 1;
-            } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals("player 2")) {
+            } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(ctx.getString(R.string.player2))) {
                 winner = 2;
             }
             String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
@@ -588,7 +589,7 @@ public class DatabaseActivity extends AppCompatActivity {
             board.setSearchResults(searchResults);
             board.invalidate();
             if (searchResults.size() == 0 && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
-                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>No search results");
+                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>" + ctx.getString(R.string.no_search_results));
             } else {
                 if (player1.length() > 0) {
                     PrefUtils.savePlayerToPrefs(DatabaseActivity.this, player1);

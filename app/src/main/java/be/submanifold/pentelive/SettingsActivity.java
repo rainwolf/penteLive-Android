@@ -45,7 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        myToolbar.setTitle("Settings");
+        myToolbar.setTitle(getString(R.string.settings));
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
 
@@ -87,7 +87,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 ColorPickerDialogBuilder
                         .with(SettingsActivity.this)
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(PentePlayer.myColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -105,7 +105,7 @@ public class SettingsActivity extends AppCompatActivity {
                                 colorTask.execute((Void) null);
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -119,14 +119,14 @@ public class SettingsActivity extends AppCompatActivity {
                 if (!PentePlayer.mSubscriber) {
                     return;
                 }
-                final CharSequence[] items = {"Take Photo", "Choose from Library",
-                        "Cancel"};
+                final CharSequence[] items = {getString(R.string.take_photo), getString(R.string.choose_from_library),
+                        getString(R.string.cancel)};
                 AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                builder.setTitle("Change avatar");
+                builder.setTitle(getString(R.string.change_avatar));
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int item) {
-                        if (items[item].equals("Take Photo")) {
+                        if (items[item].equals(getString(R.string.take_photo))) {
                             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                             // Ensure that there's a camera activity to handle the intent
@@ -147,11 +147,11 @@ public class SettingsActivity extends AppCompatActivity {
                                     startActivityForResult(takePicture, 0);
                                 }
                             }
-                        } else if (items[item].equals("Choose from Library")) {
+                        } else if (items[item].equals(getString(R.string.choose_from_library))) {
                             Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                             startActivityForResult(pickPhoto, 1);//one can be replaced with any action code
-                        } else if (items[item].equals("Cancel")) {
+                        } else if (items[item].equals(getString(R.string.cancel))) {
                             dialog.dismiss();
                         }
                     }
@@ -164,7 +164,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
         if (resultCode != RESULT_OK) {
-            System.out.println("result kitty fuck " + resultCode);
+//            System.out.println("result kitty fuck " + resultCode);
             return;
         }
         Bitmap imageBitmap = null;
@@ -208,7 +208,7 @@ public class SettingsActivity extends AppCompatActivity {
 //        }
 //        try {
             Bitmap bitmap = imageBitmap;
-        System.out.println("kitty image " + bitmap.getWidth() + " " + bitmap.getHeight());
+//        System.out.println("kitty image " + bitmap.getWidth() + " " + bitmap.getHeight());
             float maxSize = 300f;
             Bitmap newImg = scaleBitmap(bitmap, maxSize);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -364,7 +364,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");

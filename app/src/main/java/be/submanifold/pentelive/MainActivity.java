@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        myToolbar.setTitle("Dashboard");
+        myToolbar.setTitle(getString(R.string.home));
         setSupportActionBar(myToolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
 
@@ -163,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
 //                                        System.out.println(" remaining credit = " + remainingCredit);
                                             if (remainingCredit < 1) {
                                                 Snackbar snackbar = Snackbar
-                                                        .make(getCurrentFocus(), "Not enough credit, public invitations have an \"accept 2-post 1\" policy.", Snackbar.LENGTH_LONG)
-                                                        .setAction("Post now!", new View.OnClickListener() {
+                                                        .make(getCurrentFocus(), getString(R.string.not_enough_credit), Snackbar.LENGTH_LONG)
+                                                        .setAction(getString(R.string.post_now), new View.OnClickListener() {
                                                             @Override
                                                             public void onClick(View view) {
                                                                 Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
@@ -323,10 +323,7 @@ public class MainActivity extends AppCompatActivity {
                             popupWindow.setOutsideTouchable(true);
                             popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                             popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
-                            ((TextView) policyView.findViewById(R.id.informationView)).setText("Level up your game\n\nThe database allows you to search games in the "+
-                                    "pente.org database by position. This powerful tool enables you to study and analyze games and opponents, "+
-                                    "practice opening moves, sort the results by most played or highest win percentage, and filter by player name and winner"+
-                                    ".\nMore features will be added in the future.\n\nThe database is open to subscribers only.");
+                            ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                             popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                                 @Override
@@ -507,8 +504,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void ask2GetStarted() {
         Snackbar snackbar = Snackbar
-                .make(getCurrentFocus(), "Nothing to see here. Post an open invitation to get started?", Snackbar.LENGTH_LONG)
-                .setAction("Post now!", new View.OnClickListener() {
+                .make(getCurrentFocus(), getString(R.string.nothing_to_see_here), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.post_now), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);

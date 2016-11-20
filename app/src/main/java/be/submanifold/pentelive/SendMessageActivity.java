@@ -42,7 +42,7 @@ public class SendMessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_message);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("New message");
+        toolbar.setTitle(getString(R.string.new_message));
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
@@ -63,12 +63,12 @@ public class SendMessageActivity extends AppCompatActivity {
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (actv.getText().toString().equals("")) {
-                    Toast.makeText(SendMessageActivity.this, "Please enter a recipient.",
+                    Toast.makeText(SendMessageActivity.this, getString(R.string.enter_recipient),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
-                    Toast.makeText(SendMessageActivity.this, "Please enter a subject.",
+                    Toast.makeText(SendMessageActivity.this, getString(R.string.enter_subject),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -222,7 +222,7 @@ public class SendMessageActivity extends AppCompatActivity {
                PrefUtils.savePlayerToPrefs(SendMessageActivity.this, recipient);
                finish();
             } else {
-                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError("username does not exist");
+                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(R.string.no_such_user));
             }
         }
 

@@ -125,7 +125,7 @@ public class BoardActivity extends AppCompatActivity {
         if (button != null) button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!game.isActive()) {
-                    Toast.makeText(BoardActivity.this, "It's not your turn.",
+                    Toast.makeText(BoardActivity.this, getString(R.string.not_your_turn),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -134,14 +134,14 @@ public class BoardActivity extends AppCompatActivity {
                     if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
                         moves = "" + board.connect6Move1 + "," + board.playedMove;
                     } else {
-                        Toast.makeText(BoardActivity.this, "Connect6 requires 2 moves per turn.",
+                        Toast.makeText(BoardActivity.this, getString(R.string.c6_needs_2_moves),
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
                 } else if (game.isDPente() && game.getMovesList().size() == 1) {
                     if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 ||
                             board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove3 == board.dPenteMove2) {
-                        Toast.makeText(BoardActivity.this, "D-Pente requires 3 opening moves.",
+                        Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_3_moves),
                                 Toast.LENGTH_LONG).show();
                         return;
                     } else {
@@ -149,14 +149,14 @@ public class BoardActivity extends AppCompatActivity {
                     }
                 } else if (game.isDPente() && game.dPenteChoice) {
                     if (board.playedMove == -1) {
-                        Toast.makeText(BoardActivity.this, "No move played yet.",
+                        Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
                         return;
                     } else {
                         moves = "1," + board.playedMove;
                     }
                 } else if (board.playedMove == -1) {
-                    Toast.makeText(BoardActivity.this, "No move played yet  .",
+                    Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                             Toast.LENGTH_LONG).show();
                     return;
                 } else {
@@ -168,7 +168,7 @@ public class BoardActivity extends AppCompatActivity {
                 if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
                     game.setmGameString(null);
                     game.parseGame(board);
-                    ((Button) findViewById(R.id.submitButton)).setText("submit");
+                    ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
                 } else {
                     finish();
                 }
@@ -181,7 +181,7 @@ public class BoardActivity extends AppCompatActivity {
                 ((LinearLayout) findViewById(R.id.submitLayout)).setVisibility(View.VISIBLE);
                 board.dPenteChosen = true;
 //                ((TextView) findViewById(R.id.capturesLabel)).setVisibility(View.VISIBLE);
-                Toast.makeText(BoardActivity.this, "Place a stone and submit.",
+                Toast.makeText(BoardActivity.this, getString(R.string.place_stone_submit),
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -214,7 +214,7 @@ public class BoardActivity extends AppCompatActivity {
                             return false;
                         }
                         final AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                        String options[] = {"resign", "request set cancellation", "dismiss"};
+                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
                         builder.setItems(options, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -271,16 +271,16 @@ public class BoardActivity extends AppCompatActivity {
         } else if (game.isDPente() && game.getMovesList().size() == 1) {
             if (board.dPenteMove3 > -1) {
                 board.dPenteMove3 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
                         "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
                         "-...");
             }  else if (board.dPenteMove2 > -1) {
                 board.dPenteMove2 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText("Submit: " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
                         "-...");
             } else if (board.dPenteMove1 > -1) {
                 board.dPenteMove1 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText("submit");
+                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
             }
             board.invalidate();
             return;
@@ -293,7 +293,7 @@ public class BoardActivity extends AppCompatActivity {
             game.replayGameUntilMove(board.abstractBoard, board);
             board.setReplayed(false);
         }
-        ((Button) findViewById(R.id.submitButton)).setText("submit");
+        ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
 //                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
         board.playedMove = -1;
         if (game.messages.get(game.getUntilMove()) != null) {
@@ -426,7 +426,7 @@ public class BoardActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -493,7 +493,7 @@ public class BoardActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
+//                System.out.println("output===============" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -519,7 +519,7 @@ public class BoardActivity extends AppCompatActivity {
             if (success) {
                 finish();
             } else {
-                Toast.makeText(BoardActivity.this, "A cancel request already exists. Waiting for " + game.getOpponentName() + " to reply.",
+                Toast.makeText(BoardActivity.this, getString(R.string.waiting_for_cancel_reply, game.getOpponentName()),
                         Toast.LENGTH_LONG).show();
             }
         }

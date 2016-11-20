@@ -102,7 +102,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 if (groupPosition > 0) {
                     if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
                         challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
-                        ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("Challenge " + challengedUser);
+                        ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
                         ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
                         popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
                         expandableList.setAlpha(0.5f);
@@ -257,7 +257,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
                 return true;
             case R.id.action_post_open_koth:
-                ((TextView) challengeView.findViewById(R.id.titleLabel)).setText("send open challenge");
+                ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
                 challengedUser = "";
                 popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
                 ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);

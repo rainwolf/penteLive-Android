@@ -86,6 +86,8 @@ public class MMAIBoardView extends View {
 
     private Activity activity;
 
+    private Context ctx = MyApplication.getContext();
+
 
     private boolean replayed = false;
     private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
@@ -441,7 +443,9 @@ public class MMAIBoardView extends View {
         if (movesList.isEmpty()) {
             return;
         } else {
-            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
+            String str = "<center><b>"+ctx.getString(R.string.color)+":</b> "
+                    + (myColor == 1?ctx.getString(R.string.white):ctx.getString(R.string.black))
+                    + ", <b>"+ctx.getString(R.string.difficulty)+" </b>" + difficulty + "</center><br>";
             for (int i = 0; i < movesList.size(); i++) {
                 if (i%2 == 0) {
                     str = str + " <b>" + (i/2 + 1) + ".</b> ";
@@ -473,9 +477,9 @@ public class MMAIBoardView extends View {
             } else if (myColor == (2 - movesList.size()%2)) {
                 iWon = true;
             }
-            String msg = "You lost";
+            String msg = ctx.getString(R.string.you_lost);
             if (iWon) {
-                msg = "You won";
+                msg = ctx.getString(R.string.you_won);
             }
             Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
             TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
@@ -510,7 +514,9 @@ public class MMAIBoardView extends View {
         if (movesList.isEmpty()) {
             return;
         } else {
-            String str = "<center><b>Color:</b> " + (myColor == 1?"white":"black") + ", <b>difficulty: </b>" + difficulty + "</center><br>";
+            String str = "<center><b>"+ctx.getString(R.string.color)+":</b> "
+                    + (myColor == 1?ctx.getString(R.string.white):ctx.getString(R.string.black))
+                    + ", <b>"+ctx.getString(R.string.difficulty)+" </b>" + difficulty + "</center><br>";
             for (int i = 0; i < movesList.size(); i++) {
                 if (i%2 == 0) {
                     str = str + " <b>" + (i/2 + 1) + ".</b> ";
@@ -542,9 +548,9 @@ public class MMAIBoardView extends View {
             } else if (myColor == (2 - movesList.size()%2)) {
                 iWon = true;
             }
-            String msg = "You lost";
+            String msg = ctx.getString(R.string.you_lost);
             if (iWon) {
-                msg = "You won";
+                msg = ctx.getString(R.string.you_won);
             }
             Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
             TextView v = (TextView) toast.getView().findViewById(android.R.id.message);

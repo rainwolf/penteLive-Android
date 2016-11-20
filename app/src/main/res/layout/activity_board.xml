@@ -41,7 +41,7 @@
             android:layout_weight="3"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:text="Submit"
+            android:text="@string/submit"
             android:textStyle="bold"
             android:id="@+id/submitButton" />
         <Button
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:focusable="false"
             android:drawableStart="@drawable/databasesmall"
-            android:text="search"
+            android:text="@string/search"
             android:visibility="gone"
             android:textStyle="bold"
             android:id="@+id/searchDBbutton" />
@@ -78,12 +78,12 @@
             android:textSize="18dp"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="Play as:"/>
+            android:text="@string/play_as"/>
         <Button
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="white"
+            android:text="@string/white"
             android:focusable="false"
             android:textStyle="bold"
             android:id="@+id/playAsWhiteButton" />
@@ -92,7 +92,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:text="black"
+            android:text="@string/black"
             android:textStyle="bold"
             android:id="@+id/playAsBlackButton" />
     </LinearLayout>
@@ -105,7 +105,7 @@
         android:layout_height="wrap_content"
         android:gravity="bottom|center"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id_board">
+        ads:adUnitId="ca-app-pub-3326997956703582/5986542641">
     </com.google.android.gms.ads.AdView>
 
     <TextView

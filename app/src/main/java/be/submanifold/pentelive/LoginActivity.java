@@ -505,7 +505,7 @@ public class LoginActivity extends AppCompatActivity
                             output.append(line + "\n");
                         }
                         br.close();
-                        System.out.println("output===============" + token + "\n" + output.toString());
+//                        System.out.println("output===============" + token + "\n" + output.toString());
 
                         if (output.toString().indexOf("It seems to have worked") > -1) {
                             PrefUtils.saveLongToPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, millisNow);

@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/informationView"
-        android:text="subscribe now"
+        android:text="@string/subscribe_now"
         android:focusable="false"
         android:textStyle="bold"
         android:id="@+id/subscribeButton" />
