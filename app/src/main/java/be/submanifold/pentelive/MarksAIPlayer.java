@@ -19,7 +19,6 @@ public class MarksAIPlayer {
     private final int openingBookSize = 600;
     
     private int cp, tn;
-
     private int obfl, cob, crot, obsize, extnt;
     private int p[]=new int[7], cc[][]=new int[18][7], 
     sx[]=new int[362], sy[]=new int[362];
@@ -46,6 +45,13 @@ public class MarksAIPlayer {
         obfl = 1;
         
         moves = new ArrayList();
+    }
+    public boolean useOpeningBook() {
+        return obfl > 0;
+    }
+
+    public void useOpeningBook(boolean useBook) {
+        this.obfl = (useBook?1:0);
     }
     public void setSize(int size) {
         //System.out.println("setsize " + size + ","+this.size);

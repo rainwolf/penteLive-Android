@@ -30,10 +30,15 @@ public class Ai {
 	private int size = 19;
 
     private MMAIBoardView board;
+	private DBBoardView dbBoard;
 
-    public void setBoard(MMAIBoardView board) {
+
+	public void setBoard(MMAIBoardView board) {
         this.board = board;
     }
+	public void setDbBoard(DBBoardView dbBoard) {
+		this.dbBoard = dbBoard;
+	}
 
     private boolean active;
 	
@@ -120,7 +125,12 @@ public class Ai {
 	    }
 	    int m = marksAi.getMove();
 	    if (m != -1) {
-            board.processAImove(m);
+			if (board != null) {
+				board.processAImove(m);
+			}
+			if (dbBoard != null) {
+				dbBoard.processAImove(m);
+			}
 //            for (AiListener aiListener : aiListeners) {
 //                aiListener.moveReady(moves, m);
 //            }
@@ -156,7 +166,12 @@ public class Ai {
         
                     int newMove = move(cPtr, moves, game, level, vct);
 //	    			int newMove = marksAi.getMove();
-                    board.processAImove(newMove);
+					if (board != null) {
+						board.processAImove(newMove);
+					}
+					if (dbBoard != null) {
+						dbBoard.processAImove(newMove);
+					}
                     if (alive && !destroyed) {
 //                        for (AiListener aiListener : aiListeners) {
 //                            aiListener.moveReady(moves, newMove);
@@ -234,5 +249,12 @@ public class Ai {
 	}
 	public int getVct() {
 		return vct;
+	}
+	public boolean useOpeningBook() {
+		return marksAi.useOpeningBook();
+	}
+
+	public void useOpeningBook(boolean useBook) {
+		marksAi.useOpeningBook(useBook);
 	}
 }

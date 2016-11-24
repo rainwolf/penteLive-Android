@@ -76,8 +76,6 @@ public class DBBoardView extends View {
 
     public int redDot = -1;
 
-    private boolean active, rated, gameOver, aiThinking = false;
-
 
     private List<Integer> movesList = new ArrayList<>();
     private Map<Integer, Integer> searchResults;
@@ -91,7 +89,16 @@ public class DBBoardView extends View {
             replayGame(abstractBoard);
         }
     }
-    //    private Ai aiPlayer;
+
+    public Ai getAiPlayer() {
+        return aiPlayer;
+    }
+
+    public void setAiPlayer(Ai aiPlayer) {
+        this.aiPlayer = aiPlayer;
+    }
+
+    private Ai aiPlayer;
 
     public void setActivity(Activity activity) {
         this.activity = activity;
@@ -228,6 +235,7 @@ public class DBBoardView extends View {
         stoneJ = (byte) (19*stoneY/size);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
+                redDot = -1;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
@@ -364,23 +372,27 @@ public class DBBoardView extends View {
 //        invalidate();
 //    }
 
-//    public void processAImove(final int move) {
-//        activity.runOnUiThread(new Runnable() {
-//            public void run() {
-//                active = true;
-//                movesList.add(new Integer(move));
-//                replayGame(abstractBoard);
-//                playedMove = -1;
-////                try {
-////                    Thread.sleep(100);
-////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-////                }
-//                aiThinking = false;
-//                ((MMAIActivity) activity).hideThinking();
-//            }
-//        });//        aiPlayer.destroy();
-//    }
+    public void processAImove(final int move) {
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                byte color = (byte) (1 + (movesList.size()%2));
+                movesList.add(new Integer(move));
+                redDot = move;
+                stoneJ = (byte) (move / 19);
+                stoneI = (byte) (move % 19);
+                abstractBoard[stoneI][stoneJ] = color;
+                detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
+                if (game.equals("Keryo-Pente")) {
+                    detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
+                }
+                playedMove = -1;
+                ((DatabaseActivity) activity).aiStopped();
+                invalidate();
+                RelativeLayout parentLayout = (RelativeLayout) getParent();
+                setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
+            }
+        });//        aiPlayer.destroy();
+    }
 
     public void undoMove() {
         if (movesList.size()>1) {
@@ -416,7 +428,9 @@ public class DBBoardView extends View {
                 drawStone(canvas, move, searchResults.get(move));
             }
         }
-        drawRedDot(canvas);
+        if (redDot > -1) {
+            drawRedDot(canvas);
+        }
     }
 
     private void drawStone(Canvas canvas, float x, float y, byte stoneColor) {

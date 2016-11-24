@@ -41,6 +41,8 @@ public class PrefUtils {
     public static final String PREFS_REGISTRATIONSUCCESSFUL_KEY = "__REGISTRATIONSUCCESSFUL__" ;
     public static final String PREFS_DBSORT_KEY = "__DBSORT__" ;
     public static final String PREFS_DBGAME_KEY = "__DBGAME__" ;
+    public static final String  PREFS_DBAIDIFFICULTY_KEY = "__DBAIDIFFICULTY__";
+    public static final String  PREFS_DBAIOPENINGBOOK_KEY = "__DBAIOPENINGBOOK__";
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

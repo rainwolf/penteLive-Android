@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -36,11 +39,13 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.ads.AdView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -61,13 +66,13 @@ public class DatabaseActivity extends AppCompatActivity {
         private DBBoardView board;
         private AdView mAdView;
         private PopupWindow settingsWindow;
-        private View settingsView;
+        private View settingsView, aiSettingsView;
         public Animation rotation;
         public ImageView messageIcon;
 
         private ProgressBar progressBar;
-        private AlertDialog searchPrmtrsWindow;
-        private Context ctx = MyApplication.getContext();
+        private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
+//        private Context ctx = MyApplication.getContext();
 //    private int untilMove;
 
 //        private Game game;
@@ -83,8 +88,8 @@ public class DatabaseActivity extends AppCompatActivity {
             toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
             ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
             settingsView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.database_options, null, false);
-            final AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
-            helpBuilder.setTitle(ctx.getString(R.string.search_parameters));
+            AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
+            helpBuilder.setTitle(getString(R.string.search_parameters));
             helpBuilder.setView(settingsView);
             searchPrmtrsWindow = helpBuilder.create();
             searchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -94,6 +99,18 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
             });
             searchPrmtrsWindow.setCanceledOnTouchOutside(true);
+            aiSettingsView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_ai_settings, null, false);
+            helpBuilder = new AlertDialog.Builder(this);
+            helpBuilder.setTitle(getString(R.string.ai_parameters));
+            helpBuilder.setView(aiSettingsView);
+            aiSearchPrmtrsWindow= helpBuilder.create();
+            aiSearchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    board.setAlpha(1.0f);
+                }
+            });
+            aiSearchPrmtrsWindow.setCanceledOnTouchOutside(true);
 
             progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
@@ -102,13 +119,17 @@ public class DatabaseActivity extends AppCompatActivity {
 
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
-                board.setGame(extras.getString("game"));
+                String gameStr = extras.getString("game");
+                if (gameStr.equals("Pente") || gameStr.equals("Keryo-Pente")) {
+                    ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
+                }
+                board.setGame(gameStr);
                 board.setMovesList(extras.getIntegerArrayList("moves"));
             }
 
 
 
-            toolbar.setTitle(ctx.getString(R.string.database));
+            toolbar.setTitle(getString(R.string.database));
             setSupportActionBar(toolbar);
 
 //            Display display = getWindowManager().getDefaultDisplay();
@@ -138,6 +159,11 @@ public class DatabaseActivity extends AppCompatActivity {
                             ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("\u2B24 x 0 - \u25EF x 0");
                             ((TextView) findViewById(R.id.capturesView)).setVisibility(VISIBLE);
                     }
+                    if (game.equals("Pente") || game.equals("Keryo-Pente")) {
+                        ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
+                    } else {
+                        ((Button) findViewById(R.id.aiButton)).setVisibility(View.GONE);
+                    }
                     board.resetState();
                 }
 
@@ -161,11 +187,11 @@ public class DatabaseActivity extends AppCompatActivity {
                     InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     TextView tv = (TextView) v;
-                    if (tv.getText().equals(ctx.getString(R.string.popularity))) {
-                        tv.setText(ctx.getString(R.string.win_percantage));
+                    if (tv.getText().equals(getString(R.string.popularity))) {
+                        tv.setText(getString(R.string.win_percantage));
                         PrefUtils.saveToPrefs(DatabaseActivity.this,PrefUtils.PREFS_DBSORT_KEY, "win percentage");
                     } else {
-                        tv.setText(ctx.getString(R.string.popularity));
+                        tv.setText(getString(R.string.popularity));
                         PrefUtils.saveToPrefs(DatabaseActivity.this,PrefUtils.PREFS_DBSORT_KEY, "popularity");
                     }
                 }
@@ -177,12 +203,12 @@ public class DatabaseActivity extends AppCompatActivity {
                     InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     TextView tv = (TextView) v;
-                    if (tv.getText().equals(ctx.getString(R.string.either))) {
-                        tv.setText(ctx.getString(R.string.player1));
-                    } else if (tv.getText().equals(ctx.getString(R.string.player1))) {
-                        tv.setText(ctx.getString(R.string.player2));
+                    if (tv.getText().equals(getString(R.string.either))) {
+                        tv.setText(getString(R.string.player1));
+                    } else if (tv.getText().equals(getString(R.string.player1))) {
+                        tv.setText(getString(R.string.player2));
                     } else {
-                        tv.setText(ctx.getString(R.string.either));
+                        tv.setText(getString(R.string.either));
                     }
                 }
             });
@@ -330,7 +356,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
 
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-            afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, ctx.getString(R.string.clear), new DialogInterface.OnClickListener() {
+            afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_NEGATIVE) {
                         // Do Stuff
@@ -354,7 +380,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
 
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-            beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, ctx.getString(R.string.clear), new DialogInterface.OnClickListener() {
+            beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_NEGATIVE) {
                         // Do Stuff
@@ -368,17 +394,87 @@ public class DatabaseActivity extends AppCompatActivity {
                     beforeDatePickerDialog.show();
                 }
             });
+            ((Button) findViewById(R.id.aiButton)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showAISettings();
+                }
+            });
+            spinner = (Spinner) aiSettingsView.findViewById(R.id.difficultySpinner);
+            adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
+                    R.array.ai_difficulty_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIDIFFICULTY_KEY, position);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b);
+                }
+            });
+            ((Button) aiSettingsView.findViewById(R.id.runAIbutton)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    board.setSearchResults(null);
+                    aiSearchPrmtrsWindow.dismiss();
+                    if (board.getAiPlayer() == null) {
+                        InputStream tbl = null;
+                        InputStream scs = null;
+                        InputStream opnbk = null;
+                        try {
+                            Resources resources = getResources();
+                            tbl = resources.openRawResource(R.raw.pente_tbl);
+                            scs = resources.openRawResource(R.raw.pente_scs);
+                            opnbk = resources.openRawResource(R.raw.opngbk);
+
+                            //computer.setSize(size);
+
+                            Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
+                            nativeComputer.init(scs, opnbk, tbl);
+                            board.setAiPlayer(nativeComputer);
+                        } catch (Throwable t) {
+                            Log.v("ai", "error init", t);
+                        }
+                    }
+                    Ai ai = board.getAiPlayer();
+                    boolean useBook = ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).isChecked();
+                    ai.useOpeningBook(useBook);
+                    if (board.getGame().equals("Keryo-Pente")) {
+                        ai.setGame(3);
+                    } else if (board.getGame().equals("Pente")) {
+                        ai.setGame(1);
+                    }
+                    ai.setLevel(((Spinner) aiSettingsView.findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
+                    ai.setDbBoard(board);
+                    int[] moves = new int[board.getMovesList().size()];
+                    for (int i = 0; i < board.getMovesList().size(); ++i) {
+                        moves[i] = board.getMovesList().get(i).intValue();
+                    }
+                    ai.getMove(moves);
+                }
+            });
 
         }
 
         private void doSearch() {
+            board.setRedDot(-1);
             progressBar.setVisibility(View.VISIBLE);
             String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
             String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
             int winner = 0;
-            if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(ctx.getString(R.string.player1))) {
+            if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(getString(R.string.player1))) {
                 winner = 1;
-            } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(ctx.getString(R.string.player2))) {
+            } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(getString(R.string.player2))) {
                 winner = 2;
             }
             String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
@@ -416,6 +512,20 @@ public class DatabaseActivity extends AppCompatActivity {
             acAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
             actv.setAdapter(acAdapter);
 //            board.setAlpha(0.75f);
+        }
+
+        private void showAISettings() {
+            aiSearchPrmtrsWindow.show();
+            Spinner spinner = (Spinner) aiSettingsView.findViewById(R.id.difficultySpinner);
+            spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIDIFFICULTY_KEY, 0));
+            ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, false));
+        }
+
+        private void startAI() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        public void aiStopped() {
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override
@@ -589,7 +699,7 @@ public class DatabaseActivity extends AppCompatActivity {
             board.setSearchResults(searchResults);
             board.invalidate();
             if (searchResults.size() == 0 && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
-                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>" + ctx.getString(R.string.no_search_results));
+                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>" + getString(R.string.no_search_results));
             } else {
                 if (player1.length() > 0) {
                     PrefUtils.savePlayerToPrefs(DatabaseActivity.this, player1);

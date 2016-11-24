@@ -159,6 +159,9 @@
     <string name="is_your_move_against">It\'s your move against %1$s in a game of %2$s.</string>
     <string name="new_message_from">%1$s sent you a new message!%2$s</string>
     <string name="has_invited_you">%1$s has invited you to a game of %2$s.</string>
+    <string name="ask_ai">AI?</string>
+    <string name="opening_book">Opening book:</string>
+    <string name="ai_parameters">AI parameters</string>
 
 
 

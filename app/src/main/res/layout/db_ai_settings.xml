@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/opening_book"
+        android:textStyle="bold"
+        android:id="@+id/openingBookLabel"
+        android:layout_alignParentLeft="true" />
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:background="@android:color/transparent"
+        android:checked="true"
+        android:textOn="@string/yes"
+        android:textOff="@string/no"
+        android:id="@+id/openingBookToggleButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/difficulty"
+        android:textStyle="bold"
+        android:id="@+id/difficultyLabel"
+        android:layout_below="@id/openingBookLabel"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <android.support.v7.widget.AppCompatSpinner
+        android:spinnerMode="dialog"
+        android:id="@+id/difficultySpinner"
+        android:layout_toRightOf="@id/difficultyLabel"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_below="@id/openingBookToggleButton"
+        android:textAlignment="center"
+        android:layout_height="45dp"
+        android:gravity="center_vertical">
+    </android.support.v7.widget.AppCompatSpinner>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/runAIbutton"
+        android:layout_below="@id/difficultyLabel"
+        android:text="ask the AI"/>
+
+</RelativeLayout>

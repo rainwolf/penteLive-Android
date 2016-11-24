@@ -208,7 +208,7 @@ public class Game implements Parcelable {
     }
 
     public String getLocalizedRatedNot() {
-        if (mLocalizedRatedNot == null) {
+        if (mRatedNot != null && mLocalizedRatedNot == null) {
             Context ctx = MyApplication.getContext();
             if (mRatedNot.equals("Rated")) {
                 mLocalizedRatedNot = ctx.getString(R.string.rated);
@@ -224,7 +224,7 @@ public class Game implements Parcelable {
     }
 
     public String getLocalizedTime() {
-        if (mLocalizedTime == null) {
+        if (mRemainingTime != null && mLocalizedTime == null) {
             Context ctx = MyApplication.getContext();
             if (mRemainingTime.contains("minutes")) {
                 String[] splitTime = mRemainingTime.split(" ");
