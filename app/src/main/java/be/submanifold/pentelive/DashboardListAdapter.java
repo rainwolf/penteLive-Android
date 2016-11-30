@@ -328,6 +328,9 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 fcs = new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.orange));
             }
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            if (hill.isKing()) {
+                convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            }
         }
         if (groupPosition == PUBLICINVITATIONSGROUP) {
             if (game.getRatedNot().contains("KotH")) {
