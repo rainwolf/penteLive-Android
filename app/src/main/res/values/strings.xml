@@ -163,7 +163,7 @@
     <string name="opening_book">Opening book:</string>
     <string name="ai_parameters">AI parameters</string>
 
-
+    <string name="error_connecting">There was a connection error, please try again.</string>
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>

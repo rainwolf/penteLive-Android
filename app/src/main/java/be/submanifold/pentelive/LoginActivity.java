@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +30,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -352,6 +354,7 @@ public class LoginActivity extends AppCompatActivity
         private final String mEmail;
         private final String mPassword;
 
+        private boolean wrongUP = false;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -411,6 +414,7 @@ public class LoginActivity extends AppCompatActivity
 //
 //                    AlertDialog alert11 = builder1.create();
 //                    alert11.show();
+                    wrongUP = true;
                     System.out.println("wrong password");
                     return false;
                 }
@@ -452,8 +456,13 @@ public class LoginActivity extends AppCompatActivity
                 startActivity(intent);
 //                finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if (wrongUP) {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                } else {
+                    Toast toast = Toast.makeText(LoginActivity.this, getString(R.string.error_connecting), Toast.LENGTH_LONG);
+                    toast.show();
+                }
             }
         }
 
