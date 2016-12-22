@@ -10,8 +10,14 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
-        finish();
+//        finish();
     }
+
 }

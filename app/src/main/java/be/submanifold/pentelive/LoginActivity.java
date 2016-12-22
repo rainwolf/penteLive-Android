@@ -177,9 +177,6 @@ public class LoginActivity extends AppCompatActivity
                 startActivity(Intent.createChooser(i, "Get Help"));
             }
         });
-        if ((storedPassword != null) && (storedUserName != null) && PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false)) {
-            attemptLogin();
-        }
 
         ((Button) findViewById(R.id.moreSettingsButton)).setOnClickListener(new OnClickListener() {
             @Override
@@ -189,6 +186,9 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
+        if ((storedPassword != null) && (storedUserName != null) && PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false)) {
+            attemptLogin();
+        }
 
     }
 
@@ -198,8 +198,8 @@ public class LoginActivity extends AppCompatActivity
         MyApplication.activityResumed(this);
         if (PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, false)) {
             ((LinearLayout) findViewById(R.id.registerLayout)).setVisibility(View.GONE);
-//            ((AutoCompleteTextView) findViewById(R.id.email)).setEnabled(false);
-//            ((EditText) findViewById(R.id.password)).setEnabled(false);
+            ((AutoCompleteTextView) findViewById(R.id.email)).setEnabled(false);
+            ((EditText) findViewById(R.id.password)).setEnabled(false);
         }
     }
 

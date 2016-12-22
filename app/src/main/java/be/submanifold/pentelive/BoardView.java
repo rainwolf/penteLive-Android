@@ -7,7 +7,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +18,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -149,6 +152,7 @@ public class BoardView extends View {
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
             if (!game.isConnect6() && !game.isGomoku()) {
                 ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures);
+//                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle(getCapturesString());
             }
 //            parentLayout.setSupportActionBar(toolbar);
 //            if (!game.isConnect6()) {
@@ -566,6 +570,20 @@ public class BoardView extends View {
         this.boardActivity = boardActivity;
     }
 
+    private SpannableStringBuilder getCapturesString() {
+//        String str = "\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures;
+        SpannableStringBuilder sb = new SpannableStringBuilder("\u2B24");
+        float size = 1.5f;
+        sb.setSpan(new RelativeSizeSpan(size), 0,1,0);
+//        Drawable icon = null;
+//        icon = ContextCompat.getDrawable(boardActivity, R.drawable.black_nobg);
+//        sb.setSpan(icon, 0, 1, 0);
+        sb.append(" x " + game.blackCaptures + " -  \u25EF");
+//        icon = ContextCompat.getDrawable(boardActivity, R.drawable.white_nobg);
+        sb.setSpan(new RelativeSizeSpan(size), sb.length() - 1, sb.length(), 0);
+        sb.append(" x " + game.whiteCaptures);
+        return sb;
+    }
 
 
 }
