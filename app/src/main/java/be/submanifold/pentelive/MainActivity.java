@@ -1,5 +1,7 @@
 package be.submanifold.pentelive;
 
+import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,15 +9,12 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -40,7 +39,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -416,11 +417,18 @@ public class MainActivity extends AppCompatActivity {
                         loadWhosOnlineTask.execute((Void) null);
 
                         return true;
+                    case R.id.live_games:
+                        intent = new Intent(getApplicationContext(), LobbyActivity.class);
+                        startActivity(intent);
+                        return true;
                 }
 
                 return false;
             }
         });
+//        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
+//        startActivity(intent);
+
     }
 
 
@@ -532,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonline.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
 
 //                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
@@ -581,20 +589,29 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
 
             if (success) {
-                final List<KothPlayer> onlinePlayers = new ArrayList<>();
-
+                final Map<String, List<KothPlayer>> onlinePlayers = new HashMap<>();
+                int total = 0;
                 String[] dashLines = dashboardString.split("\n");
-                String dashLine;
                 int idx = 0;
                 while (idx < dashLines.length) {
-                    dashLine = dashLines[idx];
-                    String[] splitLine = dashLine.split(",");
-                    if (splitLine.length > 4) {
-                        KothPlayer player = new KothPlayer(splitLine[0], splitLine[1], splitLine[4], false, Integer.parseInt(splitLine[3]), Integer.parseInt(splitLine[2]));
-                        if (PentePlayer.loadAvatars && player.getColor() != 0) {
-                            this.player.addUserAvatar(player.getName());
+                    String roomLine = dashLines[idx];
+                    String[] splitRoomLine = roomLine.split(":");
+                    if (splitRoomLine.length>1) {
+                        List<KothPlayer> playersList = new ArrayList<>();
+                        String roomName = splitRoomLine[0];
+                        String[] users = splitRoomLine[1].split(";");
+                        for (String dashLine: users) {
+                            String[] splitLine = dashLine.split(",");
+                            if (splitLine.length > 4) {
+                                KothPlayer player = new KothPlayer(splitLine[0], splitLine[1], splitLine[4], false, Integer.parseInt(splitLine[3]), Integer.parseInt(splitLine[2]));
+                                if (PentePlayer.loadAvatars && player.getColor() != 0) {
+                                    this.player.addUserAvatar(player.getName());
+                                }
+                                total = total + 1;
+                                playersList.add(player);
+                            }
                         }
-                        onlinePlayers.add(player);
+                        onlinePlayers.put(roomName, playersList);
                     }
                     idx += 1;
                 }
@@ -608,12 +625,15 @@ public class MainActivity extends AppCompatActivity {
                 popUpView.setBackgroundColor(Color.BLUE);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                 final float scale = getResources().getDisplayMetrics().density;
-                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, onlinePlayers.size()*44))*scale), true );
+                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, total*44))*scale), true );
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
+                System.out.println("totaaaaaaaal "+total);
                 ExpandableListView onlineUsersListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
                 onlineUsersListView.setDividerHeight(0);
                 onlineUsersListView.setAdapter(listAdapter);
-                onlineUsersListView.expandGroup(0);
+                for (int i = 0; i < onlinePlayers.size(); i++ ) {
+                    onlineUsersListView.expandGroup(i);
+                }
                 onlineUsersListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
                     @Override
                     public boolean onGroupClick(ExpandableListView parent, View v,
@@ -624,11 +644,15 @@ public class MainActivity extends AppCompatActivity {
                 onlineUsersListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
                     @Override
                     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                        if (player.getPlayerName().equals(onlinePlayers.get(childPosition).getName())) {
+                        if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
+                            return false;
+                        }
+                        KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
+                        if (player.getPlayerName().equals(onlinePlayer.getName())) {
                             return false;
                         }
                         Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                        intent.putExtra("opponent", onlinePlayers.get(childPosition).getName());
+                        intent.putExtra("opponent", onlinePlayer.getName());
                         startActivity(intent);
 
                         return true;

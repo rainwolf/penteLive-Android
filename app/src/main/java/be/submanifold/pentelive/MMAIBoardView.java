@@ -906,6 +906,13 @@ public class MMAIBoardView extends View {
         }
     }
 
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, widthMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, width);
+    }
+
 
 
 }

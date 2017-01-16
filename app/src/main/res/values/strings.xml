@@ -163,7 +163,71 @@
     <string name="opening_book">Opening book:</string>
     <string name="ai_parameters">AI parameters</string>
 
+
     <string name="error_connecting">There was a connection error, please try again.</string>
+    <string name="lobby">Lobby</string>
+    <string name="live_games">live games</string>
+    <string name="rooms">rooms</string>
+    <string name="players">players</string>
+    <string name="tables">tables</string>
+    <string name="has_joined_main_room">* %1$s has joined the main room</string>
+    <string name="has_exited_main_room">* %1$s has exited the main room</string>
+    <string name="new_table">create</string>
+    <string name="timer">Timer</string>
+    <string name="watching">Watching: </string>
+    <string name="no_timer">no timer</string>
+    <string name="tap_to_sit">tap to sit</string>
+    <string name="play">play</string>
+    <string name="owner">* %1$s is now owner of this table</string>
+    <string name="leave_table">* %1$s has left the table</string>
+    <string name="join_table">* %1$s has joined the table</string>
+    <string name="not_owner">You can not make changes because you are not the table owner.</string>
+    <string name="public_table">public</string>
+    <string name="private_table">private</string>
+    <string name="table_type">Table type</string>
+    <string name="timed">Timed</string>
+    <string name="initial_minutes">Initial minutes</string>
+    <string name="incremental_seconds">Incremental seconds</string>
+    <string name="table_settings">table settings</string>
+    <string name="not_player">game actions are only available to seated players when the game has started.</string>
+    <string name="requests_cancellation">%1$s is requesting to cancel this set.</string>
+    <string name="request_undo">request undo</string>
+    <string name="requests_undo">%1$s is requesting to undo their last move.</string>
+    <string name="undo_requested">undo requested</string>
+    <string name="undo_accepted">undo accepted</string>
+    <string name="undo_declined">undo declined</string>
+    <string name="cancellation_requested">set/game cancellation requested</string>
+    <string name="cancellation_accepted">set/game cancellation accepted</string>
+    <string name="cancellation_declined">set/game cancellation declined</string>
+    <string name="continue_as">continue playing as</string>
+    <string name="p1white">player 1 (white)</string>
+    <string name="p2black">player 2 (black)</string>
+    <string name="seats_swapped">seats swapped</string>
+    <string name="seats_not_swapped">seats not swapped</string>
+    <string name="table_players">table players</string>
+    <string name="show_table_players">show table players</string>
+    <string name="boot_player">boot player</string>
+    <string name="invite_player">invite player</string>
+    <string name="player_booted_by">%1$s has been booted by %2$s</string>
+    <string name="you_booted_by">you were booted by %2$s, </string>
+    <string name="optional_message">optional message</string>
+    <string name="invite_player_to_table">invite %1$s</string>
+    <string name="accepted_your_invitation">%1$s accepted your invitation</string>
+    <string name="declined_your_invitation">%1$s declined your invitation</string>
+    <string name="is_ignoring_your_invitation">%1$s is ignoring invitations from you</string>
+    <string name="were_booted">you were booted from this table, you can try joining again in 5 minutes.</string>
+    <string name="invites_you">is inviting you to their %1$s table</string>
+    <string name="ignore_invitations">ignore invitations</string>
+    <string name="message">message</string>
+    <string name="player_disconnected">Your opponent seems to be disconnected. You can choose to resign now or wait. If your opponent does not return in 7 minutes, you get the option to cancel the game/set or force resign your opponent.</string>
+    <string name="force_resign">force resign opponent</string>
+    <string name="cancel_set_game">cancel this set/game</string>
+    <string name="opponent_unavailable">opponent unavailable</string>
+    <string name="player_not_returned">You can now choose to resign, cancel the game/set, or force resign your opponent.</string>
+
+
+
+
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
@@ -253,4 +317,7 @@
         <item>7</item>
         <item>8</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,0 +1,146 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    tools:context="be.submanifold.pentelive.liveGameRoom.LiveTableFragment">
+
+    <RelativeLayout
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/capturesView"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp" />
+                <TextView
+                    android:id="@+id/gameNameView"
+                    android:textSize="14dp"
+                    android:gravity="left|center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+            </LinearLayout>
+
+            </android.support.v7.widget.Toolbar>
+        <view
+            class="be.submanifold.pentelive.liveGameRoom.LiveBoardView"
+            android:id="@+id/boardView"
+            android:layout_below="@id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/actionLayout"
+            android:layout_width="match_parent"
+            android:layout_below="@id/boardView"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/p1Layout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:text="@string/tap_to_sit"
+                    android:textSize="18sp"
+                    android:textAlignment="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/p1Name"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textSize="18sp"
+                    android:text="0:0"
+                    android:textAlignment="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/p1Timer"/>
+            </LinearLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/settingsText"
+                    android:textSize="18sp"
+                    android:text="Timer: 0/0\nnot rated"
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:layout_height="match_parent"/>
+                <Button
+                    android:id="@+id/playButton"
+                    android:text="@string/play"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"/>
+            </FrameLayout>
+            <LinearLayout
+                android:id="@+id/p2Layout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@string/tap_to_sit"
+                    android:textSize="18sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:id="@+id/p2Name"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textSize="18sp"
+                    android:text="0:0"
+                    android:textAlignment="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/p2Timer"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|center"
+            ads:adSize="BANNER"
+            ads:adUnitId="ca-app-pub-3326997956703582/7970833848">
+        </com.google.android.gms.ads.AdView>
+
+        <TextView
+            android:id="@+id/tableTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:gravity="bottom"
+            android:background="@drawable/border"
+            android:layout_below="@id/actionLayout"
+            android:layout_above="@id/adView"/>
+
+    </RelativeLayout>
+
+</FrameLayout>

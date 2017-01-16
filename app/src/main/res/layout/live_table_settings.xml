@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/game"
+        android:textStyle="bold"
+        android:id="@+id/gameLabel"
+        android:layout_alignParentLeft="true" />
+    <android.support.v7.widget.AppCompatSpinner
+        android:spinnerMode="dialog"
+        android:id="@+id/gameSpinner"
+        android:layout_toRightOf="@id/gameLabel"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:textAlignment="center"
+        android:layout_height="45dp"
+        android:gravity="center_vertical">
+    </android.support.v7.widget.AppCompatSpinner>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/table_type"
+        android:textStyle="bold"
+        android:id="@+id/privateLabel"
+        android:layout_below="@id/gameLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:layout_toRightOf="@id/privateLabel"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/public_table"
+        android:layout_below="@id/gameSpinner"
+        android:id="@+id/privateChoice"
+        android:layout_alignParentRight="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/rated"
+        android:textStyle="bold"
+        android:id="@+id/ratedLabel"
+        android:layout_below="@id/privateLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:layout_toRightOf="@id/ratedLabel"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/no"
+        android:layout_below="@id/privateChoice"
+        android:id="@+id/ratedChoice"
+        android:layout_alignParentRight="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/timed"
+        android:textStyle="bold"
+        android:id="@+id/timedLabel"
+        android:layout_below="@id/ratedLabel"
+        android:layout_alignParentLeft="true" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:onClick="onClick"
+        android:clickable="true"
+        android:layout_toRightOf="@id/ratedLabel"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/no"
+        android:layout_below="@id/ratedChoice"
+        android:id="@+id/timedChoice"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/initial_minutes"
+        android:textStyle="bold"
+        android:id="@+id/initialMinutesLabel"
+        android:layout_below="@id/timedLabel"
+        android:layout_alignParentLeft="true" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:textAlignment="center"
+        android:layout_toRightOf="@id/initialMinutesLabel"
+        android:layout_below="@id/timedChoice"
+        android:id="@+id/initialMinutesInput"
+        android:inputType="number"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/incremental_seconds"
+        android:textStyle="bold"
+        android:id="@+id/incrementalSecondsLabel"
+        android:layout_below="@id/initialMinutesLabel"
+        android:layout_alignParentLeft="true" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:textAlignment="center"
+        android:layout_toRightOf="@id/incrementalSecondsLabel"
+        android:layout_below="@id/initialMinutesInput"
+        android:id="@+id/incrementalSecondsInput"
+        android:inputType="number"/>
+
+
+
+</RelativeLayout>

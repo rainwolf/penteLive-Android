@@ -720,13 +720,13 @@ public class Game implements Parcelable {
                 if (!dashLine.substring(dashLine.indexOf(",")+1).equals("")) {
                     msg = "\n(" + dashLine.substring(dashLine.indexOf(",")+1) + ")";
                 }
-                builder.setMessage(getOpponentName() + " requests to cancel this set." + msg);
-                builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+                builder.setMessage(host.getString(R.string.requests_cancellation, getOpponentName()) + msg);
+                builder.setPositiveButton(host.getString(R.string.accept), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "Yes", host);
                         task.execute((Void) null);
                     } });
-                builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(host.getString(R.string.decline), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
                         task.execute((Void) null);

@@ -29,6 +29,10 @@
                 android:icon="@drawable/database"
                 android:title="@string/database"
                 />
+            <item android:id="@+id/live_games"
+                android:icon="@drawable/lightning"
+                android:title="@string/live_games"
+                />
         </menu>
 
         </item>

@@ -329,10 +329,10 @@ public class BoardView extends View {
             }
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
             if (playedMove == -1 || abstractBoard[stoneI][stoneJ] != 0) {
+                ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr);
                 if (!replayed && game.getMovesList() != null) {
                     System.out.println(" fuck kitty");
                     game.replayGame(abstractBoard, this);
-                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr);
                     replayed = true;
                 }
                 if (game.isConnect6() && connect6Move1 > -1) {
@@ -583,6 +583,13 @@ public class BoardView extends View {
         sb.setSpan(new RelativeSizeSpan(size), sb.length() - 1, sb.length(), 0);
         sb.append(" x " + game.whiteCaptures);
         return sb;
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, widthMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, width);
     }
 
 

@@ -19,7 +19,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by waliedothman on 01/11/2016.
@@ -27,7 +29,8 @@ import java.util.List;
 
 public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
 
-    List<KothPlayer> onlinePlayers;
+    Map<String, List<KothPlayer>> onlinePlayers;
+    public List<String> sections;
     Activity activity;
 
     PentePlayer playerData;
@@ -42,20 +45,21 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         this.inflater = inflater;
         this.activity = activity;
     }
-    public void setOnlinePlayers(List<KothPlayer> onlinePlayers) {
+    public void setOnlinePlayers(Map<String, List<KothPlayer>> onlinePlayers) {
         this.onlinePlayers = onlinePlayers;
+        sections = new ArrayList<>(onlinePlayers.keySet());
     }
 
 
 
     @Override
     public int getGroupCount() {
-        return 1;
+        return onlinePlayers.size();
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return onlinePlayers.size();
+        return onlinePlayers.get(sections.get(groupPosition)).size();
     }
 
     @Override
@@ -90,7 +94,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(Color.GRAY);
-        ((TextView) convertView.findViewById(R.id.textView)).setText(ctx.getString(R.string.whos_online));
+        ((TextView) convertView.findViewById(R.id.textView)).setText(sections.get(groupPosition) + " (" + onlinePlayers.get(sections.get(groupPosition)).size() + ")");
 
         return convertView;
     }
@@ -118,7 +122,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
 
         int crown = 0, color = 0;
         KothPlayer player = null;
-        player = onlinePlayers.get(childPosition);
+        player = onlinePlayers.get(sections.get(groupPosition)).get(childPosition);
         ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);

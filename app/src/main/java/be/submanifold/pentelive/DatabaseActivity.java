@@ -282,13 +282,13 @@ public class DatabaseActivity extends AppCompatActivity {
             vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    int width  = board.getMeasuredWidth();
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
-                    params.height = width;
-                    params.width = width;
-//                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
-                    board.setLayoutParams(params);
+//                    board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                    int width  = board.getMeasuredWidth();
+//                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
+//                    params.height = width;
+//                    params.width = width;
+////                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
+//                    board.setLayoutParams(params);
 
                     if (board.getMovesList().size() <= 1) {
                         showDBSettings();

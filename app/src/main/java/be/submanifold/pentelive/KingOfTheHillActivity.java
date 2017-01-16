@@ -607,6 +607,12 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
             if (success) {
                 PrefUtils.saveIntToPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, ((Spinner) challengeView.findViewById(R.id.timeoutSpinner)).getSelectedItemPosition());
+                if ("".equals(opponentName)) {
+                    int remainingCredit = PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2) + 2;
+                    PrefUtils.saveIntToPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
+                } else {
+                    PrefUtils.savePlayerToPrefs(KingOfTheHillActivity.this, opponentName);
+                }
                 LoadHillTask loadTask = new LoadHillTask(gameType);
                 loadTask.execute((Void) null);
 
