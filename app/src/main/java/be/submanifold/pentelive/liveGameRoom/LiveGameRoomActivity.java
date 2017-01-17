@@ -110,7 +110,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy");
-        (new Thread() { public void run() { eventHandler.destroy(); } }).start();
+        (new Thread() { public void run() {
+            if (eventHandler != null) {
+                eventHandler.destroy();
+            }
+        } }).start();
         super.onDestroy();
     }
 

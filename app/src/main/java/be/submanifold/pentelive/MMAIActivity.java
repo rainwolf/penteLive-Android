@@ -208,22 +208,21 @@ public class MMAIActivity extends AppCompatActivity {
 
 
 
-//        final BoardView layout = (BoardView) findViewById(R.id.boardView);
-        ViewTreeObserver vto = board.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-//                board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                int width  = board.getMeasuredWidth();
-//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
-//                params.height = width;
-//                params.width = width;
-////                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
-//                board.setLayoutParams(params);
-
-                showAISettings();
-            }
-        });
+////        final BoardView layout = (BoardView) findViewById(R.id.boardView);
+//        ViewTreeObserver vto = board.getViewTreeObserver();
+//        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+////                board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+////                int width  = board.getMeasuredWidth();
+////                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
+////                params.height = width;
+////                params.width = width;
+//////                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
+////                board.setLayoutParams(params);
+//
+//            }
+//        });
 
         if (PentePlayer.mShowAds) {
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
@@ -276,7 +275,11 @@ public class MMAIActivity extends AppCompatActivity {
             });
             requestNewInterstitial();
         }
-
+        board.post(new Runnable() {
+            public void run() {
+                showAISettings();
+            }
+        });
     }
 
     private void showAISettings() {

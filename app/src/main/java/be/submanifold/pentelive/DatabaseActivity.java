@@ -277,28 +277,6 @@ public class DatabaseActivity extends AppCompatActivity {
 
 
 
-//        final BoardView layout = (BoardView) findViewById(R.id.boardView);
-            ViewTreeObserver vto = board.getViewTreeObserver();
-            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-//                    board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                    int width  = board.getMeasuredWidth();
-//                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
-//                    params.height = width;
-//                    params.width = width;
-////                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
-//                    board.setLayoutParams(params);
-
-                    if (board.getMovesList().size() <= 1) {
-                        showDBSettings();
-                    } else {
-                        doSearch();
-                    }
-                }
-            });
-
-
             Button button = (Button) findViewById(R.id.searchButton);
             if (button != null) button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -461,6 +439,16 @@ public class DatabaseActivity extends AppCompatActivity {
                         moves[i] = board.getMovesList().get(i).intValue();
                     }
                     ai.getMove(moves);
+                }
+            });
+
+            board.post(new Runnable() {
+                public void run() {
+                    if (board.getMovesList().size() <= 1) {
+                        showDBSettings();
+                    } else {
+                        doSearch();
+                    }
                 }
             });
 
