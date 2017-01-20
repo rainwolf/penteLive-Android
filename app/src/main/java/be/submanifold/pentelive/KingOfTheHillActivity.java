@@ -95,40 +95,42 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     }
                 }
         );
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
+        if (kothSummary.getGameId() > 50) {
+            expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
-                if (groupPosition > 0) {
-                    if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
-                        challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
-                        ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
-                        ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
-                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
-                        expandableList.setAlpha(0.5f);
+                    if (groupPosition > 0) {
+                        if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
+                            challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
+                            ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
+                            ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
+                            popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
+                            expandableList.setAlpha(0.5f);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+            expandableList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    int groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                    int childPosition = ExpandableListView.getPackedPositionChild(id);
+                    if (groupPosition == 0 && childPosition == 0) {
+                        JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(kothSummary.getGameId(), !kothSummary.isMember());
+                        joinLeaveTask.execute((Void) null);
+
                         return true;
                     }
+
+                    return false;
                 }
-                return false;
-            }
-        });
-        expandableList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                int groupPosition = ExpandableListView.getPackedPositionGroup(id);
-                int childPosition = ExpandableListView.getPackedPositionChild(id);
-                if (groupPosition == 0 && childPosition == 0) {
-                    JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(getGameString(kothSummary.getGame()), !kothSummary.isMember());
-                    joinLeaveTask.execute((Void) null);
+            });
+        }
 
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-        LoadHillTask loadTask = new LoadHillTask(getGameString(kothSummary.getGame()));
+        LoadHillTask loadTask = new LoadHillTask(kothSummary.getGameId());
         loadTask.execute((Void) null);
 
         Display display = getWindowManager().getDefaultDisplay();
@@ -193,7 +195,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     case 5: restriction = "C"; break;
                 }
 
-                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, getGameString(kothSummary.getGame()), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
+                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, kothSummary.getGameId(), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
                 inviteTask.execute((Void) null);
                 popupWindow.dismiss();
             }
@@ -230,7 +232,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     }
 
     private void refreshPlayer() {
-        LoadHillTask loadTask = new LoadHillTask(getGameString(kothSummary.getGame()));
+        LoadHillTask loadTask = new LoadHillTask(kothSummary.getGameId());
         loadTask.execute((Void) null);
     }
 
@@ -238,7 +240,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.koth_menu, menu);
-        if (!kothSummary.canIchallenge()) {
+        if (!kothSummary.canIchallenge() || kothSummary.getGameId() < 50) {
             menu.findItem(R.id.action_post_open_koth).setEnabled(false);
             menu.findItem(R.id.action_post_open_koth).setVisible(false);
         }
@@ -249,7 +251,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_web_koth:
-                String game = getGameString(kothSummary.getGame());
+                int game = kothSummary.getGameId();
                 String url = "https://www.pente.org/gameServer/stairs.jsp?game="+game;
                 Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
@@ -269,28 +271,6 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    private String getGameString(String inStr) {
-        String gameString= "51";
-        if (inStr.equals("Pente"))
-            gameString = "51";
-        if (inStr.equals("Gomoku"))
-            gameString = "55";
-        if (inStr.equals("D-Pente"))
-            gameString = "57";
-        if (inStr.equals("G-Pente"))
-            gameString = "59";
-        if (inStr.equals("Boat-Pente"))
-            gameString = "65";
-        if (inStr.equals("Poof-Pente"))
-            gameString = "61";
-        if (inStr.equals("Connect6"))
-            gameString = "63";
-        if (inStr.equals("Keryo-Pente"))
-            gameString = "53";
-
-        return gameString;
     }
 
     private void loadHill(String htmlString) {
@@ -340,10 +320,10 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
     private class LoadHillTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mGame;
+        private final int mGame;
         private String htmlString;
 
-        LoadHillTask(String game) {
+        LoadHillTask(int game) {
             this.mGame = game;
         }
 
@@ -433,10 +413,10 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
     private class JoinLeaveHillTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mGame;
+        private final int mGame;
         private boolean join;
 
-        JoinLeaveHillTask(String game, boolean join) {
+        JoinLeaveHillTask(int game, boolean join) {
             this.mGame = game;
             this.join = join;
         }
@@ -520,11 +500,11 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String opponentName;
-        private final String gameType;
+        private final int gameType;
         private final String timeout;
         private final String restriction;
 
-        SendInvitationTask(String opponentName, String gameType, String timeout, String restriction) {
+        SendInvitationTask(String opponentName, int gameType, String timeout, String restriction) {
             this.opponentName = opponentName;
             this.gameType = gameType;
             this.timeout = timeout;

@@ -16,6 +16,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
@@ -164,7 +165,9 @@ public class LiveGameRoomFragment extends Fragment {
 //                        dialog.cancel();
 //                    }
 //                });
-                builder.show();
+                AlertDialog dlg = builder.create();
+                dlg.show();
+                dlg.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
     }

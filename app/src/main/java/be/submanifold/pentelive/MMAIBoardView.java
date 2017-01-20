@@ -8,12 +8,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -418,6 +421,21 @@ public class MMAIBoardView extends View {
         }
     }
 
+    private SpannableStringBuilder getCapturesText(int lineHeight) {
+        SpannableStringBuilder sb = new SpannableStringBuilder("");
+        Drawable icon;
+        icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.white_nobg);
+        icon.setBounds(0, 0, lineHeight * 4 / 5, lineHeight * 4 / 5);
+        sb.append(" ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
+        sb.append(" ").append("x " + whiteCaptures + "\n");
+        icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.black_nobg);
+        icon.setBounds(0, 0, lineHeight * 4 / 5, lineHeight * 4 / 5);
+        sb.append(" ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
+        sb.append(" ").append("x " + blackCaptures);
+        return sb;
+    }
+
+
     private void replayPenteGame(byte[][] abstractBoard) {
         resetAbstractBoard(abstractBoard);
         for (int i = 0; i < movesList.size(); i++) {
@@ -455,7 +473,8 @@ public class MMAIBoardView extends View {
         }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
         if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
             gameOver = true;
@@ -526,7 +545,8 @@ public class MMAIBoardView extends View {
         }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
         if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
             gameOver = true;

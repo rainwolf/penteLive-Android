@@ -13,6 +13,8 @@ public class RatingStat implements Parcelable {
     private String totalGames;
     private int crown;
 
+    private int gameId;
+
     public int getCrown() {
         return crown;
     }
@@ -53,14 +55,51 @@ public class RatingStat implements Parcelable {
         this.game = game;
     }
 
+    public int getGameId() { return gameId; }
 
-    public RatingStat(String game, String rating, String lastGame, String totalGames, String crown) {
+    public void setGameId(int gameId) { this.gameId = gameId; }
+
+
+
+    public RatingStat(String game, String rating, String lastGame, String totalGames, String crown, String gameId) {
         this.game = game;
         this.rating = rating;
         this.lastGame = lastGame;
         this.totalGames = totalGames;
         if (crown != null) {
             this.crown = Integer.parseInt(crown);
+        }
+        if (gameId != null) {
+            this.gameId = Integer.parseInt(gameId);
+        }
+        String gameStr;
+        int gameInt = this.gameId;
+        if (gameInt > 50) {
+            gameInt -= 50;
+        }
+        if (gameInt < 3) {
+            gameStr = "Pente";
+        } else if (gameInt < 5) {
+            gameStr = "Keryo-Pente";
+        } else if (gameInt < 7) {
+            gameStr = "Gomoku";
+        } else if (gameInt < 9) {
+            gameStr = "D-Pente";
+        } else if (gameInt < 11) {
+            gameStr = "G-Pente";
+        } else if (gameInt < 13) {
+            gameStr = "Poof-Pente";
+        } else if (gameInt < 15) {
+            gameStr = "Connect6";
+        } else {
+            gameStr = "Boat-Pente";
+        }
+        if (this.gameId > 50) {
+            this.game = "tb-" + gameStr;
+        } else if (this.gameId % 2 == 0) {
+            this.game = "Speed " + gameStr;
+        } else {
+            this.game = gameStr;
         }
     }
 
@@ -70,6 +109,7 @@ public class RatingStat implements Parcelable {
         lastGame = in.readString();
         totalGames = in.readString();
         crown = in.readInt();
+        gameId = in.readInt();
     }
 
     @Override
@@ -84,6 +124,7 @@ public class RatingStat implements Parcelable {
         dest.writeString(lastGame);
         dest.writeString(totalGames);
         dest.writeInt(crown);
+        dest.writeInt(gameId);
     }
 
     @SuppressWarnings("unused")

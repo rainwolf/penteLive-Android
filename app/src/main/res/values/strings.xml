@@ -224,7 +224,7 @@
     <string name="cancel_set_game">cancel this set/game</string>
     <string name="opponent_unavailable">opponent unavailable</string>
     <string name="player_not_returned">You can now choose to resign, cancel the game/set, or force resign your opponent.</string>
-
+    <string name="live_hill_join_leave">KotH for live games are joined automatically when you play a rated set in the King of the Hill live game room</string>
 
 
 

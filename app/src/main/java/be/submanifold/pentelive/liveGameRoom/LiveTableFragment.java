@@ -269,7 +269,7 @@ public class LiveTableFragment extends Fragment {
                 }
             }
         });
-        ((TextView) tableTextView).setOnClickListener(new View.OnClickListener() {
+        tableTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -288,7 +288,9 @@ public class LiveTableFragment extends Fragment {
                         }
                     }
                 });
-                builder.show();
+                AlertDialog dlg = builder.create();
+                dlg.show();
+                dlg.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
         updateTable();

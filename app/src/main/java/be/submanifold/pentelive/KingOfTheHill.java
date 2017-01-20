@@ -13,14 +13,47 @@ public class KingOfTheHill implements Parcelable {
     private boolean member;
     private boolean king;
     private boolean canIchallenge;
+    private int gameId;
 
-    public KingOfTheHill(String game, String numPlayers, String currentKing, boolean member, boolean king, boolean canIchallenge) {
+    public KingOfTheHill(String game, String numPlayers, String currentKing, boolean member, boolean king, boolean canIchallenge, String gameId) {
         this.game = game;
         this.numPlayers = numPlayers;
         this.currentKing = currentKing;
         this.member = member;
         this.king = king;
         this.canIchallenge = canIchallenge;
+        if (gameId != null) {
+            this.gameId = Integer.parseInt(gameId);
+        }
+        String gameStr;
+        int gameInt = this.gameId;
+        if (gameInt > 50) {
+            gameInt -= 50;
+        }
+        if (gameInt < 3) {
+            gameStr = "Pente";
+        } else if (gameInt < 5) {
+            gameStr = "Keryo-Pente";
+        } else if (gameInt < 7) {
+            gameStr = "Gomoku";
+        } else if (gameInt < 9) {
+            gameStr = "D-Pente";
+        } else if (gameInt < 11) {
+            gameStr = "G-Pente";
+        } else if (gameInt < 13) {
+            gameStr = "Poof-Pente";
+        } else if (gameInt < 15) {
+            gameStr = "Connect6";
+        } else {
+            gameStr = "Boat-Pente";
+        }
+        if (this.gameId > 50) {
+            this.game = "tb-" + gameStr;
+        } else if (this.gameId % 2 == 0) {
+            this.game = "Speed " + gameStr;
+        } else {
+            this.game = gameStr;
+        }
     }
 
     public String getGame() {
@@ -68,6 +101,10 @@ public class KingOfTheHill implements Parcelable {
 
     public void setCanIchallenge(boolean canIchallenge) { this.canIchallenge = canIchallenge; }
 
+    public int getGameId() { return gameId; }
+
+    public void setGameId(int gameId) { this.gameId = gameId; }
+
     protected KingOfTheHill(Parcel in) {
         game = in.readString();
         numPlayers = in.readString();
@@ -75,6 +112,7 @@ public class KingOfTheHill implements Parcelable {
         member = in.readByte() != 0x00;
         king = in.readByte() != 0x00;
         canIchallenge = in.readByte() != 0x00;
+        gameId = in.readInt();
     }
 
     @Override
@@ -90,6 +128,7 @@ public class KingOfTheHill implements Parcelable {
         dest.writeByte((byte) (member ? 0x01 : 0x00));
         dest.writeByte((byte) (king ? 0x01 : 0x00));
         dest.writeByte((byte) (canIchallenge ? 0x01 : 0x00));
+        dest.writeInt(gameId);
     }
 
     @SuppressWarnings("unused")

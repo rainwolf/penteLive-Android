@@ -8,12 +8,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -317,7 +320,8 @@ public class DBBoardView extends View {
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
                 if (parentLayout != null) {
                     ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+                    TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+                    capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
                 }
                 setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
             }
@@ -616,7 +620,8 @@ public class DBBoardView extends View {
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
                 if (parentLayout != null) {
                     ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+                    TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+                    capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
                 }
             }
         }
@@ -759,6 +764,20 @@ public class DBBoardView extends View {
             }
         }
     }
+    private SpannableStringBuilder getCapturesText(int lineHeight) {
+        SpannableStringBuilder sb = new SpannableStringBuilder("");
+        Drawable icon;
+        icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.white_nobg);
+        icon.setBounds(0, 0, lineHeight * 4 / 5, lineHeight * 4 / 5);
+        sb.append(" ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
+        sb.append(" ").append("x " + whiteCaptures + "\n");
+        icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.black_nobg);
+        icon.setBounds(0, 0, lineHeight * 4 / 5, lineHeight * 4 / 5);
+        sb.append(" ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
+        sb.append(" ").append("x " + blackCaptures);
+        return sb;
+    }
+
 
     public void resetState() {
         resetAbstractBoard(abstractBoard);
@@ -771,7 +790,8 @@ public class DBBoardView extends View {
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         if (parentLayout != null) {
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-            ((TextView) parentLayout.findViewById(R.id.capturesView)).setText("\u2B24 x " + blackCaptures + "\n\u25EF x " + whiteCaptures);
+            TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+            capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
         }
         setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
         invalidate();

@@ -155,15 +155,23 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
         if (groupPosition == 0) {
             if (childPosition == 0) {
-                if (kothSummary.isMember()) {
-                    nameTextView.setText(ctx.getString(R.string.leave_hill));
+                if (kothSummary.getGameId() > 50) {
+                    if (kothSummary.isMember()) {
+                        nameTextView.setText(ctx.getString(R.string.leave_hill));
+                    } else {
+                        nameTextView.setText(ctx.getString(R.string.join_hill));
+                    }
+                    detailTextView.setText(ctx.getString(R.string.hill_warning));
+                    ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
+                    ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+                    return convertView;
                 } else {
-                    nameTextView.setText(ctx.getString(R.string.join_hill));
+                    nameTextView.setText(ctx.getString(R.string.live_hill_join_leave));
+                    detailTextView.setText(ctx.getString(R.string.hill_warning));
+                    ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
+                    ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+                    return convertView;
                 }
-                detailTextView.setText(ctx.getString(R.string.hill_warning));
-                ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
-                ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
-                return convertView;
             }
         }
 

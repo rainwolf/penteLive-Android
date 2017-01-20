@@ -140,10 +140,10 @@ public class PentePlayer implements Parcelable {
             while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
                 dashLine = dashLines[idx].split(";", -1);
                 idx += 1;
-                if (dashLine.length < 6) {
+                if (dashLine.length < 7) {
                     continue;
                 }
-                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4] ,dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"));
+                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4] ,dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"), dashLine[6]);
                 this.mHills.add(hill);
             }
         }
@@ -157,10 +157,10 @@ public class PentePlayer implements Parcelable {
             while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
-                if (dashLine.length < 4) {
+                if (dashLine.length < 5) {
                     continue;
                 }
-                ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3]);
+                ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3], dashLine[5]);
                 this.mRatingStats.add(ratingStat);
             }
         }
