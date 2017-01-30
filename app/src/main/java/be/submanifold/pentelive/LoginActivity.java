@@ -497,10 +497,10 @@ public class LoginActivity extends AppCompatActivity
                 Date date = new Date(System.currentTimeMillis()); //or simply new Date();
                 long millisNow = date.getTime();
                 long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
+//                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token) || true) {
                 if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
-                        URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
-                                + "&token=" + token);
+                        URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         int responseCode = connection.getResponseCode();
                         if (responseCode != 200) {
@@ -516,7 +516,7 @@ public class LoginActivity extends AppCompatActivity
                         br.close();
 //                        System.out.println("output===============" + token + "\n" + output.toString());
 
-                        if (output.toString().indexOf("It seems to have worked") > -1) {
+                        if (output.toString().contains("It seems to have worked")) {
                             PrefUtils.saveLongToPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, millisNow);
                             PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_TOKEN_KEY, token);
                         }

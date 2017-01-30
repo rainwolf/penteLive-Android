@@ -259,6 +259,13 @@
         <item>G-Pente</item>
         <item>Poof-Pente</item>
         <item>Boat-Pente</item>
+        <item>Speed Pente</item>
+        <item>Speed Keryo-Pente</item>
+        <item>Speed Gomoku</item>
+        <item>Speed D-Pente</item>
+        <item>Speed G-Pente</item>
+        <item>Speed Poof-Pente</item>
+        <item>Speed Boat-Pente</item>
     </string-array>
     <string-array name="ai_game_types_array">
         <item>Pente</item>

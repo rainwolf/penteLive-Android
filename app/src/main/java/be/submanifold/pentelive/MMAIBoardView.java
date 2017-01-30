@@ -126,6 +126,9 @@ public class MMAIBoardView extends View {
     }
 
     public void setAiPlayer(Ai aiPlayer) {
+        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
         this.aiPlayer = aiPlayer;
     }
 
