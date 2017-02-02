@@ -2,21 +2,34 @@ package be.submanifold.pentelive.liveGameRoom;
 
 import be.submanifold.pentelive.*;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,14 +70,114 @@ public class LobbyActivity extends AppCompatActivity {
         LoadActiveServersTask loadServersTask = new LoadActiveServersTask(listAdapter);
         loadServersTask.execute();
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.lobby_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.action_settings:
+//                // User chose the "Settings" item, show the app settings UI...
+//                return true;
+
+            case R.id.broadcast:
+                if (PentePlayer.mSubscriber) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    final Spinner gameSpinner = new Spinner(this);
+                    final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                            R.array.live_game_types_array, android.R.layout.simple_spinner_item);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    gameSpinner.setAdapter(adapter);
+
+                    builder.setView(gameSpinner);
+                    builder.setTitle(getString(R.string.broadcast));
+                    builder.setMessage(getString(R.string.alert_friends_followers));
+                    builder.setPositiveButton(getString(R.string.to_followers), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String game = gameSpinner.getSelectedItem().toString();
+                            BroadcastTask task = new BroadcastTask(false, game);
+                            task.execute();
+                        }
+                    });
+                    builder.setNeutralButton(getString(R.string.to_friends), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String game = gameSpinner.getSelectedItem().toString();
+                            BroadcastTask task = new BroadcastTask(true, game);
+                            task.execute();
+                        }
+                    });
+//                builder.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+                    builder.show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    View infoView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+                    ((TextView) infoView.findViewById(R.id.informationView)).setText(getString(R.string.broadcasting_subscribers_only));
+                    infoView.setBackgroundColor(Color.WHITE);
+                    builder.setView(infoView);
+                    final AlertDialog dlg = builder.create();
+                    ((Button) infoView.findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dlg.dismiss();
+                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                            Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
+                        }
+                    });
+                    dlg.show();
+//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
+
+                }
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+
+
+
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("message");
+
+            Toast.makeText(LobbyActivity.this, message,
+                    Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
     @Override
     public void onResume() {
         super.onResume();
+        (LobbyActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
         MyApplication.activityResumed(this);
     }
     @Override
     protected void onPause() {
         super.onPause();
+        (LobbyActivity.this).unregisterReceiver(mMessageReceiver);
         MyApplication.activityPaused();
     }
 
@@ -142,6 +255,90 @@ public class LobbyActivity extends AppCompatActivity {
                 listAdapter.setRooms(rooms);
                 listAdapter.updateList();
                 System.out.println(dashboardString);
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+
+    private class BroadcastTask extends AsyncTask<Void, Void, Boolean> {
+
+        String dashboardString;
+        boolean friends = false;
+        String game;
+
+        BroadcastTask(boolean friends, String game) {
+            this.friends = friends;
+            this.game = game;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                URL url = new URL("https://www.pente.org/gameServer/broadcast?sendTo="+
+                        (friends?"friends":"followers")+"&game="+ URLEncoder.encode(game, "UTF-8")+
+                        "&mobile="
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+
+                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    connection.setRequestProperty("Cookie", cookieStr);
+                }
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    return false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + "\n");
+                }
+                br.close();
+
+//                System.out.println(output.toString());
+
+                dashboardString = output.toString();
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            // TODO: register the new account here.
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (success) {
+                if (dashboardString.contains("Broadcasting to followers or friends is only available to subscribers")) {
+                    Toast.makeText(LobbyActivity.this, getString(R.string.broadcasting_subscribers_only),
+                            Toast.LENGTH_LONG).show();
+                } else if (dashboardString.contains("database error, try again later")) {
+                    Toast.makeText(LobbyActivity.this, getString(R.string.database_error),
+                            Toast.LENGTH_LONG).show();
+                } else if (dashboardString.contains("You can't broadcast more than once per hour")) {
+                    Toast.makeText(LobbyActivity.this, getString(R.string.broadcast_once_per_hour),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(LobbyActivity.this, getString(R.string.broadcast_success),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 

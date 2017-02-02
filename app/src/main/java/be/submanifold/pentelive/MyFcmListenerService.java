@@ -86,6 +86,10 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         } else if (messageStr.contains("invited you")) {
             String[] splitStr = messageStr.split(" has invited you to a game of ");
             localMsgStr = getString(R.string.has_invited_you, splitStr[0], splitStr[1]);
+        } else if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
+            String player = (String) data.get("liveBroadCastPlayer");
+            String game = (String) data.get("liveBroadCastGame");
+            localMsgStr = getString(R.string.live_game_alert, player, game);
         }
 
 
@@ -95,7 +99,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                     PendingIntent.FLAG_ONE_SHOT);
 
-            Uri notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+            Uri notificationSoundUri;
+            if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
+                notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
+            } else {
+                notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+            }
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.ic_radio_button_unchecked)
                     .setContentTitle("Pente Live")
@@ -113,7 +122,11 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 //            mediaPlayer = MediaPlayer.create(MyFcmListenerService.this, R.raw.pentelivenotificationsound);
 //            mediaPlayer.start();
 //            System.out.println("messageStr : " + messageStr);
-            MediaPlayer.create(this, R.raw.pentelivenotificationsound).start();
+            if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
+                MediaPlayer.create(this, R.raw.newplayersound).start();
+            } else {
+                MediaPlayer.create(this, R.raw.pentelivenotificationsound).start();
+            }
             if (messageStr.contains("your move")) {
 //                System.out.println("gameID : " + (String) data.get("gameID"));
                 Intent intent = new Intent("unique_name_computer");

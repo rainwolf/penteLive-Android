@@ -501,6 +501,8 @@ public class LoginActivity extends AppCompatActivity
                 if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
                         URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
+//                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword
+//                        + "&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         int responseCode = connection.getResponseCode();
                         if (responseCode != 200) {

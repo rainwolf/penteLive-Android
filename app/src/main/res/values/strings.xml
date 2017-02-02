@@ -209,7 +209,7 @@
     <string name="boot_player">boot player</string>
     <string name="invite_player">invite player</string>
     <string name="player_booted_by">%1$s has been booted by %2$s</string>
-    <string name="you_booted_by">you were booted by %2$s, </string>
+    <string name="you_booted_by">you were booted by %1$s, you can rejoin this table in 5 minutes</string>
     <string name="optional_message">optional message</string>
     <string name="invite_player_to_table">invite %1$s</string>
     <string name="accepted_your_invitation">%1$s accepted your invitation</string>
@@ -226,7 +226,24 @@
     <string name="player_not_returned">You can now choose to resign, cancel the game/set, or force resign your opponent.</string>
     <string name="live_hill_join_leave">KotH for live games are joined automatically when you play a rated set in the King of the Hill live game room</string>
 
-
+    <string name="social">social</string>
+    <string name="followers">followers</string>
+    <string name="following">following</string>
+    <string name="hold_to_unfollow">press and hold to unfollow</string>
+    <string name="follow_player">follow player</string>
+    <string name="limited_followers">non-subscribers can only follow up to 5 players</string>
+    <string name="database_error">database error, please try again later</string>
+    <string name="enter_username">enter username</string>
+    <string name="follow">follow</string>
+    <string name="now_following">now following %1$s</string>
+    <string name="broadcast">broadcast</string>
+    <string name="to_followers">alert followers</string>
+    <string name="to_friends">alert friends</string>
+    <string name="broadcasting_subscribers_only">sending alerts to followers or friends is a subscribers-only feature</string>
+    <string name="broadcast_once_per_hour">You can\'t broadcast more than once per hour</string>
+    <string name="broadcast_success">broadcast was successful</string>
+    <string name="alert_friends_followers">alert friends or followers you want to play a live game of</string>
+    <string name="live_game_alert">%1$s wants to play a live game of %2$s</string>
 
 
     <string name="prompt_username">Username</string>
@@ -265,6 +282,24 @@
         <item>Speed D-Pente</item>
         <item>Speed G-Pente</item>
         <item>Speed Poof-Pente</item>
+        <item>Speed Boat-Pente</item>
+    </string-array>
+    <string-array name="live_game_types_array">
+        <item>Pente</item>
+        <item>Keryo-Pente</item>
+        <item>Gomoku</item>
+        <item>D-Pente</item>
+        <item>G-Pente</item>
+        <item>Poof-Pente</item>
+        <item>Connect6</item>
+        <item>Boat-Pente</item>
+        <item>Speed Pente</item>
+        <item>Speed Keryo-Pente</item>
+        <item>Speed Gomoku</item>
+        <item>Speed D-Pente</item>
+        <item>Speed G-Pente</item>
+        <item>Speed Poof-Pente</item>
+        <item>Speed Connect6</item>
         <item>Speed Boat-Pente</item>
     </string-array>
     <string-array name="ai_game_types_array">

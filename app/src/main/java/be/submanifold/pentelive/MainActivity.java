@@ -294,6 +294,10 @@ public class MainActivity extends AppCompatActivity {
                         intent = new Intent(getApplicationContext(), InviteAIActivity.class);
                         startActivity(intent);
                         return true;
+                    case R.id.social:
+                        intent = new Intent(getApplicationContext(), SocialActivity.class);
+                        startActivity(intent);
+                        return true;
                     case R.id.play_mmai:
                         intent = new Intent(getApplicationContext(), MMAIActivity.class);
                         startActivity(intent);

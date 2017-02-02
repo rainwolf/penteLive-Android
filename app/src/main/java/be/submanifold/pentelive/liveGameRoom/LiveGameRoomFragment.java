@@ -4,7 +4,6 @@ import be.submanifold.pentelive.*;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -39,7 +38,6 @@ public class LiveGameRoomFragment extends Fragment {
     private PlayersListAdapter playersListAdapter;
     private TableListAdapter tableListAdapter;
     private TextView mainRoomTextView;
-    private Context ctx = MyApplication.getContext();
 
     private String roomName;
 

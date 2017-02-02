@@ -606,25 +606,25 @@ public class Game implements Parcelable {
         if (mRatedNot == null) {
             return false;
         }
-        return !(mRatedNot.indexOf("Not") > -1);
+        return !(mRatedNot.contains("Not"));
     }
     public boolean isConnect6() {
         if (getGameType() == null) {
             return false;
         }
-        return getGameType().indexOf("Connect6") > -1;
+        return getGameType().contains("Connect6");
     }
     public boolean isGomoku() {
         if (getGameType() == null) {
             return false;
         }
-        return getGameType().indexOf("Gomoku") > -1;
+        return getGameType().contains("Gomoku");
     }
     public boolean isDPente() {
         if (getGameType() == null) {
             return false;
         }
-        return getGameType().indexOf("D-Pente") > -1;
+        return getGameType().contains("D-Pente");
     }
 
     public void parseGame(BoardView boardView) {

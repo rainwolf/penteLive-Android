@@ -72,6 +72,20 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
+    }
+
+
+
     public void connectSocket() {
         connectSocket(room.getPort());
     }
