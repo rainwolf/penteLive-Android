@@ -354,11 +354,14 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case 3:
                 crownIcon = ContextCompat.getDrawable(activity, R.drawable.bcrown);
                 break;
-            case 4:
-                crownIcon = ContextCompat.getDrawable(activity, R.drawable.kothcrown);
+            default:
+                if (crown > 3) {
+                    int resourceId = ctx.getResources().getIdentifier("kothcrown"+(crown-3),"drawable", ctx.getPackageName());
+                    crownIcon = ContextCompat.getDrawable(ctx, resourceId);
+                }
                 break;
         }
-        if (crown > 0) {
+        if (crownIcon != null && crown > 0) {
             crownIcon.setBounds(0, 0, nameTextView.getLineHeight()*2/3,nameTextView.getLineHeight()*2/3);
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
