@@ -43,6 +43,7 @@ public class PrefUtils {
     public static final String PREFS_DBGAME_KEY = "__DBGAME__" ;
     public static final String  PREFS_DBAIDIFFICULTY_KEY = "__DBAIDIFFICULTY__";
     public static final String  PREFS_DBAIOPENINGBOOK_KEY = "__DBAIOPENINGBOOK__";
+    public static final String  PREFS_SOCIALGAME_KEY = "__SOCIALGAME__";
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

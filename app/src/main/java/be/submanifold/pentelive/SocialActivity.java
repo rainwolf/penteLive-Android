@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.design.widget.TabLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,10 +17,14 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -27,9 +33,16 @@ import com.google.android.gms.ads.AdView;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -38,6 +51,24 @@ import be.submanifold.pentelive.liveGameRoom.LivePlayer;
 public class SocialActivity extends AppCompatActivity {
 
     private SocialListAdapter followerListAdapter, followingListAdapter;
+    private static Map<String, Integer> gameNames;
+    static {
+        gameNames = new HashMap<>();
+        gameNames.put("Pente", 1); gameNames.put("Keryo-Pente", 3); gameNames.put("Gomoku", 5);
+        gameNames.put("D-Pente", 7); gameNames.put("G-Pente", 9); gameNames.put("Poof-Pente", 11);
+        gameNames.put("Connect6", 13); gameNames.put("Boat-Pente", 15);
+        gameNames.put("Turn-based Pente", 51); gameNames.put("Turn-based Keryo-Pente", 53); gameNames.put("Turn-based Gomoku", 55);
+        gameNames.put("Turn-based D-Pente", 57); gameNames.put("Turn-based G-Pente", 59); gameNames.put("Turn-based Poof-Pente", 61);
+        gameNames.put("Turn-based Connect6", 63); gameNames.put("Turn-based Boat-Pente", 65);
+        gameNames.put("Speed Pente", 2); gameNames.put("Speed Keryo-Pente", 4);
+        gameNames.put("Speed Gomoku", 6); gameNames.put("Speed D-Pente", 8);
+        gameNames.put("Speed G-Pente", 10); gameNames.put("Speed Poof-Pente", 12);
+        gameNames.put("Speed Connect6", 14); gameNames.put("Speed Boat-Pente", 16);
+    }
+
+    List<String> gamesArray;
+
+    private String gameStr = "Turn-based Pente";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,12 +162,44 @@ public class SocialActivity extends AppCompatActivity {
         } else {
             findViewById(R.id.adView).setVisibility(View.GONE);
         }
+
+        gameStr = PrefUtils.getFromPrefs(SocialActivity.this, PrefUtils.PREFS_SOCIALGAME_KEY, "Turn-based Pente");
+        gamesArray = Arrays.asList(getResources().getStringArray(R.array.all_game_types_array));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.social_menu, menu);
+
+        MenuItem item = menu.findItem(R.id.gameSpinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.all_game_types_array)){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ImageView view = new ImageView(getContext());
+                view.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_settings));
+                return view;
+            }
+        };
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                gameStr = gamesArray.get(i);
+                PrefUtils.saveToPrefs(SocialActivity.this, PrefUtils.PREFS_SOCIALGAME_KEY, gameStr);
+
+                LoadFollowersingTask loadfollowersingTask = new LoadFollowersingTask();
+                loadfollowersingTask.execute();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         return true;
     }
 
@@ -169,6 +232,11 @@ public class SocialActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
+                return true;
+
+            case R.id.gameSpinner:
+
+
                 return true;
             default:
                 // If we got here, the user's action was not recognized.
@@ -212,6 +280,7 @@ public class SocialActivity extends AppCompatActivity {
     private class LoadFollowersingTask extends AsyncTask<Void, Void, Boolean> {
 
         String dashboardString;
+        int game = gameNames.get(gameStr);
 
         LoadFollowersingTask() {
         }
@@ -220,7 +289,7 @@ public class SocialActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/mobile/followers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/followers.jsp?game="+game+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
 
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -270,8 +339,9 @@ public class SocialActivity extends AppCompatActivity {
                 String[] dashLines = dashboardString.split("\n");
                 for (String dashLine: dashLines) {
                     String[] splitLine = dashLine.split(";");
-                    if (splitLine.length > 1) {
+                    if (splitLine.length > 5) {
                         LivePlayer player = new LivePlayer(splitLine[1], splitLine[2].equals("1"), Integer.parseInt(splitLine[4]), Integer.parseInt(splitLine[3]));
+                        player.addRating(game, Integer.parseInt(splitLine[5]));
                         if ("1".equals(splitLine[0])) {
                             following.add(player);
                         } else {
@@ -279,8 +349,22 @@ public class SocialActivity extends AppCompatActivity {
                         }
                     }
                 }
+                Collections.sort(followers, new Comparator<LivePlayer>() {
+                    @Override
+                    public int compare(LivePlayer o1, LivePlayer o2) {
+                        return o2.getRating(game) - o1.getRating(game);
+                    }
+                });
+                Collections.sort(following, new Comparator<LivePlayer>() {
+                    @Override
+                    public int compare(LivePlayer o1, LivePlayer o2) {
+                        return o2.getRating(game) - o1.getRating(game);
+                    }
+                });
+                followingListAdapter.setGame(game);
                 followingListAdapter.setPlayersArray(following);
                 followingListAdapter.updateList();
+                followerListAdapter.setGame(game);
                 followerListAdapter.setPlayersArray(followers);
                 followerListAdapter.updateList();
 //                System.out.println(dashboardString);

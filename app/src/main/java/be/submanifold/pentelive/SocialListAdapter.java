@@ -29,6 +29,12 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
 
     private boolean following = false;
 
+    private int game = 51;
+
+    public void setGame(int game) {
+        this.game = game;
+    }
+
     public void setFollowing(boolean following) {
         this.following = following;
     }
@@ -123,6 +129,11 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
         }
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
         nameTextView.setText(player.coloredNameString(nameTextView.getLineHeight()));
+
+        int rating = player.getRating(game);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText(""+rating);
+        ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
+
         return convertView;
     }
 
