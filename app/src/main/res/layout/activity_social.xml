@@ -25,11 +25,11 @@
         <android.support.design.widget.TabItem
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="@string/followers"/>
+            android:text="@string/following"/>
         <android.support.design.widget.TabItem
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="@string/following"/>
+            android:text="@string/followers"/>
     </android.support.design.widget.TabLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,14 +41,14 @@
             android:id="@+id/followerList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:visibility="gone">
         </ExpandableListView>
         <ExpandableListView
             android:id="@+id/followingList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:visibility="gone">
+            android:layout_weight="1">
         </ExpandableListView>
     </LinearLayout>
     <com.google.android.gms.ads.AdView

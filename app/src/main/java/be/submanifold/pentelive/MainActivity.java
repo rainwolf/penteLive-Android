@@ -631,10 +631,15 @@ public class MainActivity extends AppCompatActivity {
                 onlineUsersListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
                     @Override
                     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                        KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
                         if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
+                            String url = "https://www.pente.org/gameServer/profile?viewName="+onlinePlayer.getName();
+                            Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
+
                             return false;
                         }
-                        KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
                         if (player.getPlayerName().equals(onlinePlayer.getName())) {
                             return false;
                         }
