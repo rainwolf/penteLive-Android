@@ -109,14 +109,14 @@ public class PentePlayer implements Parcelable {
         if (dashString == null) {
             return;
         }
-        if (dashString.indexOf("No Ads") > -1 && dashString.indexOf("No Ads") < 30) {
-            this.mShowAds = false;
-        }
-        if (dashString.indexOf("tb GamesLimit") > -1 || dashString.indexOf("tb GamesLimit") > 30) {
-            this.mSubscriber = false;
-        } else {
-            this.mSubscriber = true;
-        }
+//        if (dashString.indexOf("No Ads") > -1 && dashString.indexOf("No Ads") < 30) {
+//            this.mShowAds = false;
+//        }
+//        if (dashString.indexOf("tb GamesLimit") > -1 || dashString.indexOf("tb GamesLimit") > 30) {
+//            this.mSubscriber = false;
+//        } else {
+//            this.mSubscriber = true;
+//        }
 
 //        System.out.println(dashString);
         String[] dashLines = dashString.split("\n");
@@ -127,7 +127,10 @@ public class PentePlayer implements Parcelable {
         }
         if (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) == 0) {
             dashLine = dashLines[idx].split(";", -1);
-            myColor = Integer.parseInt(dashLine[1]);
+            this.myColor = Integer.parseInt(dashLine[1]);
+            this.mShowAds = !"NoAds".equals(dashLine[2]);
+            this.mSubscriber = "subscriber".equals(dashLine[3]);
+//            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
         while (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == -1) {

@@ -143,7 +143,9 @@ public class MainActivity extends AppCompatActivity {
                     viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
                     viewWithOpenButtons = null;
                 }
-                if (groupPosition == DashboardListAdapter.INVITATIONSGROUP || groupPosition == DashboardListAdapter.PUBLICINVITATIONSGROUP || groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
+                if (groupPosition == DashboardListAdapter.INVITATIONSGROUP ||
+                        groupPosition == DashboardListAdapter.PUBLICINVITATIONSGROUP ||
+                        groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
                     if (groupPosition != DashboardListAdapter.SENTINVITATIONSGROUP) {
                         if (v.findViewById(R.id.acceptButton).getVisibility() == View.VISIBLE) {
                             v.findViewById(R.id.acceptButton).setVisibility(View.GONE);
@@ -235,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                         button.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View view) {
                                 viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                                 viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
                                 viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                             }

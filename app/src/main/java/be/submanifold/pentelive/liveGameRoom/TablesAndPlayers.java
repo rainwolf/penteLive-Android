@@ -36,7 +36,7 @@ public class TablesAndPlayers {
         subscriber = (Boolean) playerData.get("unlimitedTBGames");
         LivePlayer player = new LivePlayer(playerName, subscriber, 0, color);
 
-        int crown = 0;
+        int myCrown = 0, myKotHCrown = 0;
         for (Map<String, Object> singleGame: gameData) {
             if (((String) singleGame.get("computer")).equals("N")) {
                 int game = (int) singleGame.get("game");
@@ -44,14 +44,22 @@ public class TablesAndPlayers {
                 player.addRating(game, rating);
                 int tourneyWinner = (int) singleGame.get("tourneyWinner");
                 if (tourneyWinner > 0) {
-                    if (crown > 0) {
-                        crown = Math.min(crown, tourneyWinner);
-                    } else {
-                        crown = tourneyWinner;
+                    if (tourneyWinner == 4) {
+                        myKotHCrown = myKotHCrown + 1;
+                    } else if (0 == myCrown) {
+                        myCrown = tourneyWinner;
+                    } else if (tourneyWinner < myCrown) {
+                        myCrown = tourneyWinner;
                     }
                 }
-                player.setCrown(crown);
             }
+        }
+        if (myCrown > 0) {
+            player.setCrown(myCrown);
+        } else if (myKotHCrown > 0) {
+            player.setCrown(myKotHCrown+3);
+        } else {
+            player.setCrown(0);
         }
         players.put(playerName, player);
         mainRoomText = mainRoomText + ctx.getString(R.string.has_joined_main_room, playerName) + "\n";
@@ -79,7 +87,7 @@ public class TablesAndPlayers {
         subscriber = (Boolean) playerData.get("unlimitedTBGames");
         LivePlayer player = new LivePlayer(playerName, subscriber, 0, color);
 
-        int crown = 0;
+        int myCrown = 0, myKotHCrown = 0;
         for (Map<String, Object> singleGame: gameData) {
             if (((String) singleGame.get("computer")).equals("N")) {
                 int game = (int) singleGame.get("game");
@@ -87,14 +95,22 @@ public class TablesAndPlayers {
                 player.addRating(game, rating);
                 int tourneyWinner = (int) singleGame.get("tourneyWinner");
                 if (tourneyWinner > 0) {
-                    if (crown > 0) {
-                        crown = Math.min(crown, tourneyWinner);
-                    } else {
-                        crown = tourneyWinner;
+                    if (tourneyWinner == 4) {
+                        myKotHCrown = myKotHCrown + 1;
+                    } else if (0 == myCrown) {
+                        myCrown = tourneyWinner;
+                    } else if (tourneyWinner < myCrown) {
+                        myCrown = tourneyWinner;
                     }
                 }
-                player.setCrown(crown);
             }
+        }
+        if (myCrown > 0) {
+            player.setCrown(myCrown);
+        } else if (myKotHCrown > 0) {
+            player.setCrown(myKotHCrown+3);
+        } else {
+            player.setCrown(0);
         }
         players.put(playerName, player);
     }
