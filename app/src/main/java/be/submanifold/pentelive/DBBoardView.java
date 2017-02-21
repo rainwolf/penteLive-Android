@@ -559,7 +559,7 @@ public class DBBoardView extends View {
             public void onClick(View view) {
 
                 String url = span.getURL();
-                if (url.indexOf("viewLiveGame?mobile&g=5") > 0 && url.substring(url.indexOf("g=") + 2).length() == 14) {
+                if (url.indexOf("viewLiveGame?mobile&g=") > 0 && url.substring(url.indexOf("g=") + 2).length() == 14) {
                     String gameID = url.substring(url.indexOf("g=") + 2);
 //                    System.out.println(gameID);
                     Game game = new Game(gameID, null, null, null, null, null, null, null, null, null, null);

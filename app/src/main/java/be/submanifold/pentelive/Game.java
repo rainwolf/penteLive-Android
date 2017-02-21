@@ -705,10 +705,10 @@ public class Game implements Parcelable {
                     this.mMovesList.add(Integer.parseInt(movesString[i]));
                 }
             }
-            if (isDPente() && (dashLine.indexOf("dPenteState=2") > -1 || dashLine.contains("dPenteState=1"))) {
+            if (isDPente() && (dashLine.contains("dPenteState=2") || dashLine.contains("dPenteState=1"))) {
                 this.mActive = !mActive;
             }
-            if (dashLine.indexOf("dPenteState=2") > -1) {
+            if (dashLine.contains("dPenteState=2")) {
                 this.dPenteChoice = true;
             }
             if (dashLine.indexOf("cancel="+getOpponentName()) == 0) {
@@ -741,16 +741,16 @@ public class Game implements Parcelable {
                 }
                 builder.show();
             }
-            if (dashLine.indexOf("messages=") > -1) {
+            if (dashLine.contains("messages=")) {
                 messagesArray = dashLine.substring(9).split(",");
             }
-            if (dashLine.indexOf("rated=") > -1) {
+            if (dashLine.contains("rated=")) {
                 mRatedNot = dashLine.substring(6);
             }
-            if (dashLine.indexOf("private=") > -1) {
+            if (dashLine.contains("private=")) {
                 mPrivateGame = dashLine.substring(8);
             }
-            if (dashLine.indexOf("messageNums=") > -1) {
+            if (dashLine.contains("messageNums=")) {
                 messageNums = dashLine.substring(12).split(",");
             }
             idx += 1;
@@ -758,9 +758,9 @@ public class Game implements Parcelable {
         if (!p1Name.equals(PentePlayer.mPlayerName.toLowerCase()) && !p2Name.equals(PentePlayer.mPlayerName.toLowerCase())) {
             this.mOpponentName = p1Name + " vs " + p2Name;
         }
-        if (mGameString.indexOf("state=active") == -1) {
+        if (!mGameString.contains("state=active")) {
             mActive = false;
-            if (!getGameType().equals("Connect6") && PentePlayer.mSubscriber) {
+            if (!getGameType().equals("Connect6") && !getGameType().equals("Speed Connect6") && PentePlayer.mSubscriber) {
                 final BoardActivity host = (BoardActivity) boardView.getContext();
                 ((Button) host.findViewById(R.id.submitButton)).setVisibility(View.GONE);
                 Button dbBtn = (Button) host.findViewById(R.id.searchDBbutton);
@@ -903,28 +903,28 @@ public class Game implements Parcelable {
         if (mMovesList == null) {
             return;
         }
-        if (getGameType().equals("Gomoku")) {
+        if (getGameType().equals("Gomoku") || getGameType().equals("Speed Gomoku")) {
             boardView.setBackgroundColor(boardView.gomokuColor);
             replayGomokuGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("Pente")) {
+        } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             replayPenteGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("Boat-Pente")) {
+        } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
             replayPenteGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("Keryo-Pente")) {
+        } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
             replayKeryoPenteGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("Connect6")) {
+        } else if (getGameType().equals("Connect6") || getGameType().equals("Speed Connect6")) {
             boardView.setBackgroundColor(boardView.connect6Color);
             replayConnect6Game(abstractBoard, untilMove);
-        } else if (getGameType().equals("G-Pente")) {
+        } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
             replayGPenteGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("Poof-Pente")) {
+        } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
             replayPoofPenteGame(abstractBoard, untilMove);
-        } else if (getGameType().equals("D-Pente")) {
+        } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
             replayPenteGame(abstractBoard, untilMove);
         }
@@ -977,22 +977,23 @@ public class Game implements Parcelable {
         if (mMovesList == null) {
             return;
         }
-        if (getGameType().equals("Pente")) {
+
+        if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             replayPenteGame(abstractBoard, moveI, moveJ);
-        } else if (getGameType().equals("Boat-Pente")) {
+        } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
             replayPenteGame(abstractBoard, moveI, moveJ);
-        } else if (getGameType().equals("Keryo-Pente")) {
+        } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
             replayKeryoPenteGame(abstractBoard, moveI, moveJ);
-        } else if (getGameType().equals("G-Pente")) {
+        } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
             replayPenteGame(abstractBoard, moveI, moveJ);
-        } else if (getGameType().equals("Poof-Pente")) {
+        } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
             replayPoofPenteGame(abstractBoard, moveI, moveJ);
-        } else if (getGameType().equals("D-Pente")) {
+        } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
             replayPenteGame(abstractBoard, moveI, moveJ);
         }

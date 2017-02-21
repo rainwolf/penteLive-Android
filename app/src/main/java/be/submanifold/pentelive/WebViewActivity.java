@@ -1,9 +1,11 @@
 package be.submanifold.pentelive;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -31,9 +33,27 @@ public class WebViewActivity extends AppCompatActivity {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url)
                 {
-                    view.loadUrl(url);
-//                    System.out.println("hello " + url);
-                    return true;
+                    if (url.contains("?mobile&g=")) {
+                        while (!url.startsWith("?mobile&g=")) {
+                            url = url.substring(1);
+                        }
+                        url = url.substring(10);
+                        for (int i = 0; i < url.length(); i++ ) {
+                            if (url.charAt(i) < '0' || url.charAt(i) > '9') {
+                                url = url.substring(0, i);
+                                break;
+                            }
+                        }
+
+                        Game game = new Game(url, null, null, null, null, null, null, null, null, null, null);
+                        game.setActive(false);
+                        Intent intent = new Intent(WebViewActivity.this, BoardActivity.class);
+                        intent.putExtra("game", game);
+                        startActivity(intent);
+
+                        return true;
+                    }
+                    return false;
                 }
             });
             webview.getSettings().setJavaScriptEnabled(true);
@@ -51,6 +71,7 @@ public class WebViewActivity extends AppCompatActivity {
             }
             webview.loadUrl(urlStr);
 //                    System.out.println("hello " + url);
+
         }
 
     }
@@ -66,5 +87,7 @@ public class WebViewActivity extends AppCompatActivity {
         super.onPause();
         MyApplication.activityPaused();
     }
+
+
 
 }
