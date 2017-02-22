@@ -182,10 +182,12 @@ public class SocialActivity extends AppCompatActivity {
         };
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setSelection(gamesArray.indexOf(gameStr));
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 gameStr = gamesArray.get(i);
+//                System.out.println(gameStr);
                 PrefUtils.saveToPrefs(SocialActivity.this, PrefUtils.PREFS_SOCIALGAME_KEY, gameStr);
 
                 LoadFollowersingTask loadfollowersingTask = new LoadFollowersingTask();

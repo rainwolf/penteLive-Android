@@ -19,6 +19,8 @@ import java.util.Map;
 
 public class WebViewActivity extends AppCompatActivity {
 
+    private WebView webview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -27,7 +29,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            WebView webview = (WebView) findViewById(R.id.webview);
+            webview = (WebView) findViewById(R.id.webview);
             webview.setWebViewClient(new WebViewClient()
             {
                 @Override
@@ -76,6 +78,16 @@ public class WebViewActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        if (webview.canGoBack()) {
+            webview.goBack();
+            return;
+        }
+
+        // Otherwise defer to system default behavior.
+        super.onBackPressed();
+    }
     @Override
     protected void onResume() {
         super.onResume();
