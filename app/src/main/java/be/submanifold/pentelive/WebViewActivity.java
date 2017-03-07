@@ -1,11 +1,13 @@
 package be.submanifold.pentelive;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -60,6 +62,9 @@ public class WebViewActivity extends AppCompatActivity {
             });
             webview.getSettings().setJavaScriptEnabled(true);
             webview.getSettings().setBuiltInZoomControls(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+            }
 
 //            cookieMap.put("Cookie", "name2="+PentePlayer.mPlayerName+"; password2="+PentePlayer.mPassword);
 

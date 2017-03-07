@@ -246,6 +246,11 @@
     <string name="live_game_alert">%1$s wants to play a live game of %2$s</string>
 
 
+    <string name="public_invitations_limit_reached">Public invitations limit reached</string>
+    <string name="public_invitations_limit_message">You can accept 2 public invitations for every public invitation you post. To post one, leave the opponent field blank.\n\nSubscribers are not limited.</string>
+
+
+
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>

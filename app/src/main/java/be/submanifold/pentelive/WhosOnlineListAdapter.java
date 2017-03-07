@@ -48,6 +48,16 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
     public void setOnlinePlayers(Map<String, List<KothPlayer>> onlinePlayers) {
         this.onlinePlayers = onlinePlayers;
         sections = new ArrayList<>(onlinePlayers.keySet());
+        int index = sections.indexOf("Mobile");
+        if (index > -1) {
+            sections.remove(index);
+            sections.add("Mobile");
+        }
+        index = sections.indexOf("Website");
+        if (index > -1) {
+            sections.remove(index);
+            sections.add("Website");
+        }
     }
 
 

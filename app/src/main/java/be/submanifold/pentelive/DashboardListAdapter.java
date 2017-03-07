@@ -152,11 +152,15 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case NONACTIVEGAMESGROUP: title = nonActiveGamesStr + " (" + playerData.getNonActiveGames().size() + ")"; break;
             case TOURNAMENTGROUP: title = tournamentStr + " (" + playerData.getTournaments().size() + ")"; break;
             case KOTHGROUP: title = kothStr + " (" + playerData.getHills().size() + ")";
+                int hills = 0;
                 for (KingOfTheHill player : playerData.getHills() ) {
                     if (player.isKing()) {
-                        convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
-                        break;
+                        hills += 1;
                     }
+                }
+                if (hills > 0) {
+                    convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
+                    title = kothStr + " (" + hills + "/" + playerData.getHills().size() + ")";
                 }
                 break;
             default: title = "uh-oh"; break;

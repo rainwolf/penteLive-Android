@@ -4,6 +4,7 @@ import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Display;
@@ -22,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ExpandableListView;
@@ -165,17 +169,27 @@ public class MainActivity extends AppCompatActivity {
                                             int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
 //                                        System.out.println(" remaining credit = " + remainingCredit);
                                             if (remainingCredit < 1) {
-                                                Snackbar snackbar = Snackbar
-                                                        .make(getCurrentFocus(), getString(R.string.not_enough_credit), Snackbar.LENGTH_LONG)
-                                                        .setAction(getString(R.string.post_now), new View.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(View view) {
-                                                                Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                                                                startActivity(intent);
-                                                            }
-                                                        });
-
-                                                snackbar.show();
+                                                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                                builder.setTitle(getString(R.string.public_invitations_limit_reached));
+                                                builder.setMessage(getString(R.string.public_invitations_limit_message));
+                                                builder.setPositiveButton(getString(R.string.post_now), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                                                        Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                                                        intent.putExtra("url", url);
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                AlertDialog dlg = builder.create();
+                                                dlg.show();
                                                 return;
                                             } else {
                                                 remainingCredit -= 1;
@@ -617,7 +631,7 @@ public class MainActivity extends AppCompatActivity {
                 final float scale = getResources().getDisplayMetrics().density;
                 popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, total*44))*scale), true );
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
-                System.out.println("totaaaaaaaal "+total);
+//                System.out.println("totaaaaaaaal "+total);
                 ExpandableListView onlineUsersListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
                 onlineUsersListView.setDividerHeight(0);
                 onlineUsersListView.setAdapter(listAdapter);

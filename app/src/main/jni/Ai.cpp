@@ -1126,7 +1126,7 @@ if (dv<4) {
 				if (tys==4 || tys==11 || tys==12)
 				for (i=0; i<*(pAs+index*14+7); i++) {
 					pfhn=pFh+(fhn)*4;
-					if (tys==4 && i<2 || tys==11 && i>1 || tys==12 && i<2)
+					if ((tys==4 && i<2) || (tys==11 && i>1) || (tys==12 && i<2))
 					*(pfhn+2)=3;
 					else *(pfhn+2)=2;
 					lx=x+dx[dv]*(*(pAs+index*14+8+i))*sign;
