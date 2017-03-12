@@ -2,6 +2,7 @@ package be.submanifold.pentelive;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
@@ -259,11 +261,34 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
                 return true;
             case R.id.action_post_open_koth:
-                ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
-                challengedUser = "";
-                popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
-                ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);
-                expandableList.setAlpha(0.5f);
+                if (!kothSummary.canIchallenge() && !PentePlayer.mSubscriber) {
+//                if (true) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(KingOfTheHillActivity.this);
+                    builder.setTitle(getString(R.string.public_invitations_limit_reached));
+                    builder.setMessage(getString(R.string.koth_limit));
+                    builder.setPositiveButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                            Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
+                        }
+                    });
+                    AlertDialog dlg = builder.create();
+                    dlg.show();
+                } else if (kothSummary.canIchallenge()) {
+                    ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
+                    challengedUser = "";
+                    popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                    ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);
+                    expandableList.setAlpha(0.5f);
+                }
                 return true;
             default:
                 // If we got here, the user's action was not recognized.

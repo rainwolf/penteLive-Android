@@ -147,7 +147,21 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
-            case PUBLICINVITATIONSGROUP: title = publicInvitationsStr + " (" + playerData.getPublicInvitations().size() + ")"; break;
+            case PUBLICINVITATIONSGROUP:
+                int kothInvitations = 0;
+                for (Game game: playerData.getPublicInvitations()) {
+                    if (game.getRatedNot().equals("KotH")) {
+                        kothInvitations += 1;
+                    }
+
+                }
+                if (kothInvitations == 0) {
+                    title = publicInvitationsStr + " (" + playerData.getPublicInvitations().size() + ")";
+                } else {
+                    title = publicInvitationsStr + " (" + (playerData.getPublicInvitations().size()-kothInvitations)
+                            + " + " + kothInvitations + " KotH)";
+                }
+                break;
             case SENTINVITATIONSGROUP: title = sentInvitationsStr + " (" + playerData.getSentInvitations().size() + ")"; break;
             case NONACTIVEGAMESGROUP: title = nonActiveGamesStr + " (" + playerData.getNonActiveGames().size() + ")"; break;
             case TOURNAMENTGROUP: title = tournamentStr + " (" + playerData.getTournaments().size() + ")"; break;

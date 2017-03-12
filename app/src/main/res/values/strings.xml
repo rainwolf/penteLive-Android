@@ -248,7 +248,7 @@
 
     <string name="public_invitations_limit_reached">Public invitations limit reached</string>
     <string name="public_invitations_limit_message">You can accept 2 public invitations for every public invitation you post. To post one, leave the opponent field blank.\n\nSubscribers are not limited.</string>
-
+    <string name="koth_limit">Free players can play, at most, 2 KotH sets at a time, this includes sent and received invitations, you can post invitations again after you finish a set.\n Subscribers don\'t have this limit.</string>
 
 
     <string name="prompt_username">Username</string>
