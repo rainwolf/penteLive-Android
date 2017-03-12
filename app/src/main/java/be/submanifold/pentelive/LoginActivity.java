@@ -195,6 +195,12 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
+    public void onBackPressed() {
+        MyApplication.setShouldQuit(true);
+        finish();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);

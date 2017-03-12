@@ -10,6 +10,7 @@ import android.content.Context;
 public class MyApplication extends Application {
 
     private static Context mContext;
+    private static boolean shouldQuit = false;
 
     @Override
     public void onCreate() {
@@ -37,4 +38,13 @@ public class MyApplication extends Application {
     }
 
     private static boolean activityVisible;
+
+    public static boolean shouldQuit() {
+        return shouldQuit;
+    }
+
+    public static void setShouldQuit(boolean shouldQuit) {
+        MyApplication.shouldQuit = shouldQuit;
+    }
+
 }
