@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">penteLive</string>
+    <string name="not_your_turn">Du bist nicht am Zug.</string>
+    <string name="c6_needs_2_moves">Bei Connect6 werden 2 Steine pro Zug gesetzt.</string>
+    <string name="dpente_needs_3_moves">D-Pente beginnt mit 3 Eröffnungszügen.</string>
+    <string name="no_momve_played_yet">Es wurde noch kein Zug gemacht.</string>
+    <string name="submit">Bestätige</string>
+    <string name="place_stone_submit">Lege einen Stein und bestätige den Zug.</string>
+    <string name="resign">Aufgeben</string>
+    <string name="request_cancel">Erbitte die Löschung des Spiels</string>
+    <string name="dismiss">Ablehnen</string>
+    <string name="waiting_for_cancel_reply">Es gibt bereits eine Anfrage zur Löschung des Spiels. Warte auf Antwort von %1$s.</string>
+    <string name="hourminute">%1$s Stunde, %2$s Minute</string>
+    <string name="hourminutes">%1$s Stunde, %2$s Minuten</string>
+    <string name="hoursminute">%1$s Stunden, %2$s Minute</string>
+    <string name="hoursminutes">%1$s Stunden, %2$s Minuten</string>
+    <string name="dayhour">%1$s Tag, %2$s Stunde</string>
+    <string name="dayhours">%1$s Tag, %2$s Stunden</string>
+    <string name="dayshour">%1$s Tage, %2$s Stunde</string>
+    <string name="dayshours">%1$s Tage, %2$s Stunden</string>
+    <string name="daypermove">%1$s Tag pro Zug</string>
+    <string name="dayspermove">%1$s Tage pro Zug</string>
+    <string name="rated">gewertet</string>
+    <string name="notRated">nicht gewertet</string>
+    <string name="koth">KotH</string>
+    <string name="tournament">Turnier</string>
+    <string name="rating">Wertung:</string>
+    <string name="remainingtime">Restzeit:</string>
+    <string name="this_is_a_rated_and_private_game">Dies ist ein gewertetes und privates Spiel</string>
+    <string name="private_str">privat</string>
+    <string name="non_private">öffentlich</string>
+    <string name="messages">Nachrichten</string>
+    <string name="invitations">Einladungen</string>
+    <string name="activegames">Mein Zug</string>
+    <string name="publicinvitations">Öffentliche Einladungen</string>
+    <string name="sentinvitations">Einladungen gesendet</string>
+    <string name="tournaments">Turniere</string>
+    <string name="kingofthehill">King of the Hill</string>
+    <string name="nonactivegames">Gegner ist am Zug</string>
+    <string name="number_of_players">Anzahl der Spieler: %1$s</string>
+    <string name="players_ruled_by">%1$s Spieler geregelt durch %2$s</string>
+    <string name="registration_open_until">Registrierung offen bis %1$s</string>
+    <string name="registration_closed">Registrierung geschlossen. Start: %1$s</string>
+    <string name="tournament_started">Turnier ist gestartet. Derzeitige Runde: %1$s</string>
+    <string name="white">Weiss</string>
+    <string name="black">schwarz</string>
+    <string name="search_parameters">Suchkriterien</string>
+    <string name="database">Datenbank</string>
+    <string name="popularity">Popularität</string>
+    <string name="win_percantage">Gewinnprozentsatz</string>
+    <string name="either">wahlweise</string>
+    <string name="player1">Spieler 1</string>
+    <string name="player2">Spieler 2</string>
+    <string name="clear">Löschen</string>
+    <string name="no_search_results">Keine Suchergebnisse</string>
+    <string name="search">Suchen</string>
+    <string name="play_as">Spielen als:</string>
+    <string name="opponent">Gegner</string>
+    <string-array name="restriction_array">
+        <item>alle Rankings</item>
+        <item>spielt nicht bereits</item>
+        <item>niedrigere Rankings</item>
+        <item>höhere Rankings</item>
+        <item>gleiches Ranking</item>
+        <item>gleiche Wertungsklasse</item>
+    </string-array>
+    <string name="finish_some_ai_games_first">
+Versuche es wieder, wenn das jetzige Spiel gegen den Computer-Gegner beendet ist.
+</string>
+    <string name="leave_opponent_black">Gegner (leer lassen bei offener Einladung )</string>
+    <string name="game">Spiel:</string>
+    <string name="days_per_move">Tage pro Zug:</string>
+    <string name="ratedlabel">Gewertet:</string>
+    <string name="yes">ja</string>
+    <string name="no">nein</string>
+    <string name="to_players">Am Spieler</string>
+    <string name="private_label">Privates Spiel:</string>
+    <string name="send_invitation">sende Einladung</string>
+    <string name="difficulty">Schwierigkeitsgrad:</string>
+    <string name="play_as_black_and_white">Play as black and white:</string>
+    <string name="send_open_challenge">sende offene Einladung / Herausforderung</string>
+    <string name="challenge">Herausfordern %1$s</string>
+    <string name="king_of_the_hill">King of the Hill - %1$s</string>
+    <string name="top_of_the_hill">Gipfel des Hügels</string>
+    <string name="step">Schritt %1$d</string>
+    <string name="hill_warning">Warnung: Nur Abonnenten können an mehreren K.o.t.H.-Wettkämpfen teilnehmen</string>
+    <string name="leave_hill">Gedrückt halten um diesen K.o.t.H.-Wettkampf zu verlassen</string>
+    <string name="join_hill">Gedrückt halten um an diesem K.o.t.H.-Wettkampf teil zu nehmen</string>
+    <string name="last_game_on">Letztes Spiel gespielt am %1$s</string>
+    <string name="level_up_your_game">
+Erhöhe dein spielerisches Können\n\nMit Hilfe der Datenbank kannst du, von jeglichen Spielstellungen ausgehend, sämtliche diesen entsprechende Spiele recherchieren, die auf pente.org gespeichert sind. Dieses mächtige Werkzeug ermöglicht
+es dir, Spiele und (Gegen-) Spieler zu studieren und analysieren, Eröffnungen zu testen, Züge nach ihrer Häufigkeit oder höchstem Gewinnprozentsatz zu sortieren, sowie die Ergebnisse nach Spielername und Gewinner zu filtern.\nWeitere Features
+werden in der Zukunft noch hinzugefügt.\n\nDie Datenbank ist nur offen für Abonnenten.
+</string>
+    <string name="home">Startseite</string>
+    <string name="not_enough_credit">
+Nicht genügend Guthaben, öffentliche Einladungen folgen der Regelung \"akzeptiere 2-poste 1"\.
+</string>
+    <string name="post_now">Poste jetzt!</string>
+    <string name="nothing_to_see_here">
+Nichts zu sehen hier?. Poste eine öffentliche Einladung um zu beginnen.
+</string>
+    <string name="cancel">Löschen</string>
+    <string name="decline">Ablehnen</string>
+    <string name="accept">Akzeptieren</string>
+    <string name="restart_game">Spiel neu starten</string>
+    <string name="start_game">Spiel starten</string>
+    <string name="color">Spielfarbe</string>
+    <string name="you_lost">Du hast verloren</string>
+    <string name="you_won">Du hast gewonnen</string>
+    <string name="rating_stats">Bewertungsstatistiken</string>
+    <string name="last_total">Letztes: %1$s, Gesamt: %2$s</string>
+    <string name="username_5_10">Benutzername muss aus 5-10 Zeichen bestehen</string>
+    <string name="username_only">
+Benutzername darf nur Buchstaben, Zahlen und Unterstriche enthalten
+</string>
+    <string name="password_6_16">Passwort muss aus 5-16 Zeichen bestehen</string>
+    <string name="password_only">
+Passwort darf nur Buchstaben, Zahlen und Unterstriche enthalten
+</string>
+    <string name="password_no_match">Ungültige Passwörter</string>
+    <string name="accept_policy">
+Einloggen ist nicht möglich ohne die Spielebewertungs-Regelung zu akzeptieren.
+</string>
+    <string name="username_taken">
+The username %1$s ist bereits vergeben, bitte wähle einen anderen Benutzernamen.
+</string>
+    <string name="enter_subject">Gib bitte einen Betreff ein.</string>
+    <string name="no_such_user">Benutzername existiert nicht</string>
+    <string name="enter_recipient">Gib bitte einen Empfänger ein.</string>
+    <string name="new_message">Neue Nachricht</string>
+    <string name="settings">Einstellungen</string>
+    <string name="take_photo">Foto auswählen</string>
+    <string name="choose_from_library">aus der Bibliothek auswählen</string>
+    <string name="choose_color">Spielfarbe auswählen</string>
+    <string name="change_avatar">Avatar wechseln</string>
+    <string name="username">Benutzername</string>
+    <string name="password">Passwort</string>
+    <string name="repeat_password">Passwort wiederholen</string>
+    <string name="register">Registrieren</string>
+    <string name="send">Senden</string>
+    <string name="email">E-Mail</string>
+    <string name="accept_rated_play_policy">Spielebewertungs-Regelung akzeptieren?</string>
+    <string name="subject">Betreff</string>
+    <string name="recipient">Empfänger</string>
+    <string name="whos_online">Wer ist online</string>
+    <string name="total_games">Spiele insgesamt: %1$s</string>
+    <string name="subscribe_now">Jetzt abonnieren</string>
+    <string name="sign_in">Anmelden</string>
+    <string name="log_in_automatically">Beim nächsten Mal automatisch einloggen:</string>
+    <string name="more_settings">Weitere Einstellungen</string>
+    <string name="no_account_yet">Noch keinen Account?</string>
+    <string name="register_at_pente_org">Registrieren @ Pente.org</string>
+    <string name="facebook">Finde uns auf Facebook</string>
+    <string name="invite_friends">Freunde einladen</string>
+    <string name="game_rules">Spielregeln</string>
+    <string name="sort_by">Sortieren nach</string>
+    <string name="player1_label">Spieler 1:</string>
+    <string name="player2_label">Spieler 2:</string>
+    <string name="winner">Gewinner</string>
+    <string name="after">Danach:</string>
+    <string name="tap_to_set">Drücken zum Einstellen</string>
+    <string name="before">Davor:</string>
+    <string name="send_challenge">Herausforderung senden</string>
+    <string name="other_humans">Spiele gegen menschliche Gener</string>
+    <string name="onboard_ai">Spiele gegen die App-Computer-AI</string>
+    <string name="server_ai">Spiele gegen die Server-Computer-AI</string>
+    <string name="load_avatars">Avatare laden:</string>
+    <string name="avatar_warning">
+Das Laden von Avataren beansprucht mehr Daten, nutze diese Option, wenn deine Verbindung schnell genug ist.
+</string>
+    <string name="preferences_at_pente_org">Benutzereinstellungen @ pente.org</string>
+    <string name="more_prefs_label">
+Weitere Benutzereinstellungen, wie z. B. E-Mail-Einstellungen, können auf pente.org gemacht werden.
+</string>
+    <string name="change_color">Farbe des Benutzernamens ändern</string>
+    <string name="subscribers_only">Farbige Benutzernamen und Avatare sind Abonnenten-Features</string>
+    <string name="subscribe_pente_org">Abonnieren @ pente.org</string>
+    <string name="subscribe_info">
+Abonniere um alle Einschränkungen aufzuheben, erhalte eine Bentzernamen-Farbe und einen Avatar sowie Zugang zur Datenbank.
+</string>
+    <string name="registered_for_notifications">
+Dein Gerät wurde für Push-Mitteilungen registriert.
+</string>
+    <string name="is_your_move_against">Du bist am Zug gegen %1$s in einem Spiel %2$s.</string>
+    <string name="new_message_from">%1$s hat dir eine neue Nachricht geschickt!%2$s</string>
+    <string name="has_invited_you">%1$s hat dich eingeladen zu einem Spiel %2$s.</string>
+    <string name="ask_ai">AI?</string>
+    <string name="opening_book">Eröffnungsbuch:</string>
+    <string name="ai_parameters">AI Parameter</string>
+    <string name="error_connecting">Verbindungsfehler, bitte erneut versuchen.</string>
+    <string name="lobby">Lobby</string>
+    <string name="live_games">Live-Spiele</string>
+    <string name="rooms">Räume</string>
+    <string name="players">Spieler</string>
+    <string name="tables">Tische</string>
+    <string name="has_joined_main_room">* %1$s hat den Hauptraum betreten</string>
+    <string name="has_exited_main_room">* %1$s hat den Hauptraum verlassen</string>
+    <string name="new_table">Eröffnen</string>
+    <string name="timer">Timer</string>
+    <string name="watching">Zuschauen:</string>
+    <string name="no_timer">Kein Timer</string>
+    <string name="tap_to_sit">Drücken um Platz zu nehmen</string>
+    <string name="play">Spielen</string>
+    <string name="owner">* %1$s ist nun Besitzer dieses Tisches</string>
+    <string name="leave_table">* %1$s hat den Tisch verlassen</string>
+    <string name="join_table">* %1$s ist an den Tisch gekommen</string>
+    <string name="not_owner">
+Du kannst keine Änderungen vornehmen, weil du nicht der Besitzer des Tisches bist.
+</string>
+    <string name="public_table">öffentlich</string>
+    <string name="private_table">privat</string>
+    <string name="table_type">Tisch-Typ</string>
+    <string name="timed">Zeitlich festgelegt</string>
+    <string name="initial_minutes">Spielzeit Minuten</string>
+    <string name="incremental_seconds">Inkrementalzeit Sekunden seconds</string>
+    <string name="table_settings">Tisch Einstellungen</string>
+    <string name="not_player">
+Spielaktionen sind nur Spielern möglich, die sich gesetzt haben und wenn das Spiel gestartet ist.
+</string>
+    <string name="requests_cancellation">%1$s ersucht um Abbruch dieses Sets.</string>
+    <string name="request_undo">Ersuchen rückgängig machen</string>
+    <string name="requests_undo">%1$s bittet um Rücknahme seines/ihres letzten Zuges.</string>
+    <string name="undo_requested">Ersuch um Zugrücknahme</string>
+    <string name="undo_accepted">Rücknahme akzeptiert</string>
+    <string name="undo_declined">Rücknahme verweigert</string>
+    <string name="cancellation_requested">Set- / Spiel-Abbruch angefordert</string>
+    <string name="cancellation_accepted">Set- / Spiel-Abbruch akzeptiert</string>
+    <string name="cancellation_declined">Set- / Spiel-Abbruch verweigert</string>
+    <string name="continue_as">weiterspielen als</string>
+    <string name="p1white">Spieler 1 (weiß)</string>
+    <string name="p2black">Spieler 2 (schwarz)</string>
+    <string name="seats_swapped">Sitze getauscht</string>
+    <string name="seats_not_swapped">Sitze nicht getauscht</string>
+    <string name="table_players">Spieler am Tisch</string>
+    <string name="show_table_players">Zeige Spieler am Tisch</string>
+    <string name="boot_player">Boote Spieler</string>
+    <string name="invite_player">Spieler einladen</string>
+    <string name="player_booted_by">%1$s wurde von %2$s gebootet</string>
+    <string name="you_booted_by">du wurdest von %2$s gebootet,</string>
+    <string name="optional_message">Optionale Nachricht</string>
+    <string name="invite_player_to_table">Einladung an %1$s</string>
+    <string name="accepted_your_invitation">%1$s akzeptiert deine Einladung</string>
+    <string name="declined_your_invitation">%1$s lehnt deine Einladung ab</string>
+    <string name="is_ignoring_your_invitation">%1$s ignoriert Einladungen von dir</string>
+    <string name="were_booted">
+Du wurdest dieses Tisches verwiesen, in 5 Minuten kannst du versuchen, erneut an diesen Tisch zu gehen.
+</string>
+    <string name="invites_you">läd dich an ihren %1$s Tisch ein</string>
+    <string name="ignore_invitations">Ignoriere Einladungen</string>
+    <string name="message">Nachricht</string>
+    <string name="player_disconnected">
+Dein Gegner scheint nicht mehr verbunden zu sein. Du kannst dich entscheiden jetzt aufzugeben oder zu warten. Wenn dein Gegner nicht innerhalb der nächsten 7 Minuten zurückkehrt
+hast du die Möglichkeit das Spiel/Set zu beenden oder die Aufgabe deines Gegners zu erzwingen.
+</string>
+    <string name="force_resign">Aufgeben des Gegners erzwingen</string>
+    <string name="cancel_set_game">Set/Spiel beenden</string>
+    <string name="opponent_unavailable">Gegner nicht verfügbar</string>
+    <string name="player_not_returned">
+Du kannst dich jetzt entscheiden aufzugeben, das Spiel/Set zu beenden oder das Aufgeben deines Gegners zu erzwingen.
+</string>
+    <string name="live_hill_join_leave">
+An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald man ein gewertetes Set im "King of the Hill"-live-Spielraum spielt
+</string>
+    <string name="prompt_username">Benutzername</string>
+    <string name="prompt_password">Passwort</string>
+    <string name="action_sign_in">Einloggen oder registrieren</string>
+    <string name="action_sign_in_short">Einloggen</string>
+    <string name="error_invalid_email">Diese E-Mail-Adresse ist ungültig</string>
+    <string name="error_invalid_password">Das Passwort ist zu kurz</string>
+    <string name="error_incorrect_password">Benutzername oder Passwort falsch</string>
+    <string name="error_field_required">Plichtfeld</string>
+    <string name="permission_rationale">
+"Für die Bereitstellung von E-Mail-Ergänzungen sind entsprechende Berechtigungen erforderlich."
+</string>
+    <string name="title_activity_board">Spielbrettaktivität</string>
+
+    <string name="social">social</string>
+    <string name="followers">Followers</string>
+    <string name="following">folgen</string>
+    <string name="hold_to_unfollow">Drücken und halten zum Entfolgen</string>
+    <string name="follow_player">Folge Spieler</string>
+    <string name="limited_followers">Nicht-Abonnenten können max. 5 Spielern folgen</string>
+    <string name="database_error">Datenbank-Fehler, bitte versuche es später erneut</string>
+    <string name="enter_username">Benutzernamen eingeben</string>
+    <string name="follow">Folgen</string>
+    <string name="now_following">du folgst jetzt %1$s</string>
+    <string name="broadcast">Broadcast</string>
+    <string name="to_followers">signalisiert den Followern</string>
+    <string name="to_friends">signalisiert den Freunden</string>
+    <string name="broadcasting_subscribers_only">Signale an Follower oder Freunde zu senden ist ein Feature nur für Abonnenten</string>
+    <string name="broadcast_once_per_hour">Du kannst nicht öfter als einmal pro Stunde broadcasten</string>
+    <string name="broadcast_success">Broadcast war erfolgreich</string>
+    <string name="alert_friends_followers">Signalisiere Freunden oder Followern, dass du live spielen willst</string>
+    <string name="live_game_alert">%1$s möchte live eine Runde %2$s spielen</string>
+
+
+    <string name="public_invitations_limit_reached">Das Limit an öffentlichen Einladungen ist erreicht</string>
+    <string name="public_invitations_limit_message">Für jede öffentliche Einladung, die du postest, darfst du 2 öffentliche Einladungen akzeptieren. Um eine zu posten, lasse das Gegner-Feld frei.\n\nAbonnenten sind nirgends limitiert.</string>
+    <string name="koth_limit">Nicht-Abonnenten können höchstens zwei "King-of-the-Hill"-Sets gleichzeitig spielen, das schließt gesendete und empfangene Einladungen mit ein. Du kannst erneut Einladungen posten, nachdem du ein Set beendet hast.\n Für Abonnenten gilt diese Einschränkung nicht.</string>
+
+</resources>
