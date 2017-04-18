@@ -477,6 +477,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
         }
 
+        activity.invalidateOptionsMenu();
+
         if (!asked2GetStarted && (playerData.getActiveGames().size() == 0) && (playerData.getNonActiveGames().size() == 0) && (playerData.getSentInvitations().size() == 0)) {
             asked2GetStarted = true;
             ((MainActivity) activity).ask2GetStarted();

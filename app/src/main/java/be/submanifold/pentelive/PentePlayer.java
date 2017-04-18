@@ -44,6 +44,9 @@ public class PentePlayer implements Parcelable {
 
     public static boolean loadAvatars;
 
+    private int livePlayers;
+    public int getLivePlayers() { return this.livePlayers; }
+
 
     public PentePlayer(String playerName, String password) {
         this.mPlayerName = playerName;
@@ -61,6 +64,7 @@ public class PentePlayer implements Parcelable {
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
+        livePlayers = 0;
     }
 
     public String getPlayerName() {
@@ -130,6 +134,7 @@ public class PentePlayer implements Parcelable {
             this.myColor = Integer.parseInt(dashLine[1]);
             this.mShowAds = !"NoAds".equals(dashLine[2]);
             this.mSubscriber = "subscriber".equals(dashLine[3]);
+            this.livePlayers = Integer.parseInt(dashLine[4]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
@@ -395,6 +400,7 @@ public class PentePlayer implements Parcelable {
 //            avatars = null;
 //        }
         myColor = in.readInt();
+        livePlayers = in.readInt();
     }
 
     @Override
@@ -483,6 +489,7 @@ public class PentePlayer implements Parcelable {
 //            dest.writeMap(avatars);
 //        }
         dest.writeInt(myColor);
+        dest.writeInt(livePlayers);
     }
 
     @SuppressWarnings("unused")

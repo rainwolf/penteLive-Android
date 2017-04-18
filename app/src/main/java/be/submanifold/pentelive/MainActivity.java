@@ -7,8 +7,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -24,8 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ExpandableListView;
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     private View viewWithOpenButtons = null;
     InterstitialAd mInterstitialAd;
     private PopupWindow popupWindow;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -475,6 +478,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.dashboard_menu, menu);
+
+        int livePlayers = player.getLivePlayers();
+        MenuItem menuItem = menu.findItem(R.id.action_new_invitation);
+        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.ic_play_arrow));
+        menuItem = menu.findItem(R.id.live_games);
+        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning));
+
         return true;
     }
 
@@ -693,6 +703,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private Drawable buildCounterDrawable(int count, int backgroundImageId){
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.counter_menu_item_layout, null);
+        view.setBackgroundResource(backgroundImageId);
+        if (count == 0) {
+            View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
+            counterTextPanel.setVisibility(View.GONE);
+        } else {
+            TextView textView = (TextView) view.findViewById(R.id.BadgeCount);
+            textView.setText("" + count);
+        }
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.setDrawingCacheEnabled(true);
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        return new BitmapDrawable(getResources(), bitmap);
+    }
 
 
 }
