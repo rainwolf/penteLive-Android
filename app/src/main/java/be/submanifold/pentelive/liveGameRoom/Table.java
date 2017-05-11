@@ -24,7 +24,7 @@ public class Table {
             keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
-            boatPenteColor = Color.parseColor("#25BAFF");
+            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -40,11 +40,12 @@ public class Table {
         gameNames = new HashMap<>();
         gameNames.put(1, "Pente"); gameNames.put(3, "Keryo-Pente"); gameNames.put(5, "Gomoku");
         gameNames.put(7, "D-Pente"); gameNames.put(9, "G-Pente"); gameNames.put(11, "Poof-Pente");
-        gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente");
+        gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente"); gameNames.put(17, "DK-Pente");
         gameNames.put(2, "Speed Pente"); gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku"); gameNames.put(8, "Speed D-Pente");
         gameNames.put(10, "Speed G-Pente"); gameNames.put(12, "Speed Poof-Pente");
         gameNames.put(14, "Speed Connect6"); gameNames.put(16, "Speed Boat-Pente");
+        gameNames.put(18, "Speed DK-Pente");
     }
     private List<Integer> moves = new ArrayList<>();
     private Map<String, Integer> timer;
@@ -101,11 +102,11 @@ public class Table {
                 detectPoof(move, color);
             }
             detectPenteCapture(move, color);
-            if (game == 3 || game == 4) {
+            if (game == 3 || game == 4 || game == 17 || game == 18) {
                 detectKeryoPenteCapture(move, color);
             }
         }
-        if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8 && (rated || game == 9 || game == 10)) {
+        if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8 && game != 17 && game != 18 && (rated || game == 9 || game == 10)) {
             if (moves.size() == 2) {
                 for (int i = 7; i < 12; i++) {
                     for (int j = 7; j < 12; j++) {
@@ -158,7 +159,7 @@ public class Table {
         }
     }
     public boolean isDPente() {
-        return (game == 7 || game == 8);
+        return (game == 7 || game == 8 || game == 17 || game == 18);
     }
     public int currentPlayer() {
         if (game != 13 && game != 14) {
@@ -172,7 +173,7 @@ public class Table {
     }
     public String currentPlayerName() {
         int seat = currentPlayer();
-        if ((game == 7 || game == 8) && moves.size() < 4) {
+        if ((game == 7 || game == 8 || game == 17 || game == 18) && moves.size() < 4) {
             seat = 1;
         }
         LivePlayer player = seats.get(seat);
@@ -253,8 +254,10 @@ public class Table {
             return poofPenteColor;
         } else if (game < 15) {
             return connect6Color;
-        } else {
+        } else if (game < 17) {
             return boatPenteColor;
+        } else {
+            return dkeryoColor;
         }
     }
     public String getGameName() {

@@ -54,14 +54,15 @@ public class SocialActivity extends AppCompatActivity {
         gameNames = new HashMap<>();
         gameNames.put("Pente", 1); gameNames.put("Keryo-Pente", 3); gameNames.put("Gomoku", 5);
         gameNames.put("D-Pente", 7); gameNames.put("G-Pente", 9); gameNames.put("Poof-Pente", 11);
-        gameNames.put("Connect6", 13); gameNames.put("Boat-Pente", 15);
+        gameNames.put("Connect6", 13); gameNames.put("Boat-Pente", 15); gameNames.put("DK-Pente", 17);
         gameNames.put("Turn-based Pente", 51); gameNames.put("Turn-based Keryo-Pente", 53); gameNames.put("Turn-based Gomoku", 55);
         gameNames.put("Turn-based D-Pente", 57); gameNames.put("Turn-based G-Pente", 59); gameNames.put("Turn-based Poof-Pente", 61);
-        gameNames.put("Turn-based Connect6", 63); gameNames.put("Turn-based Boat-Pente", 65);
+        gameNames.put("Turn-based Connect6", 63); gameNames.put("Turn-based Boat-Pente", 65); gameNames.put("Turn-based DK-Pente", 67);
         gameNames.put("Speed Pente", 2); gameNames.put("Speed Keryo-Pente", 4);
         gameNames.put("Speed Gomoku", 6); gameNames.put("Speed D-Pente", 8);
         gameNames.put("Speed G-Pente", 10); gameNames.put("Speed Poof-Pente", 12);
         gameNames.put("Speed Connect6", 14); gameNames.put("Speed Boat-Pente", 16);
+        gameNames.put("Speed DK-Pente", 18);
     }
 
     List<String> gamesArray;

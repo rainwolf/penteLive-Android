@@ -303,6 +303,8 @@ public class Game implements Parcelable {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
                 URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+//                url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
+//                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -413,6 +415,8 @@ public class Game implements Parcelable {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
                 URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+//                url = new URL("https://development.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
+//                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -624,7 +628,7 @@ public class Game implements Parcelable {
         if (getGameType() == null) {
             return false;
         }
-        return getGameType().contains("D-Pente");
+        return (getGameType().contains("D-Pente") || getGameType().contains("DK-Pente"));
     }
 
     public void parseGame(BoardView boardView) {
@@ -927,6 +931,9 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
             replayPenteGame(abstractBoard, untilMove);
+        } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
+            boardView.setBackgroundColor(boardView.dkeryoColor);
+            replayKeryoPenteGame(abstractBoard, untilMove);
         }
 
         movesString = "";
@@ -996,6 +1003,9 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
             replayPenteGame(abstractBoard, moveI, moveJ);
+        } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
+            boardView.setBackgroundColor(boardView.dkeryoColor);
+            replayKeryoPenteGame(abstractBoard, moveI, moveJ);
         }
 
         if (boardView != null) {

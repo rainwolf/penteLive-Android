@@ -21,14 +21,14 @@
     <string name="dayshours">%1$s Tage, %2$s Stunden</string>
     <string name="daypermove">%1$s Tag pro Zug</string>
     <string name="dayspermove">%1$s Tage pro Zug</string>
-    <string name="rated">gewertet</string>
+    <string name="rated">gewertetes</string>
     <string name="notRated">nicht gewertet</string>
     <string name="koth">KotH</string>
     <string name="tournament">Turnier</string>
     <string name="rating">Wertung:</string>
     <string name="remainingtime">Restzeit:</string>
-    <string name="this_is_a_rated_and_private_game">Dies ist ein gewertetes und privates Spiel</string>
-    <string name="private_str">privat</string>
+    <string name="this_is_a_rated_and_private_game">Dies ist ein %1$s und %2$s Spiel</string>
+    <string name="private_str">privates</string>
     <string name="non_private">öffentlich</string>
     <string name="messages">Nachrichten</string>
     <string name="invitations">Einladungen</string>

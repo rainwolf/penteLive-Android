@@ -91,8 +91,10 @@ public class RatingStat implements Parcelable {
             gameStr = "Poof-Pente";
         } else if (gameInt < 15) {
             gameStr = "Connect6";
-        } else {
+        } else if (gameInt < 17) {
             gameStr = "Boat-Pente";
+        } else {
+            gameStr = "DK-Pente";
         }
         if (this.gameId > 50) {
             this.game = "tb-" + gameStr;

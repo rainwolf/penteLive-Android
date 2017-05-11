@@ -37,12 +37,13 @@ public class DBBoardView extends View {
             keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
-            boatPenteColor = Color.parseColor("#25BAFF");
+            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500");
     private Paint blackPaint =  makePaint(blackColor), whitePaint = makePaint(whiteColor), pentePaint = makePaint(penteColor),
             keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
             dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
             poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
-            boatPentePaint = makePaint(boatPenteColor), shadowPaint = makePaint(Color.BLACK);
+            boatPentePaint = makePaint(boatPenteColor), dkeryoPaint = makePaint(dkeryoColor),
+            shadowPaint = makePaint(Color.BLACK);
     public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -143,6 +144,8 @@ public class DBBoardView extends View {
                 setBackgroundColor(poofPenteColor);
             } else if (game.equals("D-Pente")) {
                 setBackgroundColor(dPenteColor);
+            } else if (game.equals("DK-Pente")) {
+                setBackgroundColor(dkeryoColor);
             }
         }
     }
@@ -269,7 +272,7 @@ public class DBBoardView extends View {
                     detectPoof(abstractBoard, stoneI, stoneJ, color);
                 }
                 detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.equals("Keryo-Pente")) {
+                if (game.equals("Keryo-Pente") || game.equals("DK-Pente")) {
                     detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
                 }
                 if (game.equals("G-Pente") && movesList.size() == 2) {
@@ -614,7 +617,7 @@ public class DBBoardView extends View {
                     detectPoof(abstractBoard, stoneI, stoneJ, color);
                 }
                 detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.equals("Keryo-Pente")) {
+                if (game.equals("Keryo-Pente") || game.equals("DK-Pente")) {
                     detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
                 }
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
