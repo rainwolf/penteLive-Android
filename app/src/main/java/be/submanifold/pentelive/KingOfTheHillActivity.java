@@ -109,8 +109,13 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                             ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
                             popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
                             expandableList.setAlpha(0.5f);
-                            return true;
+                        } else {
+                            String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName();
+                            Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
                         }
+                        return true;
                     }
                     return false;
                 }

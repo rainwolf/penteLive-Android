@@ -37,11 +37,19 @@ public class WebViewActivity extends AppCompatActivity {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url)
                 {
-                    if (url.contains("?mobile&g=")) {
-                        while (!url.startsWith("?mobile&g=")) {
-                            url = url.substring(1);
+                    if (url.contains("?mobile&g=") || url.contains("gameServer/tb/game?gid=")) {
+                        if (url.contains("?mobile&g=")) {
+                            while (!url.startsWith("?mobile&g=")) {
+                                url = url.substring(1);
+                            }
+                            url = url.substring(10);
                         }
-                        url = url.substring(10);
+                        if (url.contains("gameServer/tb/game?gid=")) {
+                            while (!url.startsWith("gameServer/tb/game?gid=")) {
+                                url = url.substring(1);
+                            }
+                            url = url.substring(23);
+                        }
                         for (int i = 0; i < url.length(); i++ ) {
                             if (url.charAt(i) < '0' || url.charAt(i) > '9') {
                                 url = url.substring(0, i);
