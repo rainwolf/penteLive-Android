@@ -135,6 +135,20 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     return false;
                 }
             });
+        } else {
+            expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
+                    if (groupPosition > 0) {
+                        String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName();
+                        Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                        intent.putExtra("url", url);
+                        startActivity(intent);
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
 
         LoadHillTask loadTask = new LoadHillTask(kothSummary.getGameId());

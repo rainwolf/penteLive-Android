@@ -32,6 +32,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -194,7 +195,7 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/activeServers?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
 
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -245,9 +246,21 @@ public class LobbyActivity extends AppCompatActivity {
                 int idx = 0;
                 while (idx < dashLines.length) {
                     dashLine = dashLines[idx];
-                    String[] splitLine = dashLine.split(" ", 2);
-                    if (splitLine.length > 1) {
-                        LiveGameRoom room = new LiveGameRoom(splitLine[1], Integer.parseInt(splitLine[0]));
+                    String[] splitLine = dashLine.split(":", 2);
+                    String[] serverLine = splitLine[0].split(" ", 2);
+                    if (serverLine.length > 1) {
+                        LiveGameRoom room = new LiveGameRoom(serverLine[1], Integer.parseInt(serverLine[0]));
+                        if (splitLine.length > 1) {
+                            String[] playersString = splitLine[1].split(";");
+                            for (String playerString: playersString) {
+                                String[] splitPlayer = playerString.split(",");
+                                if (splitPlayer.length < 4) {
+                                    continue;
+                                }
+                                LivePlayer player = new LivePlayer(splitPlayer[0], !"0".equals(splitPlayer[2]), Integer.parseInt(splitPlayer[3]), Integer.parseInt(splitPlayer[2]));
+                                room.addPlayer(player);
+                            }
+                        }
                         rooms.add(room);
                     }
                     idx += 1;

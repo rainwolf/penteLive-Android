@@ -101,7 +101,7 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
 
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
 
-        nameTextView.setText(rooms.get(childPosition).getName());
+        nameTextView.setText(rooms.get(childPosition).getRoomText(nameTextView.getLineHeight()));
 
         return convertView;
     }
