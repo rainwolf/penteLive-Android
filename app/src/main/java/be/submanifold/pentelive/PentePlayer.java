@@ -43,10 +43,14 @@ public class PentePlayer implements Parcelable {
     public static Map<String, Bitmap> avatars;
 
     public static boolean loadAvatars;
+    public static boolean showOnlyTB;
 
     private int livePlayers;
     public int getLivePlayers() { return this.livePlayers; }
 
+    private int tbRatings, tbHills;
+    public int getTbRatings() { return tbRatings; }
+    public int gettbHills() { return tbHills; }
 
     public PentePlayer(String playerName, String password) {
         this.mPlayerName = playerName;
@@ -65,6 +69,8 @@ public class PentePlayer implements Parcelable {
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
         livePlayers = 0;
+        tbRatings = 0;
+        tbHills = 0;
     }
 
     public String getPlayerName() {
@@ -142,6 +148,7 @@ public class PentePlayer implements Parcelable {
             idx += 1;
         }
         this.mHills.clear();
+        tbHills = 0;
         KingOfTheHill hill;
         if (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == 0) {
             idx += 1;
@@ -152,6 +159,9 @@ public class PentePlayer implements Parcelable {
                     continue;
                 }
                 hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4] ,dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"), dashLine[6]);
+                if (hill.getGameId()>50) {
+                    tbHills += 1;
+                }
                 this.mHills.add(hill);
             }
         }
@@ -159,6 +169,7 @@ public class PentePlayer implements Parcelable {
             idx += 1;
         }
         this.mRatingStats.clear();
+        tbRatings = 0;
         RatingStat ratingStat;
         if (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == 0) {
             idx += 1;
@@ -169,6 +180,9 @@ public class PentePlayer implements Parcelable {
                     continue;
                 }
                 ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3], dashLine[5]);
+                if (ratingStat.getGameId()>50) {
+                    tbRatings += 1;
+                }
                 this.mRatingStats.add(ratingStat);
             }
         }
@@ -310,7 +324,8 @@ public class PentePlayer implements Parcelable {
         avatarTask.execute((Void) null);
     }
 
-    public void loadPlayer(DashboardListAdapter listAdapter, boolean loadAvatars) {
+    public void loadPlayer(DashboardListAdapter listAdapter, boolean loadAvatars, boolean showOnlyTB) {
+        this.showOnlyTB = showOnlyTB;
         this.loadAvatars = loadAvatars;
         if (this.mPassword == null || this.mPlayerName == null) {
             return;
@@ -401,6 +416,8 @@ public class PentePlayer implements Parcelable {
 //        }
         myColor = in.readInt();
         livePlayers = in.readInt();
+        tbRatings = in.readInt();
+        tbHills = in.readInt();
     }
 
     @Override
@@ -490,6 +507,8 @@ public class PentePlayer implements Parcelable {
 //        }
         dest.writeInt(myColor);
         dest.writeInt(livePlayers);
+        dest.writeInt(tbRatings);
+        dest.writeInt(tbHills);
     }
 
     @SuppressWarnings("unused")
@@ -738,7 +757,7 @@ public class PentePlayer implements Parcelable {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            loadPlayer(listAdapter, loadAvatars);
+            loadPlayer(listAdapter, loadAvatars, showOnlyTB);
         }
 
         @Override
@@ -805,7 +824,7 @@ public class PentePlayer implements Parcelable {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            loadPlayer(listAdapter, loadAvatars);
+            loadPlayer(listAdapter, loadAvatars, showOnlyTB);
         }
 
         @Override

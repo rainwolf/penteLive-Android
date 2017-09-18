@@ -299,7 +299,9 @@ public class MainActivity extends AppCompatActivity {
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_KOTH_COLLAPSED_KEY, false)) {
             expandableList.expandGroup(DashboardListAdapter.KOTHGROUP);
         }
-        this.player.loadPlayer(this.listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
+        boolean loadAvatars = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false),
+                showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
+        this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
 //        System.out.println("messages " + player.getMessages().size());
         myToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -380,6 +382,7 @@ public class MainActivity extends AppCompatActivity {
                         ratingListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
                         RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
                         adapter.setInflater(inflater, MainActivity.this);
+                        adapter.setTbRatings(player.getTbRatings());
                         ratingListView.setAdapter(adapter);
                         ratingListView.expandGroup(0);
                         ratingListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
@@ -447,7 +450,9 @@ public class MainActivity extends AppCompatActivity {
 
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
-            player.loadPlayer(listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
+            boolean loadAvatars = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false),
+                    showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
+            player.loadPlayer(listAdapter, loadAvatars, showOnlyTB);
 
             Toast.makeText(MainActivity.this, message,
                     Toast.LENGTH_SHORT).show();
@@ -458,7 +463,9 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
-        this.player.loadPlayer(this.listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
+        boolean loadAvatars = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false),
+                showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
+        this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
         (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }
     @Override
@@ -469,7 +476,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshPlayer() {
-        player.loadPlayer(listAdapter, PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
+        boolean loadAvatars = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false),
+                showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
+        player.loadPlayer(listAdapter, loadAvatars, showOnlyTB);
 //        player.loadPlayer(listAdapter, true);
         swipeRefreshLayout.setRefreshing(false);
     }

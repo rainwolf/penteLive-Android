@@ -29,6 +29,9 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
 
     private Context ctx = MyApplication.getContext();
 
+    private int tbRatings = 0;
+    public void setTbRatings(int tbRatings) { this.tbRatings = tbRatings; }
+
     public RatingStatsListAdapter(List<RatingStat> ratingStats) {
         this.ratingStats = ratingStats;
     }
@@ -44,6 +47,9 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
+        if (PentePlayer.showOnlyTB) {
+            return tbRatings;
+        }
         return this.ratingStats.size();
     }
 

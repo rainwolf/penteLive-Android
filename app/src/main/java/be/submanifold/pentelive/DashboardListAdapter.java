@@ -89,7 +89,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             case SENTINVITATIONSGROUP: count = playerData.getSentInvitations().size(); break;
             case NONACTIVEGAMESGROUP: count = playerData.getNonActiveGames().size(); break;
             case TOURNAMENTGROUP: count = playerData.getTournaments().size(); break;
-            case KOTHGROUP: count = playerData.getHills().size(); break;
+            case KOTHGROUP:
+                if (PentePlayer.showOnlyTB) {
+                    count = playerData.gettbHills();
+                } else {
+                    count = playerData.getHills().size();
+                }
+                break;
             default: count = 0; break;
         }
         return count;
@@ -172,9 +178,16 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                         hills += 1;
                     }
                 }
+                int totalHills = 0;
+                if (PentePlayer.showOnlyTB) {
+                    totalHills = playerData.gettbHills();
+                } else {
+                    totalHills = playerData.getHills().size();
+                }
+
                 if (hills > 0) {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
-                    title = kothStr + " (" + hills + "/" + playerData.getHills().size() + ")";
+                    title = kothStr + " (" + hills + "/" + totalHills + ")";
                 }
                 break;
             default: title = "uh-oh"; break;
