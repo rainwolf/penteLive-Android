@@ -764,7 +764,7 @@ public class Game implements Parcelable {
         }
         if (!mGameString.contains("state=active")) {
             mActive = false;
-            if (!getGameType().equals("Connect6") && !getGameType().equals("Speed Connect6") && PentePlayer.mSubscriber) {
+            if (PentePlayer.mSubscriber) {
                 final BoardActivity host = (BoardActivity) boardView.getContext();
                 ((Button) host.findViewById(R.id.submitButton)).setVisibility(View.GONE);
                 Button dbBtn = (Button) host.findViewById(R.id.searchDBbutton);

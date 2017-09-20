@@ -120,7 +120,7 @@ public class DatabaseActivity extends AppCompatActivity {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
                 String gameStr = extras.getString("game");
-                if (gameStr.equals("Pente") || gameStr.equals("Keryo-Pente")) {
+                if (gameStr.equals("Pente") || gameStr.equals("Speed Pente") || gameStr.contains("Keryo-Pente")) {
                     ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
                 }
                 board.setGame(gameStr);
@@ -152,14 +152,14 @@ public class DatabaseActivity extends AppCompatActivity {
                     PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, position);
                     String game = (String) parent.getItemAtPosition(position);
                     board.setGame(game);
-                    if (game.equals("Gomoku")) {
+                    if (game.contains("Gomoku") || game.contains("Connect6")) {
                             ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("");
                             ((TextView) findViewById(R.id.capturesView)).setVisibility(View.INVISIBLE);
                     } else {
                             ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("\u2B24 x 0 - \u25EF x 0");
                             ((TextView) findViewById(R.id.capturesView)).setVisibility(VISIBLE);
                     }
-                    if (game.equals("Pente") || game.equals("Keryo-Pente")) {
+                    if (game.equals("Pente") || game.equals("Speed Pente") || game.contains("Keryo-Pente")) {
                         ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
                     } else {
                         ((Button) findViewById(R.id.aiButton)).setVisibility(View.GONE);
@@ -427,9 +427,9 @@ public class DatabaseActivity extends AppCompatActivity {
                     Ai ai = board.getAiPlayer();
                     boolean useBook = ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).isChecked();
                     ai.useOpeningBook(useBook);
-                    if (board.getGame().equals("Keryo-Pente")) {
+                    if (board.getGame().contains("Keryo-Pente")) {
                         ai.setGame(3);
-                    } else if (board.getGame().equals("Pente")) {
+                    } else if (board.getGame().equals("Pente") || board.getGame().equals("Speed Pente")) {
                         ai.setGame(1);
                     }
                     ai.setLevel(((Spinner) aiSettingsView.findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);

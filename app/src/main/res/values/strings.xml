@@ -284,6 +284,7 @@
         <item>D-Pente</item>
         <item>G-Pente</item>
         <item>Poof-Pente</item>
+        <item>Connect6</item>
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
         <item>Speed Pente</item>
@@ -292,6 +293,7 @@
         <item>Speed D-Pente</item>
         <item>Speed G-Pente</item>
         <item>Speed Poof-Pente</item>
+        <item>Speed Connect6</item>
         <item>Speed Boat-Pente</item>
         <item>Speed DK-Pente</item>
     </string-array>
