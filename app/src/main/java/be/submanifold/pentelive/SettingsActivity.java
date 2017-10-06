@@ -72,7 +72,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/myprofile/prefs"; // missing 'http://' will cause crashed
+                String url = "https://www.pente.org/gameServer/myprofile/prefs?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
@@ -81,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);

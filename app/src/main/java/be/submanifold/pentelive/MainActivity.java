@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View view) {
                                     popupWindow.dismiss();
-                                    String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                                    String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
                                     Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                                     intent.putExtra("url", url);
                                     startActivity(intent);

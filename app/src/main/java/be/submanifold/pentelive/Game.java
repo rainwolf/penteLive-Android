@@ -12,7 +12,10 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -30,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -592,8 +596,186 @@ public class Game implements Parcelable {
         }
     }
 
+    public class RequestUndoTask extends AsyncTask<Void, Void, Boolean> {
 
-        public List<Integer> getMovesList() {
+        private String gid;
+        private Activity activity;
+
+
+        RequestUndoTask(String gid, Activity activity) {
+            this.gid = gid;
+            this.activity = activity;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+//                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
+                String urlParameters  = "gid=" + gid + "&command=requestUndo" +  "&mobile="
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                byte[] postData       = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                }
+                int    postDataLength = postData.length;
+                String request        = "https://www.pente.org/gameServer/tb/game";
+                URL url            = new URL( request );
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty( "charset", "utf-8");
+                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                conn.setUseCaches( false );
+                try {
+                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+                    wr.write( postData );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+
+                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+//                System.out.println(output);
+
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                activity.finish();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+    public class ReplyUndoTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String gid;
+        private Activity activity;
+        private boolean accept;
+        private String reply;
+
+        ReplyUndoTask(String gid, boolean accept, Activity activity) {
+            this.gid = gid;
+            this.activity = activity;
+            this.accept = accept;
+            reply = accept?"acceptUndo":"declineUndo";
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+//                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
+                String urlParameters  = "gid=" + gid + "&command=" + reply + "&mobile="
+                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                byte[] postData       = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                }
+                int    postDataLength = postData.length;
+                String request        = "https://www.pente.org/gameServer/tb/game";
+                URL url            = new URL( request );
+                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                if (cookies != null) {
+                    String[] splitCookie = cookies.split(";");
+                    String cookieStr = "";
+                    for (String item: splitCookie) {
+                        if (item.contains("name2") || item.contains("password2")) {
+                            cookieStr += item + ";";
+                        }
+                    }
+                    conn.setRequestProperty("Cookie", cookieStr);
+//                    System.out.println("cookieStr: " +cookieStr);
+                }
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty( "charset", "utf-8");
+                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                conn.setUseCaches( false );
+                try {
+                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
+                    wr.write( postData );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+
+                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
+//                System.out.println(output);
+
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                if (accept) {
+                    activity.finish();
+                } else {
+                    mGameString = null;
+                    parseGame((BoardView) activity.findViewById(R.id.boardView));
+                }
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+
+
+    public List<Integer> getMovesList() {
         return mMovesList;
     }
 //    public void setmMovesList(List<Integer> mMovesList) {
@@ -638,6 +820,8 @@ public class Game implements Parcelable {
             return;
         }
 
+        boolean amIPlaying = false, undoRequested = false;
+
         String messageNums[] = null;
         String messagesArray[] = null;
 
@@ -650,6 +834,7 @@ public class Game implements Parcelable {
             if (dashLine.indexOf("player1=") == 0) {
                 p1Name = dashLine.substring(8).split(",")[0];
                 if (p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                    amIPlaying = true;
                     if (this.mMovesList != null) {
 //                        if (isDPente() && mMovesList.size() == 1) {
 //                            this.mActive = true;
@@ -672,9 +857,13 @@ public class Game implements Parcelable {
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 }
             }
+            if (dashLine.contains("undo=requested")) {
+                undoRequested = true;
+            }
             if (dashLine.indexOf("player2=") == 0) {
                 p2Name = dashLine.substring(8).split(",")[0];
                 if (p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                    amIPlaying = true;
                     if (this.mMovesList != null) {
 //                        if (isDPente() && mMovesList.size() == 1) {
 //                            this.mActive = false;
@@ -718,7 +907,7 @@ public class Game implements Parcelable {
             if (dashLine.indexOf("cancel="+getOpponentName()) == 0) {
                 final Activity host = (Activity) boardView.getContext();
                 AlertDialog.Builder builder = new AlertDialog.Builder(host);
-                builder.setTitle("Cancel request");
+                builder.setTitle(host.getString(R.string.cancellation_requested));
 
                 String msg = "";
                 if (!dashLine.substring(dashLine.indexOf(",")+1).equals("")) {
@@ -779,6 +968,81 @@ public class Game implements Parcelable {
                     }
                 });
             }
+        }
+
+        if (!mActive && amIPlaying && !undoRequested) {
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
+            undoBtn.setText(host.getString(R.string.request_undo));
+            undoBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (PentePlayer.mSubscriber) {
+                        RequestUndoTask task = new RequestUndoTask(getGameID(), host);
+                        task.execute((Void) null);
+                    } else {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+                        builder.setTitle(host.getString(R.string.feature_not_available));
+
+                        builder.setMessage(host.getString(R.string.undo_subscribers_only));
+                        builder.setPositiveButton(host.getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
+                                Intent intent = new Intent(host, WebViewActivity.class);
+                                intent.putExtra("url", url);
+                                host.startActivity(intent);
+                                dialog.dismiss();
+                            } });
+                        builder.setNegativeButton(host.getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            } });
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(final DialogInterface arg0) {
+                                    host.finish();
+                                }
+                            });
+                        }
+                        final AlertDialog dialog = builder.show();
+                    }
+                }
+            });
+        } else if (!mActive && amIPlaying && undoRequested) {
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
+            undoBtn.setText(host.getString(R.string.undo_requested));
+        } else if (mActive && amIPlaying && undoRequested) {
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(host);
+            builder.setTitle(host.getString(R.string.requests_undo, getOpponentName()));
+            String options[] = {host.getString(R.string.accept), host.getString(R.string.decline)};
+            builder.setItems(options, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    ReplyUndoTask task;
+                    switch (which) {
+                        case 0:
+                            task = new ReplyUndoTask(getGameID(), true, host);
+                            task.execute((Void) null);
+                            break;
+                        case 1:
+                            task = new ReplyUndoTask(getGameID(), false, host);
+                            task.execute((Void) null);
+                            break;
+                    }
+                    // the user clicked on colors[which]
+                }
+            });
+            android.support.v7.app.AlertDialog dlg = builder.create();
+            dlg.setCanceledOnTouchOutside(false);
+            Window window = dlg.getWindow();
+            WindowManager.LayoutParams wlp = window.getAttributes();
+            wlp.gravity = Gravity.BOTTOM;
+            dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setAttributes(wlp);
+            dlg.show();
         }
 
         messages = new HashMap<Integer, String>();
