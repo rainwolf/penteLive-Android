@@ -87,6 +87,7 @@ public class BoardView extends View {
     public int dPenteMove1 = -1;
     public int dPenteMove2 = -1;
     public int dPenteMove3 = -1;
+    public int dPenteMove4 = -1;
     public boolean dPenteChosen = false;
 
     private boolean replayed = false;
@@ -197,15 +198,17 @@ public class BoardView extends View {
         if (game != null && game.getMovesList() != null && game.isConnect6()) {
             int i = game.getMovesList().size();
             myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-        } else if (game != null && game.isDPente() && game.getMovesList().size() == 1) {
-            if (dPenteMove3 > -1) {
+        } else if (game != null && game.isDPente() && game.getMovesList().size() == 0) {
+            if (dPenteMove4 > -1) {
+                myColor = (byte) 2;
+            } else if (dPenteMove3 > -1) {
                 myColor = (byte) 2;
             } else if (dPenteMove2 > -1) {
-                myColor = (byte) 2;
-            } else if (dPenteMove1 > -1) {
                 myColor = (byte) 1;
-            } else {
+            } else if (dPenteMove1 > -1) {
                 myColor = (byte) 2;
+            } else {
+                myColor = (byte) 1;
             }
         } else if (game != null && game.getMovesList() != null) {
             myColor = (byte) (game.getMovesList().size()%2 + 1);
@@ -225,8 +228,6 @@ public class BoardView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int index = event.getActionIndex();
-        int action = event.getActionMasked();
-        int pointerId = event.getPointerId(index);
 
         float x, y;
         x = event.getX();
@@ -241,7 +242,6 @@ public class BoardView extends View {
             return false;
         }
         playedMove = -1;
-        dPenteMove3 = -1;
         stoneX = x;
         stoneI = (byte) (19*stoneX/size);
         stoneY = y;
@@ -252,43 +252,11 @@ public class BoardView extends View {
                     game.replayGame(abstractBoard, BoardView.this);
                     replayed = true;
                 }
-//                mVelocityTracker.clear();
-//                // Add a user's movement to the tracker.
-//                mVelocityTracker.addMovement(event);
-//
-//                dragging = true;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
                 break;
             case MotionEvent.ACTION_MOVE:
-//                mVelocityTracker.addMovement(event);
-//                // When you want to determine the velocity, call
-//                // computeCurrentVelocity(). Then call getXVelocity()
-//                // and getYVelocity() to retrieve the velocity for each pointer ID.
-//                mVelocityTracker.computeCurrentVelocity(1000);
-//                // Log velocity of pixels per second
-//                // Best practice to use VelocityTrackerCompat where possible.
-//                double velocityX = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
-//
-//                if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-//                    if (velocityX < 0) {
-//                        swipeLeft = true;
-////                        System.out.println("swipe RightToLeft moving ");
-//
-//                    } else {
-//                        swipeLeft = false;
-////                        System.out.println("swipe LeftToright moving ");
-//                    }
-//                    playedMove = -1;
-//                    dragging = false;
-//                    scaling = 1;
-//                    translateX = 0;
-//                    translateY = 0;
-//                    return true;
-//                }
-////                System.out.println("dragging");
-//                dragging = true;
                 scaling = 2;
                 translateX = -x/2;
                 translateY = -y/2;
@@ -298,17 +266,6 @@ public class BoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
-//                if (!dragging) {
-//                    if (swipeLeft) {
-//                        boardActivity.goBack();
-////                        System.out.println("swipe RightToLeft ");
-//                    } else {
-//                        boardActivity.goForward();
-////                        System.out.println("swipe LeftToright ");
-//                    }
-//                    return true;
-//                }
-//                mVelocityTracker.recycle();
                 break;
         }
 
@@ -319,13 +276,15 @@ public class BoardView extends View {
             if (game.isConnect6() && connect6Move1 == -1) {
                 connect6Move1 = playedMove;
             }
-            if (game.isDPente() && game.getMovesList().size() == 1) {
+            if (game.isDPente() && game.getMovesList().size() == 0) {
                 if (dPenteMove1 == -1) {
                     dPenteMove1 = playedMove;
                 } else if (dPenteMove2 == -1 && playedMove != dPenteMove1) {
                     dPenteMove2 = playedMove;
-                } else if (playedMove != dPenteMove1 && playedMove != dPenteMove2){
+                } else if (dPenteMove3 == -1 && playedMove != dPenteMove1 && playedMove != dPenteMove2){
                     dPenteMove3 = playedMove;
+                } else if (playedMove != dPenteMove1 && playedMove != dPenteMove2 && playedMove != dPenteMove3){
+                    dPenteMove4 = playedMove;
                 }
             }
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
@@ -351,11 +310,17 @@ public class BoardView extends View {
                                     "-...");
                         }
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 1) {
-                    if (dPenteMove3 > -1) {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
-                                "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
-                                "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)));
+                } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                    if (dPenteMove4 > -1) {
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
+                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
+                                "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
+                                "-" + coordinateLetters[dPenteMove4 % 19] + "" + (19 - (dPenteMove4 / 19)));
+                    } else if (dPenteMove3 > -1) {
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                    "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
+                                    "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)) +
+                                    "-...");
                     } else if (dPenteMove2 > -1) {
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
@@ -426,20 +391,38 @@ public class BoardView extends View {
                 }
             }
             if (game.isDPente()) {
-                if (dPenteMove1 > -1) {
-                    byte movej = (byte) (dPenteMove1/19);
-                    byte movei = (byte) (dPenteMove1%19);
-                    drawStone(canvas, movei, movej, (byte) 2);
-                }
                 if (dPenteMove2 > -1) {
                     byte movej = (byte) (dPenteMove2/19);
                     byte movei = (byte) (dPenteMove2%19);
-                    drawStone(canvas, movei, movej, (byte) 1);
-                }
-                if (dPenteMove3 > -1) {
-                    byte movej = (byte) (dPenteMove3/19);
-                    byte movei = (byte) (dPenteMove3%19);
                     drawStone(canvas, movei, movej, (byte) 2);
+                }
+                if (scaling == 1 && dPenteMove4 > -1) {
+                    byte movej = (byte) (dPenteMove4/19);
+                    byte movei = (byte) (dPenteMove4%19);
+                    drawStone(canvas, movei, movej, (byte) 2);
+                    if (!checkDPenteCapture()) {
+                        if (dPenteMove1 > -1) {
+                            movej = (byte) (dPenteMove1/19);
+                            movei = (byte) (dPenteMove1%19);
+                            drawStone(canvas, movei, movej, (byte) 1);
+                        }
+                        if (dPenteMove3 > -1) {
+                            movej = (byte) (dPenteMove3/19);
+                            movei = (byte) (dPenteMove3%19);
+                            drawStone(canvas, movei, movej, (byte) 1);
+                        }
+                    }
+                } else {
+                    if (dPenteMove1 > -1) {
+                        byte movej = (byte) (dPenteMove1/19);
+                        byte movei = (byte) (dPenteMove1%19);
+                        drawStone(canvas, movei, movej, (byte) 1);
+                    }
+                    if (dPenteMove3 > -1) {
+                        byte movej = (byte) (dPenteMove3/19);
+                        byte movei = (byte) (dPenteMove3%19);
+                        drawStone(canvas, movei, movej, (byte) 1);
+                    }
                 }
             }
         }
@@ -593,5 +576,50 @@ public class BoardView extends View {
         setMeasuredDimension(width, width);
     }
 
+
+    private boolean checkDPenteCapture() {
+        if (dPenteMove2 - 3 == dPenteMove4 && dPenteMove2%19>2) {
+            if ((dPenteMove1 == dPenteMove2 - 2 && dPenteMove3 == dPenteMove2 - 1) ||
+                    (dPenteMove1 == dPenteMove2 - 1 && dPenteMove3 == dPenteMove2 - 2)) {
+                return true;
+            }
+        } else if (dPenteMove2 + 3 == dPenteMove4 && dPenteMove4%19>2) {
+            if ((dPenteMove1 == dPenteMove2 + 2 && dPenteMove3 == dPenteMove2 + 1) ||
+                    (dPenteMove1 == dPenteMove2 + 1 && dPenteMove3 == dPenteMove2 + 2)) {
+                return true;
+            }
+        } else if (dPenteMove2 - 57 == dPenteMove4) {
+            if ((dPenteMove1 == dPenteMove2 - 38 && dPenteMove3 == dPenteMove2 - 19) ||
+                    (dPenteMove1 == dPenteMove2 - 19 && dPenteMove3 == dPenteMove2 - 38)) {
+                return true;
+            }
+        } else if (dPenteMove2 + 57 == dPenteMove4) {
+            if ((dPenteMove1 == dPenteMove2 + 38 && dPenteMove3 == dPenteMove2 + 19) ||
+                    (dPenteMove1 == dPenteMove2 + 19 && dPenteMove3 == dPenteMove2 + 38)) {
+                return true;
+            }
+        } else if (dPenteMove2 - 60 == dPenteMove4 && dPenteMove2%19>2) {
+            if ((dPenteMove1 == dPenteMove2 - 40 && dPenteMove3 == dPenteMove2 - 20) ||
+                    (dPenteMove1 == dPenteMove2 - 20 && dPenteMove3 == dPenteMove2 - 40)) {
+                return true;
+            }
+        } else if (dPenteMove2 + 60 == dPenteMove4 && dPenteMove4%19>2) {
+            if ((dPenteMove1 == dPenteMove2 + 40 && dPenteMove3 == dPenteMove2 + 20) ||
+                    (dPenteMove1 == dPenteMove2 + 20 && dPenteMove3 == dPenteMove2 + 40)) {
+                return true;
+            }
+        } else if (dPenteMove2 - 54 == dPenteMove4 && dPenteMove4%19>2) {
+            if ((dPenteMove1 == dPenteMove2 - 36 && dPenteMove3 == dPenteMove2 - 18) ||
+                    (dPenteMove1 == dPenteMove2 - 18 && dPenteMove3 == dPenteMove2 - 36)) {
+                return true;
+            }
+        } else if (dPenteMove2 + 54 == dPenteMove4 && dPenteMove2%19>2) {
+            if ((dPenteMove1 == dPenteMove2 + 36 && dPenteMove3 == dPenteMove2 + 18) ||
+                    (dPenteMove1 == dPenteMove2 + 18 && dPenteMove3 == dPenteMove2 + 36)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

@@ -92,7 +92,7 @@ public class Table {
         }
     }
     public void addMove(int move) {
-        byte color = (byte) currentPlayer();
+        byte color = (byte) currentColor();
         moves.add(move);
         int move_i = move / 19;
         int move_j = move % 19;
@@ -161,8 +161,26 @@ public class Table {
     public boolean isDPente() {
         return (game == 7 || game == 8 || game == 17 || game == 18);
     }
+    public int currentColor() {
+        if (game != 13 && game != 14) {
+            return 1 + (moves.size() % 2);
+        } else {
+            if (moves.size() == 0) {
+                return 1;
+            }
+            return 2 - (((moves.size() - 1) / 2) % 2);
+        }
+    }
     public int currentPlayer() {
         if (game != 13 && game != 14) {
+            if (isDPente()) {
+                if (moves.size()<4) {
+                    return 1;
+                }
+                if (moves.size() == 4 && gameState.dPenteState == DPenteState.NOCHOICE) {
+                    return 2;
+                }
+            }
             return 1 + (moves.size() % 2);
         } else {
             if (moves.size() == 0) {
@@ -173,9 +191,6 @@ public class Table {
     }
     public String currentPlayerName() {
         int seat = currentPlayer();
-        if ((game == 7 || game == 8 || game == 17 || game == 18) && moves.size() < 4) {
-            seat = 1;
-        }
         LivePlayer player = seats.get(seat);
         if (player != null) {
             return player.getName();
@@ -189,6 +204,9 @@ public class Table {
                 LivePlayer player2 = seats.get(2);
                 seats.put(1, player2);
                 seats.put(2, player1);
+                Map<String, Integer> timer1 = gameState.timers.get(1), timer2 = gameState.timers.get(2);
+                gameState.timers.put(1, timer2);
+                gameState.timers.put(2, timer1);
             }
             gameState.dPenteState = DPenteState.SWAPPED;
         } else {

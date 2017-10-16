@@ -451,6 +451,7 @@ public class LiveTableFragment extends Fragment {
 
     public void gameStateChanged() {
         if (table.getGameState().state == State.STARTED) {
+            board.invalidate();
             if (table.isTimed()) {
                 timerUpdater.run();
             }

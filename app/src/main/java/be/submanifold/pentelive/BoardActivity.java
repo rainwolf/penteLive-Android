@@ -138,14 +138,15 @@ public class BoardActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 1) {
-                    if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 ||
-                            board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove3 == board.dPenteMove2) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_3_moves),
+                } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                    if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
+                            board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3  || board.dPenteMove1 == board.dPenteMove4
+                            || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_4_moves),
                                 Toast.LENGTH_LONG).show();
                         return;
                     } else {
-                        moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3;
+                        moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
                     }
                 } else if (game.isDPente() && game.dPenteChoice) {
                     if (board.playedMove == -1) {
@@ -268,8 +269,14 @@ public class BoardActivity extends AppCompatActivity {
         if (game.isConnect6() && board.connect6Move1 > -1) {
             board.connect6Move1 = -1;
             board.invalidate();
-        } else if (game.isDPente() && game.getMovesList().size() == 1) {
-            if (board.dPenteMove3 > -1) {
+        } else if (game.isDPente() && game.getMovesList().size() == 0) {
+            if (board.dPenteMove4 > -1) {
+                board.dPenteMove4 = -1;
+                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
+                        "-" + coordinateLetters[board.dPenteMove2 % 19] + "" + (19 - (board.dPenteMove2 / 19)) +
+                        "-" + coordinateLetters[board.dPenteMove3 % 19] + "" + (19 - (board.dPenteMove3 / 19)) +
+                        "-...");
+            } else if (board.dPenteMove3 > -1) {
                 board.dPenteMove3 = -1;
                 ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
                         "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
@@ -407,6 +414,9 @@ public class BoardActivity extends AppCompatActivity {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/resign";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/resign";
+                }
                 URL url            = new URL( request );
                 HttpURLConnection conn= (HttpURLConnection) url.openConnection();
                 conn.setDoOutput( true );
@@ -474,6 +484,9 @@ public class BoardActivity extends AppCompatActivity {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/cancel";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/cancel";
+                }
                 URL url            = new URL( request );
                 HttpURLConnection conn= (HttpURLConnection) url.openConnection();
                 conn.setDoOutput( true );

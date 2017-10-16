@@ -3,7 +3,7 @@
     <string name="app_name">penteLive</string>
     <string name="not_your_turn">Du bist nicht am Zug.</string>
     <string name="c6_needs_2_moves">Bei Connect6 werden 2 Steine pro Zug gesetzt.</string>
-    <string name="dpente_needs_3_moves">D-Pente beginnt mit 3 Eröffnungszügen.</string>
+    <string name="dpente_needs_4_moves">D-Pente beginnt mit 4 Eröffnungszügen.</string>
     <string name="no_momve_played_yet">Es wurde noch kein Zug gemacht.</string>
     <string name="submit">Bestätige</string>
     <string name="place_stone_submit">Lege einen Stein und bestätige den Zug.</string>

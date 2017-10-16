@@ -307,8 +307,10 @@ public class Game implements Parcelable {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
                 URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
-//                url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
-//                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
+                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                }
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -343,6 +345,9 @@ public class Game implements Parcelable {
 
                 if (mGameString.indexOf("moves=") == -1) {
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    if (PentePlayer.development) {
+                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    }
                     connection = (HttpsURLConnection)url.openConnection();
                     responseCode = connection.getResponseCode();
 //
@@ -360,6 +365,9 @@ public class Game implements Parcelable {
 
 
                     url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
+                    if (PentePlayer.development) {
+                        url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
+                    }
                     connection = (HttpsURLConnection)url.openConnection();
                     responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
@@ -419,8 +427,10 @@ public class Game implements Parcelable {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
                 URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
-//                url = new URL("https://development.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
-//                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
+                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                }
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -535,7 +545,10 @@ public class Game implements Parcelable {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/cancel";
-                URL url            = new URL( request );
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/cancel";
+                }
+                    URL url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -620,6 +633,9 @@ public class Game implements Parcelable {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/game";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/game";
+                }
                 URL url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -707,6 +723,9 @@ public class Game implements Parcelable {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/game";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/game";
+                }
                 URL url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -851,6 +870,9 @@ public class Game implements Parcelable {
                         } else {
                             this.mActive = false;
                         }
+//                        if (isDPente() && mMovesList.size() == 0) {
+//                            mActive = true;
+//                        }
                     }
                 } else {
                     this.mOpponentName = p1Name;
@@ -879,6 +901,9 @@ public class Game implements Parcelable {
                         } else {
                             this.mActive = false;
                         }
+//                        if (isDPente() && mMovesList.size() == 0) {
+//                            mActive = false;
+//                        }
                     }
                 } else {
                     this.mOpponentName = p2Name;
@@ -895,10 +920,13 @@ public class Game implements Parcelable {
                 String movesString[] = dashLine.substring(6).split(",");
                 this.mMovesList = new ArrayList<Integer>();
                 for ( int i = 0; i < movesString.length; i++ ) {
+                    if ("".equals(movesString[i])) {
+                        continue;
+                    }
                     this.mMovesList.add(Integer.parseInt(movesString[i]));
                 }
             }
-            if (isDPente() && (dashLine.contains("dPenteState=2") || dashLine.contains("dPenteState=1"))) {
+            if (isDPente() && (dashLine.contains("dPenteState=2"))) {
                 this.mActive = !mActive;
             }
             if (dashLine.contains("dPenteState=2")) {
@@ -1231,7 +1259,7 @@ public class Game implements Parcelable {
         }
 
 
-        if (boardView != null) {
+        if (boardView != null && mMovesList.size()>=untilMove) {
             boardView.setRedDot(this.mMovesList.get(untilMove - 1));
             if (isConnect6()) {
                 if (untilMove == 1) {

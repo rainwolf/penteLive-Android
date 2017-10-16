@@ -101,8 +101,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 Socket socket = null;
                 try {
                     SocketFactory factory = SSLSocketFactory.getDefault();
-//                    socket = factory.createSocket("development.pente.org", port);
-                    socket = factory.createSocket("pente.org", port);
+                    if (PentePlayer.development) {
+                        socket = factory.createSocket("development.pente.org", port);
+                    } else {
+                        socket = factory.createSocket("pente.org", port);
+                    }
                     // because client sends many short messages
                     socket.setTcpNoDelay(true);
                     // timeout after 30 seconds
@@ -371,9 +374,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         final int tableId = (int) data.get("table");
         int state = (int) data.get("state");
         final String text = (String) data.get("changeText");
-        tablesAndPlayers.updateGameState(tableId, state);
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
+        tablesAndPlayers.updateGameState(tableId, state);
         if (fragment != null && fragment.table.getId() == tableId) {
             if (text != null) {
                 fragment.addText("* " + text);

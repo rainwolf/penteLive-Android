@@ -3,7 +3,7 @@
     <string name="app_name">penteLive</string>
     <string name="not_your_turn">It\'s not your turn.</string>
     <string name="c6_needs_2_moves">Connect6 requires 2 moves per turn.</string>
-    <string name="dpente_needs_3_moves">D-Pente requires 3 opening moves.</string>
+    <string name="dpente_needs_4_moves">D-Pente requires 4 opening moves.</string>
     <string name="no_momve_played_yet">No move played yet.</string>
     <string name="submit">submit</string>
     <string name="place_stone_submit">Place a stone and submit.</string>
