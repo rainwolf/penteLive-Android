@@ -96,6 +96,11 @@ public class DatabaseActivity extends AppCompatActivity {
                 @Override
                 public void onDismiss(DialogInterface dialogInterface) {
                     board.setAlpha(1.0f);
+                    if (board.getMovesList().size() == 0 || (board.getMovesList().size()>0 && board.getMovesList().get(0) != 180)) {
+                        if (!board.getGame().contains("D-Pente") && !board.getGame().contains("DK-Pente")) {
+                            board.resetState();
+                        }
+                    }
                 }
             });
             searchPrmtrsWindow.setCanceledOnTouchOutside(true);
@@ -606,6 +611,9 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
 //                System.out.println("format data: " + tmpStr);
                 URL url = new URL("https://www.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
+                }
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {

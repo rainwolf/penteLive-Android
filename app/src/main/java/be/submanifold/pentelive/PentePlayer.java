@@ -30,6 +30,7 @@ public class PentePlayer implements Parcelable {
     public static String mPassword;
     public static Boolean mShowAds;
     public static Boolean mSubscriber;
+    public static Boolean dbAccess;
     private List<Game> mInvitations;
     private List<Game>  mSentInvitations;
     private List<Game>  mActiveGames;
@@ -114,6 +115,7 @@ public class PentePlayer implements Parcelable {
     public void setMyColor(int myColor) {
         this.myColor = myColor;
     }
+    public static Boolean hasDBAccess() { return dbAccess; }
 
 
 
@@ -143,6 +145,7 @@ public class PentePlayer implements Parcelable {
             this.mShowAds = !"NoAds".equals(dashLine[2]);
             this.mSubscriber = "subscriber".equals(dashLine[3]);
             this.livePlayers = Integer.parseInt(dashLine[4]);
+            this.dbAccess = "dbAccessGranted".equals(dashLine[5]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
@@ -351,6 +354,8 @@ public class PentePlayer implements Parcelable {
         mShowAds = mShowAdsVal == 0x02 ? null : mShowAdsVal != 0x00;
         byte mSubscriberVal = in.readByte();
         mSubscriber = mSubscriberVal == 0x02 ? null : mSubscriberVal != 0x00;
+        byte dbVal = in.readByte();
+        dbAccess = dbVal == 0x02 ? null : dbVal != 0x00;
         if (in.readByte() == 0x01) {
             mInvitations = new ArrayList<Game>();
             in.readList(mInvitations, Game.class.getClassLoader());
@@ -440,6 +445,11 @@ public class PentePlayer implements Parcelable {
             dest.writeByte((byte) (0x02));
         } else {
             dest.writeByte((byte) (mSubscriber ? 0x01 : 0x00));
+        }
+        if (dbAccess == null) {
+            dest.writeByte((byte) (0x02));
+        } else {
+            dest.writeByte((byte) (dbAccess ? 0x01 : 0x00));
         }
         if (mInvitations == null) {
             dest.writeByte((byte) (0x00));

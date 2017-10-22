@@ -414,7 +414,8 @@ public class DBBoardView extends View {
     }
 
     public void undoMove() {
-        if (movesList.size()>1) {
+        if (movesList.size()>1 || (movesList.size()==1 &&
+                (game.contains("D-Pente") || game.contentEquals("DK-Pente")))) {
             movesList.remove(movesList.size() - 1);
             replayGame(abstractBoard);
             searchResults = null;
@@ -813,8 +814,10 @@ public class DBBoardView extends View {
     public void resetState() {
         resetAbstractBoard(abstractBoard);
         movesList = new ArrayList<>();
-        movesList.add(180);
-        abstractBoard[9][9] = 1;
+        if (!game.contains("D-Pente") && !game.contains("DK-Pente")) {
+            movesList.add(180);
+            abstractBoard[9][9] = 1;
+        }
         whiteCaptures = 0;
         blackCaptures = 0;
         searchResults = null;

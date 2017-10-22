@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                         return true;
                     case R.id.database:
-                        if (player != null && player.isSubscriber()) {
+                        if (player != null && PentePlayer.hasDBAccess()) {
                             intent = new Intent(getApplicationContext(), DatabaseActivity.class);
                             startActivity(intent);
                         } else {
