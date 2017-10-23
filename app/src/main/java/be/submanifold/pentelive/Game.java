@@ -1259,7 +1259,7 @@ public class Game implements Parcelable {
         }
 
 
-        if (boardView != null && mMovesList.size()>=untilMove) {
+        if (boardView != null && mMovesList.size()>=untilMove && untilMove > 0) {
             boardView.setRedDot(this.mMovesList.get(untilMove - 1));
             if (isConnect6()) {
                 if (untilMove == 1) {
