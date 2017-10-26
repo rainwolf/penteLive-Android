@@ -41,6 +41,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import java.io.BufferedReader;
@@ -132,6 +133,11 @@ public class DatabaseActivity extends AppCompatActivity {
                 board.setMovesList(extras.getIntegerArrayList("moves"));
             }
 
+            if (PentePlayer.mShowAds) {
+                ((AdView) findViewById(R.id.dbAdView)).loadAd(new AdRequest.Builder().build());
+            } else {
+                ((AdView) findViewById(R.id.dbAdView)).setVisibility(View.GONE);
+            }
 
 
             toolbar.setTitle(getString(R.string.database));

@@ -1041,6 +1041,7 @@ public class Game implements Parcelable {
             final BoardActivity host = (BoardActivity) boardView.getContext();
             Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
             undoBtn.setText(host.getString(R.string.undo_requested));
+            undoBtn.setOnClickListener(null);
         } else if (mActive && amIPlaying && undoRequested) {
             final BoardActivity host = (BoardActivity) boardView.getContext();
             final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(host);
@@ -1071,6 +1072,9 @@ public class Game implements Parcelable {
             dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.setAttributes(wlp);
             dlg.show();
+        } else {
+            BoardActivity host = (BoardActivity) boardView.getContext();
+            host.setRegularSubmitListener();
         }
 
         messages = new HashMap<Integer, String>();
