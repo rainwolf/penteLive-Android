@@ -74,15 +74,6 @@ public class BoardActivity extends AppCompatActivity {
         messageIcon = (ImageView)((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
         rotation = AnimationUtils.loadAnimation(BoardActivity.this, R.anim.rotation_animation);
         rotation.setRepeatCount(Animation.INFINITE);
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         board = (BoardView) findViewById(R.id.boardView);
         board.setBoardActivity(this);
@@ -93,34 +84,11 @@ public class BoardActivity extends AppCompatActivity {
         board.setGame(game);
 
 
-
-
-////        final BoardView layout = (BoardView) findViewById(R.id.boardView);
-//        ViewTreeObserver vto = board.getViewTreeObserver();
-//        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                board.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                int width  = board.getMeasuredWidth();
-//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) board.getLayoutParams();
-//                params.height = width;
-//                params.width = width;
-////                System.out.println("kitteh " + params.width + " and " + params.height + " and " + width);
-//                board.setLayoutParams(params);
-//            }
-//        });
-
         if (PentePlayer.mShowAds) {
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
         } else {
-//            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
-//            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//            ((Button) findViewById(R.id.sendButton)).setLayoutParams(params);
             ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
         }
-//        mAdView = (AdView) findViewById(R.id.boardAdView);
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.loadAd(adRequest);
 
         setRegularSubmitListener();
 
@@ -164,21 +132,41 @@ public class BoardActivity extends AppCompatActivity {
                             return false;
                         }
                         final AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-                        builder.setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case 0: ResignTask resignTask = new ResignTask(game.getGameID());
-                                        resignTask.execute((Void) null);
-                                        break;
-                                    case 1: CancelTask cancelTask = new CancelTask(game.getSetID());
-                                        cancelTask.execute((Void) null);
-                                        break;
+                        if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
+                            String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
+                            builder.setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0: ResignTask resignTask = new ResignTask(game.getGameID());
+                                            resignTask.execute((Void) null);
+                                            break;
+                                        case 1: CancelTask cancelTask = new CancelTask(game.getSetID());
+                                            cancelTask.execute((Void) null);
+                                            break;
+                                        case 2: game.changeHideString();
+                                            break;
+                                    }
+                                    // the user clicked on colors[which]
                                 }
-                                // the user clicked on colors[which]
-                            }
-                        });
+                            });
+
+                        } else {
+                            String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                            builder.setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0: ResignTask resignTask = new ResignTask(game.getGameID());
+                                            resignTask.execute((Void) null);
+                                            break;
+                                        case 1: CancelTask cancelTask = new CancelTask(game.getSetID());
+                                            cancelTask.execute((Void) null);
+                                            break;
+                                    }
+                                }
+                            });
+                        }
                         builder.show();
                         return true;
                     case R.id.action_lock:
@@ -378,11 +366,6 @@ public class BoardActivity extends AppCompatActivity {
             }
         });
         menu.findItem(R.id.action_new_message).setActionView(messageIcon);
-        //        if (menu.findItem(R.id.action_new_message) == null) {
-//            System.out.println(" SHIIIIIIIiiiiiiiiiiit ");
-//        } else {
-//            System.out.println(" noooooooooot SHIIIIIIIiiiiiiiiiiit ");
-//        }
 
         MenuItem item = menu.findItem(R.id.action_lock);
         boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);

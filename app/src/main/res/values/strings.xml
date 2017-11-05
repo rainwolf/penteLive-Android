@@ -258,7 +258,8 @@
 <string name="feature_not_available">Feature not available</string>
 <string name="undo_subscribers_only">Requesting undo is a subscriber feature.</string>
 
-
+    <string name="hide_from_public">hide game from public view</string>
+    <string name="unhide_from_public">unhide game from public view</string>
 
 
     <string name="prompt_username">Username</string>

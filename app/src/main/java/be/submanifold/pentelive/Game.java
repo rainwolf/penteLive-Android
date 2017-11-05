@@ -60,6 +60,7 @@ public class Game implements Parcelable {
     public int whiteCaptures;
     public int blackCaptures;
 
+    private boolean canHide, canUnHide;
 
     private int untilMove;
     private List<Integer> mMovesList;
@@ -69,6 +70,8 @@ public class Game implements Parcelable {
     private String mLocalizedRatedNot;
 
     private String movesString = "";
+
+    private String hideStr = "";
 
     private String mBoardString;
 
@@ -93,6 +96,8 @@ public class Game implements Parcelable {
         this.mActive = false;
         this.dPenteChoice = false;
 
+        this.canHide = false;
+        this.canUnHide = false;
     }
 
     public String getGameID() {
@@ -132,6 +137,9 @@ public class Game implements Parcelable {
 //        return true;
         return mActive;
     }
+    public boolean isCanHide() { return canHide; }
+    public boolean isCanUnHide() { return canUnHide; }
+
 
     public void setActive(boolean active) {
         this.mActive = active;
@@ -144,6 +152,8 @@ public class Game implements Parcelable {
         return movesString;
     }
 
+    public String getHideStr() { return hideStr; }
+    public void setHideStr(String hideStr) { this.hideStr = hideStr; }
 
 
     protected Game(Parcel in) {
@@ -163,6 +173,9 @@ public class Game implements Parcelable {
         mActive = in.readByte() != 0;
         mLocalizedTime = in.readString();
         mLocalizedRatedNot = in.readString();
+        canHide = in.readByte() != 0;
+        canUnHide = in.readByte() != 0;
+        hideStr = in.readString();
     }
 
     @Override
@@ -188,6 +201,9 @@ public class Game implements Parcelable {
         dest.writeByte((byte) (mActive ? 1 : 0));
         dest.writeString(mLocalizedTime);
         dest.writeString(mLocalizedRatedNot);
+        dest.writeByte((byte) (canHide ? 1 : 0));
+        dest.writeByte((byte) (canUnHide ? 1 : 0));
+        dest.writeString(hideStr);
     }
 
     @SuppressWarnings("unused")
@@ -289,6 +305,31 @@ public class Game implements Parcelable {
         return mBoardString + getMovesString();
     }
 
+    public String getHideString() {
+        Context ctx = MyApplication.getContext();
+        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length()>0)) {
+            return ctx.getString(R.string.hide_from_public);
+        }
+        if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length()>0)) {
+            return ctx.getString(R.string.unhide_from_public);
+        }
+        return "";
+    }
+    public void changeHideString() {
+        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length()>0)) {
+            if (hideStr.length() == 0) {
+                hideStr = "&hide=yes";
+            } else {
+                hideStr = "";
+            }
+        } else if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length()>0)) {
+            if (hideStr.length() == 0) {
+                hideStr = "&hide=no";
+            } else {
+                hideStr = "";
+            }
+        }
+    }
 
     public class RetrieveGame extends AsyncTask<Void, Void, Boolean> {
 
@@ -425,10 +466,10 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
+                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move"+hideStr+"&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
+                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move"+hideStr+"&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
                             +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
@@ -843,6 +884,9 @@ public class Game implements Parcelable {
 
         String messageNums[] = null;
         String messagesArray[] = null;
+
+        canHide = mGameString.contains("can_hide=yes");
+        canUnHide = mGameString.contains("can_unhide=yes");
 
         String[] dashLines = mGameString.split("\n");
         String dashLine;
