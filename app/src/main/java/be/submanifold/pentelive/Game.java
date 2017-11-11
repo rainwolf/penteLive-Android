@@ -1050,8 +1050,19 @@ public class Game implements Parcelable {
                 @Override
                 public void onClick(View view) {
                     if (PentePlayer.mSubscriber) {
-                        RequestUndoTask task = new RequestUndoTask(getGameID(), host);
-                        task.execute((Void) null);
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+                        builder.setTitle(host.getString(R.string.rusure));
+                        builder.setPositiveButton(host.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                RequestUndoTask task = new RequestUndoTask(getGameID(), host);
+                                task.execute((Void) null);
+                                dialog.dismiss();
+                            } });
+                        builder.setNegativeButton(host.getString(R.string.no), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            } });
+                        final AlertDialog dialog = builder.show();
                     } else {
                         final AlertDialog.Builder builder = new AlertDialog.Builder(host);
                         builder.setTitle(host.getString(R.string.feature_not_available));

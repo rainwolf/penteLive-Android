@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
@@ -63,6 +64,8 @@ public class BoardActivity extends AppCompatActivity {
     private Game game;
     private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
+    private ResignTask resignTask;
+    private CancelTask cancelTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,11 +141,11 @@ public class BoardActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     switch (which) {
-                                        case 0: ResignTask resignTask = new ResignTask(game.getGameID());
-                                            resignTask.execute((Void) null);
+                                        case 0: resignTask = new ResignTask(game.getGameID());
+                                            askConfirmation(true);
                                             break;
-                                        case 1: CancelTask cancelTask = new CancelTask(game.getSetID());
-                                            cancelTask.execute((Void) null);
+                                        case 1: cancelTask = new CancelTask(game.getSetID());
+                                            askConfirmation(false);
                                             break;
                                         case 2: game.changeHideString();
                                             break;
@@ -157,11 +160,11 @@ public class BoardActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     switch (which) {
-                                        case 0: ResignTask resignTask = new ResignTask(game.getGameID());
-                                            resignTask.execute((Void) null);
+                                        case 0: resignTask = new ResignTask(game.getGameID());
+                                            askConfirmation(true);
                                             break;
-                                        case 1: CancelTask cancelTask = new CancelTask(game.getSetID());
-                                            cancelTask.execute((Void) null);
+                                        case 1: cancelTask = new CancelTask(game.getSetID());
+                                            askConfirmation(false);
                                             break;
                                     }
                                 }
@@ -183,6 +186,32 @@ public class BoardActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void askConfirmation(final boolean trueForResign) {
+        final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(BoardActivity.this);
+        builder.setTitle(getString(R.string.rusure));
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (trueForResign) {
+                    resignTask.execute((Void) null);
+                } else {
+                    cancelTask.execute((Void) null);
+                }
+                dialog.dismiss();
+            } });
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            } });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(final DialogInterface arg0) {
+                }
+            });
+        }
+        final android.app.AlertDialog dialog = builder.show();
     }
 
     public void setRegularSubmitListener() {
