@@ -261,6 +261,7 @@
     <string name="hide_from_public">hide game from public view</string>
     <string name="unhide_from_public">unhide game from public view</string>
     <string name="rusure">Are you sure?</string>
+    <string name="email_me_messages">Email me received messages</string>
 
 
     <string name="prompt_username">Username</string>

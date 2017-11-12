@@ -52,6 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
         ((ToggleButton) findViewById(R.id.tbOnlyToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_TBONLY_KEY, false));
+        ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setChecked(PentePlayer.emailMe);
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -67,6 +68,13 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_TBONLY_KEY, isChecked);
                 PentePlayer.showOnlyTB = isChecked;
+            }
+        });
+        ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ChangeEmailPreferenceTask task = new ChangeEmailPreferenceTask(isChecked);
+                task.execute((Void) null);
             }
         });
         ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(new View.OnClickListener() {
@@ -408,6 +416,61 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Boolean success) {
 
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+    private class ChangeEmailPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final boolean emailMe;
+
+        ChangeEmailPreferenceTask(boolean emailMeChoice) {
+            this.emailMe = emailMeChoice;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+//                System.out.println("colorStr was " + colorString);
+                URL url = new URL("https://www.pente.org/gameServer/changeEmailPreference?emailMe=" +
+                        (emailMe?"Y":"N"));
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    System.out.println("response code for changeEmailPreference was " + responseCode);
+                    return false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + "\n");
+                }
+                br.close();
+
+//                System.out.println(output);
+
+                String dashboardString = output.toString();
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                PentePlayer.emailMe = emailMe;
+            }
         }
 
         @Override

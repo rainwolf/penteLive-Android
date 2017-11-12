@@ -47,6 +47,7 @@ public class PentePlayer implements Parcelable {
 
     public static boolean loadAvatars;
     public static boolean showOnlyTB;
+    public static boolean emailMe;
 
     private int livePlayers;
     public int getLivePlayers() { return this.livePlayers; }
@@ -68,6 +69,7 @@ public class PentePlayer implements Parcelable {
         this.mTournaments = new ArrayList<Tournament>();
         this.mHills = new ArrayList<KingOfTheHill>();
         this.mShowAds = true;
+        this.emailMe = true;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
@@ -116,6 +118,8 @@ public class PentePlayer implements Parcelable {
         this.myColor = myColor;
     }
     public static Boolean hasDBAccess() { return dbAccess; }
+    public boolean isEmailMe() { return emailMe; }
+    public void setEmailMe(boolean emailMe) { this.emailMe = emailMe; }
 
 
 
@@ -146,6 +150,7 @@ public class PentePlayer implements Parcelable {
             this.mSubscriber = "subscriber".equals(dashLine[3]);
             this.livePlayers = Integer.parseInt(dashLine[4]);
             this.dbAccess = "dbAccessGranted".equals(dashLine[5]);
+            this.emailMe = "emailMe".equals(dashLine[6]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
@@ -356,6 +361,8 @@ public class PentePlayer implements Parcelable {
         mSubscriber = mSubscriberVal == 0x02 ? null : mSubscriberVal != 0x00;
         byte dbVal = in.readByte();
         dbAccess = dbVal == 0x02 ? null : dbVal != 0x00;
+        byte emaiValVal = in.readByte();
+        emailMe = emaiValVal == 0x02 ? null : dbVal != 0x00;
         if (in.readByte() == 0x01) {
             mInvitations = new ArrayList<Game>();
             in.readList(mInvitations, Game.class.getClassLoader());
@@ -451,6 +458,7 @@ public class PentePlayer implements Parcelable {
         } else {
             dest.writeByte((byte) (dbAccess ? 0x01 : 0x00));
         }
+        dest.writeByte((byte) (emailMe ? 0x01 : 0x00));
         if (mInvitations == null) {
             dest.writeByte((byte) (0x00));
         } else {
