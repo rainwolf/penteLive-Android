@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,7 +129,9 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
             imgVw.setVisibility(View.GONE);
         }
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
-        nameTextView.setText(player.coloredNameString(nameTextView.getLineHeight()));
+        SpannableStringBuilder sb = player.coloredNameString(nameTextView.getLineHeight());
+        PentePlayer.markIfOnline(player.getName(), sb);
+        nameTextView.setText(sb);
 
         int rating = player.getRating(game);
         ((TextView) convertView.findViewById(R.id.ratingText)).setText(""+rating);

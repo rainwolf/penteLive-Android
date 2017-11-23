@@ -397,6 +397,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
         detailTextView.setText(detailText);
+
+        PentePlayer.markIfOnline(mainText, sb);
         nameTextView.setText(sb);
         if (groupPosition == KOTHGROUP && hill.getCurrentKing().length() > 1) {
             sb = new SpannableStringBuilder(detailText);
@@ -405,7 +407,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
             detailTextView.setText(sb);
         }
-        if (mainText.indexOf("Anyone") == -1) {
+        if (!mainText.contains("Anyone")) {
             ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
             if (groupPosition != MESSAGESGROUP && groupPosition != TOURNAMENTGROUP && groupPosition != KOTHGROUP) {
                 sb = new SpannableStringBuilder("\u25A0");

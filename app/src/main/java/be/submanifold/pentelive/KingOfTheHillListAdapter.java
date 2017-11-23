@@ -231,6 +231,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
         detailTextView.setText(detailText);
+        PentePlayer.markIfOnline(mainText, sb);
         nameTextView.setText(sb);
         ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
         sb = new SpannableStringBuilder("\u25A0");

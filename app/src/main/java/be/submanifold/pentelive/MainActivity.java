@@ -616,6 +616,7 @@ public class MainActivity extends AppCompatActivity {
                 int total = 0;
                 String[] dashLines = dashboardString.split("\n");
                 int idx = 0;
+                Map<String, String> onlinePlayerNames = new HashMap<>();
                 while (idx < dashLines.length) {
                     String roomLine = dashLines[idx];
                     String[] splitRoomLine = roomLine.split(":");
@@ -630,6 +631,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (PentePlayer.loadAvatars && player.getColor() != 0) {
                                     this.player.addUserAvatar(player.getName());
                                 }
+                                onlinePlayerNames.put(player.getName(), "");
                                 total = total + 1;
                                 playersList.add(player);
                             }
@@ -638,6 +640,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     idx += 1;
                 }
+                PentePlayer.setOnlinePlayerNames(onlinePlayerNames);
                 listAdapter.setOnlinePlayers(onlinePlayers);
                 Point size = new Point();
                 Display display = getWindowManager().getDefaultDisplay();

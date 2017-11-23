@@ -2,9 +2,14 @@ package be.submanifold.pentelive;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.webkit.CookieManager;
 
 import java.io.BufferedReader;
@@ -45,6 +50,8 @@ public class PentePlayer implements Parcelable {
     public static List<String> pendingAvatarChecks;
     public static Map<String, Bitmap> avatars;
 
+    public static Map<String, String> onlinePlayerNames;
+
     public static boolean loadAvatars;
     public static boolean showOnlyTB;
     public static boolean emailMe;
@@ -76,6 +83,7 @@ public class PentePlayer implements Parcelable {
         livePlayers = 0;
         tbRatings = 0;
         tbHills = 0;
+        onlinePlayerNames = new HashMap<>();
     }
 
     public String getPlayerName() {
@@ -121,7 +129,14 @@ public class PentePlayer implements Parcelable {
     public boolean isEmailMe() { return emailMe; }
     public void setEmailMe(boolean emailMe) { this.emailMe = emailMe; }
 
-
+    public static void markIfOnline(String name, SpannableStringBuilder attributedString) {
+        if (onlinePlayerNames != null && onlinePlayerNames.containsKey(name)) {
+            attributedString.append("  \u25CF");
+            ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
+            attributedString.setSpan(fcs, attributedString.length()-1, attributedString.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        }
+    }
+    public static void setOnlinePlayerNames(Map<String, String> onlinePlayerNames) { PentePlayer.onlinePlayerNames = onlinePlayerNames; }
 
     private void populatePlayer(String dashString) {
         if (dashString == null) {
@@ -318,6 +333,16 @@ public class PentePlayer implements Parcelable {
                 }
                 tournament = new Tournament(dashLine[3], dashLine[0], dashLine[1], dashLine[2], dashLine[4], dashLine[5]);
                 this.mTournaments.add(tournament);
+            }
+        }
+        while (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") != 0) {
+            idx += 1;
+        }
+        if (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") == 0) {
+            dashLine = dashLines[idx].replace("OnlinePlayers:","").split(";");
+            onlinePlayerNames.clear();
+            for (String name: dashLine) {
+                onlinePlayerNames.put(name, "");
             }
         }
     }
