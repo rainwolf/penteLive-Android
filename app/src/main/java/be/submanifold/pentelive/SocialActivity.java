@@ -257,8 +257,9 @@ public class SocialActivity extends AppCompatActivity {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
 
-            Toast.makeText(SocialActivity.this, message,
-                    Toast.LENGTH_SHORT).show();
+            if (message!=null && message.length()>0) {
+                Toast.makeText(SocialActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
         }
     };
 

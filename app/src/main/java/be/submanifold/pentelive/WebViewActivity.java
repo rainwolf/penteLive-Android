@@ -1,5 +1,7 @@
 package be.submanifold.pentelive;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +12,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import java.net.CookieHandler;
 import java.net.HttpCookie;
@@ -113,6 +116,19 @@ public class WebViewActivity extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("message");
+
+            if (message!=null && message.length()>0) {
+                Toast.makeText(WebViewActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
 
 }

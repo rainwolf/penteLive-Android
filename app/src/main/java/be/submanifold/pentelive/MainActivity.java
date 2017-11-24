@@ -454,8 +454,9 @@ public class MainActivity extends AppCompatActivity {
                     showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
             player.loadPlayer(listAdapter, loadAvatars, showOnlyTB);
 
-            Toast.makeText(MainActivity.this, message,
-                    Toast.LENGTH_SHORT).show();
+            if (message!=null && message.length()>0) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
         }
     };
 

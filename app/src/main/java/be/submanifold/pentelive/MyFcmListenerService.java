@@ -80,6 +80,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Map data = message.getData();
 
         String messageStr = (String) data.get("message");
+        boolean silent = "silentNotification".equals(messageStr);
+
         String localMsgStr = "";
         if (messageStr.contains("device has been registered for notifications")) {
             localMsgStr = getString(R.string.registered_for_notifications);
@@ -142,7 +144,6 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
             notificationManager.notify(0 /* ID of notification */, notification);
         } else {
-            MediaPlayer sndPlr = new MediaPlayer();
             Uri notificationSoundUri;
             if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
                 notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
@@ -150,23 +151,26 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                 notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
             }
             try {
-                sndPlr.setDataSource(getApplicationContext(), notificationSoundUri);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    AudioAttributes att = new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build();
-                    sndPlr.setAudioAttributes(att);
-                } else {
-                    sndPlr.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-                }
-                sndPlr.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mediaPlayer) {
-                        mediaPlayer.start();
+                if (!silent) {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(getApplicationContext(), notificationSoundUri);
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        AudioAttributes att = new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build();
+                        mediaPlayer.setAudioAttributes(att);
+                    } else {
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
                     }
-                });
-                sndPlr.prepare();
+                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mediaPlayer) {
+                            mediaPlayer.start();
+                        }
+                    });
+                    mediaPlayer.prepare();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -184,7 +188,9 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             } else {
                 Intent intent = new Intent("unique_name");
                 //put whatever data you want to send, if any
-                intent.putExtra("message", localMsgStr);
+                if (!silent) {
+                    intent.putExtra("message", localMsgStr);
+                }
 
                 //send broadcast
                 sendBroadcast(intent);

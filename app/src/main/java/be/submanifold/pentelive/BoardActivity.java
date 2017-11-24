@@ -216,59 +216,62 @@ public class BoardActivity extends AppCompatActivity {
 
     public void setRegularSubmitListener() {
         Button button = (Button) findViewById(R.id.submitButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (!game.isActive()) {
-                    Toast.makeText(BoardActivity.this, getString(R.string.not_your_turn),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                String moves = "";
-                if (game.isConnect6()) {
-                    if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
-                        moves = "" + board.connect6Move1 + "," + board.playedMove;
-                    } else {
-                        Toast.makeText(BoardActivity.this, getString(R.string.c6_needs_2_moves),
+        if (button != null) {
+            button.setText(R.string.submit);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (!game.isActive()) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.not_your_turn),
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 0) {
-                    if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
-                            board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3  || board.dPenteMove1 == board.dPenteMove4
-                            || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_4_moves),
-                                Toast.LENGTH_LONG).show();
-                        return;
-                    } else {
-                        moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
-                    }
-                } else if (game.isDPente() && game.dPenteChoice) {
-                    if (board.playedMove == -1) {
+                    String moves = "";
+                    if (game.isConnect6()) {
+                        if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
+                            moves = "" + board.connect6Move1 + "," + board.playedMove;
+                        } else {
+                            Toast.makeText(BoardActivity.this, getString(R.string.c6_needs_2_moves),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                        if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
+                                board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove1 == board.dPenteMove4
+                                || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
+                            Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_4_moves),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        } else {
+                            moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
+                        }
+                    } else if (game.isDPente() && game.dPenteChoice) {
+                        if (board.playedMove == -1) {
+                            Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        } else {
+                            moves = "1," + board.playedMove;
+                        }
+                    } else if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
                         return;
                     } else {
-                        moves = "1," + board.playedMove;
+                        moves = "" + board.playedMove;
                     }
-                } else if (board.playedMove == -1) {
-                    Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                } else {
-                    moves = "" + board.playedMove;
-                }
 
-                game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
+                    game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
 
-                if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
-                    game.setmGameString(null);
-                    game.parseGame(board);
-                    ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
-                } else {
-                    finish();
+                    if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
+                        game.setmGameString(null);
+                        game.parseGame(board);
+                        ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
+                    } else {
+                        finish();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     //This is the handler that will manager to process the broadcast intent
