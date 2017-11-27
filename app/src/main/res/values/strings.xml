@@ -263,7 +263,7 @@
     <string name="rusure">Are you sure?</string>
     <string name="email_me_messages">Email me received messages</string>
     <string name="rating_above">Rating above:</string>
-
+    <string name="in_app_sounds_off">Mute in-app sounds</string>
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>

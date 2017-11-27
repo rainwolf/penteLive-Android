@@ -81,6 +81,9 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
         String messageStr = (String) data.get("message");
         boolean silent = "silentNotification".equals(messageStr);
+        if (!silent) {
+            silent = PrefUtils.getBooleanFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false);
+        }
 
         String localMsgStr = "";
         if (messageStr.contains("device has been registered for notifications")) {

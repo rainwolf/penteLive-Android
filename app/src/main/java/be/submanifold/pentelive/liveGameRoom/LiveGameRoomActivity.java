@@ -3,6 +3,8 @@ package be.submanifold.pentelive.liveGameRoom;
 import be.submanifold.pentelive.*;
 
 import android.content.DialogInterface;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -54,6 +56,12 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private LiveGameRoom room;
     private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "").toLowerCase();
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
+    private boolean silent;
+
+    private static final int NEW_INVITE_SOUND = 0;
+    private static final int NEW_PLAYER_SOUND = 1;
+    private static final int NEW_MOVE_SOUND = 2;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +71,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 //        System.out.println(room.getName());
 
         self = this;
-
+        silent = PrefUtils.getBooleanFromPrefs(LiveGameRoomActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false);
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -135,6 +143,46 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         super.onDestroy();
     }
 
+    private void playSound(int sound) {
+        if (!silent) {
+            Uri soundUri;
+            switch (sound) {
+                case NEW_INVITE_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.invitesound);
+                    break;
+                case NEW_PLAYER_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
+                    break;
+                case NEW_MOVE_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+                    break;
+                default: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+                    break;
+            }
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+            }
+            try {
+                mediaPlayer.setDataSource(getApplicationContext(), soundUri);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    AudioAttributes att = new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build();
+                    mediaPlayer.setAudioAttributes(att);
+                } else {
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+                }
+                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+                        mediaPlayer.start();
+                    }
+                });
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public void eventOccurred(String dsgEvent) {
         final Map<String, Object> jsonEvent = jsonToMap(dsgEvent);
@@ -151,7 +199,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
                                     updateMainRoom();
-                                    MediaPlayer.create(LiveGameRoomActivity.this, R.raw.newplayersound).start();
+                                    playSound(NEW_PLAYER_SOUND);
                                 } else if (jsonEvent.get("dsgJoinMainRoomErrorEvent") != null) {
                                     (new BootMeTask()).execute((Void) null);
                                 } else if (jsonEvent.get("dsgLoginEvent") != null) {
@@ -359,7 +407,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         if (fragment != null && fragment.table.getId() == tableId) {
             if (move != 0) {
                 fragment.addMove(move);
-                MediaPlayer.create(LiveGameRoomActivity.this, R.raw.pentelivenotificationsound).start();
+                playSound(NEW_MOVE_SOUND);
             } else {
                 fragment.table.resetBoard();
                 for (int m: moves) {
@@ -451,7 +499,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         }
     }
     private void receivedInvitation(Map<String,Object> data) {
-        MediaPlayer.create(LiveGameRoomActivity.this, R.raw.invitesound).start();
+        playSound(NEW_INVITE_SOUND);
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
         String toInvite = (String) data.get("toInvite");

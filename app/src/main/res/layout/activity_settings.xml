@@ -75,9 +75,9 @@
                 android:layout_height="45dp"
                 android:gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/load_avatars"
+                android:text="@string/in_app_sounds_off"
                 android:textStyle="bold"
-                android:id="@+id/avatarLabel"
+                android:id="@+id/inAppSoundsLabel"
                 android:layout_below="@id/emailMeLabel"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
@@ -88,8 +88,30 @@
                 android:checked="false"
                 android:textOn="@string/yes"
                 android:textOff="@string/no"
-                android:id="@+id/avatarToggleButton"
+                android:id="@+id/inAppSoundsToggleButton"
                 android:layout_below="@id/emailMeToggleButton"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/load_avatars"
+                android:textStyle="bold"
+                android:id="@+id/avatarLabel"
+                android:layout_below="@id/inAppSoundsLabel"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+            <ToggleButton
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:background="@android:color/transparent"
+                android:checked="false"
+                android:textOn="@string/yes"
+                android:textOff="@string/no"
+                android:id="@+id/avatarToggleButton"
+                android:layout_below="@id/inAppSoundsToggleButton"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
     <TextView

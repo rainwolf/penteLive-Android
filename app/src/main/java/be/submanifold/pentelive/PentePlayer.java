@@ -662,7 +662,7 @@ public class PentePlayer implements Parcelable {
 //                connection.addRequestProperty("Cookie", "name2="+mUsername+"; password2="+mPassword+";");
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
-                    System.out.println("response code for loadplayer was " + responseCode);
+//                    System.out.println("response code for loadplayer was " + responseCode);
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
                     if (development) {
                         url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
