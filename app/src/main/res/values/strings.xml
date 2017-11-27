@@ -262,6 +262,7 @@
     <string name="unhide_from_public">unhide game from public view</string>
     <string name="rusure">Are you sure?</string>
     <string name="email_me_messages">Email me received messages</string>
+    <string name="rating_above">Rating above:</string>
 
 
     <string name="prompt_username">Username</string>
@@ -412,6 +413,21 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
+    </string-array>
+    <string-array name="db_ratings_array">
+        <item>0</item>
+        <item>1600</item>
+        <item>1700</item>
+        <item>1800</item>
+        <item>1900</item>
+        <item>2000</item>
+        <item>2100</item>
+        <item>2200</item>
+        <item>2300</item>
+        <item>2400</item>
+        <item>2500</item>
+        <item>2600</item>
+        <item>2700</item>
     </string-array>
 
     <!-- TODO: Remove or change this placeholder text -->

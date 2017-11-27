@@ -71,6 +71,7 @@ public class DatabaseActivity extends AppCompatActivity {
         public Animation rotation;
         public ImageView messageIcon;
 
+        private String dbRating = "0";
         private ProgressBar progressBar;
         private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
 //        private Context ctx = MyApplication.getContext();
@@ -383,6 +384,35 @@ public class DatabaseActivity extends AppCompatActivity {
                     beforeDatePickerDialog.show();
                 }
             });
+            spinner = (Spinner) settingsView.findViewById(R.id.ratingSpinner);
+            adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
+                    R.array.db_ratings_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBRATING_KEY, position);
+                    String[] ratingArray = getResources().getStringArray(R.array.db_ratings_array);
+                    dbRating = ratingArray[position];
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            spinner.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    return false;
+                }
+            });
+
+
+
             ((Button) findViewById(R.id.aiButton)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -491,7 +521,8 @@ public class DatabaseActivity extends AppCompatActivity {
                     player2,
                     winner,
                     afterDate,
-                    beforeDate);
+                    beforeDate,
+                    dbRating);
             searchTask.execute((Void) null);
         }
         private void showDBSettings() {
@@ -502,6 +533,11 @@ public class DatabaseActivity extends AppCompatActivity {
 
             Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
             spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
+            spinner = (Spinner) settingsView.findViewById(R.id.ratingSpinner);
+            int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBRATING_KEY, 0);
+            spinner.setSelection(position);
+            String[] ratingArray = getResources().getStringArray(R.array.db_ratings_array);
+            dbRating = ratingArray[position];
             TextView sortOrder = (TextView) settingsView.findViewById(R.id.sortChoice);
             sortOrder.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity"));
             AutoCompleteTextView actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player1);
@@ -566,11 +602,11 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves, game, player1, player2, afterDate, beforeDate;
+        private String moves, game, player1, player2, afterDate, beforeDate, aboveRating;
         private int sortOrder, winner;
         private String searchResult;
 
-        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner, String afterDate, String beforeDate) {
+        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner, String afterDate, String beforeDate, String aboveRating) {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
@@ -579,6 +615,7 @@ public class DatabaseActivity extends AppCompatActivity {
             this.winner = winner;
             this.afterDate = afterDate;
             this.beforeDate = beforeDate;
+            this.aboveRating = aboveRating;
         }
 
         @Override
@@ -604,7 +641,7 @@ public class DatabaseActivity extends AppCompatActivity {
                     tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name="+player1+
                             "&player_2_name="+player2+"&game=" + game +
                             "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
-                            winner+afterDate+beforeDate,"UTF-8");
+                            winner+afterDate+beforeDate+"&rating_above="+aboveRating,"UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
