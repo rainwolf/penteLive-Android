@@ -71,7 +71,7 @@ public class DatabaseActivity extends AppCompatActivity {
         public Animation rotation;
         public ImageView messageIcon;
 
-        private String dbRating = "0";
+        private String dbP1Rating = "0", dbP2Rating = "0";
         private ProgressBar progressBar;
         private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
 //        private Context ctx = MyApplication.getContext();
@@ -384,7 +384,7 @@ public class DatabaseActivity extends AppCompatActivity {
                     beforeDatePickerDialog.show();
                 }
             });
-            spinner = (Spinner) settingsView.findViewById(R.id.ratingSpinner);
+            spinner = (Spinner) settingsView.findViewById(R.id.p1RatingSpinner);
             adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                     R.array.db_ratings_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -392,9 +392,9 @@ public class DatabaseActivity extends AppCompatActivity {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBRATING_KEY, position);
+                    PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP1RATING_KEY, position);
                     String[] ratingArray = getResources().getStringArray(R.array.db_ratings_array);
-                    dbRating = ratingArray[position];
+                    dbP1Rating = ratingArray[position];
                 }
 
                 @Override
@@ -408,6 +408,58 @@ public class DatabaseActivity extends AppCompatActivity {
                     InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     return false;
+                }
+            });
+            spinner = (Spinner) settingsView.findViewById(R.id.p2RatingSpinner);
+            adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
+                    R.array.db_ratings_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP2RATING_KEY, position);
+                    String[] ratingArray = getResources().getStringArray(R.array.db_ratings_array);
+                    dbP2Rating = ratingArray[position];
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            spinner.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    return false;
+                }
+            });
+            TextView txtvw = (TextView) settingsView.findViewById(R.id.eitherOrBoth);
+            txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, getString(R.string.both)));
+            txtvw.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (((TextView)view).getText().equals(getString(R.string.both))) {
+                        ((TextView)view).setText(getString(R.string.either));
+                    } else {
+                        ((TextView)view).setText(getString(R.string.both));
+                    }
+                    PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, ((TextView)view).getText().toString());
+                }
+            });
+            txtvw = (TextView) settingsView.findViewById(R.id.excludeTimeouts);
+            txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, getString(R.string.no)));
+            txtvw.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (((TextView)view).getText().equals(getString(R.string.no))) {
+                        ((TextView)view).setText(getString(R.string.yes));
+                    } else {
+                        ((TextView)view).setText(getString(R.string.no));
+                    }
+                    PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, ((TextView)view).getText().toString());
                 }
             });
 
@@ -514,6 +566,16 @@ public class DatabaseActivity extends AppCompatActivity {
             if (!"".equals(beforeDate)) {
                 beforeDate = "&before_date="+beforeDate;
             }
+            String str = ((TextView)(settingsView.findViewById(R.id.eitherOrBoth))).getText().toString();
+            String eitherOrBoth = "";
+            if (getString(R.string.either).equals(str)) {
+                eitherOrBoth = "&p1_or_p2=true";
+            }
+            str = ((TextView)(settingsView.findViewById(R.id.excludeTimeouts))).getText().toString();
+            String excludeTimeouts = "";
+            if (getString(R.string.yes).equals(str)) {
+                excludeTimeouts = "&exclude_timeout=true";
+            }
             SearchTask searchTask = new SearchTask(board.getMovesString(),
                     board.getGame(),
                     (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
@@ -522,22 +584,37 @@ public class DatabaseActivity extends AppCompatActivity {
                     winner,
                     afterDate,
                     beforeDate,
-                    dbRating);
+                    dbP1Rating,
+                    dbP2Rating,
+                    eitherOrBoth,
+                    excludeTimeouts);
             searchTask.execute((Void) null);
         }
         private void showDBSettings() {
 
 //            settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
             searchPrmtrsWindow.show();
+            int width = (int)(getResources().getDisplayMetrics().widthPixels*0.95);
+            int height = (int)(getResources().getDisplayMetrics().heightPixels*0.70);
+            settingsView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            if (settingsView.getMeasuredHeight() > height) {
+                searchPrmtrsWindow.getWindow().setLayout(width, height);
+            }
 
 
             Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
             spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
-            spinner = (Spinner) settingsView.findViewById(R.id.ratingSpinner);
-            int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBRATING_KEY, 0);
+            spinner = (Spinner) settingsView.findViewById(R.id.p1RatingSpinner);
+            int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP1RATING_KEY, 0);
             spinner.setSelection(position);
-            String[] ratingArray = getResources().getStringArray(R.array.db_ratings_array);
-            dbRating = ratingArray[position];
+            String[] p1RatingArray = getResources().getStringArray(R.array.db_ratings_array);
+            dbP1Rating = p1RatingArray[position];
+            spinner = (Spinner) settingsView.findViewById(R.id.p2RatingSpinner);
+            position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP2RATING_KEY, 0);
+            spinner.setSelection(position);
+            String[] p2RatingArray = getResources().getStringArray(R.array.db_ratings_array);
+            dbP1Rating = p2RatingArray[position];
             TextView sortOrder = (TextView) settingsView.findViewById(R.id.sortChoice);
             sortOrder.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity"));
             AutoCompleteTextView actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player1);
@@ -602,11 +679,12 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves, game, player1, player2, afterDate, beforeDate, aboveRating;
+        private String moves, game, player1, player2, afterDate, beforeDate, p1Rating, p2Rating, eitherOrBoth, excludeTimeouts;
         private int sortOrder, winner;
         private String searchResult;
 
-        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner, String afterDate, String beforeDate, String aboveRating) {
+        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner,
+                   String afterDate, String beforeDate, String p1Rating, String p2Rating, String eitherOrBoth, String excludeTimeouts) {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
@@ -615,7 +693,10 @@ public class DatabaseActivity extends AppCompatActivity {
             this.winner = winner;
             this.afterDate = afterDate;
             this.beforeDate = beforeDate;
-            this.aboveRating = aboveRating;
+            this.p1Rating = p1Rating;
+            this.p2Rating = p2Rating;
+            this.eitherOrBoth = eitherOrBoth;
+            this.excludeTimeouts = excludeTimeouts;
         }
 
         @Override
@@ -641,7 +722,8 @@ public class DatabaseActivity extends AppCompatActivity {
                     tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name="+player1+
                             "&player_2_name="+player2+"&game=" + game +
                             "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
-                            winner+afterDate+beforeDate+"&rating_above="+aboveRating,"UTF-8");
+                            winner+afterDate+beforeDate+"&p1_rating_above="+p1Rating+"&p2_rating_above="+p2Rating
+                            +eitherOrBoth+excludeTimeouts,"UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
@@ -673,7 +755,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
                 br.close();
 
-//                System.out.println("search output: " + output.toString());
+                System.out.println("search output: " + output.toString());
                 searchResult = output.toString();
 
             } catch (IOException e1) {

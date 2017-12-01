@@ -6,6 +6,15 @@
     android:paddingRight="10dp"
     android:paddingBottom="10dp"
     android:paddingTop="10dp">
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:measureAllChildren="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:id="@+id/scrollLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
     <TextView
         android:layout_width="wrap_content"
@@ -160,25 +169,94 @@
         android:layout_toRightOf="@id/beforeLabel"
         android:id="@+id/beforeDate"
         android:layout_alignParentRight="true" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/rating_above"
-        android:textStyle="bold"
-        android:id="@+id/ratingLabel"
-        android:layout_below="@id/beforeLabel"
-        android:layout_alignParentLeft="true" />
-    <android.support.v7.widget.AppCompatSpinner
-        android:spinnerMode="dialog"
-        android:id="@+id/ratingSpinner"
-        android:layout_toRightOf="@id/ratingLabel"
-        android:layout_below="@id/beforeDate"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_width="match_parent"
-        android:textAlignment="center"
-        android:layout_height="45dp"
-        android:gravity="center_vertical">
-    </android.support.v7.widget.AppCompatSpinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/p1_rating_above"
+                android:textStyle="bold"
+                android:id="@+id/p1RatingLabel"
+                android:layout_below="@id/beforeLabel"
+                android:layout_alignParentLeft="true" />
+            <android.support.v7.widget.AppCompatSpinner
+                android:spinnerMode="dialog"
+                android:id="@+id/p1RatingSpinner"
+                android:layout_toRightOf="@id/p1RatingLabel"
+                android:layout_below="@id/beforeDate"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_width="match_parent"
+                android:textAlignment="center"
+                android:layout_height="45dp"
+                android:gravity="center_vertical">
+            </android.support.v7.widget.AppCompatSpinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/p2_rating_above"
+                android:textStyle="bold"
+                android:id="@+id/p2RatingLabel"
+                android:layout_below="@id/p1RatingLabel"
+                android:layout_alignParentLeft="true" />
+            <android.support.v7.widget.AppCompatSpinner
+                android:spinnerMode="dialog"
+                android:id="@+id/p2RatingSpinner"
+                android:layout_toRightOf="@id/p2RatingLabel"
+                android:layout_below="@id/p1RatingSpinner"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_width="match_parent"
+                android:textAlignment="center"
+                android:layout_height="45dp"
+                android:gravity="center_vertical">
+            </android.support.v7.widget.AppCompatSpinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/match_players"
+                android:textStyle="bold"
+                android:id="@+id/eitherOrBothLabel"
+                android:layout_below="@id/p2RatingLabel"
+                android:layout_alignParentLeft="true" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:layout_toRightOf="@id/eitherOrBothLabel"
+                android:textAlignment="center"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/both"
+                android:layout_below="@id/p2RatingSpinner"
+                android:id="@+id/eitherOrBoth"
+                android:layout_alignParentRight="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/exclude_timeouts"
+                android:textStyle="bold"
+                android:id="@+id/excludeTimeoutsLabel"
+                android:layout_below="@id/eitherOrBothLabel"
+                android:layout_alignParentLeft="true" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:layout_toRightOf="@id/excludeTimeoutsLabel"
+                android:textAlignment="center"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/no"
+                android:layout_below="@id/eitherOrBoth"
+                android:id="@+id/excludeTimeouts"
+                android:layout_alignParentRight="true" />
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

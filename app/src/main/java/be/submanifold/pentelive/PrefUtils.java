@@ -45,7 +45,10 @@ public class PrefUtils {
     public static final String  PREFS_DBAIOPENINGBOOK_KEY = "__DBAIOPENINGBOOK__";
     public static final String  PREFS_SOCIALGAME_KEY = "__SOCIALGAME__";
     public static final String PREFS_TBONLY_KEY = "__SHOWTBONLY__";
-    public static final String PREFS_DBRATING_KEY = "__DBRATING__";
+    public static final String PREFS_DBP1RATING_KEY = "__DBP1RATING__";
+    public static final String PREFS_DBP2RATING_KEY = "__DBP2RATING__";
+    public static final String PREFS_DBPEITHERORBOTH_KEY = "__DBPEITHERORBOTH__";
+    public static final String PREFS_DBEXCLUDETIMEOUTS_KEY = "__DBEXCLUDETIMEOUTS__";
     public static final String PREFS_INAPPSOUNDSOFF_KEY = "__INAPPSOUNDSOFF__";
     public static final String PREFS_NOBEGINNERACCEPTREMIND_KEY = "__NOBEGINNERACCEPTREMIND__";
 

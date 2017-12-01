@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="be.submanifold.pentelive"
-    android:versionCode="118"
-    android:versionName="2.2.19">
+    android:versionCode="119"
+    android:versionName="2.2.20">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

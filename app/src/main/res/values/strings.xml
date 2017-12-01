@@ -263,7 +263,8 @@
     <string name="unhide_from_public">unhide game from public view</string>
     <string name="rusure">Are you sure?</string>
     <string name="email_me_messages">Email me received messages</string>
-    <string name="rating_above">Rating above:</string>
+    <string name="p1_rating_above">P1 rating above:</string>
+    <string name="p2_rating_above">P2 rating above:</string>
     <string name="in_app_sounds_off">Mute in-app sounds</string>
     <string name="yes_accept">yes, accept</string>
     <string name="warning">Warning</string>
@@ -271,6 +272,10 @@
     <string name="stop_beginner_warnings">Stop beginner warnings</string>
     <string name="rated_beginner">Rated, beginner</string>
     <string name="not_rated_beginner">Not rated, beginner</string>
+    <string name="both">both</string>
+    <string name="match_players">Match players</string>
+    <string name="exclude_timeouts">Exclude timeouts</string>
+
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
