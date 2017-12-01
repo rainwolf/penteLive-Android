@@ -167,10 +167,49 @@ public class MainActivity extends AppCompatActivity {
                                         setID = player.getInvitations().get(childPosition).getGameID();
                                         opponentName = player.getInvitations().get(childPosition).getOpponentName();
                                     } else {
-                                        // check if enough credit.
-                                        if (!player.isSubscriber()) {
+                                        setID = player.getPublicInvitations().get(childPosition).getGameID();
+                                        opponentName = player.getPublicInvitations().get(childPosition).getOpponentName();
+                                        if (player.getPublicInvitations().get(childPosition).getRatedNot().contains(", beginner")) {
+                                            boolean noRemind = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false);
+                                            if (!noRemind) {
+                                                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                                builder.setTitle(getString(R.string.warning));
+                                                builder.setMessage(getString(R.string.beginner_invitation_accept));
+                                                final String finalsetID = setID;
+                                                final String finalOpponentName = opponentName;
+                                                builder.setPositiveButton(getString(R.string.yes_accept), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        player.respondInvitation(finalsetID, true, listAdapter);
+                                                        PrefUtils.savePlayerToPrefs(MainActivity.this, finalOpponentName);
+
+                                                        if (player.showAds()) {
+                                                            if (mInterstitialAd.isLoaded()) {
+                                                                mInterstitialAd.show();
+                                                            }
+                                                        }
+                                                        viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                                    }
+                                                });
+                                                builder.setNeutralButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                                                        viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                                    }
+                                                });
+                                                AlertDialog dlg = builder.create();
+                                                dlg.show();
+                                                return;
+                                            }
+
+                                        } else if (!player.isSubscriber()) { // check if enough credit.
                                             int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
-//                                        System.out.println(" remaining credit = " + remainingCredit);
                                             if (remainingCredit < 1) {
                                                 final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                                                 builder.setTitle(getString(R.string.public_invitations_limit_reached));
@@ -199,8 +238,6 @@ public class MainActivity extends AppCompatActivity {
                                                 PrefUtils.saveIntToPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
                                             }
                                         }
-                                        setID = player.getPublicInvitations().get(childPosition).getGameID();
-                                        opponentName = player.getPublicInvitations().get(childPosition).getOpponentName();
                                     }
                                     player.respondInvitation(setID, true, listAdapter);
                                     PrefUtils.savePlayerToPrefs(MainActivity.this, opponentName);

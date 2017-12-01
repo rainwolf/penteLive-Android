@@ -47,6 +47,7 @@ public class PrefUtils {
     public static final String PREFS_TBONLY_KEY = "__SHOWTBONLY__";
     public static final String PREFS_DBRATING_KEY = "__DBRATING__";
     public static final String PREFS_INAPPSOUNDSOFF_KEY = "__INAPPSOUNDSOFF__";
+    public static final String PREFS_NOBEGINNERACCEPTREMIND_KEY = "__NOBEGINNERACCEPTREMIND__";
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

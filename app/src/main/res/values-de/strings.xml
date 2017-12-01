@@ -58,6 +58,7 @@
     <string name="play_as">Spielen als:</string>
     <string name="opponent">Gegner</string>
     <string-array name="restriction_array">
+        <item>Anfänger</item>
         <item>alle Rankings</item>
         <item>spielt nicht bereits</item>
         <item>niedrigere Rankings</item>

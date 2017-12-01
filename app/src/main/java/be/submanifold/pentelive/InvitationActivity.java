@@ -100,12 +100,13 @@ public class InvitationActivity extends AppCompatActivity {
                 String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
                 String restriction = "";
                 switch (((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition()) {
-                    case 0: restriction = "A"; break;
-                    case 1: restriction = "N"; break;
-                    case 2: restriction = "L"; break;
-                    case 3: restriction = "H"; break;
-                    case 4: restriction = "S"; break;
-                    case 5: restriction = "C"; break;
+                    case 0: restriction = "B"; break;
+                    case 1: restriction = "A"; break;
+                    case 2: restriction = "N"; break;
+                    case 3: restriction = "L"; break;
+                    case 4: restriction = "H"; break;
+                    case 5: restriction = "S"; break;
+                    case 6: restriction = "C"; break;
                 }
                 String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
                 String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked()?"Y":"N";
@@ -235,6 +236,9 @@ public class InvitationActivity extends AppCompatActivity {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/newGame";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/tb/newGame";
+                }
                 URL    url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

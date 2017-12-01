@@ -53,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
         ((ToggleButton) findViewById(R.id.tbOnlyToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_TBONLY_KEY, false));
         ((ToggleButton) findViewById(R.id.inAppSoundsToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false));
+        ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false));
         ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setChecked(PentePlayer.emailMe);
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -75,6 +76,12 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, isChecked);
+            }
+        });
+        ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, isChecked);
             }
         });
         ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

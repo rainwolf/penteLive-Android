@@ -58,6 +58,7 @@
     <string name="play_as">Play as:</string>
     <string name="opponent">opponent</string>
     <string-array name="restriction_array">
+        <item>beginners</item>
         <item>of any rating</item>
         <item>not already playing</item>
         <item>of lower rating</item>
@@ -264,6 +265,12 @@
     <string name="email_me_messages">Email me received messages</string>
     <string name="rating_above">Rating above:</string>
     <string name="in_app_sounds_off">Mute in-app sounds</string>
+    <string name="yes_accept">yes, accept</string>
+    <string name="warning">Warning</string>
+    <string name="beginner_invitation_accept">If you accept a beginner invitation, the server will post an identical invitation in your name. This warning can be disabled in the settings.\nDo you want to continue?</string>
+    <string name="stop_beginner_warnings">Stop beginner warnings</string>
+    <string name="rated_beginner">Rated, beginner</string>
+    <string name="not_rated_beginner">Not rated, beginner</string>
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>

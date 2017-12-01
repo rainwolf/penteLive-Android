@@ -365,7 +365,10 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         if (groupPosition == PUBLICINVITATIONSGROUP) {
             if (game.getRatedNot().contains("KotH")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            } else if (game.getRatedNot().contains(", beginner")) {
+                convertView.setBackgroundColor(Color.rgb(242, 249, 222));
             }
+
         }
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
             if (game.getRatedNot().contains("Tournament")) {

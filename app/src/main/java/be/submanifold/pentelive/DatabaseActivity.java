@@ -743,13 +743,17 @@ public class DatabaseActivity extends AppCompatActivity {
                 if (player1.length() > 0) {
                     String[] pList = player1.replace(" ", "").split(",");
                     for (String name: pList) {
-                        PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        if (!name.contains("*")) {
+                            PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        }
                     }
                 }
                 if (player2.length() > 0) {
                     String[] pList = player2.replace(" ", "").split(",");
                     for (String name: pList) {
-                        PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        if (!name.contains("*")) {
+                            PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        }
                     }
                 }
                 board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));

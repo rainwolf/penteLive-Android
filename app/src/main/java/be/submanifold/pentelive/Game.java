@@ -238,6 +238,10 @@ public class Game implements Parcelable {
                 mLocalizedRatedNot = ctx.getString(R.string.koth);
             } else if (mRatedNot.equals("Tournament")) {
                 mLocalizedRatedNot = ctx.getString(R.string.tournament);
+            } else if (mRatedNot.equals("Rated, beginner")) {
+                mLocalizedRatedNot = ctx.getString(R.string.rated_beginner);
+            } else if (mRatedNot.equals("Not Rated, beginner")) {
+                mLocalizedRatedNot = ctx.getString(R.string.not_rated_beginner);
             }
         }
         return mLocalizedRatedNot;
