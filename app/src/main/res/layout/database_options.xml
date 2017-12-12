@@ -257,6 +257,29 @@
                 android:layout_below="@id/eitherOrBoth"
                 android:id="@+id/excludeTimeouts"
                 android:layout_alignParentRight="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/type"
+                android:textStyle="bold"
+                android:id="@+id/liveOrTBLabel"
+                android:layout_below="@id/excludeTimeoutsLabel"
+                android:layout_alignParentLeft="true" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:layout_toRightOf="@id/liveOrTBLabel"
+                android:textAlignment="center"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/all"
+                android:layout_below="@id/excludeTimeouts"
+                android:id="@+id/liveOrTB"
+                android:layout_alignParentRight="true" />
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

@@ -51,6 +51,7 @@ public class PrefUtils {
     public static final String PREFS_DBEXCLUDETIMEOUTS_KEY = "__DBEXCLUDETIMEOUTS__";
     public static final String PREFS_INAPPSOUNDSOFF_KEY = "__INAPPSOUNDSOFF__";
     public static final String PREFS_NOBEGINNERACCEPTREMIND_KEY = "__NOBEGINNERACCEPTREMIND__";
+    public static final String PREFS_DBLIVEORTB_KEY = "__DBLIVEORTB__";
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

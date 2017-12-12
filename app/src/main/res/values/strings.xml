@@ -275,6 +275,11 @@
     <string name="both">both</string>
     <string name="match_players">Match players</string>
     <string name="exclude_timeouts">Exclude timeouts</string>
+    <string name="type">Type</string>
+    <string name="all">all</string>
+    <string name="turn_based_only">turn-based only</string>
+    <string name="live_only">live only</string>
+
 
 
     <string name="prompt_username">Username</string>

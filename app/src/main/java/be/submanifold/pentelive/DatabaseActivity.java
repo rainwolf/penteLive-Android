@@ -462,6 +462,21 @@ public class DatabaseActivity extends AppCompatActivity {
                     PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, ((TextView)view).getText().toString());
                 }
             });
+            txtvw = (TextView) settingsView.findViewById(R.id.liveOrTB);
+            txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, getString(R.string.all)));
+            txtvw.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (((TextView)view).getText().equals(getString(R.string.all))) {
+                        ((TextView)view).setText(getString(R.string.turn_based_only));
+                    } else if (((TextView)view).getText().equals(getString(R.string.turn_based_only))) {
+                        ((TextView)view).setText(getString(R.string.live_only));
+                    } else {
+                        ((TextView)view).setText(getString(R.string.all));
+                    }
+                    PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, ((TextView)view).getText().toString());
+                }
+            });
 
 
 
@@ -576,6 +591,13 @@ public class DatabaseActivity extends AppCompatActivity {
             if (getString(R.string.yes).equals(str)) {
                 excludeTimeouts = "&exclude_timeout=true";
             }
+            str = ((TextView)(settingsView.findViewById(R.id.liveOrTB))).getText().toString();
+            String liveOrTB = "";
+            if (getString(R.string.live_only).equals(str)) {
+                liveOrTB = "&only_live=yes";
+            } else if (getString(R.string.live_only).equals(str)) {
+                liveOrTB = "&only_turn_based=yes";
+            }
             SearchTask searchTask = new SearchTask(board.getMovesString(),
                     board.getGame(),
                     (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity")?1:2),
@@ -587,7 +609,8 @@ public class DatabaseActivity extends AppCompatActivity {
                     dbP1Rating,
                     dbP2Rating,
                     eitherOrBoth,
-                    excludeTimeouts);
+                    excludeTimeouts,
+                    liveOrTB);
             searchTask.execute((Void) null);
         }
         private void showDBSettings() {
@@ -679,12 +702,14 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves, game, player1, player2, afterDate, beforeDate, p1Rating, p2Rating, eitherOrBoth, excludeTimeouts;
+        private String moves, game, player1, player2, afterDate, beforeDate, p1Rating, p2Rating,
+                eitherOrBoth, excludeTimeouts, liveOrTB;
         private int sortOrder, winner;
         private String searchResult;
 
         SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner,
-                   String afterDate, String beforeDate, String p1Rating, String p2Rating, String eitherOrBoth, String excludeTimeouts) {
+                   String afterDate, String beforeDate, String p1Rating, String p2Rating, String eitherOrBoth,
+                   String excludeTimeouts, String liveOrTB) {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
@@ -697,6 +722,7 @@ public class DatabaseActivity extends AppCompatActivity {
             this.p2Rating = p2Rating;
             this.eitherOrBoth = eitherOrBoth;
             this.excludeTimeouts = excludeTimeouts;
+            this.liveOrTB = liveOrTB;
         }
 
         @Override
@@ -723,7 +749,7 @@ public class DatabaseActivity extends AppCompatActivity {
                             "&player_2_name="+player2+"&game=" + game +
                             "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
                             winner+afterDate+beforeDate+"&p1_rating_above="+p1Rating+"&p2_rating_above="+p2Rating
-                            +eitherOrBoth+excludeTimeouts,"UTF-8");
+                            +eitherOrBoth+excludeTimeouts+liveOrTB,"UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
@@ -755,7 +781,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
                 br.close();
 
-                System.out.println("search output: " + output.toString());
+//                System.out.println("search output: " + output.toString());
                 searchResult = output.toString();
 
             } catch (IOException e1) {
