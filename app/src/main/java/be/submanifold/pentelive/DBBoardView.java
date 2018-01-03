@@ -116,6 +116,10 @@ public class DBBoardView extends View {
 
 
     public String getGame() {
+        if (game == null) {
+            setGame("Pente");
+            invalidate();
+        }
         return game;
     }
 

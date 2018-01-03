@@ -749,7 +749,7 @@ public class DatabaseActivity extends AppCompatActivity {
                             "&player_2_name="+player2+"&game=" + game +
                             "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
                             winner+afterDate+beforeDate+"&p1_rating_above="+p1Rating+"&p2_rating_above="+p2Rating
-                            +eitherOrBoth+excludeTimeouts+liveOrTB,"UTF-8");
+                            +eitherOrBoth+excludeTimeouts+liveOrTB+"&android=yes","UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     tmpStr = "";
                 }
