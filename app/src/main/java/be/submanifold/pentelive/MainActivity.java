@@ -532,6 +532,12 @@ public class MainActivity extends AppCompatActivity {
         menuItem = menu.findItem(R.id.live_games);
         menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning));
 
+        int onlineFollowing = player.getOnlineFollowingers();
+        menuItem = menu.findItem(R.id.action_more);
+        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.ic_action_more));
+        menuItem = menu.findItem(R.id.onlineUsers);
+        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.online_users));
+
         return true;
     }
 
@@ -602,6 +608,9 @@ public class MainActivity extends AppCompatActivity {
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                }
 
 //                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
@@ -689,7 +698,7 @@ public class MainActivity extends AppCompatActivity {
                 popUpView.setBackgroundColor(Color.BLUE);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                 final float scale = getResources().getDisplayMetrics().density;
-                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, total*44))*scale), true );
+                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, 30 + total*44))*scale), true );
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
 //                System.out.println("totaaaaaaaal "+total);
                 ExpandableListView onlineUsersListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
@@ -756,6 +765,27 @@ public class MainActivity extends AppCompatActivity {
     private Drawable buildCounterDrawable(int count, int backgroundImageId){
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.counter_menu_item_layout, null);
+        view.setBackgroundResource(backgroundImageId);
+        if (count == 0) {
+            View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
+            counterTextPanel.setVisibility(View.GONE);
+        } else {
+            TextView textView = (TextView) view.findViewById(R.id.BadgeCount);
+            textView.setText("" + count);
+        }
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.setDrawingCacheEnabled(true);
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        return new BitmapDrawable(getResources(), bitmap);
+    }
+    private Drawable buildGreenCounterDrawable(int count, int backgroundImageId){
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.counter_green_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
         if (count == 0) {
             View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);

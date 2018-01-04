@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/text_circle">
+        android:background="@drawable/text_green_circle">
         <TextView
             android:id="@+id/BadgeCount"
             android:layout_width="wrap_content"

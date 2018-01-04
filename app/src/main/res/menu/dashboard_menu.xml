@@ -44,24 +44,33 @@
         android:icon="@drawable/ic_action_info"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/action_new_message"
-        android:title="@string/new_message"
-        android:icon="@drawable/ic_chat"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/moreSettings"
-        android:title="@string/settings"
-        android:icon="@drawable/ic_action_settings"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/onlineUsers"
-        android:title="@string/whos_online"
-        android:icon="@drawable/online_users"
-        app:showAsAction="never"/>
-    <item android:id="@+id/social"
-        android:icon="@drawable/broadcast"
-        android:title="@string/social"
-        />
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_action_more"
+        android:title="more"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_new_message"
+                android:title="@string/new_message"
+                android:icon="@drawable/ic_chat"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/moreSettings"
+                android:title="@string/settings"
+                android:icon="@drawable/ic_action_settings"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/onlineUsers"
+                android:title="@string/whos_online"
+                android:icon="@drawable/online_users"
+                app:showAsAction="never"/>
+            <item android:id="@+id/social"
+                android:icon="@drawable/broadcast"
+                android:title="@string/social"
+                />
+        </menu>
+
+    </item>
 
     <!--&lt;!&ndash; Settings, should always be in the overflow &ndash;&gt;-->
     <!--<item android:id="@+id/action_settings"-->

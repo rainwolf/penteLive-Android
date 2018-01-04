@@ -58,6 +58,8 @@ public class PentePlayer implements Parcelable {
 
     private int livePlayers;
     public int getLivePlayers() { return this.livePlayers; }
+    private int onlineFollowingers;
+    public int getOnlineFollowingers() { return onlineFollowingers; }
 
     private int tbRatings, tbHills;
     public int getTbRatings() { return tbRatings; }
@@ -166,6 +168,7 @@ public class PentePlayer implements Parcelable {
             this.livePlayers = Integer.parseInt(dashLine[4]);
             this.dbAccess = "dbAccessGranted".equals(dashLine[5]);
             this.emailMe = "emailMe".equals(dashLine[6]);
+            this.onlineFollowingers = Integer.parseInt(dashLine[7]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
@@ -455,6 +458,7 @@ public class PentePlayer implements Parcelable {
 //        }
         myColor = in.readInt();
         livePlayers = in.readInt();
+        onlineFollowingers = in.readInt();
         tbRatings = in.readInt();
         tbHills = in.readInt();
     }
@@ -552,6 +556,7 @@ public class PentePlayer implements Parcelable {
 //        }
         dest.writeInt(myColor);
         dest.writeInt(livePlayers);
+        dest.writeInt(onlineFollowingers);
         dest.writeInt(tbRatings);
         dest.writeInt(tbHills);
     }
