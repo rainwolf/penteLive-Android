@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -134,7 +136,7 @@ public class BoardActivity extends AppCompatActivity {
                         if (!game.isActive()) {
                             return false;
                         }
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                         if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
                             String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
                             builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -181,6 +183,34 @@ public class BoardActivity extends AppCompatActivity {
                         }
                         PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
                         return  true;
+                    case R.id.go_territory:
+                        game.getTerritories();
+                        board.invalidate();
+                        builder = new android.support.v7.app.AlertDialog.Builder(BoardActivity.this);
+                        builder.setTitle(getString(R.string.score));
+                        int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
+                                p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
+                                p1Stones = game.getMovesForValue(2).size(),
+                                p2Stones = game.getMovesForValue(1).size();
+                        builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
+                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialogInterface) {
+                                if (!game.isGoMarkStones()) {
+                                    game.getGoTerritoryByPlayer().get(1).clear();
+                                    game.getGoTerritoryByPlayer().get(2).clear();
+                                    board.invalidate();
+                                }
+                            }
+                        });
+                        android.support.v7.app.AlertDialog dlg = builder.create();
+                        dlg.setCanceledOnTouchOutside(true);
+                        Window window = dlg.getWindow();
+                        WindowManager.LayoutParams wlp = window.getAttributes();
+                        wlp.gravity = Gravity.BOTTOM;
+//                        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                        window.setAttributes(wlp);
+                        dlg.show();
                 }
 
                 return false;
@@ -217,7 +247,11 @@ public class BoardActivity extends AppCompatActivity {
     public void setRegularSubmitListener() {
         Button button = (Button) findViewById(R.id.submitButton);
         if (button != null) {
-            button.setText(R.string.submit);
+            if (game.isGo() && !game.isGoMarkStones()) {
+                button.setText(R.string.pass);
+            } else {
+                button.setText(R.string.submit);
+            }
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (!game.isActive()) {
@@ -252,6 +286,16 @@ public class BoardActivity extends AppCompatActivity {
                         } else {
                             moves = "1," + board.playedMove;
                         }
+                    } else if (game.isGoMarkStones() && game.isGo()) {
+                        moves = "361";
+                        for (int move: game.getGoDeadStonesByPlayer().get(1)) {
+                            moves = move + "," + moves;
+                        }
+                        for (int move: game.getGoDeadStonesByPlayer().get(2)) {
+                            moves = move + "," + moves;
+                        }
+                    } else if (board.playedMove == -1 && game.isGo()) {
+                        moves = "361";
                     } else if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
@@ -292,25 +336,29 @@ public class BoardActivity extends AppCompatActivity {
 
 
     public void goBack() {
+        String str;
         if (game.isConnect6() && board.connect6Move1 > -1) {
             board.connect6Move1 = -1;
             board.invalidate();
         } else if (game.isDPente() && game.getMovesList().size() == 0) {
             if (board.dPenteMove4 > -1) {
                 board.dPenteMove4 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
+                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
                         "-" + coordinateLetters[board.dPenteMove2 % 19] + "" + (19 - (board.dPenteMove2 / 19)) +
                         "-" + coordinateLetters[board.dPenteMove3 % 19] + "" + (19 - (board.dPenteMove3 / 19)) +
-                        "-...");
+                        "-...";
+                ((Button) findViewById(R.id.submitButton)).setText(str);
             } else if (board.dPenteMove3 > -1) {
                 board.dPenteMove3 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
                         "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
-                        "-...");
+                        "-...";
+                ((Button) findViewById(R.id.submitButton)).setText(str);
             }  else if (board.dPenteMove2 > -1) {
                 board.dPenteMove2 = -1;
-                ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                        "-...");
+                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                        "-...";
+                ((Button) findViewById(R.id.submitButton)).setText(str);
             } else if (board.dPenteMove1 > -1) {
                 board.dPenteMove1 = -1;
                 ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
@@ -405,6 +453,11 @@ public class BoardActivity extends AppCompatActivity {
             item.setIcon(R.drawable.ic_action_lock_closed);
         } else {
             item.setIcon(R.drawable.ic_action_lock_open);
+        }
+
+        if (!(game.getGameType().equals("Go") || game.getGameType().equals("Speed Go"))) {
+            item = menu.findItem(R.id.go_territory);
+            item.setVisible(false);
         }
         return true;
     }

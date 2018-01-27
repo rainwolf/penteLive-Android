@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -74,6 +75,27 @@ public class Game implements Parcelable {
     private String hideStr = "";
 
     private String mBoardString;
+
+
+    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
     public Game(String gameID, String setID, String gameType, String opponentName, String opponentRating, String myColor,
                 String remainingTime, String ratedNot, String privateGame, String nameColor, String crown) {
@@ -892,68 +914,37 @@ public class Game implements Parcelable {
         canHide = mGameString.contains("can_hide=yes");
         canUnHide = mGameString.contains("can_unhide=yes");
 
+        go = false; goMarkStones = false; goEvaluateDeadStones = false;
+
         String[] dashLines = mGameString.split("\n");
         String dashLine;
         int idx = 0;
         String p1Name = "", p2Name = "";
         while (idx < dashLines.length) {
             dashLine = dashLines[idx];
+            if (dashLine.indexOf("Go=MARK_DEAD_STONES") == 0) {
+                goMarkStones = true;
+            }
+            if (dashLine.indexOf("Go=EVALUATE_DEAD_STONES") == 0) {
+                goEvaluateDeadStones = true;
+            }
             if (dashLine.indexOf("player1=") == 0) {
                 p1Name = dashLine.substring(8).split(",")[0];
-                if (p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
-                    amIPlaying = true;
-                    if (this.mMovesList != null) {
-//                        if (isDPente() && mMovesList.size() == 1) {
-//                            this.mActive = true;
-//
-//                        } else
-                        if (isConnect6()) {
-                            if ((((mMovesList.size() % 4) == 0) || ((mMovesList.size() % 4) == 3))) {
-                                this.mActive = true;
-                            } else {
-                                this.mActive = false;
-                            }
-                        } else if (this.mMovesList.size()%2 == 0) {
-                            this.mActive = true;
-                        } else {
-                            this.mActive = false;
-                        }
-//                        if (isDPente() && mMovesList.size() == 0) {
-//                            mActive = true;
-//                        }
-                    }
-                } else {
+                if (!p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     this.mOpponentName = p1Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 }
+            }
+            if (dashLine.indexOf("current_player=") == 0) {
+                mActive = dashLine.equals("current_player="+PentePlayer.mPlayerName.toLowerCase());
+                amIPlaying = mActive;
             }
             if (dashLine.contains("undo=requested")) {
                 undoRequested = true;
             }
             if (dashLine.indexOf("player2=") == 0) {
                 p2Name = dashLine.substring(8).split(",")[0];
-                if (p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
-                    amIPlaying = true;
-                    if (this.mMovesList != null) {
-//                        if (isDPente() && mMovesList.size() == 1) {
-//                            this.mActive = false;
-//                        } else
-                        if (isConnect6()) {
-                            if ((((mMovesList.size() % 4) == 1) || ((mMovesList.size() % 4) == 2))) {
-                                this.mActive = true;
-                            } else {
-                                this.mActive = false;
-                            }
-                        } else if (this.mMovesList.size()%2 == 1) {
-                            this.mActive = true;
-                        } else {
-                            this.mActive = false;
-                        }
-//                        if (isDPente() && mMovesList.size() == 0) {
-//                            mActive = false;
-//                        }
-                    }
-                } else {
+                if (!p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     this.mOpponentName = p2Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 }
@@ -963,6 +954,9 @@ public class Game implements Parcelable {
             }
             if (dashLine.indexOf("gameName=") == 0) {
                 this.mGameType = dashLine.substring(9);
+                if (mGameType.equals("Go") || mGameType.equals("Speed Go")) {
+                    go = true;
+                }
             }
             if (dashLine.indexOf("moves=") == 0) {
                 String movesString[] = dashLine.substring(6).split(",");
@@ -1161,8 +1155,82 @@ public class Game implements Parcelable {
         }
 //        this.mActive = true;
         if (boardView != null) {
-            replayGame(boardView.abstractBoard, boardView);
+            replayGame(boardView);
 //            boardView.invalidate();
+        }
+
+        if (mActive && goMarkStones) {
+
+        }
+
+        if (mActive && goEvaluateDeadStones) {
+            getTerritories();
+            boardView.invalidate();
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+            builder.setTitle(host.getString(R.string.score));
+            int p1Territory = getGoTerritoryByPlayer().get(1).size(),
+                    p2Territory = getGoTerritoryByPlayer().get(2).size(),
+                    p1Stones = getMovesForValue(2).size(),
+                    p2Stones = getMovesForValue(1).size();
+            builder.setMessage(host.getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
+            builder.setPositiveButton(host.getString(R.string.accept), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    submitMove("1","");
+                    host.finish();
+                }
+            });
+            builder.setNegativeButton(host.getString(R.string.reject), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    submitMove("0", "");
+                    host.finish();
+                }
+            });
+            AlertDialog dlg = builder.create();
+            dlg.setCanceledOnTouchOutside(false);
+            Window window = dlg.getWindow();
+            WindowManager.LayoutParams wlp = window.getAttributes();
+            wlp.gravity = Gravity.BOTTOM;
+            dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setAttributes(wlp);
+            dlg.show();
+        }
+
+        if (mActive && goMarkStones) {
+            getTerritories();
+            boardView.invalidate();
+
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            if (PrefUtils.getBooleanFromPrefs(host, PrefUtils.PREFS_DOUBLEPASSREMINDER_KEY, true)) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+                builder.setTitle(host.getString(R.string.score));
+                int p1Territory = getGoTerritoryByPlayer().get(1).size(),
+                        p2Territory = getGoTerritoryByPlayer().get(2).size(),
+                        p1Stones = getMovesForValue(2).size(),
+                        p2Stones = getMovesForValue(1).size();
+                builder.setMessage(host.getString(R.string.double_pass));
+                builder.setPositiveButton(host.getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                builder.setNegativeButton(host.getString(R.string.no_reminder), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        PrefUtils.saveBooleanToPrefs(host, PrefUtils.PREFS_DOUBLEPASSREMINDER_KEY, false);
+                    }
+                });
+                AlertDialog dlg = builder.create();
+                dlg.setCanceledOnTouchOutside(true);
+                Window window = dlg.getWindow();
+                WindowManager.LayoutParams wlp = window.getAttributes();
+                wlp.gravity = Gravity.BOTTOM;
+//                dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                window.setAttributes(wlp);
+                dlg.show();
+            }
         }
     }
 
@@ -1188,35 +1256,10 @@ public class Game implements Parcelable {
         return tmpStrPlain;
     }
 
-    public void replayGame(byte[][] abstractBoard, BoardView boardView) {
+    public void replayGame(BoardView boardView) {
         if (mMovesList == null) {
             return;
         }
-//        if (getGameType().equals("Gomoku")) {
-//            boardView.setBackgroundColor(boardView.gomokuColor);
-//            replayGomokuGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("Pente")) {
-//            boardView.setBackgroundColor(boardView.penteColor);
-//            replayPenteGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("Boat-Pente")) {
-//            boardView.setBackgroundColor(boardView.boatPenteColor);
-//            replayPenteGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("Keryo-Pente")) {
-//            boardView.setBackgroundColor(boardView.keryoPenteColor);
-//            replayKeryoPenteGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("Connect6")) {
-//            boardView.setBackgroundColor(boardView.connect6Color);
-//            replayConnect6Game(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("G-Pente")) {
-//            boardView.setBackgroundColor(boardView.gPenteColor);
-//            replayGPenteGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("Poof-Pente")) {
-//            boardView.setBackgroundColor(boardView.poofPenteColor);
-//            replayPoofPenteGame(abstractBoard, mMovesList.size());
-//        } else if (getGameType().equals("D-Pente")) {
-//            boardView.setBackgroundColor(boardView.dPenteColor);
-//            replayPenteGame(abstractBoard, mMovesList.size());
-//        }
 
         this.untilMove = this.mMovesList.size();
         replayGameUntilMove(abstractBoard, boardView);
@@ -1225,7 +1268,7 @@ public class Game implements Parcelable {
             boardView.invalidate();
             if (mGameType.equals("Pente") && mOpponentName.equals("computer")) {
 //                System.out.println("what white: " + whiteCaptures + " black: " + blackCaptures + " pente? " + detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1)));
-                if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+                if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
                     boolean iWon = false;
                     mActive = false;
                     int myColor = (mMyColor.contains("white")?1:2);
@@ -1257,6 +1300,7 @@ public class Game implements Parcelable {
         }
 
     }
+
     private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
     public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
         if (mMovesList == null) {
@@ -1264,31 +1308,34 @@ public class Game implements Parcelable {
         }
         if (getGameType().equals("Gomoku") || getGameType().equals("Speed Gomoku")) {
             boardView.setBackgroundColor(boardView.gomokuColor);
-            replayGomokuGame(abstractBoard, untilMove);
+            replayGomokuGame(untilMove);
         } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
-            replayPenteGame(abstractBoard, untilMove);
+            replayPenteGame(untilMove);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
-            replayPenteGame(abstractBoard, untilMove);
+            replayPenteGame(untilMove);
         } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
-            replayKeryoPenteGame(abstractBoard, untilMove);
+            replayKeryoPenteGame(untilMove);
         } else if (getGameType().equals("Connect6") || getGameType().equals("Speed Connect6")) {
             boardView.setBackgroundColor(boardView.connect6Color);
-            replayConnect6Game(abstractBoard, untilMove);
+            replayConnect6Game(untilMove);
         } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
-            replayGPenteGame(abstractBoard, untilMove);
+            replayGPenteGame(untilMove);
         } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
-            replayPoofPenteGame(abstractBoard, untilMove);
+            replayPoofPenteGame(untilMove);
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
-            replayPenteGame(abstractBoard, untilMove);
+            replayPenteGame(untilMove);
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
-            replayKeryoPenteGame(abstractBoard, untilMove);
+            replayKeryoPenteGame(untilMove);
+        } else if (getGameType().equals("Go") || getGameType().equals("Speed Go")) {
+            boardView.setBackgroundColor(boardView.goColor);
+            replayGoGame(untilMove);
         }
 
         movesString = "";
@@ -1305,14 +1352,20 @@ public class Game implements Parcelable {
                         movesString += "-";
                     }
                 }
-                movesString += coordinateLetters[mMovesList.get(i) % 19] + "" + (19 - (mMovesList.get(i) / 19));
+                int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+                movesString += coordinateLetters[moveJ] + "" + (19 - (moveI));
             }
         } else {
             for (int i = 0; i < Math.min(mMovesList.size(), untilMove); i++) {
                 if (i%2 == 0) {
                     movesString += "<b>" + (i/2 + 1) + ".</b> ";
                 }
-                movesString += coordinateLetters[mMovesList.get(i) % 19] + "" + (19 - (mMovesList.get(i) / 19)) + " ";
+                int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+                if (move == 361) {
+                    movesString += "PASS ";
+                } else {
+                    movesString += coordinateLetters[moveJ] + "" + (19 - (moveI)) + " ";
+                }
                 if (i%2 == 0) {
                     movesString += "- ";
                 } else {
@@ -1335,32 +1388,35 @@ public class Game implements Parcelable {
         }
     }
 
-    public void replayGame(byte[][] abstractBoard, byte moveI, byte moveJ, BoardView boardView) {
+    public void replayGame(byte moveI, byte moveJ, BoardView boardView) {
         if (mMovesList == null) {
             return;
         }
 
         if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
-            replayPenteGame(abstractBoard, moveI, moveJ);
+            replayPenteGame(moveI, moveJ);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
-            replayPenteGame(abstractBoard, moveI, moveJ);
+            replayPenteGame(moveI, moveJ);
         } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
-            replayKeryoPenteGame(abstractBoard, moveI, moveJ);
+            replayKeryoPenteGame(moveI, moveJ);
         } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
-            replayPenteGame(abstractBoard, moveI, moveJ);
+            replayPenteGame(moveI, moveJ);
         } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
-            replayPoofPenteGame(abstractBoard, moveI, moveJ);
+            replayPoofPenteGame(moveI, moveJ);
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
-            replayPenteGame(abstractBoard, moveI, moveJ);
+            replayPenteGame(moveI, moveJ);
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
-            replayKeryoPenteGame(abstractBoard, moveI, moveJ);
+            replayKeryoPenteGame(moveI, moveJ);
+        } else if (getGameType().equals("Go") || getGameType().equals("Speed Go")) {
+            boardView.setBackgroundColor(boardView.goColor);
+            replayGoGame(moveI, moveJ);
         }
 
         if (boardView != null) {
@@ -1370,7 +1426,8 @@ public class Game implements Parcelable {
     }
 
 
-    private void resetAbstractBoard(byte[][] abstractBoard) {
+
+    private void resetAbstractBoard() {
         whiteCaptures = 0;
         blackCaptures = 0;
         for (int i = 0; i < 19; i++) {
@@ -1380,20 +1437,22 @@ public class Game implements Parcelable {
         }
     }
 
-    private void replayGomokuGame(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayGomokuGame(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
         }
     }
 
-    private void replayPenteGame(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayPenteGame(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
             for( int i = 7; i < 12; ++i) {
@@ -1405,7 +1464,7 @@ public class Game implements Parcelable {
             }
         }
         if (mOpponentName.equals("computer") && mGameType.equals("Pente")) {
-            if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+            if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
 //                for (int i = 0; i < 19; i++) {
 //                    for (int j = 0; j < 19; j++) {
 //                        System.out.print(abstractBoard[i][j]);
@@ -1416,26 +1475,28 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void replayPenteGame(byte[][] abstractBoard, byte moveI, byte moveJ) {
-        resetAbstractBoard(abstractBoard);
+    private void replayPenteGame(byte moveI, byte moveJ) {
+        resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            abstractBoard[mvI][mvJ] = color;
+            detectPenteCapture(mvI, mvJ, color);
         }
         byte color = (byte) (1 + (mMovesList.size()%2));
         abstractBoard[moveI][moveJ] = color;
 //        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + color);
-        detectPenteCapture(abstractBoard, moveI, moveJ, color);
+        detectPenteCapture(moveI, moveJ, color);
     }
 
-    private void replayKeryoPenteGame(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayKeryoPenteGame(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
-            detectKeryoPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
+            detectKeryoPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
             for( int i = 7; i < 12; ++i) {
@@ -1447,34 +1508,37 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void replayKeryoPenteGame(byte[][] abstractBoard, byte moveI, byte moveJ) {
-        resetAbstractBoard(abstractBoard);
+    private void replayKeryoPenteGame(byte moveI, byte moveJ) {
+        resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
-            detectKeryoPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            abstractBoard[mvI][mvJ] = color;
+            detectPenteCapture(mvI, mvJ, color);
+            detectKeryoPenteCapture(mvI, mvJ, color);
         }
         byte color = (byte) (1 + (mMovesList.size()%2));
         abstractBoard[moveI][moveJ] = color;
-        detectPenteCapture(abstractBoard, moveI, moveJ, color);
-        detectKeryoPenteCapture(abstractBoard, moveI, moveJ, color);
+        detectPenteCapture(moveI, moveJ, color);
+        detectKeryoPenteCapture(moveI, moveJ, color);
     }
 
-    private void replayConnect6Game(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayConnect6Game(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
         }
     }
 
-    private void replayGPenteGame(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayGPenteGame(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
         }
         if (mMovesList.size() == 2) {
             for(byte i = 7; i < 12; i++) {
@@ -1501,13 +1565,14 @@ public class Game implements Parcelable {
         }
     }
 
-    private void replayPoofPenteGame(byte[][] abstractBoard, int until) {
-        resetAbstractBoard(abstractBoard);
+    private void replayPoofPenteGame(int until) {
+        resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPoof(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
+            detectPoof(moveI, moveJ, color);
+            detectPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
             for( int i = 7; i < 12; ++i) {
@@ -1519,22 +1584,23 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void replayPoofPenteGame(byte[][] abstractBoard, byte moveI, byte moveJ) {
-        resetAbstractBoard(abstractBoard);
+    private void replayPoofPenteGame(byte moveI, byte moveJ) {
+        resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
             byte color = (byte) (1 + (i%2));
-            abstractBoard[mMovesList.get(i) % 19][(int) (mMovesList.get(i) / 19)] = color;
-            detectPoof(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
-            detectPenteCapture(abstractBoard, mMovesList.get(i) % 19, (int) (mMovesList.get(i) / 19), color);
+            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            abstractBoard[mvI][mvJ] = color;
+            detectPoof(mvI, mvJ, color);
+            detectPenteCapture(mvI, mvJ, color);
         }
         byte color = (byte) (1 + (mMovesList.size()%2));
         abstractBoard[moveI][moveJ] = color;
-        detectPoof(abstractBoard, moveI, moveJ, color);
-        detectPenteCapture(abstractBoard, moveI, moveJ, color);
+        detectPoof(moveI, moveJ, color);
+        detectPenteCapture(moveI, moveJ, color);
     }
 
 
-    private void detectPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
+    private void detectPenteCapture(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
         if ((i-3) > -1) {
             if (abstractBoard[i-3][j] == myColor) {
@@ -1641,7 +1707,7 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void detectKeryoPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
+    private void detectKeryoPenteCapture(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
         if ((i-4) > -1) {
             if (abstractBoard[i-4][j] == myColor) {
@@ -1756,7 +1822,7 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void detectPoof(byte[][] abstractBoard, int i, int j, byte myColor) {
+    private void detectPoof(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
         boolean poofed = false;
         if (((i-2) > -1) && ((i+1) < 19)) {
@@ -1882,10 +1948,10 @@ public class Game implements Parcelable {
     }
 
 
-    private boolean detectPente(byte[][] abstractBoard, byte color, int rowCol) {
+    private boolean detectPente(byte color, int rowCol) {
         boolean pente = false;
         int penteCounter = 1;
-        int row = rowCol % 19, col = rowCol / 19, i, j;
+        int row = rowCol / 19, col = rowCol % 19, i, j;
 //        System.out.println("row: " + row + " column: " + col + " color: " + color);
         i = row - 1;
         j = col;
@@ -1999,6 +2065,647 @@ public class Game implements Parcelable {
         return pente;
     }
 
+
+
+    private int getPosition(int move) {
+        int i = move/gridSize, j = move%gridSize;
+        return abstractBoard[i][j];
+    }
+
+    private void setPosition(int move, int val) {
+        int i = move/gridSize, j = move%gridSize;
+        abstractBoard[i][j] = (byte) val;
+    }
+    private int getPosition(int i, int j) {
+        return abstractBoard[i][j];
+    }
+
+    private void setPosition(int i, int j, int val) {
+        abstractBoard[i][j] = (byte) val;
+    }
+
+
+
+
+
+    private HashMap<Integer,HashMap<Integer, List<Integer>>> groupsByPlayerAndID;
+    private HashMap<Integer,HashMap<Integer, Integer>> stoneGroupIDsByPlayer;
+    private int koMove = -1;
+    private List<Integer> deadStones;
+    private HashMap<Integer, List<Integer>> goTerritoryByPlayer;
+    private HashMap<Integer, List<Integer>> goDeadStonesByPlayer;
+
+    public HashMap<Integer, HashMap<Integer, List<Integer>>> getGroupsByPlayerAndID() { return groupsByPlayerAndID; }
+    public HashMap<Integer, HashMap<Integer, Integer>> getStoneGroupIDsByPlayer() { return stoneGroupIDsByPlayer; }
+    public HashMap<Integer, List<Integer>> getGoDeadStonesByPlayer() { return goDeadStonesByPlayer; }
+    public HashMap<Integer, List<Integer>> getGoTerritoryByPlayer() { return goTerritoryByPlayer; }
+
+    private int gridSize = 19;
+    private int passMove = 361;
+
+    private boolean go, goMarkStones, goEvaluateDeadStones;
+
+    public boolean isGo() { return go; }
+    public boolean isGoMarkStones() { return goMarkStones; }
+    public boolean isGoEvaluateDeadStones() { return goEvaluateDeadStones; }
+
+
+    private void initGo() {
+        whiteCaptures = 0;
+        blackCaptures = 0;
+        this.groupsByPlayerAndID = new HashMap<>();
+        this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
+        this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
+        this.stoneGroupIDsByPlayer = new HashMap<>();
+        this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
+        this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
+        this.koMove = -1;
+        this.goDeadStonesByPlayer = new HashMap<>();
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        goTerritoryByPlayer = new HashMap<Integer, List<Integer>>();
+        goTerritoryByPlayer.put(1, new ArrayList<Integer>());
+        goTerritoryByPlayer.put(2, new ArrayList<Integer>());
+    }
+
+    private void replayGoGame(int until) {
+        resetAbstractBoard();
+        initGo();
+        boolean suicideAllowed = false, hasPass = false, doublePass = false;
+        for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
+//            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
+            int move = mMovesList.get(i);
+            if (move == passMove) {
+                if (hasPass) {
+                    doublePass = true;
+                } else {
+                    hasPass = true;
+                }
+            } else {
+                hasPass = false;
+            }
+
+            if (doublePass) {
+                if (0 <= move && move < passMove) {
+                    if (getPosition(move) == 1) {
+                        goDeadStonesByPlayer.get(2).add(move);
+                    } else if (getPosition(move) == 2) {
+                        goDeadStonesByPlayer.get(1).add(move);
+                    }
+                    setPosition(move, 0);
+                }
+            } else {
+                int currentPlayer = 1 + i%2;
+                int color = 3 - currentPlayer;
+                if (0 <= move && move < passMove) {
+                    setPosition(move, color);
+
+                    Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                    Map<Integer, Integer> stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                    settleGroups(move, groupsByID, stoneGroupIDs);
+
+                    int opponent = 3 - currentPlayer;
+                    groupsByID = getGroupsByPlayerAndID().get(opponent);
+                    stoneGroupIDs = getStoneGroupIDsByPlayer().get(opponent);
+                    makeCaptures(move, groupsByID, stoneGroupIDs);
+
+                    if (suicideAllowed) {
+                        groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                        stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                        int moveGroupID = stoneGroupIDs.get(move);
+                        List<Integer> moveGroup = groupsByID.get(moveGroupID);
+                        if (!groupHasLiberties(moveGroup)) {
+                            captureGroup(moveGroupID, groupsByID, stoneGroupIDs);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private void replayGoGame(byte moveI, byte moveJ) {
+        resetAbstractBoard();
+        initGo();
+        boolean suicideAllowed = false, hasPass = false, doublePass = false;
+        for (int i = 0; i < mMovesList.size(); i++) {
+            int move = mMovesList.get(i);
+            if (move == passMove) {
+                if (hasPass) {
+                    doublePass = true;
+                } else {
+                    hasPass = true;
+                }
+            } else {
+                hasPass = false;
+            }
+
+            if (doublePass) {
+                if (0 <= move && move < passMove) {
+                    if (getPosition(move) == 1) {
+                        goDeadStonesByPlayer.get(2).add(move);
+                    } else if (getPosition(move) == 2) {
+                        goDeadStonesByPlayer.get(1).add(move);
+                    }
+                    setPosition(move, 0);
+                }
+            } else {
+                int currentPlayer = 1 + i%2;
+                int color = 3 - currentPlayer;
+                if (0 <= move && move < passMove) {
+                    setPosition(move, color);
+
+                    Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                    Map<Integer, Integer> stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                    settleGroups(move, groupsByID, stoneGroupIDs);
+
+                    int opponent = 3 - currentPlayer;
+                    groupsByID = getGroupsByPlayerAndID().get(opponent);
+                    stoneGroupIDs = getStoneGroupIDsByPlayer().get(opponent);
+                    makeCaptures(move, groupsByID, stoneGroupIDs);
+
+                    if (suicideAllowed) {
+                        groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                        stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                        int moveGroupID = stoneGroupIDs.get(move);
+                        List<Integer> moveGroup = groupsByID.get(moveGroupID);
+                        if (!groupHasLiberties(moveGroup)) {
+                            captureGroup(moveGroupID, groupsByID, stoneGroupIDs);
+                        }
+                    }
+                }
+            }
+        }
+        int move = moveI*19+moveJ;
+        if (doublePass) {
+            if (0 <= move && move < passMove) {
+                if (getPosition(move) == 1) {
+                    goDeadStonesByPlayer.get(2).add(move);
+                } else if (getPosition(move) == 2) {
+                    goDeadStonesByPlayer.get(1).add(move);
+                }
+                setPosition(move, 0);
+            }
+        } else {
+            int currentPlayer = 1 + getMovesList().size()%2;
+            int color = 3 - currentPlayer;
+            if (0 <= move && move < passMove) {
+                setPosition(move, color);
+
+                Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                Map<Integer, Integer> stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                settleGroups(move, groupsByID, stoneGroupIDs);
+
+                int opponent = 3 - currentPlayer;
+                groupsByID = getGroupsByPlayerAndID().get(opponent);
+                stoneGroupIDs = getStoneGroupIDsByPlayer().get(opponent);
+                makeCaptures(move, groupsByID, stoneGroupIDs);
+
+                if (suicideAllowed) {
+                    groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+                    stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+                    int moveGroupID = stoneGroupIDs.get(move);
+                    List<Integer> moveGroup = groupsByID.get(moveGroupID);
+                    if (!groupHasLiberties(moveGroup)) {
+                        captureGroup(moveGroupID, groupsByID, stoneGroupIDs);
+                    }
+                }
+            }
+        }
+    }
+
+//    public void addGoMove(int move) {
+//
+//        boolean suicideAllowed = false;
+//
+////        if (containsDoublePass() > -1) {
+////
+////            i
+////            deadStones.add(move);
+////
+////        } else {
+//
+//            int currentPlayer = 1 + mMovesList.size()%2;
+//            int color = 3 - currentPlayer;
+//            mMovesList.add(move);
+//            setPosition(move, color);
+//
+//            if (0 <= move && move < passMove) {
+//
+//                Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+//                Map<Integer, Integer> stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+//                settleGroups(move, groupsByID, stoneGroupIDs);
+//
+//                int opponent = 3 - currentPlayer;
+//                groupsByID = getGroupsByPlayerAndID().get(opponent);
+//                stoneGroupIDs = getStoneGroupIDsByPlayer().get(opponent);
+//                makeCaptures(move, groupsByID, stoneGroupIDs);
+//
+//                if (suicideAllowed) {
+//                    groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+//                    stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+//                    int moveGroupID = stoneGroupIDs.get(move);
+//                    List<Integer> moveGroup = groupsByID.get(moveGroupID);
+//                    if (!groupHasLiberties(moveGroup)) {
+//                        captureGroup(moveGroupID, groupsByID, stoneGroupIDs);
+//                    }
+//                }
+//            }
+//
+////        }
+//    }
+//
+
+
+    private void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        int captures = 0;
+//        int gridSize = 19;
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (captures != 1) {
+            koMove = -1;
+        }
+//        this.captures[capturer] += captures;
+    }
+
+    private int getCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs, int captures, int neighborStone, Integer neighborStoneGroupID) {
+        if (neighborStoneGroupID != null) {
+            List<Integer> neighborStoneGroup = groupsByID.get(neighborStoneGroupID);
+            if (!groupHasLiberties(neighborStoneGroup)) {
+                if (koMove < 0 && neighborStoneGroup.size() == 1 && checkKo(move)) {
+                    koMove = neighborStone;
+                } else {
+                    koMove = -1;
+                }
+                captures += neighborStoneGroup.size();
+                captureGroup(neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        return captures;
+    }
+
+    private boolean checkKo(int move) {
+        int position = getPosition(move);
+//        int gridSize = 19;
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void captureGroup(int groupID, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        List<Integer> group = groupsByID.get(groupID);
+//        int capturer = 0;
+        if (group.size() > 0) {
+//            capturer = 3 - getPosition(group.get(0));
+            int pos = getPosition(group.get(0));
+            if (pos == 1) {
+                whiteCaptures += group.size();
+            } else if (pos == 2) {
+                blackCaptures += group.size();
+            }
+        }
+        for (int stone: group) {
+//            captureMove(stone, capturer);
+            setPosition(stone, 0);
+            stoneGroupIDs.remove(stone);
+        }
+        groupsByID.remove(groupID);
+    }
+
+    private boolean groupHasLiberties(List<Integer> group) {
+        for (int stone: group) {
+            if (stoneHasLiberties(stone)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean stoneHasLiberties(int stone) {
+        int gridSize = 19;
+        if (stone%gridSize != 0) {
+            int neighborStone = stone - 1;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone%gridSize != gridSize - 1) {
+            int neighborStone = stone + 1;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone/gridSize != 0) {
+            int neighborStone = stone - gridSize;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone/gridSize != gridSize - 1) {
+            int neighborStone = stone + gridSize;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void settleGroups(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        List<Integer> newGroup = new ArrayList<>();
+        newGroup.add(move);
+        groupsByID.put(move, newGroup);
+        stoneGroupIDs.put(move, move);
+        int gridSize = 19;
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(move, neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+    }
+
+    private void mergeGroups(int group1, int group2, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        if (group1 == group2) {
+            return;
+        }
+        List<Integer> oldGroup, newGroup;
+        int oldGroupID, newGroupID;
+        if (group1 < group2) {
+            oldGroup = groupsByID.get(group1);
+            newGroup = groupsByID.get(group2);
+            oldGroupID = group1;
+            newGroupID = group2;
+        } else {
+            oldGroup = groupsByID.get(group2);
+            newGroup = groupsByID.get(group1);
+            oldGroupID = group2;
+            newGroupID = group1;
+        }
+        groupsByID.remove(oldGroupID);
+        newGroup.addAll(oldGroup);
+        for (int oldStone: oldGroup) {
+            stoneGroupIDs.put(oldStone, newGroupID);
+        }
+    }
+
+//    private List<Integer> getGroupWithoutMerge(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+//        List<Integer> newGroup = new ArrayList<>();
+//        newGroup.add(move);
+//        int gridSize = 19;
+//        if (move%gridSize != 0) {
+//            int neighborStone = move - 1;
+//            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+//            if (neighborStoneGroupID != null) {
+//                newGroup.addAll(groupsByID.get(neighborStoneGroupID));
+//            }
+//        }
+//        if (move%gridSize != gridSize - 1) {
+//            int neighborStone = move + 1;
+//            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+//            if (neighborStoneGroupID != null) {
+//                newGroup.addAll(groupsByID.get(neighborStoneGroupID));
+//            }
+//        }
+//        if (move/gridSize != 0) {
+//            int neighborStone = move - gridSize;
+//            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+//            if (neighborStoneGroupID != null) {
+//                newGroup.addAll(groupsByID.get(neighborStoneGroupID));
+//            }
+//        }
+//        if (move/gridSize != gridSize - 1) {
+//            int neighborStone = move + gridSize;
+//            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+//            if (neighborStoneGroupID != null) {
+//                newGroup.addAll(groupsByID.get(neighborStoneGroupID));
+//            }
+//        }
+//        return newGroup;
+//    }
+
+    private void captureMove(int move, int capturePlayer) {
+        setPosition(move, 0);
+    }
+//    public void undoMove() {
+//        gridState.clear();
+//
+//        init();
+//        for (int move: gridState.getMoves()) {
+//            addMove(move);
+//        }
+//    }
+
+    private int getEmptyNeighbour(int move) {
+        int gridSize = 19;
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        return -1;
+    }
+    private void floodFillWorker(int move, int value) {
+        setPosition(move, value);
+        int neighbourStone = getEmptyNeighbour(move);
+        while (neighbourStone != -1) {
+            floodFillWorker(neighbourStone, value);
+            neighbourStone = getEmptyNeighbour(move);
+        }
+    }
+    private List<Integer> floodFill(int player) {
+        Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(player);
+        for (List<Integer> group: groupsByID.values()) {
+            for (int move: group) {
+                int neighbourStone = getEmptyNeighbour(move);
+                while (neighbourStone != -1) {
+                    floodFillWorker(neighbourStone, player + 2);
+                    neighbourStone = getEmptyNeighbour(move);
+                }
+            }
+        }
+        List<Integer> floodedTerritory = new ArrayList<>();
+        for (int i = 0; i < passMove; i++) {
+            int val = getPosition(i);
+            if (val == player + 2) {
+                floodedTerritory.add(i);
+            }
+        }
+        return floodedTerritory;
+    }
+    private void resetGoBeforeFlood() {
+        int gridSize = 19;
+        for (int i = 0; i < gridSize; i++ ) {
+            for (int j = 0; j < gridSize; j++ ) {
+                int pos = getPosition(i,j);
+                if (pos != 1 && pos != 2) {
+                    setPosition(i,j,0);
+                }
+            }
+        }
+    }
+    public List<Integer> getMovesForValue(int val) {
+        List<Integer> results = new ArrayList<>();
+        int gridSize = 19;
+        for (int j = 0; j < gridSize; j++) {
+            for (int i = 0; i < gridSize; i++) {
+                if (getPosition(i,j) == val) {
+                    results.add(j*19+i);
+                }
+            }
+        }
+        return results;
+    }
+    public void getTerritories() {
+        goTerritoryByPlayer = new HashMap<Integer, List<Integer>>();
+        floodFill(1);
+        List<Integer> p1Territory = getMovesForValue(3);
+        resetGoBeforeFlood();
+        floodFill(2);
+        List<Integer> p2Territory = getMovesForValue(4);
+        resetGoBeforeFlood();
+
+        int i = p1Territory.size()-1, j = p2Territory.size()-1;
+
+        while (i>-1 && j>-1) {
+            int p1Stone = p1Territory.get(i), p2Stone = p2Territory.get(j);
+            if (p1Stone == p2Stone) {
+                p1Territory.remove(i);
+                p2Territory.remove(j);
+                --i;
+                --j;
+            } else if (p1Stone>p2Stone) {
+                --i;
+            } else {
+                --j;
+            }
+        }
+
+        goTerritoryByPlayer.put(1, p1Territory);
+        goTerritoryByPlayer.put(2, p2Territory);
+    }
+    private int containsDoublePass() {
+        boolean hasPass = false;
+        for (int i = 0; i < mMovesList.size() ; i++) {
+            int move = mMovesList.get(i);
+            if (move == passMove) {
+                if (hasPass) {
+                    return i;
+                } else {
+                    hasPass = true;
+                }
+            } else {
+                hasPass = false;
+            }
+        }
+        return -1;
+    }
+
+    public void processDeadStone(int move) {
+        int i = move/19, j = move%19;
+        int pos = abstractBoard[i][j];
+        if (pos == 0) {
+            if (goDeadStonesByPlayer.get(1).remove(Integer.valueOf(move))) {
+                abstractBoard[i][j] = 2;
+            }
+            if (goDeadStonesByPlayer.get(2).remove(Integer.valueOf(move))) {
+                abstractBoard[i][j] = 1;
+            }
+        } else if (pos == 1) {
+            getGoDeadStonesByPlayer().get(2).add(move);
+            abstractBoard[i][j] = 0;
+        } else if (pos == 2) {
+            getGoDeadStonesByPlayer().get(1).add(move);
+            abstractBoard[i][j] = 0;
+        }
+        getTerritories();
+    }
 
 }
 

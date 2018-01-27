@@ -46,32 +46,16 @@ public class BoardView extends View {
             keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
-            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500");
+            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
+            goColor = Color.parseColor("#FAC832");
     private Paint blackPaint =  makePaint(blackColor), whitePaint = makePaint(whiteColor), pentePaint = makePaint(penteColor),
             keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
             dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
             poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
             boatPentePaint = makePaint(boatPenteColor), dkeryoPaint = makePaint(dkeryoColor),
-            shadowPaint = makePaint(Color.BLACK);
-    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+            goPaint = makePaint(goColor), shadowPaint = makePaint(Color.BLACK);
+    public byte abstractBoard[][];
+
     private float size;
     private float scaling = 1;
     private float translateX = 0, translateY = 0, stoneX, stoneY;
@@ -97,13 +81,14 @@ public class BoardView extends View {
 
     private TextView textView = null;
 
-    private String submitStr;
+    private String submitStr, passStr;
 
     public Game getGame() {
         return game;
     }
     public void setGame(Game game) {
         this.game = game;
+        abstractBoard = game.abstractBoard;
 //        this.game.parseGame(this);
     }
 
@@ -138,6 +123,7 @@ public class BoardView extends View {
         translateX = 0;
         translateY = 0;
         submitStr = context.getString(R.string.submit);
+        passStr = context.getString(R.string.pass);
 //        mDetector = new GestureDetectorCompat(context, new MyGestureListener());
     }
 
@@ -154,14 +140,7 @@ public class BoardView extends View {
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
             if (!game.isConnect6() && !game.isGomoku()) {
                 ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures);
-//                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle(getCapturesString());
             }
-//            parentLayout.setSupportActionBar(toolbar);
-//            if (!game.isConnect6()) {
-//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
-//            } else {
-//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
-//            }
             if (scaling == 1) {
                 if (textView == null) {
                     textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
@@ -178,12 +157,10 @@ public class BoardView extends View {
                 setTextViewHTML(textView, str);
             }
 
-//            if (game.dPenteChoice && !game.isActive()) {
             if (game.dPenteChoice && game.isActive() && !dPenteChosen) {
 //                System.out.println("kitten here");
                 ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).setVisibility(VISIBLE);
                 ((LinearLayout) parentLayout.findViewById(R.id.submitLayout)).setVisibility(INVISIBLE);
-//                ((TextView) parentLayout.findViewById(R.id.capturesLabel)).setVisibility(GONE);
                 return;
             }
             if (!game.isActive()) {
@@ -191,7 +168,6 @@ public class BoardView extends View {
             }
         }
         if (playedMove == -1) {
-//            playedMove = -1;
             return;
         }
 
@@ -209,6 +185,12 @@ public class BoardView extends View {
                 myColor = (byte) 2;
             } else {
                 myColor = (byte) 1;
+            }
+        } else if (game != null && game.isGo() && game.getMovesList() != null) {
+            if (game.isGoMarkStones()) {
+                myColor = 3;
+            } else {
+                myColor = (byte) (2 - game.getMovesList().size()%2);
             }
         } else if (game != null && game.getMovesList() != null) {
             myColor = (byte) (game.getMovesList().size()%2 + 1);
@@ -243,13 +225,13 @@ public class BoardView extends View {
         }
         playedMove = -1;
         stoneX = x;
-        stoneI = (byte) (19*stoneX/size);
+        stoneJ = (byte) (19*stoneX/size);
         stoneY = y;
-        stoneJ = (byte) (19*stoneY/size);
+        stoneI = (byte) (19*stoneY/size);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                if (!replayed) {
-                    game.replayGame(abstractBoard, BoardView.this);
+                if (!replayed && !game.isGoMarkStones()) {
+                    game.replayGame( BoardView.this);
                     replayed = true;
                 }
                 scaling = 2;
@@ -269,8 +251,18 @@ public class BoardView extends View {
                 break;
         }
 
-        if (game.isActive() && abstractBoard[stoneI][stoneJ] == 0) {
-            playedMove = 19*stoneJ + stoneI;
+        String str;
+        playedMove = 19*stoneI + stoneJ;
+        if (game.isActive()) {
+            if (game.isGoMarkStones()) {
+                if (!(abstractBoard[stoneI][stoneJ] != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
+                    playedMove = -1;
+                }
+            } else if (abstractBoard[stoneI][stoneJ] != 0) {
+                playedMove = -1;
+            }
+        } else {
+            playedMove = -1;
         }
         if (scaling == 1) {
             if (game.isConnect6() && connect6Move1 == -1) {
@@ -288,54 +280,68 @@ public class BoardView extends View {
                 }
             }
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            if (playedMove == -1 || abstractBoard[stoneI][stoneJ] != 0) {
-                ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr);
+            if (!game.isGoMarkStones() && (playedMove == -1 || abstractBoard[stoneI][stoneJ] != 0)) {
+                if (game.isGo()) {
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(passStr);
+                } else {
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr);
+                }
                 if (!replayed && game.getMovesList() != null) {
-                    System.out.println(" fuck kitty");
-                    game.replayGame(abstractBoard, this);
+//                    System.out.println(" fuck kitty");
+                    game.replayGame( this);
                     replayed = true;
                 }
                 if (game.isConnect6() && connect6Move1 > -1) {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
-                                    "-...");
+                    str = submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                            "-...";
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                 }
-            } else if (playedMove > -1){
+            } else if (!game.isGoMarkStones() && playedMove > -1){
                 if (game.isConnect6()) {
                     if (connect6Move1 > -1) {
                         if (playedMove > -1 && playedMove != connect6Move1) {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
-                                    "-" + coordinateLetters[stoneI] + "" + (19 - stoneJ));
+                            str = submitStr+": " + coordinateLetters[connect6Move1%19] + "" + (19 - (connect6Move1/19)) +
+                                    "-" + coordinateLetters[stoneJ] + "" + (19 - stoneI);
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         } else {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[stoneI] + "" + (19 - stoneJ) +
-                                    "-...");
+                            str = submitStr+": " + coordinateLetters[stoneJ] + "" + (19 - stoneI) +
+                                    "-...";
+                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         }
                     }
                 } else if (game.isDPente() && game.getMovesList().size() == 0) {
                     if (dPenteMove4 > -1) {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
                                 "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
                                 "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
-                                "-" + coordinateLetters[dPenteMove4 % 19] + "" + (19 - (dPenteMove4 / 19)));
+                                "-" + coordinateLetters[dPenteMove4 % 19] + "" + (19 - (dPenteMove4 / 19));
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (dPenteMove3 > -1) {
-                            ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
-                                    "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
-                                    "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)) +
-                                    "-...");
-                    } else if (dPenteMove2 > -1) {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                        str = submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
                                 "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
-                                "-...");
+                                "-" + coordinateLetters[dPenteMove3%19] + "" + (19 - (dPenteMove3/19)) +
+                                "-...";
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
+                    } else if (dPenteMove2 > -1) {
+                        str = submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                "-" + coordinateLetters[dPenteMove2%19] + "" + (19 - (dPenteMove2/19)) +
+                                "-...";
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else {
-                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
-                                "-...");
+                        str = submitStr+": " + coordinateLetters[dPenteMove1%19] + "" + (19 - (dPenteMove1/19)) +
+                                "-...";
+                        ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
                 } else if (game.isDPente() && game.dPenteChoice && ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).getVisibility()==VISIBLE) {
                     playedMove = -1;
                 } else {
-                    game.replayGame(abstractBoard, stoneI, stoneJ, this);
+                    game.replayGame(stoneI, stoneJ, this);
                     replayed = false;
-                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(submitStr+": " + coordinateLetters[stoneI] + "" + (19 - stoneJ));
+                    str = submitStr+": " + coordinateLetters[stoneJ] + "" + (19 - stoneI);
+                    ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                 }
+            } else if (game.isGoMarkStones() && playedMove > -1) {
+                game.processDeadStone(playedMove);
             }
         }
 
@@ -355,11 +361,25 @@ public class BoardView extends View {
             canvas.drawLine(margin + step*i, margin, margin + step*i, size - margin, linePaint);
             canvas.drawLine(margin, margin + step*i, size - margin, margin + step*i, linePaint);
         }
-        canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
+        if (game != null && game.isGo()) {
+            linePaint.setStyle(Paint.Style.FILL);
+            float radius = margin/3;
+            canvas.drawCircle(margin + 3*step, margin + 3*step, radius, linePaint);
+            canvas.drawCircle( margin + 3*step, size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( margin + 3*step, size/2, radius, linePaint);
+            canvas.drawCircle(size/2, margin + 3*step, radius, linePaint);
+            canvas.drawCircle( size/2, size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( size/2, size/2, radius, linePaint);
+            canvas.drawCircle(size - (margin + 3*step), margin + 3*step, radius, linePaint);
+            canvas.drawCircle( size - (margin + 3*step), size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( size - (margin + 3*step), size/2, radius, linePaint);
+        } else {
+            canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
+            canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
+            canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
+        }
         for ( byte i = 0; i < 19; i++ ) {
             for ( byte j = 0; j < 19; j++ ) {
                 drawStone(canvas, i, j, abstractBoard[i][j]);
@@ -367,17 +387,39 @@ public class BoardView extends View {
         }
         drawRedDot(canvas);
         if (game!= null) {
+            if (game.isGo()) {
+                for (int move: game.getGoDeadStonesByPlayer().get(1)) {
+                    byte movei = (byte) (move/19);
+                    byte movej = (byte) (move%19);
+                    drawStone(canvas, movei, movej, (byte) 4);
+                }
+                for (int move: game.getGoDeadStonesByPlayer().get(2)) {
+                    byte movei = (byte) (move/19);
+                    byte movej = (byte) (move%19);
+                    drawStone(canvas, movei, movej, (byte) 3);
+                }
+                for (int move: game.getGoTerritoryByPlayer().get(1)) {
+                    byte movei = (byte) (move/19);
+                    byte movej = (byte) (move%19);
+                    drawSquare(canvas, movei, movej, 2);
+                }
+                for (int move: game.getGoTerritoryByPlayer().get(2)) {
+                    byte movei = (byte) (move/19);
+                    byte movej = (byte) (move%19);
+                    drawSquare(canvas, movei, movej, 1);
+                }
+            }
             if (game.getMovesList() != null && game.isConnect6()) {
                 int i = game.getMovesList().size();
                 myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
                 if (connect6Move1 > -1) {
-                    byte movej = (byte) (connect6Move1/19);
-                    byte movei = (byte) (connect6Move1%19);
+                    byte movei = (byte) (connect6Move1/19);
+                    byte movej = (byte) (connect6Move1%19);
                     drawStone(canvas, movei, movej, myColor);
                 }
                 if (playedMove > -1 && playedMove != connect6Move1) {
-                    byte movej = (byte) (playedMove/19);
-                    byte movei = (byte) (playedMove%19);
+                    byte movei = (byte) (playedMove/19);
+                    byte movej = (byte) (playedMove%19);
                     drawStone(canvas, movei, movej, myColor);
                 }
             }
@@ -385,42 +427,42 @@ public class BoardView extends View {
                 int i = game.getMovesList().size();
                 myColor = (byte) (1 + (i%2));
                 if (playedMove > -1) {
-                    byte movej = (byte) (playedMove/19);
-                    byte movei = (byte) (playedMove%19);
+                    byte movei = (byte) (playedMove/19);
+                    byte movej = (byte) (playedMove%19);
                     drawStone(canvas, movei, movej, myColor);
                 }
             }
             if (game.isDPente()) {
                 if (dPenteMove2 > -1) {
-                    byte movej = (byte) (dPenteMove2/19);
-                    byte movei = (byte) (dPenteMove2%19);
+                    byte movei = (byte) (dPenteMove2/19);
+                    byte movej = (byte) (dPenteMove2%19);
                     drawStone(canvas, movei, movej, (byte) 2);
                 }
                 if (scaling == 1 && dPenteMove4 > -1) {
-                    byte movej = (byte) (dPenteMove4/19);
-                    byte movei = (byte) (dPenteMove4%19);
+                    byte movei = (byte) (dPenteMove4/19);
+                    byte movej = (byte) (dPenteMove4%19);
                     drawStone(canvas, movei, movej, (byte) 2);
                     if (!checkDPenteCapture()) {
                         if (dPenteMove1 > -1) {
-                            movej = (byte) (dPenteMove1/19);
-                            movei = (byte) (dPenteMove1%19);
+                            movei = (byte) (dPenteMove1/19);
+                            movej = (byte) (dPenteMove1%19);
                             drawStone(canvas, movei, movej, (byte) 1);
                         }
                         if (dPenteMove3 > -1) {
-                            movej = (byte) (dPenteMove3/19);
-                            movei = (byte) (dPenteMove3%19);
+                            movei = (byte) (dPenteMove3/19);
+                            movej = (byte) (dPenteMove3%19);
                             drawStone(canvas, movei, movej, (byte) 1);
                         }
                     }
                 } else {
                     if (dPenteMove1 > -1) {
-                        byte movej = (byte) (dPenteMove1/19);
-                        byte movei = (byte) (dPenteMove1%19);
+                        byte movei = (byte) (dPenteMove1/19);
+                        byte movej = (byte) (dPenteMove1%19);
                         drawStone(canvas, movei, movej, (byte) 1);
                     }
                     if (dPenteMove3 > -1) {
-                        byte movej = (byte) (dPenteMove3/19);
-                        byte movei = (byte) (dPenteMove3%19);
+                        byte movei = (byte) (dPenteMove3/19);
+                        byte movej = (byte) (dPenteMove3%19);
                         drawStone(canvas, movei, movej, (byte) 1);
                     }
                 }
@@ -444,14 +486,25 @@ public class BoardView extends View {
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
                     radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
-        } else {
+        } else if (stoneColor == 1){
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        } else if (stoneColor == 4) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+            stonePaint.setAlpha(180);
+        } else if (stoneColor == 3){
+            stonePaint.setShader(new RadialGradient(cgx,cgy,
+                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+            stonePaint.setAlpha(180);
         }
-        float shadowOffset = radius/5;
-        shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        shadowPaint.setAlpha(110);
-        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+
+        if (stoneColor < 3) {
+            float shadowOffset = radius/5;
+            shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            shadowPaint.setAlpha(110);
+            canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        }
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
     private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
@@ -466,9 +519,12 @@ public class BoardView extends View {
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
                     radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
-        } else {
+        } else if (stoneColor == 1) {
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        } else if (stoneColor == 3) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(250,125,125), Color.RED, Shader.TileMode.CLAMP));
         }
         float shadowOffset = radius/5;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -487,8 +543,28 @@ public class BoardView extends View {
         canvas.drawLine(0,cy,size,cy, linePaint);
         canvas.drawLine(cx,0,cx,size, linePaint);
     }
-    private void drawStone(Canvas canvas, byte i, byte j, byte stoneColor) {
+    private void drawStone(Canvas canvas, byte j, byte i, byte stoneColor) {
         drawStone(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+    }
+    private void drawSquare(Canvas canvas, byte i, byte j, int stoneColor) {
+        drawSquare(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+    }
+    private void drawSquare(Canvas canvas, float x, float y, int stoneColor) {
+        if (stoneColor < 1) {
+            return;
+        }
+        float width = size / 60;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38 - width/2, cy = (float) Math.floor(19*y/size)*size/19 + size/38 - width/2;
+        Paint stonePaint;
+        stonePaint = new Paint();
+        stonePaint.setStrokeWidth(1);
+        stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        if (stoneColor == 1) {
+            stonePaint.setColor(Color.WHITE);
+        } else if (stoneColor == 2) {
+            stonePaint.setColor(Color.BLACK);
+        }
+        canvas.drawRect(cx,cy,cx+width,cy+width, stonePaint);
     }
 
     private void drawRedDot(Canvas canvas) {

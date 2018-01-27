@@ -279,6 +279,13 @@
     <string name="all">all</string>
     <string name="turn_based_only">turn-based only</string>
     <string name="live_only">live only</string>
+    <string name="pass">PASS</string>
+    <string name="score">score</string>
+    <string name="scorestring">Black: %1$d + %2$d = %3$d \nWhite: 7.5 + %4$d + %5$d = %6$d.5</string>
+    <string name="reject">reject</string>
+    <string name="no_reminder">Don\'t remind me</string>
+    <string name="double_pass">Your opponent has made a pass as well. Mark all the dead stones and submit them to your opponent for consideration.</string>
+
 
 
 
@@ -304,6 +311,7 @@
         <item>Connect6</item>
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
+        <item>Go</item>
     </string-array>
     <string-array name="database_game_types_array">
         <item>Pente</item>

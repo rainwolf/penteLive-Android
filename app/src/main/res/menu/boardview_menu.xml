@@ -9,6 +9,12 @@
         style="@android:style/Widget.ActionButton"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/go_territory"
+        android:icon="@drawable/database"
+        android:title=""
+        style="@android:style/Widget.ActionButton"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/action_cancel_resign"
         android:icon="@drawable/ic_do_not_disturb"
         android:title="cancel game or resign"
