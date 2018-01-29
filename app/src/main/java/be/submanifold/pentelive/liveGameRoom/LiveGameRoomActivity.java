@@ -647,7 +647,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
 
             try {
                     try {
@@ -679,7 +678,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 e1.printStackTrace();
                 return  false;
             }
-            // TODO: register the new account here.
             return true;
         }
 
