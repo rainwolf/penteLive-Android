@@ -155,6 +155,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             }
             try {
                 if (!silent) {
+                    if (mediaPlayer == null) {
+                        mediaPlayer = new MediaPlayer();
+                    }
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.reset();
+                    }
                     mediaPlayer = new MediaPlayer();
                     mediaPlayer.setDataSource(getApplicationContext(), notificationSoundUri);
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
