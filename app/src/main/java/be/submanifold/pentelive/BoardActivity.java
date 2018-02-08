@@ -455,7 +455,7 @@ public class BoardActivity extends AppCompatActivity {
             item.setIcon(R.drawable.ic_action_lock_open);
         }
 
-        if (!(game.getGameType().equals("Go") || game.getGameType().equals("Speed Go"))) {
+        if (!game.isGo()) {
             item = menu.findItem(R.id.go_territory);
             item.setVisible(false);
         }

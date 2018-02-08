@@ -2600,9 +2600,9 @@ public class Game implements Parcelable {
         }
     }
     private List<Integer> floodFill(int player) {
-        Map<Integer, List<Integer>> groupsByID = getGroupsByPlayerAndID().get(player);
-        for (List<Integer> group: groupsByID.values()) {
-            for (int move: group) {
+        for (int move = 0; move < passMove; move++) {
+            int pos = getPosition(move);
+            if (pos == 3-player) {
                 int neighbourStone = getEmptyNeighbour(move);
                 while (neighbourStone != -1) {
                     floodFillWorker(neighbourStone, player + 2);
