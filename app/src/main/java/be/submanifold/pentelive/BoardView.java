@@ -157,8 +157,8 @@ public class BoardView extends View {
                 setTextViewHTML(textView, str);
             }
 
+//            System.out.println("kitten here " +game.dPenteChoice + " " + dPenteChosen+ " " + game.isActive());
             if (game.dPenteChoice && game.isActive() && !dPenteChosen) {
-//                System.out.println("kitten here");
                 ((LinearLayout) parentLayout.findViewById(R.id.dPenteLayout)).setVisibility(VISIBLE);
                 ((LinearLayout) parentLayout.findViewById(R.id.submitLayout)).setVisibility(INVISIBLE);
                 return;

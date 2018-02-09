@@ -906,6 +906,8 @@ public class Game implements Parcelable {
             return;
         }
 
+//        System.out.println(mGameString);
+
         boolean amIPlaying = false, undoRequested = false;
 
         String messageNums[] = null;
@@ -967,9 +969,6 @@ public class Game implements Parcelable {
                     }
                     this.mMovesList.add(Integer.parseInt(movesString[i]));
                 }
-            }
-            if (isDPente() && (dashLine.contains("dPenteState=2"))) {
-                this.mActive = !mActive;
             }
             if (dashLine.contains("dPenteState=2")) {
                 this.dPenteChoice = true;
@@ -1157,10 +1156,6 @@ public class Game implements Parcelable {
         if (boardView != null) {
             replayGame(boardView);
 //            boardView.invalidate();
-        }
-
-        if (mActive && goMarkStones) {
-
         }
 
         if (mActive && goEvaluateDeadStones) {
