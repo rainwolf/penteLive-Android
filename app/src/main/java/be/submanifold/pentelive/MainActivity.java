@@ -38,12 +38,14 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+import com.kobakei.ratethisapp.RateThisApp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -476,6 +478,8 @@ public class MainActivity extends AppCompatActivity {
 //        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
 //        startActivity(intent);
 
+
+        askForRating();
     }
 
 
@@ -805,5 +809,28 @@ public class MainActivity extends AppCompatActivity {
         return new BitmapDrawable(getResources(), bitmap);
     }
 
+
+    private void askForRating() {
+        long currentTime = System.currentTimeMillis();
+        long installDateLong = PrefUtils.getLongFromPrefs(this, PrefUtils.PREFS_INSTALLDATE_KEY, 0);
+        if (installDateLong == 0) {
+            installDateLong = currentTime;
+            PrefUtils.saveLongToPrefs(this, PrefUtils.PREFS_INSTALLDATE_KEY, installDateLong);
+            return;
+        }
+//        if (installDateLong  < currentTime) {
+        if (installDateLong + 1000L*3600*24*10 < currentTime) {
+            long lastRated = PrefUtils.getLongFromPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, 0);
+            if (lastRated == 0 || lastRated + 1000L*3600*24*90 < currentTime) {
+                PrefUtils.saveLongToPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, currentTime);
+                RateThisApp.onCreate(this);
+//        RateThisApp.showRateDialogIfNeeded(this);
+                RateThisApp.showRateDialog(this);
+            }
+        }
+
+
+
+    }
 
 }
