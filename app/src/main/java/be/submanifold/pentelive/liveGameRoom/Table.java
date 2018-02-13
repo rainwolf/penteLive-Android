@@ -617,7 +617,7 @@ public class Table {
         return "P1 score is "+p1Count+", and P2 score is "+(p2Count+7)+".5";
     }
 
-    public synchronized void rejectAndContinue() {
+    public void rejectAndContinue() {
         List<Integer> oldMoves = new ArrayList<>();
         int l = containsDoublePass() - 1;
         for (int i = 0; i < l; i++) {

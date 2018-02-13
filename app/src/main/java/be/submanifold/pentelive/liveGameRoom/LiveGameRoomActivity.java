@@ -472,7 +472,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         addTableMessage(tableId, "* " + getString(R.string.reject_go_state, player));
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
-        if (fragment != null && fragment.table.getId() == tableId && !player.equals(me)) {
+        if (fragment != null && fragment.table.getId() == tableId) {
             fragment.rejectGoState();
         } else {
             System.out.println("**************** ah crap");
