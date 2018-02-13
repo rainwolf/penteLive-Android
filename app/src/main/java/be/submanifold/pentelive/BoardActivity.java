@@ -455,11 +455,24 @@ public class BoardActivity extends AppCompatActivity {
             item.setIcon(R.drawable.ic_action_lock_open);
         }
 
-        if (!game.isGo()) {
-            item = menu.findItem(R.id.go_territory);
-            item.setVisible(false);
-        }
+//        item = menu.findItem(R.id.go_territory);
+//        if (!game.isGo()) {
+//            item.setVisible(false);
+//        } else {
+//            item.setVisible(true);
+//        }
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.go_territory);
+        if (!game.isGo()) {
+            item.setVisible(false);
+        } else {
+            item.setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     public Game getGame() {

@@ -24,7 +24,8 @@ public class Table {
             keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
-            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500");
+            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
+            goColor = Color.parseColor("#FAC832");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -38,20 +39,25 @@ public class Table {
     private static Map<Integer, String> gameNames;
     static {
         gameNames = new HashMap<>();
-        gameNames.put(1, "Pente"); gameNames.put(3, "Keryo-Pente"); gameNames.put(5, "Gomoku");
-        gameNames.put(7, "D-Pente"); gameNames.put(9, "G-Pente"); gameNames.put(11, "Poof-Pente");
-        gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente"); gameNames.put(17, "DK-Pente");
+        gameNames.put(1, "Pente"); gameNames.put(3, "Keryo-Pente");
+        gameNames.put(5, "Gomoku"); gameNames.put(7, "D-Pente");
+        gameNames.put(9, "G-Pente"); gameNames.put(11, "Poof-Pente");
+        gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente");
+        gameNames.put(17, "DK-Pente"); gameNames.put(19, "Go");
         gameNames.put(2, "Speed Pente"); gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku"); gameNames.put(8, "Speed D-Pente");
         gameNames.put(10, "Speed G-Pente"); gameNames.put(12, "Speed Poof-Pente");
         gameNames.put(14, "Speed Connect6"); gameNames.put(16, "Speed Boat-Pente");
-        gameNames.put(18, "Speed DK-Pente");
+        gameNames.put(18, "Speed DK-Pente"); gameNames.put(20, "Speed Go");
     }
     private List<Integer> moves = new ArrayList<>();
     private Map<String, Integer> timer;
     private Map<Integer, LivePlayer> seats = new HashMap<>();
     private GameState gameState = new GameState();
     private Context ctx = MyApplication.getContext();
+
+    private int gridSize = 19, passMove = gridSize*gridSize;
+    private boolean hasPass = false;
 
     public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -73,25 +79,52 @@ public class Table {
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
+    private Map<Integer, Map<Integer, List<Integer>>> groupsByPlayerAndID;
+    private Map<Integer,Map<Integer, Integer>> stoneGroupIDsByPlayer;
+    private int koMove = -1;
+    private Map<Integer, List<Integer>> goTerritoryByPlayer;
+    private Map<Integer, List<Integer>> goDeadStonesByPlayer;
+    public Map<Integer, List<Integer>> getGoDeadStonesByPlayer() { return goDeadStonesByPlayer; }
+    public Map<Integer, List<Integer>> getGoTerritoryByPlayer() { return goTerritoryByPlayer; }
+
+
     public Table() {
         timer = new HashMap<>();
         timer.put("initialMinutes", 0); timer.put("incrementalSeconds", 0);
+        this.groupsByPlayerAndID = new HashMap<Integer, Map<Integer, List<Integer>>>();
+        this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
+        this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
+        this.stoneGroupIDsByPlayer = new HashMap<>();
+        this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
+        this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
+        this.goDeadStonesByPlayer = new HashMap<>();
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.koMove = -1;
+        gameState.goState = GoState.PLAY;
+        hasPass = false;
     }
 
     public void undoMove() {
         if (moves.size() > 1) {
             List<Integer> oldMoves = moves;
             oldMoves.remove(oldMoves.size() - 1);
-            resetBoard();
             addMoves(oldMoves);
         }
     }
     public void addMoves(List<Integer> moveList) {
+        resetBoard();
         for (int move: moveList) {
             addMove(move);
         }
     }
+    public boolean isGo() {
+        return game == 19 || game == 20;
+    }
     public void addMove(int move) {
+        if (isGo()) {
+            addGoMove(move);
+            return;
+        }
         byte color = (byte) currentColor();
         moves.add(move);
         int move_i = move / 19;
@@ -162,7 +195,13 @@ public class Table {
         return (game == 7 || game == 8 || game == 17 || game == 18);
     }
     public int currentColor() {
-        if (game != 13 && game != 14) {
+        if (isGo()) {
+            if (getGameState().goState == GoState.PLAY) {
+                return 2 - moves.size()%2;
+            } else {
+                return 3;
+            }
+        } else if (game != 13 && game != 14) {
             return 1 + (moves.size() % 2);
         } else {
             if (moves.size() == 0) {
@@ -171,8 +210,22 @@ public class Table {
             return 2 - (((moves.size() - 1) / 2) % 2);
         }
     }
+    public boolean isMyTurn(String me) {
+        return me.equals(seats.get(currentPlayer()).getName());
+    }
     public int currentPlayer() {
-        if (game != 13 && game != 14) {
+        if (isGo()) {
+            int cp = 0;
+            int dp = containsDoublePass();
+            if (getGameState().goState == GoState.EVALUATESTONES) {
+                cp = dp % 2 + 1;
+            } else if (getGameState().goState == GoState.MARKSTONES) {
+                cp = 2 - dp % 2;
+            } else {
+                cp = 1 + moves.size()%2;
+            }
+            return cp;
+        } else  if (game != 13 && game != 14) {
             if (isDPente()) {
                 if (moves.size()<4) {
                     return 1;
@@ -245,6 +298,17 @@ public class Table {
         moves = new ArrayList<>();
         whiteCaptures = 0;
         blackCaptures = 0;
+        this.groupsByPlayerAndID = new HashMap<Integer, Map<Integer, List<Integer>>>();
+        this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
+        this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
+        this.stoneGroupIDsByPlayer = new HashMap<>();
+        this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
+        this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
+        this.goDeadStonesByPlayer = new HashMap<>();
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.koMove = -1;
+        gameState.goState = GoState.PLAY;
+        hasPass = false;
         updateTimer(true,0,0,0);
     }
     public void resetBoard() {
@@ -252,7 +316,449 @@ public class Table {
         moves = new ArrayList<>();
         whiteCaptures = 0;
         blackCaptures = 0;
+        this.groupsByPlayerAndID = new HashMap<Integer, Map<Integer, List<Integer>>>();
+        this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
+        this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
+        this.stoneGroupIDsByPlayer = new HashMap<>();
+        this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
+        this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
+        this.goDeadStonesByPlayer = new HashMap<>();
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.koMove = -1;
+        gameState.goState = GoState.PLAY;
+        hasPass = false;
     }
+
+
+    private void addGoMove(int move) {
+        if (getGameState().goState == GoState.EVALUATESTONES) {
+            if (move == passMove) {
+                addDeadStone(move);
+            }
+        } else if (getGameState().goState == GoState.MARKSTONES) {
+            if (move == passMove) {
+                getGameState().goState = GoState.EVALUATESTONES;
+            }
+            addDeadStone(move);
+        } else {
+
+            int currentPlayer = currentPlayer(), color = 3 - currentPlayer;
+
+            moves.add(move);
+
+            if (move == passMove) {
+                if (hasPass) {
+                    getGameState().goState = GoState.MARKSTONES;
+                } else {
+                    hasPass = true;
+                }
+            } else {
+                hasPass = false;
+                setPosition(move, color);
+            }
+            if (0 <= move && move < passMove) {
+
+                Map<Integer, List<Integer>> groupsByID = groupsByPlayerAndID.get(currentPlayer);
+                Map<Integer, Integer> stoneGroupIDs = stoneGroupIDsByPlayer.get(currentPlayer);
+                settleGroups(move, groupsByID, stoneGroupIDs);
+
+                int opponent = 3 - currentPlayer;
+                groupsByID = groupsByPlayerAndID.get(opponent);
+                stoneGroupIDs = stoneGroupIDsByPlayer.get(opponent);
+                makeCaptures(move, groupsByID, stoneGroupIDs);
+
+//                if (isSuicideAllowed()) {
+//                    groupsByID = getGroupsByPlayerAndID().get(currentPlayer);
+//                    stoneGroupIDs = getStoneGroupIDsByPlayer().get(currentPlayer);
+//                    int moveGroupID = stoneGroupIDs.get(move);
+//                    List<Integer> moveGroup = groupsByID.get(moveGroupID);
+//                    if (!groupHasLiberties(moveGroup)) {
+//                        captureGroup(moveGroupID, groupsByID, stoneGroupIDs);
+//                    }
+//                }
+            }
+
+        }
+    }
+
+    private int containsDoublePass() {
+        boolean hasPass = false;
+        for (int i = 0; i < moves.size(); i++) {
+            int move = moves.get(i);
+            if (move == passMove) {
+                if (hasPass) {
+                    return i;
+                } else {
+                    hasPass = true;
+                }
+            } else {
+                hasPass = false;
+            }
+        }
+        return -1;
+    }
+
+
+    private synchronized void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        int captures = 0;
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
+        }
+        if (captures != 1) {
+            koMove = -1;
+        }
+    }
+
+    private synchronized int getCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs, int captures, int neighborStone, Integer neighborStoneGroupID) {
+        if (neighborStoneGroupID != null) {
+            List<Integer> neighborStoneGroup = groupsByID.get(neighborStoneGroupID);
+            if (!groupHasLiberties(neighborStoneGroup)) {
+                if (koMove < 0 && neighborStoneGroup.size() == 1 && checkKo(move)) {
+                    koMove = neighborStone;
+                } else {
+                    koMove = -1;
+                }
+                captures += neighborStoneGroup.size();
+                captureGroup(neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        return captures;
+    }
+
+    private int getPosition(int move) {
+        int i = move/gridSize, j = move%gridSize;
+        return abstractBoard[i][j];
+    }
+    private void setPosition(int move, int value) {
+        int i = move/gridSize, j = move%gridSize;
+        abstractBoard[i][j] = (byte) value;
+    }
+    private synchronized boolean checkKo(int move) {
+        int position = getPosition(move);
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            int neighborPosition = getPosition(neighborStone);
+            if (position != 3 - neighborPosition) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private synchronized void captureGroup(int groupID, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        List<Integer> group = groupsByID.get(groupID);
+        int capturee = 0;
+        if (group.size() > 0) {
+            capturee = getPosition(group.get(0));
+        }
+        for (int stone: group) {
+            setPosition(stone, 0);
+            stoneGroupIDs.remove(stone);
+        }
+        if (capturee == 1) {
+            whiteCaptures += group.size();
+        } else if (capturee == 2) {
+            blackCaptures += group.size();
+        }
+        groupsByID.remove(groupID);
+    }
+
+    protected synchronized boolean groupHasLiberties(List<Integer> group) {
+        for (int stone: group) {
+            if (stoneHasLiberties(stone)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private synchronized boolean stoneHasLiberties(int stone) {
+        if (stone%gridSize != 0) {
+            int neighborStone = stone - 1;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone%gridSize != gridSize - 1) {
+            int neighborStone = stone + 1;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone/gridSize != 0) {
+            int neighborStone = stone - gridSize;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        if (stone/gridSize != gridSize - 1) {
+            int neighborStone = stone + gridSize;
+            int position = getPosition(neighborStone);
+            if (position != 1 && position != 2) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private synchronized void settleGroups(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        List<Integer> newGroup = new ArrayList<>();
+        newGroup.add(move);
+        groupsByID.put(move, newGroup);
+        stoneGroupIDs.put(move, move);
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(move, neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
+            if (neighborStoneGroupID != null) {
+                mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
+            }
+        }
+    }
+
+    private synchronized void mergeGroups(int group1, int group2, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
+        if (group1 == group2) {
+            return;
+        }
+        List<Integer> oldGroup, newGroup;
+        int oldGroupID, newGroupID;
+        if (group1 < group2) {
+            oldGroup = groupsByID.get(group1);
+            newGroup = groupsByID.get(group2);
+            oldGroupID = group1;
+            newGroupID = group2;
+        } else {
+            oldGroup = groupsByID.get(group2);
+            newGroup = groupsByID.get(group1);
+            oldGroupID = group2;
+            newGroupID = group1;
+        }
+        newGroup.addAll(oldGroup);
+        groupsByID.remove(oldGroupID);
+        for (int oldStone: oldGroup) {
+            stoneGroupIDs.put(oldStone, newGroupID);
+        }
+    }
+
+    public String getScoreMessage() {
+        List<Integer> p1Territory = goTerritoryByPlayer.get(1), p2Territory = goTerritoryByPlayer.get(2);
+        int p1Count = p1Territory.size();
+        int p2Count = p2Territory.size();
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (abstractBoard[i][j] == 2) {
+                    p1Count += 1;
+                } else if (abstractBoard[i][j] == 1) {
+                    p2Count += 1;
+                }
+            }
+        }
+        return "P1 score is "+p1Count+", and P2 score is "+(p2Count+7)+".5";
+    }
+
+    public synchronized void rejectAndContinue() {
+        List<Integer> oldMoves = new ArrayList<>();
+        int l = containsDoublePass() - 1;
+        for (int i = 0; i < l; i++) {
+            oldMoves.add(moves.get(i));
+        }
+
+        resetBoard();
+
+        for (int move: oldMoves) {
+            addMove(move);
+        }
+    }
+
+    public boolean showEvaluateDialog(String player) {
+        boolean gameOver = moves.size() > 2 && containsDoublePass() < moves.size()-2 &&
+                moves.get(moves.size()-1) == passMove && moves.get(moves.size()-2) == passMove;
+        return !gameOver && currentPlayerName().equals(player);
+    }
+
+    private synchronized int getEmptyNeighbour(int move) {
+        if (move%gridSize != 0) {
+            int neighborStone = move - 1;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move%gridSize != gridSize - 1) {
+            int neighborStone = move + 1;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move/gridSize != 0) {
+            int neighborStone = move - gridSize;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        if (move/gridSize != gridSize - 1) {
+            int neighborStone = move + gridSize;
+            if (getPosition(neighborStone) == 0) {
+                return neighborStone;
+            }
+        }
+        return -1;
+    }
+    private synchronized void floodFillWorker(int move, int value) {
+        setPosition(move, value);
+        int neighbourStone = getEmptyNeighbour(move);
+        while (neighbourStone != -1) {
+            floodFillWorker(neighbourStone, value);
+            neighbourStone = getEmptyNeighbour(move);
+        }
+    }
+    private synchronized List<Integer> floodFill(int player) {
+        int color = 3 - player;
+        for (int move = 0; move < passMove; move++) {
+            int pos = getPosition(move);
+            if (pos == color) {
+                int neighbourStone = getEmptyNeighbour(move);
+                while (neighbourStone != -1) {
+                    floodFillWorker(neighbourStone, player + 2);
+                    neighbourStone = getEmptyNeighbour(move);
+                }
+            }
+        }
+        List<Integer> floodedTerritory = new ArrayList<>();
+        for (int i = 0; i < passMove; i++) {
+            int val = getPosition(i);
+            if (val == player + 2) {
+                floodedTerritory.add(i);
+            }
+        }
+        return floodedTerritory;
+    }
+    private synchronized void resetGoBeforeFlood() {
+        for (int i = 0; i < gridSize; i++ ) {
+            for (int j = 0; j < gridSize; j++ ) {
+                int pos = abstractBoard[i][j];
+                if (pos != 1 && pos != 2) {
+                    abstractBoard[i][j] = 0;
+                }
+            }
+        }
+    }
+    private synchronized List<Integer> getMovesForValue(int val) {
+        List<Integer> results = new ArrayList<>();
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (abstractBoard[i][j] == val) {
+                    results.add(i*19+j);
+                }
+            }
+        }
+        return results;
+    }
+    public synchronized Map<Integer, List<Integer>> getTerritories() {
+        goTerritoryByPlayer = new HashMap<>();
+        floodFill(1);
+        List<Integer> p1Territory = getMovesForValue(3);
+        resetGoBeforeFlood();
+        floodFill(2);
+        List<Integer> p2Territory = getMovesForValue(4);
+        resetGoBeforeFlood();
+
+        int i = p1Territory.size()-1, j = p2Territory.size()-1;
+
+        while (i>-1 && j>-1) {
+            int p1Stone = p1Territory.get(i), p2Stone = p2Territory.get(j);
+            if (p1Stone == p2Stone) {
+                p1Territory.remove(i);
+                p2Territory.remove(j);
+                --i;
+                --j;
+            } else if (p1Stone>p2Stone) {
+                --i;
+            } else {
+                --j;
+            }
+        }
+
+        goTerritoryByPlayer.put(1, p1Territory);
+        goTerritoryByPlayer.put(2, p2Territory);
+        return goTerritoryByPlayer;
+    }
+
+    protected void addDeadStone(int deadStone) {
+        moves.add(deadStone);
+        if (deadStone < passMove) {
+            int player = getPosition(deadStone);
+            if (player == 1 || player == 2) {
+                goDeadStonesByPlayer.get(3 - player).add(deadStone);
+                setPosition(deadStone, 0);
+            }
+        }
+    }
+
+    public boolean startMarkStones() {
+        return moves.size() > 2 && containsDoublePass() == moves.size() - 1;
+    }
+
 
     public boolean gameHasCaptures() {
         return (game != 5 && game != 6 && game != 13 && game != 14);
@@ -274,8 +780,10 @@ public class Table {
             return connect6Color;
         } else if (game < 17) {
             return boatPenteColor;
-        } else {
+        } else if (game < 19) {
             return dkeryoColor;
+        } else {
+            return goColor;
         }
     }
     public String getGameName() {
@@ -300,7 +808,11 @@ public class Table {
         LivePlayer player = seats.get(1);
         Drawable icon;
         if (player != null) {
-            icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.white_nobg);
+            if (isGo()) {
+                icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.black_nobg);
+            } else {
+                icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.white_nobg);
+            }
             icon.setBounds(0, 0, lineHeight * 2 / 3, lineHeight * 2 / 3);
             sb.append("  ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
             sb.append("  ").append(player.coloredNameString(lineHeight));
@@ -310,7 +822,11 @@ public class Table {
         }
         player = seats.get(2);
         if (player != null) {
-            icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.black_nobg);
+            if (isGo()) {
+                icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.white_nobg);
+            } else {
+                icon = ContextCompat.getDrawable(MyApplication.getContext(), R.drawable.black_nobg);
+            }
             icon.setBounds(0, 0, lineHeight * 2 / 3, lineHeight * 2 / 3);
             sb.append("  ").setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
             sb.append("  ").append(player.coloredNameString(lineHeight));

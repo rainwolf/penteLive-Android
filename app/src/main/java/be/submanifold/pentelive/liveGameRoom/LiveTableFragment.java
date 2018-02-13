@@ -44,6 +44,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
@@ -235,7 +236,9 @@ public class LiveTableFragment extends Fragment {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mListener != null && table.isSeated(me)) {
+                if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
+                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":361,\"moves\":[361],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                } else if (mListener != null && table.isSeated(me)) {
                     mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":"+table.getId()+",\"time\":0}}");
                     playButton.setVisibility(View.INVISIBLE);
                 }
@@ -363,16 +366,22 @@ public class LiveTableFragment extends Fragment {
         }
         settingsText.setText(timerStr + "\n" + ratedStr);
         board.invalidate();
-        int minutes = table.getGameState().timers.get(1).get("minutes");
-        int seconds = table.getGameState().timers.get(1).get("seconds");
-        p1Timer.setText(minutes+":"+seconds);
-        minutes = table.getGameState().timers.get(2).get("minutes");
-        seconds = table.getGameState().timers.get(2).get("seconds");
-        p2Timer.setText(minutes+":"+seconds);
+        synchronized (this) {
+            int minutes = table.getGameState().timers.get(1).get("minutes");
+            int seconds = table.getGameState().timers.get(1).get("seconds");
+            p1Timer.setText(minutes+":"+seconds);
+            minutes = table.getGameState().timers.get(2).get("minutes");
+            seconds = table.getGameState().timers.get(2).get("seconds");
+            p2Timer.setText(minutes+":"+seconds);
+        }
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
 
         if (table.getSeats().size() == 2 && table.isSeated(me) && (table.getGameState().state == State.NOTSTARTED || table.getGameState().state == State.HALFSET)) {
             playButton.setVisibility(View.VISIBLE);
+            playButton.setText(getString(R.string.play));
+        } else if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
         } else {
             playButton.setVisibility(View.GONE);
         }
@@ -436,7 +445,6 @@ public class LiveTableFragment extends Fragment {
 
     public void addMove(int move) {
         table.addMove(move);
-        board.invalidate();
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
         if (table.isDPente() && table.getMoves().size() == 4 && table.getGameState().dPenteState == DPenteState.NOCHOICE) {
             LivePlayer p2Player = table.getSeats().get(2);
@@ -444,6 +452,107 @@ public class LiveTableFragment extends Fragment {
                 showDPenteChoice();
             }
         }
+        if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+        if (table.isGo() && (table.getGameState().goState == GoState.MARKSTONES || table.getGameState().goState == GoState.EVALUATESTONES)) {
+            board.setGoTerritoryByPlayer(table.getTerritories());
+            board.setGoDeadStonesByPlayer(table.getGoDeadStonesByPlayer());
+        } else {
+            board.clearGoStructures();
+        }
+        board.invalidate();
+        showGoDialog();
+    }
+
+    public void addMoves(List<Integer> moves) {
+        table.addMoves(moves);
+        capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
+        if (table.isDPente() && table.getMoves().size() == 4 && table.getGameState().dPenteState == DPenteState.NOCHOICE) {
+            LivePlayer p2Player = table.getSeats().get(2);
+            if (p2Player != null && p2Player.getName().equals(me)) {
+                showDPenteChoice();
+            }
+        }
+        if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+        if (table.isGo() && (table.getGameState().goState == GoState.MARKSTONES || table.getGameState().goState == GoState.EVALUATESTONES)) {
+            board.setGoTerritoryByPlayer(table.getTerritories());
+            board.setGoDeadStonesByPlayer(table.getGoDeadStonesByPlayer());
+        } else {
+            board.clearGoStructures();
+        }
+        board.invalidate();
+        showGoDialog();
+    }
+    public void rejectGoState() {
+        table.rejectAndContinue();
+        if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+        board.clearGoStructures();
+        board.invalidate();
+    }
+
+    private void showGoDialog() {
+        if (table.isGo() && table.getGameState().state == State.STARTED) {
+            if (table.getGameState().goState == GoState.EVALUATESTONES && table.showEvaluateDialog(me)) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(table.getScoreMessage());
+                String options[] = {getString(R.string.accept), getString(R.string.decline)};
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":361,\"moves\":[361],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                                break;
+                            case 1:
+                                mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                                break;
+                        }
+                        // the user clicked on colors[which]
+                    }
+                });
+                AlertDialog dlg = builder.create();
+                dlg.setCanceledOnTouchOutside(false);
+                Window window = dlg.getWindow();
+                WindowManager.LayoutParams wlp = window.getAttributes();
+                wlp.gravity = Gravity.BOTTOM;
+                dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                window.setAttributes(wlp);
+                dlg.show();
+            } else if (table.getGameState().goState == GoState.MARKSTONES && table.isMyTurn(me)
+                    && table.startMarkStones()) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setMessage(activity.getString(R.string.double_pass_live));
+                AlertDialog dlg = builder.create();
+                Window window = dlg.getWindow();
+                WindowManager.LayoutParams wlp = window.getAttributes();
+                wlp.gravity = Gravity.BOTTOM;
+                dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                window.setAttributes(wlp);
+                dlg.show();
+            }
+        }
+    }
+
+    public void updateGameState(int state) {
+        if (state == 2 && table.getGameState().state != State.PAUSED) {
+            board.clearGoStructures();
+        }
+        table.updateGameState(state);
+        gameStateChanged();
     }
 
     public void gameStateChanged() {
@@ -507,20 +616,26 @@ public class LiveTableFragment extends Fragment {
             }
         }
         if (table.getSeats().size() == 2 && table.isSeated(me) && (table.getGameState().state == State.NOTSTARTED || table.getGameState().state == State.HALFSET)) {
+            playButton.setText(getString(R.string.play));
             playButton.setVisibility(View.VISIBLE);
+        } else if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
         } else {
             playButton.setVisibility(View.GONE);
         }
     }
 
     public void updateTimer() {
-        int currentPlayer = table.currentPlayer();
-        table.updateTimer(false, currentPlayer, -1, -1);
-        Map<String, Integer> timer = table.getGameState().timers.get(currentPlayer);
-        if (currentPlayer == 1) {
-            p1Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
-        } else {
-            p2Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
+        synchronized (this) {
+            int currentPlayer = table.currentPlayer();
+            table.updateTimer(false, currentPlayer, -1, -1);
+            Map<String, Integer> timer = table.getGameState().timers.get(currentPlayer);
+            if (currentPlayer == 1) {
+                p1Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
+            } else {
+                p2Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
+            }
         }
     }
 
@@ -643,7 +758,50 @@ public class LiveTableFragment extends Fragment {
 
     private void showGameActions(boolean myTurn) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        if (!myTurn) {
+        if (table.isGo()) {
+            if (table.getGameState().state == State.STARTED &&
+                    ((table.getGameState().goState == GoState.PLAY && !myTurn) || (table.getGameState().goState == GoState.MARKSTONES && myTurn))) {
+                String options[] = {getString(R.string.score), getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                scoreGame();
+                                break;
+                            case 1:
+                                sendUndoRequest();
+                                break;
+                            case 2:
+                                sendResign();
+                                break;
+                            case 3:
+                                sendCancelRequest();
+                                break;
+                        }
+                    }
+                });
+            } else {
+                String options[] = {getString(R.string.score), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                scoreGame();
+                                break;
+                            case 1:
+                                sendResign();
+                                break;
+                            case 2:
+                                sendCancelRequest();
+                                break;
+                        }
+                    }
+                });
+            }
+
+        } else if (!myTurn) {
             String options[] = {getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
             builder.setItems(options, new DialogInterface.OnClickListener() {
                 @Override
@@ -696,6 +854,11 @@ public class LiveTableFragment extends Fragment {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgUndoRequestTableEvent\":{\"table\":"+table.getId()+",\"time\":0}}");
         }
+    }
+    private void scoreGame() {
+        board.setGoTerritoryByPlayer(table.getTerritories());
+        addText("* " + table.getScoreMessage());
+        board.invalidate();
     }
 
     public void cancelRequest(String player) {
@@ -801,6 +964,23 @@ public class LiveTableFragment extends Fragment {
         board.invalidate();
     }
 
+    public void undoMove() {
+        table.undoMove();
+        if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
+            playButton.setVisibility(View.VISIBLE);
+            playButton.setText(R.string.pass);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+        if (table.isGo() && (table.getGameState().goState == GoState.MARKSTONES || table.getGameState().goState == GoState.EVALUATESTONES)) {
+            board.setGoTerritoryByPlayer(table.getTerritories());
+            board.setGoDeadStonesByPlayer(table.getGoDeadStonesByPlayer());
+        } else {
+            board.clearGoStructures();
+        }
+        board.invalidate();
+        showGoDialog();
+    }
     private void showTablePlayers() {
         PlayersListAdapter listAdapter = new PlayersListAdapter(table.getPlayers(), getString(R.string.table_players), table.getGame());
         listAdapter.setInflater(activity.getLayoutInflater());

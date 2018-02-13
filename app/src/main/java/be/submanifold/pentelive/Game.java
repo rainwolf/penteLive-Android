@@ -1227,6 +1227,7 @@ public class Game implements Parcelable {
                 dlg.show();
             }
         }
+        ((BoardActivity)boardView.getContext()).invalidateOptionsMenu();
     }
 
     private String filterMessage(String msgStr) {

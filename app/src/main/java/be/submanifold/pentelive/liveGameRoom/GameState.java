@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameState {
     public State state = State.NOTSTARTED;
     public DPenteState dPenteState = DPenteState.NOCHOICE;
+    public GoState goState = GoState.PLAY;
     public Map<Integer,Map<String, Integer>> timers = new ConcurrentHashMap<>();
 
     public GameState() {

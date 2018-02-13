@@ -159,9 +159,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             if (mediaPlayer == null) {
                 mediaPlayer = new MediaPlayer();
             }
-            if (mediaPlayer.isPlaying()) {
+//            if (mediaPlayer.isPlaying()) {
                 mediaPlayer.reset();
-            }
+//            }
             try {
                 mediaPlayer.setDataSource(getApplicationContext(), soundUri);
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -337,6 +337,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 } else if (jsonEvent.get("dsgWaitingPlayerReturnTimeUpTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgWaitingPlayerReturnTimeUpTableEvent");
                                     waitingPlayerReturnTimeUp(data);
+                                } else if (jsonEvent.get("dsgRejectGoStateEvent") != null) {
+                                    Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgRejectGoStateEvent");
+                                    rejectGoState(data);
                                 }
                                 synchronized (this) {
                                     this.notify();
@@ -412,10 +415,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 fragment.addMove(move);
                 playSound(NEW_MOVE_SOUND);
             } else {
-                fragment.table.resetBoard();
-                for (int m: moves) {
-                    fragment.addMove(m);
-                }
+                fragment.addMoves(moves);
             }
         } else {
             System.out.println("**************** ah crap");
@@ -427,14 +427,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         final String text = (String) data.get("changeText");
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
-        tablesAndPlayers.updateGameState(tableId, state);
         if (fragment != null && fragment.table.getId() == tableId) {
             if (text != null) {
                 fragment.addText("* " + text);
             }
-            fragment.gameStateChanged();
+            fragment.updateGameState(state);
+//            fragment.gameStateChanged();
         } else {
-            System.out.println("**************** ah crap");
+            tablesAndPlayers.updateGameState(tableId, state);
         }
     }
     private void updateTableTimer(Map<String,Object> data) {
@@ -466,6 +466,18 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
+    private void rejectGoState(Map<String,Object> data) {
+        final int tableId = (int) data.get("table");
+        final String player = (String) data.get("player");
+        addTableMessage(tableId, "* " + getString(R.string.reject_go_state, player));
+        LiveTableFragment fragment = (LiveTableFragment)
+                getSupportFragmentManager().findFragmentByTag("liveTable");
+        if (fragment != null && fragment.table.getId() == tableId && !player.equals(me)) {
+            fragment.rejectGoState();
+        } else {
+            System.out.println("**************** ah crap");
+        }
+    }
     private void swapSeats(Map<String,Object> data) {
         final int tableId = (int) data.get("table");
         final boolean swapped = (boolean) data.get("swap");
@@ -491,14 +503,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         boolean accepted = (boolean) data.get("accepted");
         addTableMessage(tableId, accepted?("* "+getString(R.string.undo_accepted)):("* " +getString(R.string.undo_declined)));
         if (accepted) {
-            tablesAndPlayers.undoMove(tableId);
-        }
-        LiveTableFragment fragment = (LiveTableFragment)
-                getSupportFragmentManager().findFragmentByTag("liveTable");
-        if (fragment != null && fragment.table.getId() == tableId) {
-            fragment.updateBoard();
-        } else {
-            System.out.println("**************** ah crap");
+            LiveTableFragment fragment = (LiveTableFragment)
+                    getSupportFragmentManager().findFragmentByTag("liveTable");
+            if (fragment != null && fragment.table.getId() == tableId) {
+                fragment.undoMove();
+            } else {
+                System.out.println("**************** ah crap");
+            }
         }
     }
     private void receivedInvitation(Map<String,Object> data) {

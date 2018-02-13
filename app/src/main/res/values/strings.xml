@@ -285,7 +285,8 @@
     <string name="reject">reject</string>
     <string name="no_reminder">Don\'t remind me</string>
     <string name="double_pass">Your opponent has made a pass as well. Mark all the dead stones and submit them to your opponent for consideration.</string>
-
+    <string name="double_pass_live">Your opponent has made a pass as well. Mark all the dead stones and finish with a pass.</string>
+    <string name="reject_go_state">%1$s has rejected the dead stones, play continues.</string>
 
 
 

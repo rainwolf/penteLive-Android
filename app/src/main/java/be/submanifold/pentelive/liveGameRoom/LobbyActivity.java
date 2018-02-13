@@ -195,7 +195,12 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url;
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                } else {
+                    url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                }
 
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

@@ -4,22 +4,18 @@ package be.submanifold.pentelive.liveGameRoom;
  * Created by waliedothman on 11/01/2017.
  */
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PrefUtils;
@@ -41,7 +37,10 @@ public class LiveBoardView extends View {
     private float zoomedScale = 3;
     float offSetX = 0, offSetY = 0;
 
+    private Map<Integer, List<Integer>> goDeadStonesByPlayer, goTerritoryByPlayer;
 
+    public void setGoDeadStonesByPlayer(Map<Integer, List<Integer>> goDeadStonesByPlayer) { this.goDeadStonesByPlayer = goDeadStonesByPlayer; }
+    public void setGoTerritoryByPlayer(Map<Integer, List<Integer>> goTerritoryByPlayer) { this.goTerritoryByPlayer = goTerritoryByPlayer; }
     public int getRedDot() {
         return redDot;
     }
@@ -88,7 +87,7 @@ public class LiveBoardView extends View {
         if (!table.currentPlayerName().equals(me) || table.getGameState().state != State.STARTED) {
             return false;
         }
-        myColor = (byte) table.currentPlayer();
+        myColor = (byte) table.currentColor();
         float x, y;
         x = event.getX();
         y = event.getY();
@@ -126,8 +125,15 @@ public class LiveBoardView extends View {
         stoneJ = (byte) (19*stoneX/size);
         stoneY = offSetY + 2*(y-offSetY)/zoomedScale;
         stoneI = (byte) (19*stoneY/size);
-        if (table != null && table.abstractBoard[stoneI][stoneJ] == 0) {
-            playedMove = 19*stoneI + stoneJ;
+        if (table != null) {
+            boolean filled = table.abstractBoard[stoneI][stoneJ] != 0;
+            if (table.isGo()) {
+                if ((filled && table.getGameState().goState == GoState.MARKSTONES) || (!filled && table.getGameState().goState == GoState.PLAY)) {
+                    playedMove = 19*stoneI + stoneJ;
+                }
+            } else if (!filled) {
+                playedMove = 19*stoneI + stoneJ;
+            }
         } else {
             playedMove = -1;
         }
@@ -140,6 +146,12 @@ public class LiveBoardView extends View {
         return true;
     }
 
+    public void clearGoStructures() {
+        goTerritoryByPlayer = null;
+        goDeadStonesByPlayer = null;
+        invalidate();
+    }
+
 
     private void drawBoard(Canvas canvas) {
         float step = (float) size / 19, margin = step/2;
@@ -150,11 +162,25 @@ public class LiveBoardView extends View {
             canvas.drawLine(margin + step*i, margin, margin + step*i, size - margin, linePaint);
             canvas.drawLine(margin, margin + step*i, size - margin, margin + step*i, linePaint);
         }
-        canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
+        if (table != null && table.isGo()) {
+            linePaint.setStyle(Paint.Style.FILL);
+            float radius = margin/3;
+            canvas.drawCircle(margin + 3*step, margin + 3*step, radius, linePaint);
+            canvas.drawCircle( margin + 3*step, size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( margin + 3*step, size/2, radius, linePaint);
+            canvas.drawCircle(size/2, margin + 3*step, radius, linePaint);
+            canvas.drawCircle( size/2, size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( size/2, size/2, radius, linePaint);
+            canvas.drawCircle(size - (margin + 3*step), margin + 3*step, radius, linePaint);
+            canvas.drawCircle( size - (margin + 3*step), size - (margin + 3*step), radius, linePaint);
+            canvas.drawCircle( size - (margin + 3*step), size/2, radius, linePaint);
+        } else {
+            canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
+            canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
+            canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
+        }
         if (table != null) {
             for ( byte i = 0; i < 19; i++ ) {
                 for ( byte j = 0; j < 19; j++ ) {
@@ -162,6 +188,30 @@ public class LiveBoardView extends View {
                 }
             }
             setBackgroundColor(table.getGameColor());
+        }
+        if (goDeadStonesByPlayer != null) {
+            for (int move : goDeadStonesByPlayer.get(1)) {
+                byte movei = (byte) (move / 19);
+                byte movej = (byte) (move % 19);
+                drawStone(canvas, movei, movej, (byte) 4);
+            }
+            for (int move : goDeadStonesByPlayer.get(2)) {
+                byte movei = (byte) (move / 19);
+                byte movej = (byte) (move % 19);
+                drawStone(canvas, movei, movej, (byte) 3);
+            }
+        }
+        if (goTerritoryByPlayer != null) {
+            for (int move: goTerritoryByPlayer.get(1)) {
+                byte movei = (byte) (move/19);
+                byte movej = (byte) (move%19);
+                drawSquare(canvas, movei, movej, 2);
+            }
+            for (int move: goTerritoryByPlayer.get(2)) {
+                byte movei = (byte) (move/19);
+                byte movej = (byte) (move%19);
+                drawSquare(canvas, movei, movej, 1);
+            }
         }
         if (redDot > -1) {
             drawRedDot(canvas);
@@ -173,7 +223,7 @@ public class LiveBoardView extends View {
             return;
         }
         float radius = size / 39;
-        float cy = (float) Math.floor(19*x/size)*size/19 + size/38, cx = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
         float cgx = cx - size/200, cgy = cy - size/200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -183,14 +233,25 @@ public class LiveBoardView extends View {
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
                     radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
-        } else {
+        } else if (stoneColor == 1){
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        } else if (stoneColor == 4) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+            stonePaint.setAlpha(180);
+        } else if (stoneColor == 3){
+            stonePaint.setShader(new RadialGradient(cgx,cgy,
+                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+            stonePaint.setAlpha(180);
         }
-        float shadowOffset = radius/7;
-        shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        shadowPaint.setAlpha(110);
-        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+
+        if (stoneColor < 3) {
+            float shadowOffset = radius/5;
+            shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            shadowPaint.setAlpha(110);
+            canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        }
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
     private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
@@ -205,11 +266,14 @@ public class LiveBoardView extends View {
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
                     radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
-        } else {
+        } else if (stoneColor == 1) {
             stonePaint.setShader(new RadialGradient(cgx,cgy,
                     radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+        } else if (stoneColor == 3) {
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius*5/4, Color.rgb(250,125,125), Color.RED, Shader.TileMode.CLAMP));
         }
-        float shadowOffset = radius/7;
+        float shadowOffset = radius/5;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         shadowPaint.setAlpha(110);
         canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
@@ -227,7 +291,27 @@ public class LiveBoardView extends View {
         canvas.drawLine(cx,0,cx,size, linePaint);
     }
     private void drawStone(Canvas canvas, byte i, byte j, byte stoneColor) {
-        drawStone(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+        drawStone(canvas, size*j/19 + size/38, size*i/19 + size/38, stoneColor);
+    }
+    private void drawSquare(Canvas canvas, byte i, byte j, int stoneColor) {
+        drawSquare(canvas, size*j/19 + size/38, size*i/19 + size/38, stoneColor);
+    }
+    private void drawSquare(Canvas canvas, float x, float y, int stoneColor) {
+        if (stoneColor < 1) {
+            return;
+        }
+        float width = size / 60;
+        float cx = (float) Math.floor(19*x/size)*size/19 + size/38 - width/2, cy = (float) Math.floor(19*y/size)*size/19 + size/38 - width/2;
+        Paint stonePaint;
+        stonePaint = new Paint();
+        stonePaint.setStrokeWidth(1);
+        stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        if (stoneColor == 1) {
+            stonePaint.setColor(Color.WHITE);
+        } else if (stoneColor == 2) {
+            stonePaint.setColor(Color.BLACK);
+        }
+        canvas.drawRect(cx,cy,cx+width,cy+width, stonePaint);
     }
 
     private void drawRedDot(Canvas canvas) {
@@ -237,9 +321,9 @@ public class LiveBoardView extends View {
         stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         stonePaint.setColor(Color.RED);
         float radius = size / 100;
-        byte j = (byte) (redDot/19);
-        byte i = (byte) (redDot%19);
-        float cx = size*i/19 + size/38, cy = size*j/19 + size/38;
+        byte i = (byte) (redDot/19);
+        byte j = (byte) (redDot%19);
+        float cx = size*j/19 + size/38, cy = size*i/19 + size/38;
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
 

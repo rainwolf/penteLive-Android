@@ -480,6 +480,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         askForRating();
+
+//        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
+//        startActivity(intent);
     }
 
 
