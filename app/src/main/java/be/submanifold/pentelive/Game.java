@@ -956,7 +956,19 @@ public class Game implements Parcelable {
             }
             if (dashLine.indexOf("gameName=") == 0) {
                 this.mGameType = dashLine.substring(9);
-                if (mGameType.equals("Go") || mGameType.equals("Speed Go")) {
+                if (mGameType.equals("Go") || mGameType.equals("Speed Go") ||
+                        mGameType.equals("Go (9x9)") || mGameType.equals("Speed Go (9x9)") ||
+                        mGameType.equals("Go (13x13)") || mGameType.equals("Speed Go (13x13)")) {
+                    if (mGameType.contains("(9x9)")) {
+                        gridSize = 9;
+                    } else if (mGameType.contains("(13x13)")) {
+                        gridSize = 13;
+                    } else {
+                        gridSize = 19;
+                    }
+
+                    boardView.gridSize = gridSize;
+                    passMove = gridSize*gridSize;
                     go = true;
                 }
             }
@@ -1329,7 +1341,7 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
             replayKeryoPenteGame(untilMove);
-        } else if (getGameType().equals("Go") || getGameType().equals("Speed Go")) {
+        } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(untilMove);
         }
@@ -1356,11 +1368,11 @@ public class Game implements Parcelable {
                 if (i%2 == 0) {
                     movesString += "<b>" + (i/2 + 1) + ".</b> ";
                 }
-                int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
-                if (move == 361) {
+                int move = mMovesList.get(i), moveI = move/gridSize, moveJ = move%gridSize;
+                if (move == gridSize*gridSize) {
                     movesString += "PASS ";
                 } else {
-                    movesString += coordinateLetters[moveJ] + "" + (19 - (moveI)) + " ";
+                    movesString += coordinateLetters[moveJ] + "" + (gridSize - (moveI)) + " ";
                 }
                 if (i%2 == 0) {
                     movesString += "- ";
@@ -1410,7 +1422,7 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
             replayKeryoPenteGame(moveI, moveJ);
-        } else if (getGameType().equals("Go") || getGameType().equals("Speed Go")) {
+        } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(moveI, moveJ);
         }
@@ -1426,8 +1438,8 @@ public class Game implements Parcelable {
     private void resetAbstractBoard() {
         whiteCaptures = 0;
         blackCaptures = 0;
-        for (int i = 0; i < 19; i++) {
-            for (int j = 0; j < 19; j++) {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
                 abstractBoard[i][j] = 0;
             }
         }
@@ -2096,6 +2108,8 @@ public class Game implements Parcelable {
     public HashMap<Integer, List<Integer>> getGoDeadStonesByPlayer() { return goDeadStonesByPlayer; }
     public HashMap<Integer, List<Integer>> getGoTerritoryByPlayer() { return goTerritoryByPlayer; }
 
+    public int getGridSize() { return gridSize; }
+
     private int gridSize = 19;
     private int passMove = 361;
 
@@ -2129,7 +2143,7 @@ public class Game implements Parcelable {
         initGo();
         boolean suicideAllowed = false, hasPass = false, doublePass = false;
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-//            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
+//            int move = mMovesList.get(i), moveI = move / gridSize, moveJ = move % gridSize;
             int move = mMovesList.get(i);
             if (move == passMove) {
                 if (hasPass) {
@@ -2230,7 +2244,7 @@ public class Game implements Parcelable {
                 }
             }
         }
-        int move = moveI*19+moveJ;
+        int move = moveI*gridSize+moveJ;
         if (doublePass) {
             if (0 <= move && move < passMove) {
                 if (getPosition(move) == 1) {
@@ -2313,7 +2327,6 @@ public class Game implements Parcelable {
 
     private void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         int captures = 0;
-//        int gridSize = 19;
         if (move%gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
@@ -2358,7 +2371,6 @@ public class Game implements Parcelable {
 
     private boolean checkKo(int move) {
         int position = getPosition(move);
-//        int gridSize = 19;
         if (move%gridSize != 0) {
             int neighborStone = move - 1;
             int neighborPosition = getPosition(neighborStone);
@@ -2420,7 +2432,6 @@ public class Game implements Parcelable {
         return false;
     }
     private boolean stoneHasLiberties(int stone) {
-        int gridSize = 19;
         if (stone%gridSize != 0) {
             int neighborStone = stone - 1;
             int position = getPosition(neighborStone);
@@ -2457,7 +2468,6 @@ public class Game implements Parcelable {
         newGroup.add(move);
         groupsByID.put(move, newGroup);
         stoneGroupIDs.put(move, move);
-        int gridSize = 19;
         if (move%gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
@@ -2515,7 +2525,7 @@ public class Game implements Parcelable {
 //    private List<Integer> getGroupWithoutMerge(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
 //        List<Integer> newGroup = new ArrayList<>();
 //        newGroup.add(move);
-//        int gridSize = 19;
+//        int gridSize = gridSize;
 //        if (move%gridSize != 0) {
 //            int neighborStone = move - 1;
 //            Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
@@ -2560,7 +2570,6 @@ public class Game implements Parcelable {
 //    }
 
     private int getEmptyNeighbour(int move) {
-        int gridSize = 19;
         if (move%gridSize != 0) {
             int neighborStone = move - 1;
             if (getPosition(neighborStone) == 0) {
@@ -2616,7 +2625,6 @@ public class Game implements Parcelable {
         return floodedTerritory;
     }
     private void resetGoBeforeFlood() {
-        int gridSize = 19;
         for (int i = 0; i < gridSize; i++ ) {
             for (int j = 0; j < gridSize; j++ ) {
                 int pos = getPosition(i,j);
@@ -2628,11 +2636,10 @@ public class Game implements Parcelable {
     }
     public List<Integer> getMovesForValue(int val) {
         List<Integer> results = new ArrayList<>();
-        int gridSize = 19;
         for (int j = 0; j < gridSize; j++) {
             for (int i = 0; i < gridSize; i++) {
                 if (getPosition(i,j) == val) {
-                    results.add(j*19+i);
+                    results.add(j*gridSize+i);
                 }
             }
         }
@@ -2684,7 +2691,7 @@ public class Game implements Parcelable {
     }
 
     public void processDeadStone(int move) {
-        int i = move/19, j = move%19;
+        int i = move/gridSize, j = move%gridSize;
         int pos = abstractBoard[i][j];
         if (pos == 0) {
             if (goDeadStonesByPlayer.get(1).remove(Integer.valueOf(move))) {

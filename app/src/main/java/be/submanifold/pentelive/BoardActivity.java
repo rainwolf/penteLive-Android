@@ -287,7 +287,7 @@ public class BoardActivity extends AppCompatActivity {
                             moves = "1," + board.playedMove;
                         }
                     } else if (game.isGoMarkStones() && game.isGo()) {
-                        moves = "361";
+                        moves = "" + (game.getGridSize()*game.getGridSize());
                         for (int move: game.getGoDeadStonesByPlayer().get(1)) {
                             moves = move + "," + moves;
                         }
@@ -295,7 +295,7 @@ public class BoardActivity extends AppCompatActivity {
                             moves = move + "," + moves;
                         }
                     } else if (board.playedMove == -1 && game.isGo()) {
-                        moves = "361";
+                        moves = "" + (game.getGridSize()*game.getGridSize());
                     } else if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();

@@ -263,6 +263,9 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/mymessages";
+                if (PentePlayer.development) {
+                    request        = "https://development.pente.org/gameServer/mymessages";
+                }
                 URL url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -359,6 +362,10 @@ public class ReplyMessageActivity extends AppCompatActivity {
 //                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID);
                 URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID
                         +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/mymessages?command=view&mid=" + messageID
+                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                }
                 HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
@@ -483,6 +490,9 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 }
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/mymessages";
+                if (PentePlayer.development) {
+                     request        = "https://development.pente.org/gameServer/mymessages";
+                }
                 URL url            = new URL( request );
                 HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

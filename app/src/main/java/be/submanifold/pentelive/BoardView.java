@@ -61,7 +61,7 @@ public class BoardView extends View {
     private float translateX = 0, translateY = 0, stoneX, stoneY;
     private byte myColor, stoneI, stoneJ;
     public int playedMove = -1;
-
+    public int gridSize = 19;
 
     public int redDot = -1;
 
@@ -225,9 +225,9 @@ public class BoardView extends View {
         }
         playedMove = -1;
         stoneX = x;
-        stoneJ = (byte) (19*stoneX/size);
+        stoneJ = (byte) (gridSize*stoneX/size);
         stoneY = y;
-        stoneI = (byte) (19*stoneY/size);
+        stoneI = (byte) (gridSize*stoneY/size);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 if (!replayed && !game.isGoMarkStones()) {
@@ -252,7 +252,7 @@ public class BoardView extends View {
         }
 
         String str;
-        playedMove = 19*stoneI + stoneJ;
+        playedMove = gridSize*stoneI + stoneJ;
         if (game.isActive()) {
             if (game.isGoMarkStones()) {
                 if (!(abstractBoard[stoneI][stoneJ] != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
@@ -337,7 +337,7 @@ public class BoardView extends View {
                 } else {
                     game.replayGame(stoneI, stoneJ, this);
                     replayed = false;
-                    str = submitStr+": " + coordinateLetters[stoneJ] + "" + (19 - stoneI);
+                    str = submitStr+": " + coordinateLetters[stoneJ] + "" + (gridSize - stoneI);
                     ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                 }
             } else if (game.isGoMarkStones() && playedMove > -1) {
@@ -352,27 +352,32 @@ public class BoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / 19, margin = step/2;
+        float step = (float) size / gridSize, margin = step/2;
 //        canvas.drawPaint(pentePaint);
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
-        for ( int i = 0; i < 19; i++ ) {
+        for ( int i = 0; i < gridSize; i++ ) {
             canvas.drawLine(margin + step*i, margin, margin + step*i, size - margin, linePaint);
             canvas.drawLine(margin, margin + step*i, size - margin, margin + step*i, linePaint);
         }
         if (game != null && game.isGo()) {
             linePaint.setStyle(Paint.Style.FILL);
             float radius = margin/3;
-            canvas.drawCircle(margin + 3*step, margin + 3*step, radius, linePaint);
-            canvas.drawCircle( margin + 3*step, size - (margin + 3*step), radius, linePaint);
-            canvas.drawCircle( margin + 3*step, size/2, radius, linePaint);
-            canvas.drawCircle(size/2, margin + 3*step, radius, linePaint);
-            canvas.drawCircle( size/2, size - (margin + 3*step), radius, linePaint);
+            int l = 3;
+            if (game.getGridSize() == 9) { l = 2; }
+            canvas.drawCircle(margin + l*step, margin + l*step, radius, linePaint);
+            canvas.drawCircle( margin + l*step, size - (margin + l*step), radius, linePaint);
+            canvas.drawCircle(size - (margin + l*step), margin + l*step, radius, linePaint);
+            canvas.drawCircle( size - (margin + l*step), size - (margin + l*step), radius, linePaint);
             canvas.drawCircle( size/2, size/2, radius, linePaint);
-            canvas.drawCircle(size - (margin + 3*step), margin + 3*step, radius, linePaint);
-            canvas.drawCircle( size - (margin + 3*step), size - (margin + 3*step), radius, linePaint);
-            canvas.drawCircle( size - (margin + 3*step), size/2, radius, linePaint);
+
+            if (l == 3) {
+                canvas.drawCircle( margin + 3*step, size/2, radius, linePaint);
+                canvas.drawCircle(size/2, margin + 3*step, radius, linePaint);
+                canvas.drawCircle( size/2, size - (margin + 3*step), radius, linePaint);
+                canvas.drawCircle( size - (margin + 3*step), size/2, radius, linePaint);
+            }
         } else {
             canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
             canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
@@ -380,8 +385,8 @@ public class BoardView extends View {
             canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
             canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
         }
-        for ( byte i = 0; i < 19; i++ ) {
-            for ( byte j = 0; j < 19; j++ ) {
+        for ( byte i = 0; i < gridSize; i++ ) {
+            for ( byte j = 0; j < gridSize; j++ ) {
                 drawStone(canvas, i, j, abstractBoard[i][j]);
             }
         }
@@ -389,23 +394,23 @@ public class BoardView extends View {
         if (game!= null) {
             if (game.isGo()) {
                 for (int move: game.getGoDeadStonesByPlayer().get(1)) {
-                    byte movei = (byte) (move/19);
-                    byte movej = (byte) (move%19);
+                    byte movei = (byte) (move/gridSize);
+                    byte movej = (byte) (move%gridSize);
                     drawStone(canvas, movei, movej, (byte) 4);
                 }
                 for (int move: game.getGoDeadStonesByPlayer().get(2)) {
-                    byte movei = (byte) (move/19);
-                    byte movej = (byte) (move%19);
+                    byte movei = (byte) (move/gridSize);
+                    byte movej = (byte) (move%gridSize);
                     drawStone(canvas, movei, movej, (byte) 3);
                 }
                 for (int move: game.getGoTerritoryByPlayer().get(1)) {
-                    byte movei = (byte) (move/19);
-                    byte movej = (byte) (move%19);
+                    byte movei = (byte) (move/gridSize);
+                    byte movej = (byte) (move%gridSize);
                     drawSquare(canvas, movei, movej, 2);
                 }
                 for (int move: game.getGoTerritoryByPlayer().get(2)) {
-                    byte movei = (byte) (move/19);
-                    byte movej = (byte) (move%19);
+                    byte movei = (byte) (move/gridSize);
+                    byte movej = (byte) (move%gridSize);
                     drawSquare(canvas, movei, movej, 1);
                 }
             }
@@ -475,8 +480,8 @@ public class BoardView extends View {
         if (stoneColor < 1) {
             return;
         }
-        float radius = size / 39;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float radius = size / (2*gridSize + 1);
+        float cx = (float) Math.floor(gridSize*x/size)*size/gridSize + size/(2*gridSize), cy = (float) Math.floor(gridSize*y/size)*size/gridSize + size/(2*gridSize);
         float cgx = cx - size/200, cgy = cy - size/200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -508,8 +513,8 @@ public class BoardView extends View {
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
     private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
-        float radius = size / 30;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float radius = size / (2*gridSize - 5);
+        float cx = (float) Math.floor(gridSize*x/size)*size/gridSize + size/(2*gridSize), cy = (float) Math.floor(gridSize*y/size)*size/gridSize + size/(2*gridSize);
         float cgx = cx - size/200, cgy = cy - size/200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -533,8 +538,8 @@ public class BoardView extends View {
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
     private void drawZoomedLine(Canvas canvas, float x, float y) {
-        float radius = size / 30;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+//        float radius = size / 30;
+        float cx = (float) Math.floor(gridSize*x/size)*size/gridSize + size/(2*gridSize), cy = (float) Math.floor(gridSize*y/size)*size/gridSize + size/(2*gridSize);
         Paint linePaint;
         linePaint = new Paint();
         linePaint.setStrokeWidth(4);
@@ -544,17 +549,17 @@ public class BoardView extends View {
         canvas.drawLine(cx,0,cx,size, linePaint);
     }
     private void drawStone(Canvas canvas, byte j, byte i, byte stoneColor) {
-        drawStone(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+        drawStone(canvas, size*i/gridSize + size/(2*gridSize), size*j/gridSize + size/(2*gridSize), stoneColor);
     }
     private void drawSquare(Canvas canvas, byte i, byte j, int stoneColor) {
-        drawSquare(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+        drawSquare(canvas, size*i/gridSize + size/(2*gridSize), size*j/gridSize + size/(2*gridSize), stoneColor);
     }
     private void drawSquare(Canvas canvas, float x, float y, int stoneColor) {
         if (stoneColor < 1) {
             return;
         }
-        float width = size / 60;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38 - width/2, cy = (float) Math.floor(19*y/size)*size/19 + size/38 - width/2;
+        float width = size / (3*gridSize);
+        float cx = (float) Math.floor(gridSize*x/size)*size/gridSize + size/(2*gridSize) - width/2, cy = (float) Math.floor(gridSize*y/size)*size/gridSize + size/(2*gridSize) - width/2;
         Paint stonePaint;
         stonePaint = new Paint();
         stonePaint.setStrokeWidth(1);
@@ -573,16 +578,16 @@ public class BoardView extends View {
         stonePaint.setStrokeWidth(1);
         stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         stonePaint.setColor(Color.RED);
-        float radius = size / 100;
-        byte j = (byte) (redDot/19);
-        byte i = (byte) (redDot%19);
-        float cx = size*i/19 + size/38, cy = size*j/19 + size/38;
+        float radius = size / (5*gridSize);
+        byte j = (byte) (redDot/gridSize);
+        byte i = (byte) (redDot%gridSize);
+        float cx = size*i/gridSize + size/(2*gridSize), cy = size*j/gridSize + size/(2*gridSize);
         canvas.drawCircle(cx, cy, radius, stonePaint);
         if (c6RedDot > -1) {
-            j = (byte) (c6RedDot/19);
-            i = (byte) (c6RedDot%19);
-            cx = size*i/19 + size/38;
-            cy = size*j/19 + size/38;
+            j = (byte) (c6RedDot/gridSize);
+            i = (byte) (c6RedDot%gridSize);
+            cx = size*i/gridSize + size/(2*gridSize);
+            cy = size*j/gridSize + size/(2*gridSize);
             canvas.drawCircle(cx, cy, radius, stonePaint);
         }
     }

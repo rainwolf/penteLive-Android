@@ -509,7 +509,7 @@ public class LiveTableFragment extends Fragment {
             if (table.getGameState().goState == GoState.EVALUATESTONES && table.showEvaluateDialog(me)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(table.getScoreMessage());
-                String options[] = {getString(R.string.accept), getString(R.string.decline)};
+                String options[] = {getString(R.string.accept), getString(R.string.reject)};
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
