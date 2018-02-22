@@ -44,17 +44,22 @@ public class Table {
         gameNames.put(9, "G-Pente"); gameNames.put(11, "Poof-Pente");
         gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente");
         gameNames.put(17, "DK-Pente"); gameNames.put(19, "Go");
+        gameNames.put(21, "Go (9x9)");gameNames.put(23, "Go (13x13)");
         gameNames.put(2, "Speed Pente"); gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku"); gameNames.put(8, "Speed D-Pente");
         gameNames.put(10, "Speed G-Pente"); gameNames.put(12, "Speed Poof-Pente");
         gameNames.put(14, "Speed Connect6"); gameNames.put(16, "Speed Boat-Pente");
         gameNames.put(18, "Speed DK-Pente"); gameNames.put(20, "Speed Go");
+        gameNames.put(22, "Speed Go (9x9)");gameNames.put(24, "Speed Go (13x13)");
     }
     private List<Integer> moves = new ArrayList<>();
     private Map<String, Integer> timer;
     private Map<Integer, LivePlayer> seats = new HashMap<>();
     private GameState gameState = new GameState();
     private Context ctx = MyApplication.getContext();
+
+    public int getGridSize() { return gridSize; }
+    public void setGridSize(int gridSize) { this.gridSize = gridSize; }
 
     private int gridSize = 19, passMove = gridSize*gridSize;
     private boolean hasPass = false;
@@ -118,7 +123,7 @@ public class Table {
         }
     }
     public boolean isGo() {
-        return game == 19 || game == 20;
+        return game > 18 && game < 25;
     }
     public void addMove(int move) {
         if (isGo()) {
@@ -708,7 +713,7 @@ public class Table {
         for (int i = 0; i < gridSize; i++) {
             for (int j = 0; j < gridSize; j++) {
                 if (abstractBoard[i][j] == val) {
-                    results.add(i*19+j);
+                    results.add(i*gridSize+j);
                 }
             }
         }
@@ -932,6 +937,13 @@ public class Table {
     }
 
     public void setGame(int game) {
+        if (game == 21 || game == 22) {
+            gridSize = 9; passMove = gridSize*gridSize;
+        } else if (game == 23 || game == 24) {
+            gridSize = 13; passMove = gridSize*gridSize;
+        } else {
+            gridSize = 19; passMove = gridSize*gridSize;
+        }
         this.game = game;
     }
 

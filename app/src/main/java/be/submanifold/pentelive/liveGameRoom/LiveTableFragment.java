@@ -237,7 +237,8 @@ public class LiveTableFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
-                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":361,\"moves\":[361],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                    int passMove = table.getGridSize()*table.getGridSize();
+                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":"+passMove+",\"moves\":["+passMove+"],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
                 } else if (mListener != null && table.isSeated(me)) {
                     mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":"+table.getId()+",\"time\":0}}");
                     playButton.setVisibility(View.INVISIBLE);
@@ -365,7 +366,6 @@ public class LiveTableFragment extends Fragment {
             timerStr = getString(R.string.timer) + ": " + initialMnts + "/" + incrementalScnds;
         }
         settingsText.setText(timerStr + "\n" + ratedStr);
-        board.invalidate();
         synchronized (this) {
             int minutes = table.getGameState().timers.get(1).get("minutes");
             int seconds = table.getGameState().timers.get(1).get("seconds");
@@ -391,6 +391,8 @@ public class LiveTableFragment extends Fragment {
             capturesTextView.setVisibility(View.GONE);
         }
         gameNameView.setText(table.getGameName());
+        board.setGridSize(table.getGridSize());
+        board.invalidate();
     }
 
     public void addText(String text) {
@@ -513,9 +515,10 @@ public class LiveTableFragment extends Fragment {
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        int passMove = table.getGridSize()*table.getGridSize();
                         switch (which) {
                             case 0:
-                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":361,\"moves\":[361],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":"+passMove+",\"moves\":["+passMove+"],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
                                 break;
                             case 1:
                                 mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");

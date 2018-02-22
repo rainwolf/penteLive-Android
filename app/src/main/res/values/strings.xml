@@ -313,6 +313,8 @@
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
         <item>Go</item>
+        <item>Go (9x9)</item>
+        <item>Go (13x13)</item>
     </string-array>
     <string-array name="database_game_types_array">
         <item>Pente</item>
@@ -344,6 +346,9 @@
         <item>Connect6</item>
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
+        <item>Go</item>
+        <item>Go (9x9)</item>
+        <item>Go (13x13)</item>
         <item>Speed Pente</item>
         <item>Speed Keryo-Pente</item>
         <item>Speed Gomoku</item>
@@ -353,6 +358,9 @@
         <item>Speed Connect6</item>
         <item>Speed Boat-Pente</item>
         <item>Speed DK-Pente</item>
+        <item>Speed Go</item>
+        <item>Speed Go (9x9)</item>
+        <item>Speed Go (13x13)</item>
     </string-array>
     <string-array name="all_game_types_array">
         <item>Pente</item>
@@ -364,6 +372,9 @@
         <item>Connect6</item>
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
+        <item>Go</item>
+        <item>Go (9x9)</item>
+        <item>Go (13x13)</item>
         <item>Turn-based Pente</item>
         <item>Turn-based Keryo-Pente</item>
         <item>Turn-based Gomoku</item>
@@ -373,6 +384,9 @@
         <item>Turn-based Connect6</item>
         <item>Turn-based Boat-Pente</item>
         <item>Turn-based DK-Pente</item>
+        <item>Turn-based Go</item>
+        <item>Turn-based Go (9x9)</item>
+        <item>Turn-based Go (13x13)</item>
         <item>Speed Pente</item>
         <item>Speed Keryo-Pente</item>
         <item>Speed Gomoku</item>
@@ -382,6 +396,9 @@
         <item>Speed Connect6</item>
         <item>Speed Boat-Pente</item>
         <item>Speed DK-Pente</item>
+        <item>Speed Go</item>
+        <item>Speed Go (9x9)</item>
+        <item>Speed Go (13x13)</item>
     </string-array>
     <string-array name="ai_game_types_array">
         <item>Pente</item>
