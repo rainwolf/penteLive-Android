@@ -824,7 +824,7 @@ public class MainActivity extends AppCompatActivity {
 //        if (installDateLong  < currentTime) {
         if (installDateLong + 1000L*3600*24*10 < currentTime) {
             long lastRated = PrefUtils.getLongFromPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, 0);
-            if (lastRated == 0 || lastRated + 1000L*3600*24*90 < currentTime) {
+            if (lastRated == 0 || lastRated + 1000L*3600*24*120 < currentTime) {
                 PrefUtils.saveLongToPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, currentTime);
                 RateThisApp.onCreate(this);
 //        RateThisApp.showRateDialogIfNeeded(this);

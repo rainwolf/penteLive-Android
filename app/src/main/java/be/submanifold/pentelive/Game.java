@@ -2098,7 +2098,7 @@ public class Game implements Parcelable {
 
     private HashMap<Integer,HashMap<Integer, List<Integer>>> groupsByPlayerAndID;
     private HashMap<Integer,HashMap<Integer, Integer>> stoneGroupIDsByPlayer;
-    private int koMove = -1;
+    public int koMove = -1;
     private List<Integer> deadStones;
     private HashMap<Integer, List<Integer>> goTerritoryByPlayer;
     private HashMap<Integer, List<Integer>> goDeadStonesByPlayer;

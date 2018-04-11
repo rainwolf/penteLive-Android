@@ -258,7 +258,7 @@ public class BoardView extends View {
                 if (!(abstractBoard[stoneI][stoneJ] != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
                     playedMove = -1;
                 }
-            } else if (abstractBoard[stoneI][stoneJ] != 0) {
+            } else if (abstractBoard[stoneI][stoneJ] != 0 || playedMove == game.koMove) {
                 playedMove = -1;
             }
         } else {
