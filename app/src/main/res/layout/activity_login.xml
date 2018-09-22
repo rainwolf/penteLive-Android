@@ -157,6 +157,14 @@
                 android:layout_marginTop="5dp"
                 android:text="Get Help"/>
 
+            <Button
+                android:id="@+id/privacyButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_action_help"
+                android:layout_marginTop="5dp"
+                android:text="@string/privacy_policy"/>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

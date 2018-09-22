@@ -1,5 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">penteLive</string>
     <string name="not_your_turn">It\'s not your turn.</string>
     <string name="c6_needs_2_moves">Connect6 requires 2 moves per turn.</string>
@@ -253,11 +252,9 @@
     <string name="koth_limit">Free players can play, at most, 2 KotH sets at a time, this includes sent and received invitations, you can post invitations again after you finish a set.\n Subscribers don\'t have this limit.</string>
 
 
-
-
-<string name="show_tb_only">Show only turn-based</string>
-<string name="feature_not_available">Feature not available</string>
-<string name="undo_subscribers_only">Requesting undo is a subscriber feature.</string>
+    <string name="show_tb_only">Show only turn-based</string>
+    <string name="feature_not_available">Feature not available</string>
+    <string name="undo_subscribers_only">Requesting undo is a subscriber feature.</string>
 
     <string name="hide_from_public">hide game from public view</string>
     <string name="unhide_from_public">unhide game from public view</string>
@@ -287,8 +284,9 @@
     <string name="double_pass">Your opponent has made a pass as well. Mark all the dead stones and submit them to your opponent for consideration.</string>
     <string name="double_pass_live">Your opponent has made a pass as well. Mark all the dead stones and finish with a pass.</string>
     <string name="reject_go_state">%1$s has rejected the dead stones, play continues.</string>
-
-
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="gdpr_terms">This app uses device identifiers to personalise ads, delivered by Google\'s Adsense network and Firebase. Please check our privacy policy for an overview of the data that is collected and what we do with it, you can find a link below. By proceeding to use this app, you consent to our privacy policy. You must be at least 16 years old to consent to this, otherwise consent from a parent or guardian is required.</string>
+    <string name="terms_conditions">Terms and conditions</string>
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
@@ -475,4 +473,5 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_gdpr">GDPRActivity</string>
 </resources>

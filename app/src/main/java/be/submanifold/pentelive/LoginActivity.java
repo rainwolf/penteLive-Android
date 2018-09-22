@@ -141,6 +141,14 @@ public class LoginActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        });
 
 
         ((ToggleButton) findViewById(R.id.autoLoginToggle)).setChecked(PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false));

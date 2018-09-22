@@ -25,10 +25,17 @@ public class SplashActivity extends AppCompatActivity {
 //            }
             finish();
         } else {
-            Intent intent = new Intent(this, LoginActivity.class);
+            boolean gdprAccepted = PrefUtils.getBooleanFromPrefs(SplashActivity.this, PrefUtils.PREFS_GDPR_KEY, false);
+            if (!gdprAccepted) {
+                Intent intent = new Intent(this, GDPRActivity.class);
 //        startActivityForResult(intent, 3);
-            startActivity(intent);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, LoginActivity.class);
+//        startActivityForResult(intent, 3);
+                startActivity(intent);
 //        finish();
+            }
         }
     }
 
