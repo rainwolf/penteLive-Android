@@ -343,6 +343,9 @@ public class PentePlayer implements Parcelable {
         }
         if (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") == 0) {
             dashLine = dashLines[idx].replace("OnlinePlayers:","").split(";");
+            if (onlinePlayerNames == null) {
+                onlinePlayerNames = new HashMap<>();
+            }
             onlinePlayerNames.clear();
             for (String name: dashLine) {
                 onlinePlayerNames.put(name, "");

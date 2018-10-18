@@ -586,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void ask2GetStarted() {
         Snackbar snackbar = Snackbar
-                .make(getCurrentFocus(), getString(R.string.nothing_to_see_here), Snackbar.LENGTH_LONG)
+                .make(findViewById(R.id.list), getString(R.string.nothing_to_see_here), Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.post_now), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
