@@ -55,7 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
                 messageWindow.setFocusable(true);
                 messageWindow.setOutsideTouchable(true);
                 messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(RegisterActivity.this, R.drawable.border));
-                messageWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                messageWindow.showAtLocation(findViewById(R.id.registerView), Gravity.TOP, 0, 260);
                 ((TextView) policyView.findViewById(R.id.informationView)).setText("Pente.org maintains a rating for you when you play \"rated\" games.  The ratings system is important to help you determine your skill level and to help you find worthy opponents.  Pente.org attempts to ensure that ratings accurately reflect a players skill, and therefore certain guidelines must be followed by all players!\n" +
                         "          \n" +
                         "1. Play rated games using only your brain.  Do not play with any outside assistance.  Just to be clear, here are some examples of what you should NOT do: use another pente board to examine future positions, use a game database to lookup the current or future positions, use a computer opponent to find moves, consult written notes or books. \n" +

@@ -107,7 +107,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                             challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
                             ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
                             ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
-                            popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 300);
+                            popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
                             expandableList.setAlpha(0.5f);
                         } else {
                             String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName();
@@ -274,7 +274,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_web_koth:
                 int game = kothSummary.getGameId();
-                String url = "https://www.pente.org/gameServer/stairs.jsp?game="+game;
+                String url = "https://www.pente.org/gameServer/stairs.jsp?game="+game+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                 Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
@@ -294,7 +294,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                            String url = "https://www.pente.org/gameServer/subscriptions"+"?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                             Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -305,7 +305,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 } else if (kothSummary.canIchallenge()) {
                     ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
                     challengedUser = "";
-                    popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                    popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                     ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);
                     expandableList.setAlpha(0.5f);
                 }

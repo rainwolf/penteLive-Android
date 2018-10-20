@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
                             popupWindow.setFocusable(true);
                             popupWindow.setOutsideTouchable(true);
                             popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
-                            popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                            popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                             ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                             popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
@@ -448,7 +448,7 @@ public class MainActivity extends AppCompatActivity {
                         popupWindow.setFocusable(true);
                         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                         popupWindow.setOutsideTouchable(true);
-                        popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                        popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                             @Override
                             public void onDismiss() {
@@ -726,7 +726,7 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                         KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
                         if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
-                            String url = "https://www.pente.org/gameServer/profile?viewName="+onlinePlayer.getName();
+                            String url = "https://www.pente.org/gameServer/profile?viewName="+onlinePlayer.getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                             Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -751,7 +751,7 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow.setFocusable(true);
                 popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                 popupWindow.setOutsideTouchable(true);
-                popupWindow.showAtLocation(getCurrentFocus(), Gravity.TOP, 0, 260);
+                popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                 popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                     @Override
                     public void onDismiss() {

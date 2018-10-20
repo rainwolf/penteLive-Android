@@ -301,10 +301,12 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             imgVw.setVisibility(View.VISIBLE);
             imgVw.setAlpha(1f);
             Bitmap avatar = null;
-            if (groupPosition == MESSAGESGROUP) {
-                avatar = PentePlayer.avatars.get(message.getAuthor());
-            } else {
-                avatar = PentePlayer.avatars.get(game.getOpponentName());
+            if (PentePlayer.loadAvatars && PentePlayer.avatars != null) {
+                if (groupPosition == MESSAGESGROUP) {
+                    avatar = PentePlayer.avatars.get(message.getAuthor());
+                } else {
+                    avatar = PentePlayer.avatars.get(game.getOpponentName());
+                }
             }
             if (groupPosition == MESSAGESGROUP && message.unread()) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
