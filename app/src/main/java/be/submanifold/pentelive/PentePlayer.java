@@ -175,7 +175,8 @@ public class PentePlayer implements Parcelable {
         while (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == -1) {
             idx += 1;
         }
-        this.mHills.clear();
+        List<KingOfTheHill> newKOTH = new ArrayList<>();
+//        this.mHills.clear();
         tbHills = 0;
         KingOfTheHill hill;
         if (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == 0) {
@@ -190,8 +191,9 @@ public class PentePlayer implements Parcelable {
                 if (hill.getGameId()>50) {
                     tbHills += 1;
                 }
-                this.mHills.add(hill);
+                newKOTH.add(hill);
             }
+            this.mHills = newKOTH;
         }
         while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
             idx += 1;
@@ -218,7 +220,8 @@ public class PentePlayer implements Parcelable {
         while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
             idx += 1;
         }
-        this.mInvitations.clear();
+        List<Game> newInvitations = new ArrayList<>();
+//        this.mInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == -1) {
@@ -232,10 +235,12 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
-                this.mInvitations.add(game);
+                newInvitations.add(game);
             }
+            this.mInvitations = newInvitations;
         }
-        this.mSentInvitations.clear();
+        List<Game> newSentInvitations = new ArrayList<>();
+//        this.mSentInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == -1) {
@@ -249,10 +254,12 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
-                this.mSentInvitations.add(game);
+                newSentInvitations.add(game);
             }
+            this.mSentInvitations = newSentInvitations;
         }
-        this.mActiveGames.clear();
+        List<Game> newActive = new ArrayList<>();
+//        this.mActiveGames.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == -1) {
@@ -266,10 +273,12 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
-                this.mActiveGames.add(game);
+                newActive.add(game);
             }
+            this.mActiveGames = newActive;
         }
-        this.mNonActiveGames.clear();
+        List<Game> newNonActive = new ArrayList<>();
+//        this.mNonActiveGames.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == -1) {
@@ -283,10 +292,12 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
-                this.mNonActiveGames.add(game);
+                newNonActive.add(game);
             }
+            this.mNonActiveGames = newNonActive;
         }
-        this.mPublicInvitations.clear();
+        List<Game> newPublic = new ArrayList<>();
+//        this.mPublicInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == 0) {
             idx += 1;
             while (idx < dashLines.length && dashLines[idx].indexOf("Messages") == -1) {
@@ -300,10 +311,12 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
-                this.mPublicInvitations.add(game);
+                newPublic.add(game);
             }
+            this.mPublicInvitations = newPublic;
         }
-        this.mMessages.clear();
+        List<Message> newMessages = new ArrayList<>();
+//        this.mMessages.clear();
         Message message;
         if (idx < dashLines.length && dashLines[idx].indexOf("Messages") == 0) {
             idx += 1;
@@ -317,11 +330,13 @@ public class PentePlayer implements Parcelable {
                 if (loadAvatars && message.getNameColor() != 0) {
                     addUserAvatar(message.getAuthor());
                 }
-                this.mMessages.add(message);
+                newMessages.add(message);
             }
+            this.mMessages = newMessages;
         }
 
-        this.mTournaments.clear();
+        List<Tournament> newTournament = new ArrayList<>();
+//        this.mTournaments.clear();
         Tournament tournament;
         while (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") != 0) {
             idx += 1;
@@ -335,8 +350,9 @@ public class PentePlayer implements Parcelable {
                     continue;
                 }
                 tournament = new Tournament(dashLine[3], dashLine[0], dashLine[1], dashLine[2], dashLine[4], dashLine[5]);
-                this.mTournaments.add(tournament);
+                newTournament.add(tournament);
             }
+            this.mTournaments = newTournament;
         }
         while (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") != 0) {
             idx += 1;

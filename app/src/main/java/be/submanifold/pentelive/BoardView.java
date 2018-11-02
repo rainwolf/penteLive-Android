@@ -228,6 +228,9 @@ public class BoardView extends View {
         stoneJ = (byte) (gridSize*stoneX/size);
         stoneY = y;
         stoneI = (byte) (gridSize*stoneY/size);
+        if (stoneI >= size || stoneJ >= size) {
+            return false;
+        }
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 if (!replayed && !game.isGoMarkStones()) {
