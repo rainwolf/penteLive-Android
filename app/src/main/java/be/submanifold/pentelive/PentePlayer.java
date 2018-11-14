@@ -164,7 +164,9 @@ public class PentePlayer implements Parcelable {
             dashLine = dashLines[idx].split(";", -1);
             this.myColor = Integer.parseInt(dashLine[1]);
             this.mShowAds = !"NoAds".equals(dashLine[2]);
+//            this.mShowAds = true;
             this.mSubscriber = "subscriber".equals(dashLine[3]);
+//            this.mSubscriber = false;
             this.livePlayers = Integer.parseInt(dashLine[4]);
             this.dbAccess = "dbAccessGranted".equals(dashLine[5]);
             this.emailMe = "emailMe".equals(dashLine[6]);
