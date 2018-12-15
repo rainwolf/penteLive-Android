@@ -201,7 +201,10 @@ public class RegisterActivity extends AppCompatActivity {
                 PrefUtils.saveToPrefs(RegisterActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, password);
                 finish();
             } else {
-                if (response.indexOf("Registration failed: Requested name " + username + " is already taken, please choose another.") > -1) {
+                if (response == null) {
+                    Toast.makeText(RegisterActivity.this, "Something went wrong, please try again/later.",
+                            Toast.LENGTH_LONG).show();
+                } else if (response.indexOf("Registration failed: Requested name " + username + " is already taken, please choose another.") > -1) {
                     Toast.makeText(RegisterActivity.this, getString(R.string.username_taken, username),
                             Toast.LENGTH_LONG).show();
                 }

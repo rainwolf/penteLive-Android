@@ -79,11 +79,11 @@ public class BoardActivity extends AppCompatActivity {
         board.setGame(game);
 
 
-        if (PentePlayer.mShowAds) {
-            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
-        } else {
-            ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
-        }
+//        if (PentePlayer.mShowAds) {
+//            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
+//        } else {
+//            ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
+//        }
 
         setRegularSubmitListener();
 
@@ -396,6 +396,11 @@ public class BoardActivity extends AppCompatActivity {
         super.onResume();
         (BoardActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name_computer"));
         MyApplication.activityResumed(this);
+        if (PentePlayer.mShowAds == null || PentePlayer.mShowAds) {
+            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
+        } else {
+            ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
+        }
     }
 
     @Override

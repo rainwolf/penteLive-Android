@@ -118,7 +118,9 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
         Bitmap avatar = null;
-        avatar = PentePlayer.avatars.get(player.getName());
+        if (PentePlayer.loadAvatars && PentePlayer.avatars != null) {
+            avatar = PentePlayer.avatars.get(player.getName());
+        }
         if (avatar != null) {
             imgVw.setImageBitmap(avatar);
         } else if (PentePlayer.loadAvatars) {

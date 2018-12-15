@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="be.submanifold.pentelive"
-    android:versionCode="138"
-    android:versionName="2.4.9">
+    android:versionCode="143"
+    android:versionName="2.4.14">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -20,6 +20,9 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3326997956703582~7930084241"/>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <activity
             android:name=".SplashActivity"
             android:clearTaskOnLaunch="true"

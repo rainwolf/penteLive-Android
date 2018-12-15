@@ -31,11 +31,11 @@ public class PentePlayer implements Parcelable {
 
     public static Boolean development = false;
 
-    public static String mPlayerName;
-    public static String mPassword;
-    public static Boolean mShowAds;
-    public static Boolean mSubscriber;
-    public static Boolean dbAccess;
+    public static String mPlayerName = "";
+    public static String mPassword = "";
+    public static Boolean mShowAds = true;
+    public static Boolean mSubscriber= false;
+    public static Boolean dbAccess = false;
     private List<Game> mInvitations;
     private List<Game>  mSentInvitations;
     private List<Game>  mActiveGames;
@@ -45,16 +45,16 @@ public class PentePlayer implements Parcelable {
     private List<RatingStat> mRatingStats;
     private List<KingOfTheHill> mHills;
     private List<Tournament> mTournaments;
-    public static int myColor;
+    public static int myColor = 0;
 
     public static List<String> pendingAvatarChecks;
     public static Map<String, Bitmap> avatars;
 
     public static Map<String, String> onlinePlayerNames;
 
-    public static boolean loadAvatars;
-    public static boolean showOnlyTB;
-    public static boolean emailMe;
+    public static boolean loadAvatars = false;
+    public static boolean showOnlyTB = false;
+    public static boolean emailMe = false;
 
     private int livePlayers;
     public int getLivePlayers() { return this.livePlayers; }
@@ -66,8 +66,8 @@ public class PentePlayer implements Parcelable {
     public int gettbHills() { return tbHills; }
 
     public PentePlayer(String playerName, String password) {
-        this.mPlayerName = playerName;
-        this.mPassword = password;
+        mPlayerName = playerName;
+        mPassword = password;
         this.mInvitations = new ArrayList<Game>();
         this.mSentInvitations = new ArrayList<Game>();
         this.mActiveGames = new ArrayList<Game>();
@@ -77,8 +77,8 @@ public class PentePlayer implements Parcelable {
         this.mRatingStats = new ArrayList<RatingStat>();
         this.mTournaments = new ArrayList<Tournament>();
         this.mHills = new ArrayList<KingOfTheHill>();
-        this.mShowAds = true;
-        this.emailMe = true;
+        mShowAds = true;
+        emailMe = true;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
@@ -89,7 +89,7 @@ public class PentePlayer implements Parcelable {
     }
 
     public String getPlayerName() {
-        return this.mPlayerName;
+        return mPlayerName;
     }
     public List<Game> getInvitations() {
         return this.mInvitations;
@@ -110,12 +110,12 @@ public class PentePlayer implements Parcelable {
         return this.mMessages;
     }
     public List<Tournament> getTournaments() { return this.mTournaments;    }
-    public Boolean showAds() { return this.mShowAds; }
+    public Boolean showAds() { return mShowAds; }
     public Boolean isSubscriber() {
         return mSubscriber;
     }
-    public void setSubscriber(Boolean mSubscriber) {
-        this.mSubscriber = mSubscriber;
+    public void setSubscriber(Boolean subscriber) {
+        mSubscriber = subscriber;
     }
     public List<RatingStat> getRatingStats() {
         return mRatingStats;
@@ -124,12 +124,12 @@ public class PentePlayer implements Parcelable {
     public int getMyColor() {
         return myColor;
     }
-    public void setMyColor(int myColor) {
-        this.myColor = myColor;
+    public void setMyColor(int color) {
+        myColor = color;
     }
     public static Boolean hasDBAccess() { return dbAccess; }
     public boolean isEmailMe() { return emailMe; }
-    public void setEmailMe(boolean emailMe) { this.emailMe = emailMe; }
+    public void setEmailMe(boolean email) { emailMe = email; }
 
     public static void markIfOnline(String name, SpannableStringBuilder attributedString) {
         if (onlinePlayerNames != null && onlinePlayerNames.containsKey(name)) {
@@ -162,14 +162,14 @@ public class PentePlayer implements Parcelable {
         }
         if (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) == 0) {
             dashLine = dashLines[idx].split(";", -1);
-            this.myColor = Integer.parseInt(dashLine[1]);
-            this.mShowAds = !"NoAds".equals(dashLine[2]);
+            myColor = Integer.parseInt(dashLine[1]);
+            mShowAds = !"NoAds".equals(dashLine[2]);
 //            this.mShowAds = true;
-            this.mSubscriber = "subscriber".equals(dashLine[3]);
+            mSubscriber = "subscriber".equals(dashLine[3]);
 //            this.mSubscriber = false;
             this.livePlayers = Integer.parseInt(dashLine[4]);
-            this.dbAccess = "dbAccessGranted".equals(dashLine[5]);
-            this.emailMe = "emailMe".equals(dashLine[6]);
+            dbAccess = "dbAccessGranted".equals(dashLine[5]);
+            emailMe = "emailMe".equals(dashLine[6]);
             this.onlineFollowingers = Integer.parseInt(dashLine[7]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
@@ -384,9 +384,9 @@ public class PentePlayer implements Parcelable {
     }
 
     public void loadPlayer(DashboardListAdapter listAdapter, boolean loadAvatars, boolean showOnlyTB) {
-        this.showOnlyTB = showOnlyTB;
-        this.loadAvatars = loadAvatars;
-        if (this.mPassword == null || this.mPlayerName == null) {
+        showOnlyTB = showOnlyTB;
+        loadAvatars = loadAvatars;
+        if (mPassword == null || mPlayerName == null) {
             return;
         }
         LoadPlayerTask loadTask = new LoadPlayerTask(mPlayerName, mPassword, listAdapter);

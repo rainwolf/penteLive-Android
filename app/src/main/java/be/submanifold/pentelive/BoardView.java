@@ -228,7 +228,7 @@ public class BoardView extends View {
         stoneJ = (byte) (gridSize*stoneX/size);
         stoneY = y;
         stoneI = (byte) (gridSize*stoneY/size);
-        if (stoneI >= size || stoneJ >= size) {
+        if (stoneI >= gridSize || stoneJ >= gridSize) {
             return false;
         }
         switch(event.getAction()){
