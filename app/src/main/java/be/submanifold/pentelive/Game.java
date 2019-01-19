@@ -318,12 +318,12 @@ public class Game implements Parcelable {
                     thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
                 String players[] = mOpponentName.split(" vs ");
-                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "\">" +players[0] + "</a> vs " +
-                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "\">" +players[1] + "</a>"
+                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0]+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" +players[0] + "</a> vs " +
+                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1]+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" +players[1] + "</a>"
                         + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             } else {
-                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName + "\">" + mOpponentName + "</a>"
+                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" + mOpponentName + "</a>"
                         + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             }

@@ -15,11 +15,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
@@ -65,7 +65,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
+
+//        Map<String, String> params = message.getData();
+//        JSONObject object = new JSONObject(params);
+//        System.out.println(object.toString());
         sendNotification(message);
+
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -81,9 +86,6 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
         String messageStr = (String) data.get("message");
         boolean silent = "silentNotification".equals(messageStr);
-        if (!silent) {
-            silent = PrefUtils.getBooleanFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false);
-        }
 
         String localMsgStr = "";
         if (messageStr.contains("device has been registered for notifications")) {
@@ -110,43 +112,49 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                     PendingIntent.FLAG_ONE_SHOT);
 
-            Uri notificationSoundUri;
-            String notificationChannel = "";
-            if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
-                notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
-                notificationChannel = "penteLive_livePlay_channel";
-            } else {
-                notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
-                notificationChannel = "penteLive_turnBased_channel";
-            }
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, notificationChannel)
-                    .setSmallIcon(R.drawable.ic_radio_button_unchecked)
-                    .setContentTitle("Pente Live")
+            if (!silent) {
+                Uri notificationSoundUri;
+                String notificationChannel = "";
+                if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
+                    notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
+                    notificationChannel = "penteLive_livePlay_channel";
+                } else {
+                    notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+                    notificationChannel = "penteLive_turnBased_channel";
+                }
+                NotificationCompat.Builder notificationBuilder;
+                notificationBuilder = new NotificationCompat.Builder(this, notificationChannel)
+                        .setSmallIcon(R.drawable.ic_radio_button_unchecked)
+                        .setContentTitle("Pente Live")
 //                    .setContentText("")
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(localMsgStr))
-                    .setAutoCancel(true)
-                    .setSound(notificationSoundUri)
-                    .setContentIntent(pendingIntent);
+                        .setStyle(new android.support.v4.app.NotificationCompat.BigTextStyle().bigText(localMsgStr))
+                        .setAutoCancel(true)
+                        .setSound(notificationSoundUri)
+                        .setContentIntent(pendingIntent);
 
-            Notification notification = notificationBuilder.build();
-            notification.sound = notificationSoundUri;
-            notification.defaults = ~Notification.DEFAULT_SOUND;
+                Notification notification = notificationBuilder.build();
+                notification.sound = notificationSoundUri;
+                notification.defaults = ~Notification.DEFAULT_SOUND;
 
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                AudioAttributes att = new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build();
-                NotificationChannel channel = new NotificationChannel(notificationChannel, "penteLive", NotificationManager.IMPORTANCE_DEFAULT);
-                channel.setSound(notificationSoundUri, att);
-                notificationManager.createNotificationChannel(channel);
+                NotificationManager notificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    AudioAttributes att = new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build();
+                    NotificationChannel channel = new NotificationChannel(notificationChannel, "penteLive", NotificationManager.IMPORTANCE_DEFAULT);
+                    channel.setSound(notificationSoundUri, att);
+                    notificationManager.createNotificationChannel(channel);
+                }
+
+
+                notificationManager.notify(0 /* ID of notification */, notification);
             }
-
-
-            notificationManager.notify(0 /* ID of notification */, notification);
         } else {
+            if (!silent) {
+                silent = PrefUtils.getBooleanFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false);
+            }
             Uri notificationSoundUri;
             if (messageStr.contains("Live Game Alert") && messageStr.contains("wants to play live")) {
                 notificationSoundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);

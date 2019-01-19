@@ -110,7 +110,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                             popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
                             expandableList.setAlpha(0.5f);
                         } else {
-                            String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName();
+                            String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                             Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -140,7 +140,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 @Override
                 public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
                     if (groupPosition > 0) {
-                        String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName();
+                        String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
                         Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                         intent.putExtra("url", url);
                         startActivity(intent);

@@ -367,13 +367,17 @@ public class BoardActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
 //                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
         board.playedMove = -1;
-        if (game.messages.get(game.getUntilMove()) != null) {
+
+        if (game.messages != null && game.messages.get(game.getUntilMove()) != null) {
             messageIcon.startAnimation(rotation);
         } else {
             messageIcon.clearAnimation();
         }
     }
     public void  goForward() {
+        if (game.getMovesList() == null) {
+            return;
+        }
         if (game.getUntilMove() < game.getMovesList().size()) {
             if (game.isConnect6()) {
                 game.setUntilMove(game.getUntilMove() + 2);
@@ -419,7 +423,7 @@ public class BoardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 messageIcon.clearAnimation();
-                if (game.messages.get(game.getUntilMove()) != null) {
+                if (game != null && game.messages != null && game.messages.get(game.getUntilMove()) != null) {
                     ((TextView) messageView.findViewById(R.id.opponentMessage)).setText(game.messages.get(game.getUntilMove()));
                 } else if (!game.isActive()) {
                     return;
