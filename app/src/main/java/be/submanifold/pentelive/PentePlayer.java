@@ -174,7 +174,7 @@ public class PentePlayer implements Parcelable {
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
         }
 
-        while (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == -1) {
+        while (idx < dashLines.length && !dashLines[idx].contains("King of the Hill")) {
             idx += 1;
         }
         List<KingOfTheHill> newKOTH = new ArrayList<>();
@@ -183,7 +183,7 @@ public class PentePlayer implements Parcelable {
         KingOfTheHill hill;
         if (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Rating Stats")) {
                 dashLine = dashLines[idx].split(";", -1);
                 idx += 1;
                 if (dashLine.length < 7) {
@@ -197,7 +197,7 @@ public class PentePlayer implements Parcelable {
             }
             this.mHills = newKOTH;
         }
-        while (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == -1) {
+        while (idx < dashLines.length && !dashLines[idx].contains("Rating Stats")) {
             idx += 1;
         }
         this.mRatingStats.clear();
@@ -205,7 +205,7 @@ public class PentePlayer implements Parcelable {
         RatingStat ratingStat;
         if (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Invitations received")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 5) {
@@ -219,14 +219,14 @@ public class PentePlayer implements Parcelable {
             }
         }
         Game game;
-        while (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == -1) {
+        while (idx < dashLines.length && !dashLines[idx].contains("Invitations received")) {
             idx += 1;
         }
         List<Game> newInvitations = new ArrayList<>();
 //        this.mInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Invitations sent")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 9) {
@@ -245,7 +245,7 @@ public class PentePlayer implements Parcelable {
 //        this.mSentInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Active Games - My Turn")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 9) {
@@ -264,7 +264,7 @@ public class PentePlayer implements Parcelable {
 //        this.mActiveGames.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Active Games - Opponents Turn")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 10) {
@@ -283,7 +283,7 @@ public class PentePlayer implements Parcelable {
 //        this.mNonActiveGames.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Open Invitation Games")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 10) {
@@ -302,7 +302,7 @@ public class PentePlayer implements Parcelable {
 //        this.mPublicInvitations.clear();
         if (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].indexOf("Messages") == -1) {
+            while (idx < dashLines.length && !dashLines[idx].contains("Messages")) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 9) {

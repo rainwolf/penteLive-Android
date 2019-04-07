@@ -27,9 +27,13 @@ public class MyApplication extends Application {
     }
 
     public static void activityResumed(Context ctx) {
-        NotificationManager notificationManager =
-                (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
+        try {
+            NotificationManager notificationManager =
+                    (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         activityVisible = true;
     }
 

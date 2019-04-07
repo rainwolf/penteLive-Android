@@ -183,7 +183,7 @@ public class RegisterActivity extends AppCompatActivity {
                 System.out.println(output);
                 response = output.toString();
 
-                if (response.indexOf("Registration failed: Requested name " + username + " is already taken, please choose another.") > -1) {
+                if (response.contains("Registration failed: Requested name " + username + " is already taken, please choose another.")) {
                     return false;
                 }
 

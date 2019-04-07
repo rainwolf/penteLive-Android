@@ -287,7 +287,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         }
         if ((groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP) && game.getRatedNot().contains("Not ")) {
             String colorStr;
-            if (game.getMyColor().equals("white")) {
+            System.out.println("***************** " + game.getMyColor());
+            if (game.getMyColor().indexOf("white") == 0) {
                 colorStr = ctx.getString(R.string.white);
             } else {
                 colorStr = ctx.getString(R.string.black);
