@@ -82,7 +82,7 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
-    int countDownSeconds = 7*60;
+    int countDownSeconds = 1*60;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -583,7 +583,7 @@ public class LiveTableFragment extends Fragment {
                     }
                 });
                 waitForPlayerReturnDialog = builder.create();
-                waitForPlayerReturnDialog.setTitle("7:00");
+                waitForPlayerReturnDialog.setTitle("1:00");
                 waitForPlayerReturnDialog.setMessage(getString(R.string.player_disconnected));
                 Window window = waitForPlayerReturnDialog.getWindow();
                 WindowManager.LayoutParams wlp = window.getAttributes();
@@ -601,7 +601,7 @@ public class LiveTableFragment extends Fragment {
                     }
                 });
                 waitForPlayerReturnDialog.show();
-                countDownTimer = new CountDownTimer(7*60*1000, 1000) {
+                countDownTimer = new CountDownTimer(1*60*1000, 1000) {
                     @Override
                     public void onTick(long l) {
                         long seconds = l/1000;
