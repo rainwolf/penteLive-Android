@@ -8,7 +8,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +18,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +32,6 @@ import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +49,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
     private LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
-    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "").toLowerCase();
+
+    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    public String getMe() { return me; }
+
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
     private boolean silent;
 
@@ -124,7 +122,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     eventHandler.addListener(self);
                     String username = PentePlayer.mPlayerName;
                     String password = PentePlayer.mPassword;
-                    eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\""+username+"\",\"password\":\""+password+"\",\"guest\":false,\"time\":0}}");
+                    if (self.me.startsWith("guest")) {
+                        eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"guest\":true,\"time\":0}}");
+                    } else {
+                        eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\""+username+"\",\"password\":\""+password+"\",\"guest\":false,\"time\":0}}");
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -207,6 +209,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     (new BootMeTask()).execute((Void) null);
                                 } else if (jsonEvent.get("dsgLoginEvent") != null) {
                                     tablesAndPlayers.login((Map<String, ?>) jsonEvent.get("dsgLoginEvent"));
+                                    self.me = tablesAndPlayers.getMe();
                                     updateMainRoom();
                                 } else if (jsonEvent.get("dsgTextMainRoomEvent") != null) {
                                     tablesAndPlayers.addMainRoomText((Map<String, ?>) jsonEvent.get("dsgTextMainRoomEvent"));

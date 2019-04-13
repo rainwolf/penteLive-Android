@@ -60,8 +60,8 @@ public class LiveBoardView extends View {
         translateY = 0;
     }
 
-    public void setTable(Table table) {
-        me = (String) PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "").toLowerCase();
+    public void setTable(Table table, String me) {
+        this.me = me;
         this.table = table;
     }
 

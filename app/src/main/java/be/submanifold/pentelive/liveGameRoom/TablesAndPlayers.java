@@ -21,7 +21,9 @@ public class TablesAndPlayers {
     public Map<Integer, Table> tables = new HashMap<>();
     public String mainRoomText = "";
     private Context ctx = MyApplication.getContext();
-    private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "").toLowerCase();
+
+    private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    public String getMe() { return me; }
 
     public void joinMainRoom(Map<String, ?> data) {
         String playerName = (String) data.get("player");
@@ -122,6 +124,7 @@ public class TablesAndPlayers {
                 mainRoomText = mainRoomText + message + "\n";
             }
         }
+        this.me = (String) data.get("player");
     }
     public int changeTableState(Map<String, Object> data) {
         boolean timed = (Boolean) data.get("timed");

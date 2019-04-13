@@ -4,12 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.AsyncTask;
 
@@ -46,6 +48,10 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+
+import be.submanifold.pentelive.liveGameRoom.LiveGameRoom;
+import be.submanifold.pentelive.liveGameRoom.LiveGameRoomActivity;
+import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 
 
 /**
@@ -216,6 +222,29 @@ public class LoginActivity extends AppCompatActivity
             ((LinearLayout) findViewById(R.id.registerLayout)).setVisibility(View.GONE);
             ((AutoCompleteTextView) findViewById(R.id.email)).setEnabled(false);
             ((EditText) findViewById(R.id.password)).setEnabled(false);
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.not_registered_yet));
+            builder.setMessage(getString(R.string.account_needed));
+            builder.setPositiveButton(getString(R.string.play_live_as_guest), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(getApplicationContext(), LiveGameRoomActivity.class);
+                    intent.putExtra("room", new LiveGameRoom("Beginners", 16001));
+                    startActivity(intent);
+                }
+            });
+            builder.setNeutralButton(getString(R.string.play_ai), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                    startActivity(intent);
+                }
+            });
+            builder.setNegativeButton(getString(R.string.register), null);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
@@ -478,6 +507,20 @@ public class LoginActivity extends AppCompatActivity
                 } else {
                     Toast toast = Toast.makeText(LoginActivity.this, getString(R.string.error_connecting), Toast.LENGTH_LONG);
                     toast.show();
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                    builder.setTitle(getString(R.string.connection_wrong));
+                    builder.setPositiveButton(getString(R.string.play_ai), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                    builder.setNegativeButton(getString(R.string.dismiss), null);
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
             }
         }

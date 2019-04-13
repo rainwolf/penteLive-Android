@@ -2,21 +2,16 @@ package be.submanifold.pentelive.liveGameRoom;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -33,7 +28,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,9 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
-import be.submanifold.pentelive.BoardActivity;
-import be.submanifold.pentelive.InvitationActivity;
-import be.submanifold.pentelive.MainActivity;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
@@ -213,16 +204,16 @@ public class LiveTableFragment extends Fragment {
             }
         });
 
+        activity = (LiveGameRoomActivity) getActivity();
+        me = activity.getMe();
         board = (LiveBoardView) getView().findViewById(R.id.boardView);
-        board.setTable(table);
+        board.setTable(table, me);
         board.setFragment(this);
         if (PentePlayer.mShowAds) {
             ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
         } else {
             ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
         }
-        activity = (LiveGameRoomActivity) getActivity();
-        me = PrefUtils.getFromPrefs(activity, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "").toLowerCase();
         p1Name = (TextView) getView().findViewById(R.id.p1Name);
         p2Name = (TextView) getView().findViewById(R.id.p2Name);
         p1Timer = (TextView) getView().findViewById(R.id.p1Timer);
