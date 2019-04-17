@@ -399,7 +399,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
+//                System.out.println("output==========" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");
@@ -420,7 +420,7 @@ public class Game implements Parcelable {
 //
 //                    output = new StringBuilder();
 //                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output===============" + br);
+//                    System.out.println("output==========" + br);
 //                    line = "";
 //                    while((line = br.readLine()) != null ) {
 //                        output.append(line + System.getProperty("line.separator"));
@@ -444,7 +444,7 @@ public class Game implements Parcelable {
 
                     output = new StringBuilder();
                     br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output===============" + br);
+//                    System.out.println("output==========" + br);
                     line = "";
                     while((line = br.readLine()) != null ) {
                         output.append(line + "\n");
@@ -519,7 +519,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
+//                System.out.println("output==========" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + "\n");
@@ -536,7 +536,7 @@ public class Game implements Parcelable {
 ////
 ////                    output = new StringBuilder();
 ////                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-////                    System.out.println("output===============" + br);
+////                    System.out.println("output==========" + br);
 ////                    line = "";
 ////                    while((line = br.readLine()) != null ) {
 ////                        output.append(line + System.getProperty("line.separator"));
@@ -557,7 +557,7 @@ public class Game implements Parcelable {
 //
 //                    output = new StringBuilder();
 //                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output===============" + br);
+//                    System.out.println("output==========" + br);
 //                    line = "";
 //                    while((line = br.readLine()) != null ) {
 //                        output.append(line + "\n");
@@ -646,7 +646,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
+//                System.out.println("output==========" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -734,7 +734,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
+//                System.out.println("output==========" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -824,7 +824,7 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
+//                System.out.println("output==========" + br);
                 String line = "";
                 while((line = br.readLine()) != null ) {
                     output.append(line + System.getProperty("line.separator"));
@@ -1344,6 +1344,9 @@ public class Game implements Parcelable {
         } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(untilMove);
+        } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
+            boardView.setBackgroundColor(boardView.oPenteColor);
+            replayOPenteGame(untilMove);
         }
 
         movesString = "";
@@ -1425,6 +1428,9 @@ public class Game implements Parcelable {
         } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(moveI, moveJ);
+        } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
+            boardView.setBackgroundColor(boardView.oPenteColor);
+            replayOPenteGame(moveI, moveJ);
         }
 
         if (boardView != null) {
@@ -1516,6 +1522,46 @@ public class Game implements Parcelable {
             }
         }
     }
+    private void replayOPenteGame(int until) {
+        resetAbstractBoard();
+        for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
+            byte color = (byte) (1 + (i%2));
+            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            abstractBoard[moveI][moveJ] = color;
+            detectPoof(moveI, moveJ, color);
+            detectKeryoPoof(moveI, moveJ, color);
+            detectPenteCapture(moveI, moveJ, color);
+            detectKeryoPenteCapture(moveI, moveJ, color);
+        }
+        if (rated() && (mMovesList.size() == 2)) {
+            for( int i = 7; i < 12; ++i) {
+                for (int j = 7; j < 12; ++j) {
+                    if (abstractBoard[i][j] == 0) {
+                        abstractBoard[i][j] = -1;
+                    }
+                }
+            }
+        }
+    }
+    private void replayOPenteGame(byte moveI, byte moveJ) {
+        resetAbstractBoard();
+        for (int i = 0; i < mMovesList.size(); i++) {
+            byte color = (byte) (1 + (i%2));
+            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            abstractBoard[mvI][mvJ] = color;
+            detectPoof(mvI, mvJ, color);
+            detectKeryoPoof(mvI, mvJ, color);
+            detectPenteCapture(mvI, mvJ, color);
+            detectKeryoPenteCapture(mvI, mvJ, color);
+        }
+        byte color = (byte) (1 + (mMovesList.size()%2));
+        abstractBoard[moveI][moveJ] = color;
+        detectPoof(moveI, moveJ, color);
+        detectKeryoPoof(moveI, moveJ, color);
+        detectPenteCapture(moveI, moveJ, color);
+        detectKeryoPenteCapture(moveI, moveJ, color);
+    }
+
     private void replayKeryoPenteGame(byte moveI, byte moveJ) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
@@ -1955,8 +2001,202 @@ public class Game implements Parcelable {
         }
     }
 
+    private void detectKeryoPoof(int i, int j, byte myColor) {
+        byte opponentColor = (byte) (1 + (myColor % 2));
+        boolean poofed = false;
+        if (((i-3) > -1) && ((i+1) < 19)) { // left
+            if (abstractBoard[i-1][j] == myColor && abstractBoard[i-2][j] == myColor) {
+                if ((abstractBoard[i-3][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
+                    abstractBoard[i-2][j] = 0;
+                    abstractBoard[i-1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-3) > -1) && ((j-3) > -1) && ((i+1) < 19) && ((j+1) < 19)) { // up left
+            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i-2][j-2] == myColor) {
+                if ((abstractBoard[i-3][j-3] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
+                    abstractBoard[i-2][j-2] = 0;
+                    abstractBoard[i-1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j-3) > -1) && ((j+1) < 19)) { // up
+            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j-2] == myColor) {
+                if ((abstractBoard[i][j-3] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
+                    abstractBoard[i][j-2] = 0;
+                    abstractBoard[i][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-1) > -1) && ((j-3) > -1) && ((i+3) < 19) && ((j+1) < 19)) { // up right
+            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+2][j-2] == myColor) {
+                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
+                    abstractBoard[i+2][j-2] = 0;
+                    abstractBoard[i+1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i+3) < 19) && ((i-1) > -1)) { // right
+            if (abstractBoard[i+1][j] == myColor && abstractBoard[i+2][j] == myColor) {
+                if ((abstractBoard[i+3][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
+                    abstractBoard[i+2][j] = 0;
+                    abstractBoard[i+1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-1) > -1) && ((j-1) > -1) && ((i+3) < 19) && ((j+3) < 19)) { // down right
+            if (abstractBoard[i+1][j+1] == myColor && abstractBoard[i+2][j+2] == myColor) {
+                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
+                    abstractBoard[i+2][j+2] = 0;
+                    abstractBoard[i+1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j+2) < 19) && ((j-1) > -1)) { // down
+            if (abstractBoard[i][j+1] == myColor && abstractBoard[i][j+2] == myColor) {
+                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
+                    abstractBoard[i][j+1] = 0;
+                    abstractBoard[i][j+2] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-3) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+3) < 19)) { // down left
+            if (abstractBoard[i-1][j+1] == myColor && abstractBoard[i-2][j+2] == myColor) {
+                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
+                    abstractBoard[i-2][j+2] = 0;
+                    abstractBoard[i-1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
 
-    private boolean detectPente(byte color, int rowCol) {
+        // 4 directions with center of 3 stones placed to poof
+        if (((i-2) > -1) && ((i+2) < 19)) { // horizontal
+            if (abstractBoard[i-1][j] == myColor && abstractBoard[i+1][j] == myColor) {
+                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
+                    abstractBoard[i+1][j] = 0;
+                    abstractBoard[i-1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up left
+            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i+1][j+1] == myColor) {
+                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
+                    abstractBoard[i+1][j+1] = 0;
+                    abstractBoard[i-1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j-2) > -1) && ((j+2) < 19)) { // vertical
+            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j+1] == myColor) {
+                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
+                    abstractBoard[i][j+1] = 0;
+                    abstractBoard[i][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up right
+            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+1][j-1] == myColor) {
+                if ((abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
+                    abstractBoard[i+1][j-1] = 0;
+                    abstractBoard[i-1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+
+        if (poofed) {
+            if (myColor == 1) {
+                ++whiteCaptures;
+            } else {
+                ++blackCaptures;
+            }
+        }
+    }
+
+        private boolean detectPente(byte color, int rowCol) {
         boolean pente = false;
         int penteCounter = 1;
         int row = rowCol / 19, col = rowCol % 19, i, j;

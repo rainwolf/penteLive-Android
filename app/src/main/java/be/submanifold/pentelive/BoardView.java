@@ -47,13 +47,13 @@ public class BoardView extends View {
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            goColor = Color.parseColor("#FAC832");
+            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80");
     private Paint blackPaint =  makePaint(blackColor), whitePaint = makePaint(whiteColor), pentePaint = makePaint(penteColor),
             keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
             dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
             poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
             boatPentePaint = makePaint(boatPenteColor), dkeryoPaint = makePaint(dkeryoColor),
-            goPaint = makePaint(goColor), shadowPaint = makePaint(Color.BLACK);
+            goPaint = makePaint(goColor), oPentePaint = makePaint(oPenteColor), shadowPaint = makePaint(Color.BLACK);
     public byte abstractBoard[][];
 
     private float size;

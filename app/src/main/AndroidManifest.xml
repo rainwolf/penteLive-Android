@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="be.submanifold.pentelive"
-    android:versionCode="150"
-    android:versionName="2.5.0">
+    android:versionCode="151"
+    android:versionName="2.6.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

@@ -98,6 +98,7 @@ public class InvitationActivity extends AppCompatActivity {
                     case 9: gameType = "69"; break;
                     case 10: gameType = "71"; break;
                     case 11: gameType = "73"; break;
+                    case 12: gameType = "75"; break;
                 }
                 String timeout =  ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
                 String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";

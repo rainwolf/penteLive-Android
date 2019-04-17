@@ -25,7 +25,7 @@ public class Table {
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            goColor = Color.parseColor("#FAC832");
+            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -45,12 +45,14 @@ public class Table {
         gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente");
         gameNames.put(17, "DK-Pente"); gameNames.put(19, "Go");
         gameNames.put(21, "Go (9x9)");gameNames.put(23, "Go (13x13)");
+        gameNames.put(25, "O-Pente");
         gameNames.put(2, "Speed Pente"); gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku"); gameNames.put(8, "Speed D-Pente");
         gameNames.put(10, "Speed G-Pente"); gameNames.put(12, "Speed Poof-Pente");
         gameNames.put(14, "Speed Connect6"); gameNames.put(16, "Speed Boat-Pente");
         gameNames.put(18, "Speed DK-Pente"); gameNames.put(20, "Speed Go");
         gameNames.put(22, "Speed Go (9x9)");gameNames.put(24, "Speed Go (13x13)");
+        gameNames.put(26, "Speed O-Pente");
     }
     private List<Integer> moves = new ArrayList<>();
     private Map<String, Integer> timer;
@@ -136,11 +138,14 @@ public class Table {
         int move_j = move % 19;
         abstractBoard[move_i][move_j] = color;
         if (game != 5 && game != 6 && game != 13 && game != 14) {
-            if (game == 11 || game == 12) {
+            if (game == 11 || game == 12 || game == 25 || game == 26) {
                 detectPoof(move, color);
             }
+            if (game == 25 || game == 26) {
+                detectKeryoPoof(move, color);
+            }
             detectPenteCapture(move, color);
-            if (game == 3 || game == 4 || game == 17 || game == 18) {
+            if (game == 3 || game == 4 || game == 17 || game == 18 || game == 25 || game == 26) {
                 detectKeryoPenteCapture(move, color);
             }
         }
@@ -787,8 +792,10 @@ public class Table {
             return boatPenteColor;
         } else if (game < 19) {
             return dkeryoColor;
-        } else {
+        } else if (game < 25) {
             return goColor;
+        } else {
+            return oPenteColor;
         }
     }
     public String getGameName() {
@@ -1381,6 +1388,204 @@ public class Table {
             }
         }
     }
+
+    private void detectKeryoPoof(int move, byte myColor) {
+        int i = move / 19;
+        int j = move % 19;
+        byte opponentColor = (byte) (1 + (myColor % 2));
+        boolean poofed = false;
+        if (((i-3) > -1) && ((i+1) < 19)) { // left
+            if (abstractBoard[i-1][j] == myColor && abstractBoard[i-2][j] == myColor) {
+                if ((abstractBoard[i-3][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
+                    abstractBoard[i-2][j] = 0;
+                    abstractBoard[i-1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-3) > -1) && ((j-3) > -1) && ((i+1) < 19) && ((j+1) < 19)) { // up left
+            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i-2][j-2] == myColor) {
+                if ((abstractBoard[i-3][j-3] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
+                    abstractBoard[i-2][j-2] = 0;
+                    abstractBoard[i-1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j-3) > -1) && ((j+1) < 19)) { // up
+            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j-2] == myColor) {
+                if ((abstractBoard[i][j-3] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
+                    abstractBoard[i][j-2] = 0;
+                    abstractBoard[i][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-1) > -1) && ((j-3) > -1) && ((i+3) < 19) && ((j+1) < 19)) { // up right
+            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+2][j-2] == myColor) {
+                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
+                    abstractBoard[i+2][j-2] = 0;
+                    abstractBoard[i+1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i+3) < 19) && ((i-1) > -1)) { // right
+            if (abstractBoard[i+1][j] == myColor && abstractBoard[i+2][j] == myColor) {
+                if ((abstractBoard[i+3][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
+                    abstractBoard[i+2][j] = 0;
+                    abstractBoard[i+1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-1) > -1) && ((j-1) > -1) && ((i+3) < 19) && ((j+3) < 19)) { // down right
+            if (abstractBoard[i+1][j+1] == myColor && abstractBoard[i+2][j+2] == myColor) {
+                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
+                    abstractBoard[i+2][j+2] = 0;
+                    abstractBoard[i+1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j+2) < 19) && ((j-1) > -1)) { // down
+            if (abstractBoard[i][j+1] == myColor && abstractBoard[i][j+2] == myColor) {
+                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
+                    abstractBoard[i][j+1] = 0;
+                    abstractBoard[i][j+2] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-3) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+3) < 19)) { // down left
+            if (abstractBoard[i-1][j+1] == myColor && abstractBoard[i-2][j+2] == myColor) {
+                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
+                    abstractBoard[i-2][j+2] = 0;
+                    abstractBoard[i-1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+
+        // 4 directions with center of 3 stones placed to poof
+        if (((i-2) > -1) && ((i+2) < 19)) { // horizontal
+            if (abstractBoard[i-1][j] == myColor && abstractBoard[i+1][j] == myColor) {
+                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
+                    abstractBoard[i+1][j] = 0;
+                    abstractBoard[i-1][j] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up left
+            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i+1][j+1] == myColor) {
+                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
+                    abstractBoard[i+1][j+1] = 0;
+                    abstractBoard[i-1][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((j-2) > -1) && ((j+2) < 19)) { // vertical
+            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j+1] == myColor) {
+                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
+                    abstractBoard[i][j+1] = 0;
+                    abstractBoard[i][j-1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up right
+            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+1][j-1] == myColor) {
+                if ((abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
+                    abstractBoard[i+1][j-1] = 0;
+                    abstractBoard[i-1][j+1] = 0;
+                    abstractBoard[i][j] = 0;
+                    if (myColor == 1) {
+                        whiteCaptures += 2;
+                    } else {
+                        blackCaptures += 2;
+                    }
+                    poofed = true;
+                }
+            }
+        }
+
+        if (poofed) {
+            if (myColor == 1) {
+                ++whiteCaptures;
+            } else {
+                ++blackCaptures;
+            }
+        }
+    }
+
 
     private void resetAbstractBoard() {
         whiteCaptures = 0;

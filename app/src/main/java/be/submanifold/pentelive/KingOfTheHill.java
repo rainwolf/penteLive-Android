@@ -52,8 +52,10 @@ public class KingOfTheHill implements Parcelable {
             gameStr = "Go";
         } else if (gameInt < 23) {
             gameStr = "Go (9x9)";
-        } else {
+        } else if (gameInt < 25) {
             gameStr = "Go (13x13)";
+        } else {
+            gameStr = "O-Pente";
         }
         if (this.gameId > 50) {
             this.game = "tb-" + gameStr;
