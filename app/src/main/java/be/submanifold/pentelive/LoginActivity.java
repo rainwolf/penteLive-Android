@@ -230,7 +230,7 @@ public class LoginActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Intent intent = new Intent(getApplicationContext(), LiveGameRoomActivity.class);
-                    intent.putExtra("room", new LiveGameRoom("Beginners", 16001));
+                    intent.putExtra("room", new LiveGameRoom("Main Room", 16000));
                     startActivity(intent);
                 }
             });
