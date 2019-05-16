@@ -289,7 +289,7 @@ public class LiveTableFragment extends Fragment {
         updateTable();
         if (PentePlayer.mShowAds) {
             mInterstitialAd = new InterstitialAd(activity);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/5017367443");
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 
             mInterstitialAd.setAdListener(new AdListener() {
                 //                @Override

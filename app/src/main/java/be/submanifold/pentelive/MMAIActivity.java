@@ -261,7 +261,7 @@ public class MMAIActivity extends AppCompatActivity {
         });
         if (PentePlayer.mShowAds) {
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/9477825047");
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 
             mInterstitialAd.setAdListener(new AdListener() {
                 //                @Override

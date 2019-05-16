@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (player.showAds()) {
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8120483448");
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 
             mInterstitialAd.setAdListener(new AdListener() {
                 @Override

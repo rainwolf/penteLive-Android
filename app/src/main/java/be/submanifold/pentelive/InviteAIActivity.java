@@ -91,7 +91,7 @@ public class InviteAIActivity extends AppCompatActivity {
         });
         if (PentePlayer.mShowAds) {
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/6524358646");
+            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 
             mInterstitialAd.setAdListener(new AdListener() {
 //                @Override
