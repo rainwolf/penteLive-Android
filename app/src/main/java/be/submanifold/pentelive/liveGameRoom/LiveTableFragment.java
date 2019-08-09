@@ -287,7 +287,7 @@ public class LiveTableFragment extends Fragment {
             }
         });
         updateTable();
-        if (PentePlayer.mShowAds) {
+        if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
             mInterstitialAd = new InterstitialAd(activity);
             mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 

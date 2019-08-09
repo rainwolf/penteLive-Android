@@ -259,7 +259,7 @@ public class MMAIActivity extends AppCompatActivity {
                 return false;
             }
         });
-        if (PentePlayer.mShowAds) {
+        if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
             mInterstitialAd = new InterstitialAd(this);
             mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
 

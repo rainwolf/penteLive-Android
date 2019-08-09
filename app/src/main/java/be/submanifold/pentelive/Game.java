@@ -1245,7 +1245,9 @@ public class Game implements Parcelable {
     private String filterMessage(String msgStr) {
 
         String tmpStrComma = msgStr.replace("\\1", ",");
-        String tmpStrSmiley = tmpStrComma.replace("<img border='0' src='http://[host]/gameServer/forums/images/emoticons/happy.gif' alt=''>", ":)");
+        String tmpStrQuote = tmpStrComma.replace("\\2", "\"");
+        String tmpStrAmpersand = tmpStrQuote.replace("&amp;#38;", "&");
+        String tmpStrSmiley = tmpStrAmpersand.replace("<img border='0' src='http://[host]/gameServer/forums/images/emoticons/happy.gif' alt=''>", ":)");
         String tmpStrWink = tmpStrSmiley.replace("<img border='0' src='http://[host]/gameServer/forums/images/emoticons/wink.gif' alt=''>", ";)");
         String tmpStrTongue = tmpStrWink.replace("<img border='0' src='http://[host]/gameServer/forums/images/emoticons/silly.gif' alt=''>", ":p");
         String tmpStrGrin = tmpStrTongue.replace("<img border='0' src='http://[host]/gameServer/forums/images/emoticons/grin.gif' alt=''>", ":D");
