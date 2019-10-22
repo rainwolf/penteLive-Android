@@ -11,7 +11,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     tools:context="be.submanifold.pentelive.liveGameRoom.LobbyActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_alignParentTop="true"

@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;

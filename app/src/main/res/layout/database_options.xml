@@ -25,7 +25,7 @@
         android:textStyle="bold"
         android:id="@+id/gameLabel"
         android:layout_alignParentLeft="true" />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:spinnerMode="dialog"
         android:id="@+id/gameSpinner"
         android:layout_toRightOf="@id/gameLabel"
@@ -34,7 +34,7 @@
         android:textAlignment="center"
         android:layout_height="45dp"
         android:gravity="center_vertical">
-    </android.support.v7.widget.AppCompatSpinner>
+    </androidx.appcompat.widget.AppCompatSpinner>
 
 
     <TextView
@@ -179,7 +179,7 @@
                 android:id="@+id/p1RatingLabel"
                 android:layout_below="@id/beforeLabel"
                 android:layout_alignParentLeft="true" />
-            <android.support.v7.widget.AppCompatSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:spinnerMode="dialog"
                 android:id="@+id/p1RatingSpinner"
                 android:layout_toRightOf="@id/p1RatingLabel"
@@ -189,7 +189,7 @@
                 android:textAlignment="center"
                 android:layout_height="45dp"
                 android:gravity="center_vertical">
-            </android.support.v7.widget.AppCompatSpinner>
+            </androidx.appcompat.widget.AppCompatSpinner>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
@@ -200,7 +200,7 @@
                 android:id="@+id/p2RatingLabel"
                 android:layout_below="@id/p1RatingLabel"
                 android:layout_alignParentLeft="true" />
-            <android.support.v7.widget.AppCompatSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:spinnerMode="dialog"
                 android:id="@+id/p2RatingSpinner"
                 android:layout_toRightOf="@id/p2RatingLabel"
@@ -210,7 +210,7 @@
                 android:textAlignment="center"
                 android:layout_height="45dp"
                 android:gravity="center_vertical">
-            </android.support.v7.widget.AppCompatSpinner>
+            </androidx.appcompat.widget.AppCompatSpinner>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"

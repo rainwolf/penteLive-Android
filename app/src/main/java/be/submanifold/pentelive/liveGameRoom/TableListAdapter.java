@@ -1,16 +1,9 @@
 package be.submanifold.pentelive.liveGameRoom;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
-import android.text.style.StyleSpan;
+
+import androidx.core.content.ContextCompat;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import be.submanifold.pentelive.MyApplication;
-import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.R;
 
 /**

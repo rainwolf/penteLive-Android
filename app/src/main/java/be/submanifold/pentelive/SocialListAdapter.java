@@ -3,7 +3,7 @@ package be.submanifold.pentelive;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;

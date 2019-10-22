@@ -9,10 +9,10 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -176,7 +176,7 @@ public class BoardActivity extends AppCompatActivity {
                     case R.id.go_territory:
                         game.getTerritories();
                         board.invalidate();
-                        builder = new android.support.v7.app.AlertDialog.Builder(BoardActivity.this);
+                        builder = new androidx.appcompat.app.AlertDialog.Builder(BoardActivity.this);
                         builder.setTitle(getString(R.string.score));
                         int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
                                 p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
@@ -193,7 +193,7 @@ public class BoardActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                        android.support.v7.app.AlertDialog dlg = builder.create();
+                        androidx.appcompat.app.AlertDialog dlg = builder.create();
                         dlg.setCanceledOnTouchOutside(true);
                         Window window = dlg.getWindow();
                         WindowManager.LayoutParams wlp = window.getAttributes();

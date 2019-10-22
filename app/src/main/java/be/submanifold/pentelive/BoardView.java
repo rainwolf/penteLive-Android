@@ -7,12 +7,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GestureDetectorCompat;
-import android.support.v4.view.VelocityTrackerCompat;
-import android.support.v7.widget.Toolbar;
+
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -21,17 +17,13 @@ import android.text.style.ClickableSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import java.util.List;
 
 /**
  * Created by waliedothman on 15/04/16.

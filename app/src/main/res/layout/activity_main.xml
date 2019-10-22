@@ -8,7 +8,7 @@
     android:orientation="vertical"
     tools:context="be.submanifold.pentelive.MainActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_alignParentTop="true"
@@ -25,7 +25,7 @@
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3326997956703582/9406817448">
     </com.google.android.gms.ads.AdView>
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipeRefresh"
         android:layout_below="@id/my_toolbar"
@@ -37,7 +37,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:groupIndicator="@null" />
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
 

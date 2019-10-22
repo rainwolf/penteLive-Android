@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     tools:context="be.submanifold.pentelive.InvitationActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -38,7 +38,7 @@
         android:layout_below="@id/opponent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/gameTypeSpinner"
         android:layout_toRightOf="@id/gameTypeLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -47,7 +47,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:layout_below="@id/opponent">
-    </android.support.v7.widget.AppCompatSpinner>
+    </androidx.appcompat.widget.AppCompatSpinner>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="45dp"
@@ -58,7 +58,7 @@
         android:layout_below="@id/gameTypeLabel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/timeoutSpinner"
         android:layout_toRightOf="@id/timeoutLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -67,7 +67,7 @@
         android:layout_height="45dp"
         android:gravity="center"
         android:layout_below="@id/gameTypeSpinner">
-    </android.support.v7.widget.AppCompatSpinner>
+    </androidx.appcompat.widget.AppCompatSpinner>
 
     <TextView
         android:layout_width="wrap_content"
@@ -101,7 +101,7 @@
         android:layout_below="@id/ratedToggleButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/restrictionSpinner"
         android:layout_toRightOf="@id/restrictionLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -110,7 +110,7 @@
         android:layout_height="45dp"
         android:gravity="center"
         android:layout_below="@id/ratedToggleButton">
-    </android.support.v7.widget.AppCompatSpinner>
+    </androidx.appcompat.widget.AppCompatSpinner>
 
     <TextView
         android:layout_width="wrap_content"

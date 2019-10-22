@@ -3,24 +3,21 @@ package be.submanifold.pentelive;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,7 +48,6 @@ import java.util.Date;
 
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoom;
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoomActivity;
-import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 
 
 /**

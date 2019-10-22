@@ -15,19 +15,82 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
+
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import org.json.JSONObject;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Date;
 import java.util.Map;
 
 public class MyFcmListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFcmListenerService";
     private MediaPlayer mediaPlayer;
+
+
+    @Override
+    public void onNewToken(String newToken) {
+
+//        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+//        Log.d(TAG, "Refreshed token: " + refreshedToken);
+//        System.out.println("Refreshed token: " + refreshedToken);
+//        System.out.println("Refreshed token: " + newToken);
+        // TODO: Implement this method to send any registration to your app's servers.
+        sendRegistrationToServer(newToken);
+    }
+    // [END refresh_token]
+
+    private void sendRegistrationToServer(String token) {
+        String storedUserName = PrefUtils.getFromPrefs(MyFcmListenerService.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
+        String storedPassword = PrefUtils.getFromPrefs(MyFcmListenerService.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
+        String storedToken = PrefUtils.getFromPrefs(MyFcmListenerService.this, PrefUtils.PREFS_TOKEN_KEY, "");
+
+        Date date = new Date(System.currentTimeMillis()); //or simply new Date();
+        long millisNow = date.getTime();
+        if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+            try {
+                PrefUtils.saveLongToPrefs(MyFcmListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
+                URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
+                if (PentePlayer.development) {
+                    url = new URL("https://development.pente.org/gameServer/notification?device=android&token=" + token);
+                }
+//                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
+//                        + "&token=" + token);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    System.out.println("response code for submit was " + responseCode);
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                System.out.println("output===============" + br);
+                String line = "";
+                while ((line = br.readLine()) != null) {
+                    output.append(line + "\n");
+                }
+                br.close();
+
+                if (output.toString().contains("It seems to have worked")) {
+                    PrefUtils.saveLongToPrefs(MyFcmListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, millisNow);
+                    PrefUtils.saveToPrefs(MyFcmListenerService.this, PrefUtils.PREFS_TOKEN_KEY, token);
+                }
+
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        // Add custom implementation, as needed.
+    }
 
     /**
      * Called when message is received.
@@ -127,7 +190,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                         .setSmallIcon(R.drawable.ic_radio_button_unchecked)
                         .setContentTitle("Pente Live")
 //                    .setContentText("")
-                        .setStyle(new android.support.v4.app.NotificationCompat.BigTextStyle().bigText(localMsgStr))
+                        .setStyle(new androidx.core.app.NotificationCompat.BigTextStyle().bigText(localMsgStr))
                         .setAutoCancel(true)
                         .setSound(notificationSoundUri)
                         .setContentIntent(pendingIntent);
