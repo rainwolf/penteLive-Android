@@ -2,7 +2,6 @@ package be.submanifold.pentelive;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,14 +10,13 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -935,6 +932,8 @@ public class Game implements Parcelable {
                 if (!p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     this.mOpponentName = p1Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
+                } else {
+                    amIPlaying = true;
                 }
             }
             if (dashLine.indexOf("current_player=") == 0) {
@@ -949,6 +948,8 @@ public class Game implements Parcelable {
                 if (!p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
                     this.mOpponentName = p2Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
+                } else {
+                    amIPlaying = true;
                 }
             }
             if (dashLine.indexOf("sid=") == 0) {
@@ -1108,7 +1109,7 @@ public class Game implements Parcelable {
             undoBtn.setOnClickListener(null);
         } else if (mActive && amIPlaying && undoRequested) {
             final BoardActivity host = (BoardActivity) boardView.getContext();
-            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(host);
+            final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(host);
             builder.setTitle(host.getString(R.string.requests_undo, getOpponentName()));
             String options[] = {host.getString(R.string.accept), host.getString(R.string.decline)};
             builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -1128,7 +1129,7 @@ public class Game implements Parcelable {
                     // the user clicked on colors[which]
                 }
             });
-            android.support.v7.app.AlertDialog dlg = builder.create();
+            androidx.appcompat.app.AlertDialog dlg = builder.create();
             dlg.setCanceledOnTouchOutside(false);
             Window window = dlg.getWindow();
             WindowManager.LayoutParams wlp = window.getAttributes();
