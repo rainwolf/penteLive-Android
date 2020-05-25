@@ -14,6 +14,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -578,8 +580,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestNewInterstitial() {
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
+        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+        Bundle extras = new Bundle();
+        extras.putString("npa", (personalizeAds?"0":"1"));
+        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
         mInterstitialAd.loadAd(adRequest);
     }
 

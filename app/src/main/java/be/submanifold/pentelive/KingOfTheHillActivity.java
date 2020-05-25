@@ -33,6 +33,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -442,7 +443,10 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             listAdapter.updateList();
             if (player.showAds()) {
                 ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
-                ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+                boolean personalizeAds = PrefUtils.getBooleanFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+                Bundle extras = new Bundle();
+                extras.putString("npa", (personalizeAds?"0":"1"));
+                ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
             } else {
                 ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
             }

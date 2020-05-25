@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.material.tabs.TabLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -162,7 +163,10 @@ public class SocialActivity extends AppCompatActivity {
 
 
         if (PentePlayer.mShowAds) {
-            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(SocialActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             findViewById(R.id.adView).setVisibility(View.GONE);
         }

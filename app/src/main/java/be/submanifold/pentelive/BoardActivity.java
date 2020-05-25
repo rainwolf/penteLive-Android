@@ -32,6 +32,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -401,7 +402,10 @@ public class BoardActivity extends AppCompatActivity {
         (BoardActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name_computer"));
         MyApplication.activityResumed(this);
         if (PentePlayer.mShowAds == null || PentePlayer.mShowAds) {
-            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
         }

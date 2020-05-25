@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/penteLive.iml" filepath="$PROJECT_DIR$/penteLive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="penteLive/app" />
+      <module fileurl="file://$PROJECT_DIR$/penteLive.iml" filepath="$PROJECT_DIR$/penteLive.iml" group="penteLive" />
     </modules>
   </component>
 </project>

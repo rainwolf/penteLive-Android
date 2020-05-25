@@ -34,6 +34,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -128,7 +129,10 @@ public class DatabaseActivity extends AppCompatActivity {
             }
 
             if (PentePlayer.mShowAds) {
-                ((AdView) findViewById(R.id.dbAdView)).loadAd(new AdRequest.Builder().build());
+                boolean personalizeAds = PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+                Bundle adextras = new Bundle();
+                adextras.putString("npa", (personalizeAds?"0":"1"));
+                ((AdView) findViewById(R.id.dbAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, adextras).build());
             } else {
                 ((AdView) findViewById(R.id.dbAdView)).setVisibility(View.GONE);
             }

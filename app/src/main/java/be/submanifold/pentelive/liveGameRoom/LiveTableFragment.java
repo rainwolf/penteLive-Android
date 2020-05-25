@@ -32,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.Timer;
 
 import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 
 
@@ -209,7 +211,10 @@ public class LiveTableFragment extends Fragment {
         board.setTable(table, me);
         board.setFragment(this);
         if (PentePlayer.mShowAds) {
-            ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
         }
@@ -1162,8 +1167,10 @@ public class LiveTableFragment extends Fragment {
     }
 
     private void requestNewInterstitial() {
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
+        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+        Bundle extras = new Bundle();
+        extras.putString("npa", (personalizeAds?"0":"1"));
+        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
         mInterstitialAd.loadAd(adRequest);
     }
 

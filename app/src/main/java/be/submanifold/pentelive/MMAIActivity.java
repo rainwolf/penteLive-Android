@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -223,7 +224,10 @@ public class MMAIActivity extends AppCompatActivity {
 //        });
 
         if (PentePlayer.mShowAds) {
-            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
         }
@@ -332,8 +336,10 @@ public class MMAIActivity extends AppCompatActivity {
     }
 
     private void requestNewInterstitial() {
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
+        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+        Bundle extras = new Bundle();
+        extras.putString("npa", (personalizeAds?"0":"1"));
+        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
         mInterstitialAd.loadAd(adRequest);
     }
 

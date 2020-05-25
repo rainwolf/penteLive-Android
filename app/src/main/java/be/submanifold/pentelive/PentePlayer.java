@@ -53,7 +53,8 @@ public class PentePlayer implements Parcelable {
 
     public static boolean loadAvatars = false;
     public static boolean showOnlyTB = false;
-    public static boolean emailMe = false;
+    public static Boolean emailMe = false;
+    public static Boolean personalizeAds = false;
 
     private int livePlayers;
     public int getLivePlayers() { return this.livePlayers; }
@@ -78,6 +79,7 @@ public class PentePlayer implements Parcelable {
         this.mHills = new ArrayList<KingOfTheHill>();
         mShowAds = true;
         emailMe = true;
+        personalizeAds = false;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
@@ -171,6 +173,8 @@ public class PentePlayer implements Parcelable {
             emailMe = "emailMe".equals(dashLine[6]);
             this.onlineFollowingers = Integer.parseInt(dashLine[7]);
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
+            this.personalizeAds = "personalizeAds".equals(dashLine[8]);
+            PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, this.personalizeAds);
         }
 
         while (idx < dashLines.length && !dashLines[idx].contains("King of the Hill")) {
@@ -409,8 +413,10 @@ public class PentePlayer implements Parcelable {
         mSubscriber = mSubscriberVal == 0x02 ? null : mSubscriberVal != 0x00;
         byte dbVal = in.readByte();
         dbAccess = dbVal == 0x02 ? null : dbVal != 0x00;
-        byte emaiValVal = in.readByte();
-        emailMe = emaiValVal == 0x02 ? null : dbVal != 0x00;
+        byte emailVal = in.readByte();
+        emailMe = emailVal == 0x02 ? null : emailVal != 0x00;
+        byte personalizeAdsVal = in.readByte();
+        personalizeAds = personalizeAdsVal == 0x02 ? null : personalizeAdsVal != 0x00;
         if (in.readByte() == 0x01) {
             mInvitations = new ArrayList<Game>();
             in.readList(mInvitations, Game.class.getClassLoader());
@@ -507,7 +513,16 @@ public class PentePlayer implements Parcelable {
         } else {
             dest.writeByte((byte) (dbAccess ? 0x01 : 0x00));
         }
-        dest.writeByte((byte) (emailMe ? 0x01 : 0x00));
+        if (emailMe == null) {
+            dest.writeByte((byte) (0x02));
+        } else {
+            dest.writeByte((byte) (emailMe ? 0x01 : 0x00));
+        }
+        if (personalizeAds == null) {
+            dest.writeByte((byte) (0x02));
+        } else {
+            dest.writeByte((byte) (personalizeAds ? 0x01 : 0x00));
+        }
         if (mInvitations == null) {
             dest.writeByte((byte) (0x00));
         } else {

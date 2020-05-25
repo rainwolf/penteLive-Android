@@ -53,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((ToggleButton) findViewById(R.id.inAppSoundsToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, false));
         ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false));
         ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setChecked(PentePlayer.emailMe);
+        ((ToggleButton) findViewById(R.id.personalizeAdsToggleButton)).setChecked(PentePlayer.personalizeAds);
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -80,6 +81,13 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, isChecked);
+            }
+        });
+        ((ToggleButton) findViewById(R.id.personalizeAdsToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ChangeAdsPersonalizationPreferenceTask task = new ChangeAdsPersonalizationPreferenceTask(isChecked);
+                task.execute((Void) null);
             }
         });
         ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -303,7 +311,7 @@ public class SettingsActivity extends AppCompatActivity {
         bm = Bitmap.createScaledBitmap(bm, (int) (ratio*width), (int) (ratio*height), true);
         return bm;
     }
-    private class UploadAvatarTask extends AsyncTask<Void, Void, Boolean> {
+    private static class UploadAvatarTask extends AsyncTask<Void, Void, Boolean> {
 
         private final byte[] bytes;
 
@@ -382,7 +390,7 @@ public class SettingsActivity extends AppCompatActivity {
         protected void onCancelled() {
         }
     }
-    private class ChangeColorTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeColorTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String colorString;
 
@@ -435,7 +443,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private class ChangeEmailPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeEmailPreferenceTask extends AsyncTask<Void, Void, Boolean> {
 
         private final boolean emailMe;
 
@@ -482,6 +490,64 @@ public class SettingsActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
             if (success) {
                 PentePlayer.emailMe = emailMe;
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+    private class ChangeAdsPersonalizationPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final boolean personalizeAds;
+
+        ChangeAdsPersonalizationPreferenceTask(boolean personalizeAds) {
+            this.personalizeAds = personalizeAds;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+//                System.out.println("colorStr was " + colorString);
+                URL url = new URL("https://www.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
+                        (personalizeAds?"Y":"N"));
+                if (PentePlayer.development) {
+                    new URL("https://development.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
+                            (personalizeAds?"Y":"N"));                }
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    System.out.println("response code for personalizeAdsPreference was " + responseCode);
+                    return false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//                System.out.println("output===============" + br);
+                String line = "";
+                while((line = br.readLine()) != null ) {
+                    output.append(line + "\n");
+                }
+                br.close();
+
+//                System.out.println(output);
+
+                String dashboardString = output.toString();
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return  false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                PentePlayer.personalizeAds = personalizeAds;
+                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
             }
         }
 

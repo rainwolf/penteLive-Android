@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import androidx.core.content.ContextCompat;
+
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -18,6 +21,7 @@ import java.util.List;
 
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 
 /**
@@ -126,7 +130,10 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
 
         if (PentePlayer.mShowAds) {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.VISIBLE);
-            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
         }

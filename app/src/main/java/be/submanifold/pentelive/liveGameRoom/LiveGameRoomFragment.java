@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -126,7 +128,10 @@ public class LiveGameRoomFragment extends Fragment {
 
 
         if (PentePlayer.mShowAds) {
-            ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
         }

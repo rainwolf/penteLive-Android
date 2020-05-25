@@ -52,7 +52,8 @@ public class PrefUtils {
     public static final String PREFS_DOUBLEPASSREMINDER_KEY = "__DOUBLEPASSREMINDER__";
     public static final String PREFS_INSTALLDATE_KEY = "__INSTALLDATE__";
     public static final String PREFS_LASTRATED_KEY = "__LASTRATED__";
-    public static final String PREFS_GDPR_KEY = "__GDPR__";
+    public static final String PREFS_GDPR_KEY = "__GDPR_0__";
+    public static final String PREFS_PERSONALIZEDADS_KEY = "__PERSONALIZEDADS__";
 
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

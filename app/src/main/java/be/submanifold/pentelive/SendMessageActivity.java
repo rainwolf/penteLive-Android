@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -48,7 +49,10 @@ public class SendMessageActivity extends AppCompatActivity {
         actv.setAdapter(adapter);
 
         if (PentePlayer.mShowAds) {
-            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().build());
+            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(SendMessageActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+            Bundle extras = new Bundle();
+            extras.putString("npa", (personalizeAds?"0":"1"));
+            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);

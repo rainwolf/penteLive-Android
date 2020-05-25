@@ -15,8 +15,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 
 import java.io.BufferedReader;
@@ -261,8 +263,10 @@ public class InviteAIActivity extends AppCompatActivity {
     }
 
     private void requestNewInterstitial() {
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
+        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
+        Bundle extras = new Bundle();
+        extras.putString("npa", (personalizeAds?"0":"1"));
+        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
         mInterstitialAd.loadAd(adRequest);
     }
 
