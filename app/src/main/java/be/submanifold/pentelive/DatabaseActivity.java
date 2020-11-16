@@ -763,6 +763,7 @@ public class DatabaseActivity extends AppCompatActivity {
                     url = new URL("https://development.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
                 }
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                connection.setConnectTimeout(200000);
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for submit was " + responseCode);
