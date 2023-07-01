@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:dist="http://schemas.android.com/apk/distribution"
-    package="be.submanifold.pentelive"
     android:versionCode="158"
     android:versionName="2.6.7">
 
@@ -27,6 +26,7 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
         <activity
+            android:exported="true"
             android:name=".SplashActivity"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="portrait"
@@ -81,13 +81,15 @@
             android:name=".DatabaseActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name=".MyFcmListenerService">
+        <service android:name=".MyFcmListenerService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!-- [START instanceId_listener] -->
-        <service android:name=".MyInstanceIDListenerService">
+        <service android:name=".MyInstanceIDListenerService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>

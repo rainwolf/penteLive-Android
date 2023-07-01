@@ -498,12 +498,12 @@ public class MMAIBoardView extends View {
                 msg = ctx.getString(R.string.you_won);
             }
             Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
-            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-            if (iWon) {
-                v.setTextColor(Color.GREEN);
-            } else {
-                v.setTextColor(Color.YELLOW);
-            }
+//            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+//            if (iWon) {
+//                v.setTextColor(Color.GREEN);
+//            } else {
+//                v.setTextColor(Color.YELLOW);
+//            }
             toast.show();
         } else {
             gameOver = false;
@@ -570,12 +570,12 @@ public class MMAIBoardView extends View {
                 msg = ctx.getString(R.string.you_won);
             }
             Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
-            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-            if (iWon) {
-                v.setTextColor(Color.GREEN);
-            } else {
-                v.setTextColor(Color.YELLOW);
-            }
+//            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+//            if (iWon) {
+//                v.setTextColor(Color.GREEN);
+//            } else {
+//                v.setTextColor(Color.YELLOW);
+//            }
             toast.show();
         } else {
             gameOver = false;

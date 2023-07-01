@@ -1,6 +1,10 @@
 package be.submanifold.pentelive;
 
-import com.google.firebase.iid.FirebaseInstanceId;
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 
 import java.io.BufferedReader;
@@ -14,22 +18,26 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyInstanceIDLS";
 
-
-    /**
-     * Called if InstanceID token is updated. This may occur if the security of
-     * the previous token had been compromised. This call is initiated by the
-     * InstanceID provider.
-     */
-    // [START refresh_token]
     @Override
     public void onNewToken(String newToken) {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                 @Override
+                 public void onComplete(@NonNull Task<String> task) {
+                     if (!task.isSuccessful()) {
+                         return;
+                     }
 
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-//        Log.d(TAG, "Refreshed token: " + refreshedToken);
-        System.out.println("Refreshed token: " + refreshedToken);
-        System.out.println("Refreshed token: " + newToken);
-        // TODO: Implement this method to send any registration to your app's servers.
-        sendRegistrationToServer(refreshedToken);
+                     // Get new FCM registration token
+                     String refreshedToken = task.getResult();
+
+                     System.out.println("Refreshed token: " + refreshedToken);
+                     System.out.println("Refreshed token: " + newToken);
+                     // TODO: Implement this method to send any registration to your app's servers.
+                     sendRegistrationToServer(refreshedToken);
+                 }
+             }
+        );
+
     }
     // [END refresh_token]
 
@@ -60,7 +68,7 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
                 System.out.println("output===============" + br);
                 String line = "";
                 while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                    output.append(line).append("\n");
                 }
                 br.close();
 

@@ -15,9 +15,14 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -37,13 +42,23 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(String newToken) {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+             @Override
+             public void onComplete(@NonNull Task<String> task) {
+                 if (!task.isSuccessful()) {
+                     return;
+                 }
 
-//        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-//        Log.d(TAG, "Refreshed token: " + refreshedToken);
-//        System.out.println("Refreshed token: " + refreshedToken);
-//        System.out.println("Refreshed token: " + newToken);
-        // TODO: Implement this method to send any registration to your app's servers.
-        sendRegistrationToServer(newToken);
+                 // Get new FCM registration token
+                 String refreshedToken = task.getResult();
+
+                 System.out.println("Refreshed token: " + refreshedToken);
+                 System.out.println("Refreshed token: " + newToken);
+                 // TODO: Implement this method to send any registration to your app's servers.
+                 sendRegistrationToServer(refreshedToken);
+             }
+         }
+        );
     }
     // [END refresh_token]
 
@@ -92,22 +107,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         // Add custom implementation, as needed.
     }
 
-    /**
-     * Called when message is received.
-     *
-     *
-     * @param from SenderID of the sender.
-     * @param data Data bundle containing message data as key/value pairs.
-     *             For Set of keys use data.keySet().
-     */
-    // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage message){
         String from = message.getFrom();
         Map data = message.getData();
 
         String messageStr = (String) data.get("message");
-//        Log.d(TAG, "From: " + from);
+        Log.d(TAG, "kitty message: " + messageStr);
 //        Log.d(TAG, "Message: " + messageStr);
 
         if (from.startsWith("/topics/")) {
@@ -150,6 +156,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         String messageStr = (String) data.get("message");
         boolean silent = "silentNotification".equals(messageStr);
 
+        System.out.println("kitty: "+messageStr);
+
         String localMsgStr = "";
         if (messageStr.contains("device has been registered for notifications")) {
             localMsgStr = getString(R.string.registered_for_notifications);
@@ -173,7 +181,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
             if (!silent) {
                 Uri notificationSoundUri;

@@ -9,6 +9,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.AsyncTask;
@@ -32,7 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -491,11 +495,24 @@ public class LoginActivity extends AppCompatActivity
             showProgress(false);
 
             if (success) {
-                String token = FirebaseInstanceId.getInstance().getToken();
-                if (token != null) {
-                    SendTokenTask sendTokenTast = new SendTokenTask(token);
-                    sendTokenTast.execute((Void) null);
-                }
+                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                     @Override
+                     public void onComplete(@NonNull Task<String> task) {
+                         if (!task.isSuccessful()) {
+                             return;
+                         }
+
+                         // Get new FCM registration token
+                         String refreshedToken = task.getResult();
+                         System.out.println("New token: " + refreshedToken);
+                         // TODO: Implement this method to send any registration to your app's servers.
+                         if (refreshedToken != null) {
+                             SendTokenTask sendTokenTask = new SendTokenTask(refreshedToken);
+                             sendTokenTask.execute((Void) null);
+                         }
+                     }
+                 }
+                );
 
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, mEmail);
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, mPassword);
@@ -545,6 +562,8 @@ public class LoginActivity extends AppCompatActivity
 
 
         SendTokenTask(String token) {
+            System.out.println("\n\n\n\nkitty SendTokenTask\n\n\n\n");
+
             this.token = token;
         }
 
@@ -561,7 +580,7 @@ public class LoginActivity extends AppCompatActivity
                 long millisNow = date.getTime();
                 long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
 //                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token) || true) {
-                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+                if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
                         URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
 //                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword

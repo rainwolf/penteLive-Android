@@ -3,6 +3,8 @@ package be.submanifold.pentelive;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
@@ -16,10 +18,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -85,20 +89,7 @@ public class InviteAIActivity extends AppCompatActivity {
             }
         });
         if (PentePlayer.mShowAds) {
-            mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
-
-            mInterstitialAd.setAdListener(new AdListener() {
-//                @Override
-//                public void onAdClosed() {
-//                    requestNewInterstitial();
-//                }
-                @Override
-                public void onAdLoaded() {
-                    mInterstitialAd.show();
-                }
-            });
-            requestNewInterstitial();
+            requestNewInterstitialAndShow();
         }
     }
 
@@ -262,13 +253,40 @@ public class InviteAIActivity extends AppCompatActivity {
         }
     }
 
-    private void requestNewInterstitial() {
+    private void requestNewInterstitialAndShow() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
         extras.putString("npa", (personalizeAds?"0":"1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-        mInterstitialAd.loadAd(adRequest);
+
+        InterstitialAd.load(this,"ca-app-pub-3326997956703582/8353630687", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                // Called when ad is dismissed.
+                                // Set the ad reference to null so you don't show the ad a second time.
+                                mInterstitialAd = null;
+                            }
+
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                // Called when ad fails to show.
+                                mInterstitialAd = null;
+                            }
+                        });
+                        mInterstitialAd.show(InviteAIActivity.this);
+                    }
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        mInterstitialAd = null;
+                    }
+                });
     }
-
-
 }

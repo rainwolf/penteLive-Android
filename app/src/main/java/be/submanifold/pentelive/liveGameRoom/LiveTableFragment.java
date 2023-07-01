@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -33,16 +35,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import be.submanifold.pentelive.InviteAIActivity;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
@@ -292,20 +299,7 @@ public class LiveTableFragment extends Fragment {
         });
         updateTable();
         if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
-            mInterstitialAd = new InterstitialAd(activity);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3326997956703582/8353630687");
-
-            mInterstitialAd.setAdListener(new AdListener() {
-                //                @Override
-//                public void onAdClosed() {
-//                    requestNewInterstitial();
-//                }
-                @Override
-                public void onAdLoaded() {
-                    mInterstitialAd.show();
-                }
-            });
-            requestNewInterstitial();
+            requestNewInterstitialAndShow();
         }
 
     }
@@ -1166,14 +1160,41 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
-    private void requestNewInterstitial() {
+    private void requestNewInterstitialAndShow() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
         extras.putString("npa", (personalizeAds?"0":"1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-        mInterstitialAd.loadAd(adRequest);
+
+        InterstitialAd.load(activity,"ca-app-pub-3326997956703582/8353630687", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                // Called when ad is dismissed.
+                                // Set the ad reference to null so you don't show the ad a second time.
+                                mInterstitialAd = null;
+                            }
+
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                // Called when ad fails to show.
+                                mInterstitialAd = null;
+                            }
+                        });
+                        mInterstitialAd.show(activity);
+                    }
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        mInterstitialAd = null;
+                    }
+                });
     }
-
-
 
 }

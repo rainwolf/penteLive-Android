@@ -1299,12 +1299,12 @@ public class Game implements Parcelable {
                         msg = "You won";
                     }
                     Toast toast = Toast.makeText(boardView.getContext(), msg, Toast.LENGTH_LONG);
-                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-                    if (iWon) {
-                        v.setTextColor(Color.GREEN);
-                    } else {
-                        v.setTextColor(Color.YELLOW);
-                    }
+//                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+//                    if (iWon) {
+//                        v.setTextColor(Color.GREEN);
+//                    } else {
+//                        v.setTextColor(Color.YELLOW);
+//                    }
                     toast.show();
                 }
             }
