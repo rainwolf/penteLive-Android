@@ -579,8 +579,8 @@ public class LoginActivity extends AppCompatActivity
                 Date date = new Date(System.currentTimeMillis()); //or simply new Date();
                 long millisNow = date.getTime();
                 long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
-//                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token) || true) {
-                if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+//                if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
                         URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
 //                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword

@@ -5,19 +5,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -72,6 +69,9 @@ public class Game implements Parcelable {
     private String hideStr = "";
 
     private String mBoardString;
+
+    public boolean swap2Choice = false;
+
 
 
     public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -871,6 +871,9 @@ public class Game implements Parcelable {
     }
 
 
+    public boolean isSwap2() {
+        return this.mGameType.startsWith("Swap2");
+    }
     public boolean rated() {
         if (mRatedNot == null) {
             return false;
@@ -985,6 +988,9 @@ public class Game implements Parcelable {
             }
             if (dashLine.contains("dPenteState=2")) {
                 this.dPenteChoice = true;
+                if (isSwap2()) {
+                    this.swap2Choice = true;
+                }
             }
             if (dashLine.indexOf("cancel="+getOpponentName()) == 0) {
                 final Activity host = (Activity) boardView.getContext();
@@ -996,23 +1002,16 @@ public class Game implements Parcelable {
                     msg = "\n(" + dashLine.substring(dashLine.indexOf(",")+1) + ")";
                 }
                 builder.setMessage(host.getString(R.string.requests_cancellation, getOpponentName()) + msg);
-                builder.setPositiveButton(host.getString(R.string.accept), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "Yes", host);
-                        task.execute((Void) null);
-                    } });
-                builder.setNegativeButton(host.getString(R.string.decline), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
-                        task.execute((Void) null);
-                    } });
+                builder.setPositiveButton(host.getString(R.string.accept), (dialog, id) -> {
+                    ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "Yes", host);
+                    task.execute((Void) null);
+                });
+                builder.setNegativeButton(host.getString(R.string.decline), (dialog, id) -> {
+                    ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
+                    task.execute((Void) null);
+                });
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(final DialogInterface arg0) {
-                            host.finish();
-                        }
-                    });
+                    builder.setOnDismissListener(arg0 -> host.finish());
                 }
                 builder.show();
             }
@@ -1037,17 +1036,14 @@ public class Game implements Parcelable {
             mActive = false;
             if (PentePlayer.mSubscriber) {
                 final BoardActivity host = (BoardActivity) boardView.getContext();
-                ((Button) host.findViewById(R.id.submitButton)).setVisibility(View.GONE);
-                Button dbBtn = (Button) host.findViewById(R.id.searchDBbutton);
+                host.findViewById(R.id.submitButton).setVisibility(View.GONE);
+                Button dbBtn = host.findViewById(R.id.searchDBbutton);
                 dbBtn.setVisibility(View.VISIBLE);
-                dbBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(host.getApplicationContext(), DatabaseActivity.class);
-                        intent.putIntegerArrayListExtra("moves", new ArrayList<Integer>(getMovesList().subList(0, untilMove)));
-                        intent.putExtra("game", getGameType());
-                        host.startActivity(intent);
-                    }
+                dbBtn.setOnClickListener(view -> {
+                    Intent intent = new Intent(host.getApplicationContext(), DatabaseActivity.class);
+                    intent.putIntegerArrayListExtra("moves", new ArrayList<Integer>(getMovesList().subList(0, untilMove)));
+                    intent.putExtra("game", getGameType());
+                    host.startActivity(intent);
                 });
             }
         }
@@ -1056,50 +1052,32 @@ public class Game implements Parcelable {
             final BoardActivity host = (BoardActivity) boardView.getContext();
             Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
             undoBtn.setText(host.getString(R.string.request_undo));
-            undoBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (PentePlayer.mSubscriber) {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(host);
-                        builder.setTitle(host.getString(R.string.rusure));
-                        builder.setPositiveButton(host.getString(R.string.yes), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                RequestUndoTask task = new RequestUndoTask(getGameID(), host);
-                                task.execute((Void) null);
-                                dialog.dismiss();
-                            } });
-                        builder.setNegativeButton(host.getString(R.string.no), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            } });
-                        final AlertDialog dialog = builder.show();
-                    } else {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(host);
-                        builder.setTitle(host.getString(R.string.feature_not_available));
+            undoBtn.setOnClickListener(view -> {
+                if (PentePlayer.mSubscriber) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+                    builder.setTitle(host.getString(R.string.rusure));
+                    builder.setPositiveButton(host.getString(R.string.yes), (dialog, id) -> {
+                        RequestUndoTask task = new RequestUndoTask(getGameID(), host);
+                        task.execute((Void) null);
+                        dialog.dismiss();
+                    });
+                    builder.setNegativeButton(host.getString(R.string.no), (dialog, id) -> dialog.dismiss());
+                    final AlertDialog dialog = builder.show();
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+                    builder.setTitle(host.getString(R.string.feature_not_available));
 
-                        builder.setMessage(host.getString(R.string.undo_subscribers_only));
-                        builder.setPositiveButton(host.getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
-                                Intent intent = new Intent(host, WebViewActivity.class);
-                                intent.putExtra("url", url);
-                                host.startActivity(intent);
-                                dialog.dismiss();
-                            } });
-                        builder.setNegativeButton(host.getString(R.string.dismiss), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            } });
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(final DialogInterface arg0) {
-                                    host.finish();
-                                }
-                            });
-                        }
-                        final AlertDialog dialog = builder.show();
-                    }
+                    builder.setMessage(host.getString(R.string.undo_subscribers_only));
+                    builder.setPositiveButton(host.getString(R.string.subscribe_now), (dialog, id) -> {
+                        String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
+                        Intent intent = new Intent(host, WebViewActivity.class);
+                        intent.putExtra("url", url);
+                        host.startActivity(intent);
+                        dialog.dismiss();
+                    });
+                    builder.setNegativeButton(host.getString(R.string.dismiss), (dialog, id) -> dialog.dismiss());
+                    builder.setOnDismissListener(arg0 -> host.finish());
+                    final AlertDialog dialog = builder.show();
                 }
             });
         } else if (!mActive && amIPlaying && undoRequested) {
@@ -1171,6 +1149,12 @@ public class Game implements Parcelable {
 //            boardView.invalidate();
         }
 
+        if (mActive && isSwap2() && getMovesList().size() == 3 && swap2Choice) {
+            final BoardActivity host = (BoardActivity) boardView.getContext();
+            Button button = host.findViewById(R.id.swap2PassButton);
+            button.setVisibility(View.VISIBLE);
+        }
+
         if (mActive && goEvaluateDeadStones) {
             getTerritories();
             boardView.invalidate();
@@ -1182,19 +1166,13 @@ public class Game implements Parcelable {
                     p1Stones = getMovesForValue(2).size(),
                     p2Stones = getMovesForValue(1).size();
             builder.setMessage(host.getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
-            builder.setPositiveButton(host.getString(R.string.accept), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    submitMove("1","");
-                    host.finish();
-                }
+            builder.setPositiveButton(host.getString(R.string.accept), (dialogInterface, i) -> {
+                submitMove("1","");
+                host.finish();
             });
-            builder.setNegativeButton(host.getString(R.string.reject), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    submitMove("0", "");
-                    host.finish();
-                }
+            builder.setNegativeButton(host.getString(R.string.reject), (dialogInterface, i) -> {
+                submitMove("0", "");
+                host.finish();
             });
             AlertDialog dlg = builder.create();
             dlg.setCanceledOnTouchOutside(false);
@@ -1219,10 +1197,7 @@ public class Game implements Parcelable {
                         p1Stones = getMovesForValue(2).size(),
                         p2Stones = getMovesForValue(1).size();
                 builder.setMessage(host.getString(R.string.double_pass));
-                builder.setPositiveButton(host.getString(R.string.dismiss), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
+                builder.setPositiveButton(host.getString(R.string.dismiss), (dialogInterface, i) -> {
                 });
                 builder.setNegativeButton(host.getString(R.string.no_reminder), new DialogInterface.OnClickListener() {
                     @Override
@@ -1350,6 +1325,9 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
             boardView.setBackgroundColor(boardView.oPenteColor);
             replayOPenteGame(untilMove);
+        } else if (getGameType().equals("Swap2-Pente") || getGameType().equals("Speed Swap2-Pente")) {
+            boardView.setBackgroundColor(boardView.swap2PenteColor);
+            replayPenteGame(untilMove);
         }
 
         movesString = "";
@@ -1402,29 +1380,29 @@ public class Game implements Parcelable {
         }
     }
 
-    public void replayGame(byte moveI, byte moveJ, BoardView boardView) {
+    public void replayGame(byte moveI, byte moveJ, BoardView boardView, byte moveG, byte moveH) {
         if (mMovesList == null) {
             return;
         }
 
         if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
-            replayPenteGame(moveI, moveJ);
+            replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
-            replayPenteGame(moveI, moveJ);
+            replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
             replayKeryoPenteGame(moveI, moveJ);
         } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
-            replayPenteGame(moveI, moveJ);
+            replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
             replayPoofPenteGame(moveI, moveJ);
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
-            replayPenteGame(moveI, moveJ);
+            replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
             replayKeryoPenteGame(moveI, moveJ);
@@ -1434,6 +1412,9 @@ public class Game implements Parcelable {
         } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
             boardView.setBackgroundColor(boardView.oPenteColor);
             replayOPenteGame(moveI, moveJ);
+        } else if (getGameType().equals("Swap2-Pente") || getGameType().equals("Speed Swap2-Pente")) {
+            boardView.setBackgroundColor(boardView.swap2PenteColor);
+            replayPenteGame(moveI, moveJ, moveG, moveH);
         }
 
         if (boardView != null) {
@@ -1492,7 +1473,7 @@ public class Game implements Parcelable {
             }
         }
     }
-    private void replayPenteGame(byte moveI, byte moveJ) {
+    private void replayPenteGame(byte moveI, byte moveJ, byte moveG, byte moveH) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
             byte color = (byte) (1 + (i%2));
@@ -1501,9 +1482,17 @@ public class Game implements Parcelable {
             detectPenteCapture(mvI, mvJ, color);
         }
         byte color = (byte) (1 + (mMovesList.size()%2));
-        abstractBoard[moveI][moveJ] = color;
-//        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + color);
-        detectPenteCapture(moveI, moveJ, color);
+//        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + moveG + " and " + moveH + " and " + color);
+        if (moveG != (byte) 255 && moveH != (byte) 255) {
+            abstractBoard[moveG][moveH] = color;
+            detectPenteCapture(moveG, moveH, color);
+            color = (byte) (3 - color);
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
+        } else {
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
+        }
     }
 
     private void replayKeryoPenteGame(int until) {

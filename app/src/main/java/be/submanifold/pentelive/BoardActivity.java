@@ -64,14 +64,14 @@ public class BoardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_board);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         messageView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.in_game_message, null, false);
         messageIcon = (ImageView)((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
         rotation = AnimationUtils.loadAnimation(BoardActivity.this, R.anim.rotation_animation);
         rotation.setRepeatCount(Animation.INFINITE);
 
-        board = (BoardView) findViewById(R.id.boardView);
+        board = findViewById(R.id.boardView);
         board.setBoardActivity(this);
         this.game = getIntent().getParcelableExtra("game");
         game.parseGame(board);
@@ -88,188 +88,206 @@ public class BoardActivity extends AppCompatActivity {
 
         setRegularSubmitListener();
 
-        Button button = (Button) findViewById(R.id.playAsWhiteButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ((LinearLayout) findViewById(R.id.dPenteLayout)).setVisibility(View.INVISIBLE);
-                ((LinearLayout) findViewById(R.id.submitLayout)).setVisibility(View.VISIBLE);
+        Button button = findViewById(R.id.playAsWhiteButton);
+        if (button != null) button.setOnClickListener(v -> {
+            if (game.isSwap2()) {
+                game.submitMove("0", ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
+                finish();
+            } else {
+                findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
                 board.dPenteChosen = true;
 //                ((TextView) findViewById(R.id.capturesLabel)).setVisibility(View.VISIBLE);
                 Toast.makeText(BoardActivity.this, getString(R.string.place_stone_submit),
                         Toast.LENGTH_LONG).show();
             }
         });
-        button = (Button) findViewById(R.id.playAsBlackButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        button = findViewById(R.id.playAsBlackButton);
+        if (button != null) button.setOnClickListener(v -> {
+            if (game.isSwap2()) {
+                findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
+                board.swap2Chosen = true;
+                Toast.makeText(BoardActivity.this, getString(R.string.place_stone_submit),
+                        Toast.LENGTH_LONG).show();
+            } else {
                 game.submitMove("0", ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
                 finish();
             }
         });
-        button = (Button) findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                goBack();
+
+        button = findViewById(R.id.swap2PassButton);
+        if (button != null) button.setOnClickListener(v -> {
+            if (game.isSwap2()) {
+                if (game.swap2Choice) {
+                    Toast.makeText(BoardActivity.this, getString(R.string.place_2_stones_submit),
+                            Toast.LENGTH_LONG).show();
+                    findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
+                    board.swap2Chosen = true;
+                    board.swap2WillPass = true;
+                }
             }
         });
-        button = (Button) findViewById(R.id.forwardButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                goForward();
-            }
-        });
+        button = findViewById(R.id.backButton);
+        if (button != null) button.setOnClickListener(v -> goBack());
+        button = findViewById(R.id.forwardButton);
+        if (button != null) button.setOnClickListener(v -> goForward());
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
-                    case R.id.action_cancel_resign:
-                        if (!game.isActive()) {
-                            return false;
-                        }
-                        AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                        if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
-                            String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
-                            builder.setItems(options, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (which) {
-                                        case 0: resignTask = new ResignTask(game.getGameID());
-                                            askConfirmation(true);
-                                            break;
-                                        case 1: cancelTask = new CancelTask(game.getSetID());
-                                            askConfirmation(false);
-                                            break;
-                                        case 2: game.changeHideString();
-                                            break;
-                                    }
-                                    // the user clicked on colors[which]
-                                }
-                            });
-
-                        } else {
-                            String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-                            builder.setItems(options, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (which) {
-                                        case 0: resignTask = new ResignTask(game.getGameID());
-                                            askConfirmation(true);
-                                            break;
-                                        case 1: cancelTask = new CancelTask(game.getSetID());
-                                            askConfirmation(false);
-                                            break;
-                                    }
-                                }
-                            });
-                        }
-                        builder.show();
-                        return true;
-                    case R.id.action_lock:
-                        boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
-                        if (staywithgame) {
-                            menuItem.setIcon(R.drawable.ic_action_lock_open);
-                        } else {
-                            menuItem.setIcon(R.drawable.ic_action_lock_closed);
-                        }
-                        PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
-                        return  true;
-                    case R.id.go_territory:
-                        game.getTerritories();
-                        board.invalidate();
-                        builder = new androidx.appcompat.app.AlertDialog.Builder(BoardActivity.this);
-                        builder.setTitle(getString(R.string.score));
-                        int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
-                                p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
-                                p1Stones = game.getMovesForValue(2).size(),
-                                p2Stones = game.getMovesForValue(1).size();
-                        builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
-                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()){
+                case R.id.action_cancel_resign:
+                    if (!game.isActive()) {
+                        return false;
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                    if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
+                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onDismiss(DialogInterface dialogInterface) {
-                                if (!game.isGoMarkStones()) {
-                                    game.getGoTerritoryByPlayer().get(1).clear();
-                                    game.getGoTerritoryByPlayer().get(2).clear();
-                                    board.invalidate();
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0: resignTask = new ResignTask(game.getGameID());
+                                        askConfirmation(true);
+                                        break;
+                                    case 1: cancelTask = new CancelTask(game.getSetID());
+                                        askConfirmation(false);
+                                        break;
+                                    case 2: game.changeHideString();
+                                        break;
                                 }
+                                // the user clicked on colors[which]
                             }
                         });
-                        androidx.appcompat.app.AlertDialog dlg = builder.create();
-                        dlg.setCanceledOnTouchOutside(true);
-                        Window window = dlg.getWindow();
-                        WindowManager.LayoutParams wlp = window.getAttributes();
-                        wlp.gravity = Gravity.BOTTOM;
-//                        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                        window.setAttributes(wlp);
-                        dlg.show();
-                }
 
-                return false;
+                    } else {
+                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                        builder.setItems(options, (dialog, which) -> {
+                            switch (which) {
+                                case 0: resignTask = new ResignTask(game.getGameID());
+                                    askConfirmation(true);
+                                    break;
+                                case 1: cancelTask = new CancelTask(game.getSetID());
+                                    askConfirmation(false);
+                                    break;
+                            }
+                        });
+                    }
+                    builder.show();
+                    return true;
+                case R.id.action_lock:
+                    boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
+                    if (staywithgame) {
+                        menuItem.setIcon(R.drawable.ic_action_lock_open);
+                    } else {
+                        menuItem.setIcon(R.drawable.ic_action_lock_closed);
+                    }
+                    PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
+                    return  true;
+                case R.id.go_territory:
+                    game.getTerritories();
+                    board.invalidate();
+                    builder = new AlertDialog.Builder(BoardActivity.this);
+                    builder.setTitle(getString(R.string.score));
+                    int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
+                            p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
+                            p1Stones = game.getMovesForValue(2).size(),
+                            p2Stones = game.getMovesForValue(1).size();
+                    builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            if (!game.isGoMarkStones()) {
+                                game.getGoTerritoryByPlayer().get(1).clear();
+                                game.getGoTerritoryByPlayer().get(2).clear();
+                                board.invalidate();
+                            }
+                        }
+                    });
+                    AlertDialog dlg = builder.create();
+                    dlg.setCanceledOnTouchOutside(true);
+                    Window window = dlg.getWindow();
+                    WindowManager.LayoutParams wlp = window.getAttributes();
+                    wlp.gravity = Gravity.BOTTOM;
+//                        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                    window.setAttributes(wlp);
+                    dlg.show();
             }
+
+            return false;
         });
     }
 
     private void askConfirmation(final boolean trueForResign) {
         final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(BoardActivity.this);
         builder.setTitle(getString(R.string.rusure));
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if (trueForResign) {
-                    resignTask.execute((Void) null);
-                } else {
-                    cancelTask.execute((Void) null);
-                }
-                dialog.dismiss();
-            } });
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
-            } });
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(final DialogInterface arg0) {
-                }
-            });
-        }
+        builder.setPositiveButton(getString(R.string.yes), (dialog, id) -> {
+            if (trueForResign) {
+                resignTask.execute((Void) null);
+            } else {
+                cancelTask.execute((Void) null);
+            }
+            dialog.dismiss();
+        });
+        builder.setNegativeButton(getString(R.string.no), (dialog, id) -> dialog.dismiss());
+        builder.setOnDismissListener(arg0 -> {
+        });
         final android.app.AlertDialog dialog = builder.show();
     }
 
     public void setRegularSubmitListener() {
-        Button button = (Button) findViewById(R.id.submitButton);
+        Button button = findViewById(R.id.submitButton);
         if (button != null) {
             if (game.isGo() && !game.isGoMarkStones()) {
                 button.setText(R.string.pass);
             } else {
                 button.setText(R.string.submit);
             }
-            button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (!game.isActive()) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.not_your_turn),
+            button.setOnClickListener(v -> {
+                if (!game.isActive()) {
+                    Toast.makeText(BoardActivity.this, getString(R.string.not_your_turn),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                String moves = "";
+                if (game.isConnect6()) {
+                    if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
+                        moves = "" + board.connect6Move1 + "," + board.playedMove;
+                    } else {
+                        Toast.makeText(BoardActivity.this, getString(R.string.c6_needs_2_moves),
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
-                    String moves = "";
-                    if (game.isConnect6()) {
-                        if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
-                            moves = "" + board.connect6Move1 + "," + board.playedMove;
-                        } else {
-                            Toast.makeText(BoardActivity.this, getString(R.string.c6_needs_2_moves),
+                } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                    if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
+                            board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove1 == board.dPenteMove4
+                            || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_4_moves),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
+                    }
+                } else if (game.isSwap2() && game.getMovesList().size() == 0) {
+                    if (board.swap2Move1 == -1 || board.swap2Move2 == -1 || board.swap2Move3 == -1 ||
+                            board.swap2Move1 == board.swap2Move2 || board.swap2Move1 == board.swap2Move3
+                            || board.swap2Move3 == board.swap2Move2) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.swap2_needs_3_moves),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        moves = "" + board.swap2Move1 + "," + board.swap2Move2 + "," + board.swap2Move3;
+                    }
+                } else if (game.isSwap2() && game.swap2Choice) {
+                    if (board.swap2WillPass) {
+                        if (board.swap2Move1 == -1 || board.swap2Move2 == -1 || board.swap2Move1 == board.swap2Move2) {
+                            Toast.makeText(BoardActivity.this, getString(R.string.swap2_pass_needs_2_moves),
                                     Toast.LENGTH_LONG).show();
                             return;
-                        }
-                    } else if (game.isDPente() && game.getMovesList().size() == 0) {
-                        if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
-                                board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove1 == board.dPenteMove4
-                                || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
-                            Toast.makeText(BoardActivity.this, getString(R.string.dpente_needs_4_moves),
-                                    Toast.LENGTH_LONG).show();
-                            return;
                         } else {
-                            moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
+                            moves = "2," + board.swap2Move1 + "," + board.swap2Move2;
                         }
-                    } else if (game.isDPente() && game.dPenteChoice) {
+                    } else {
                         if (board.playedMove == -1) {
                             Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                     Toast.LENGTH_LONG).show();
@@ -277,33 +295,41 @@ public class BoardActivity extends AppCompatActivity {
                         } else {
                             moves = "1," + board.playedMove;
                         }
-                    } else if (game.isGoMarkStones() && game.isGo()) {
-                        moves = "" + (game.getGridSize()*game.getGridSize());
-                        for (int move: game.getGoDeadStonesByPlayer().get(1)) {
-                            moves = move + "," + moves;
-                        }
-                        for (int move: game.getGoDeadStonesByPlayer().get(2)) {
-                            moves = move + "," + moves;
-                        }
-                    } else if (board.playedMove == -1 && game.isGo()) {
-                        moves = "" + (game.getGridSize()*game.getGridSize());
-                    } else if (board.playedMove == -1) {
+                    }
+                } else if (game.isDPente() && game.dPenteChoice) {
+                    if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
                         return;
                     } else {
-                        moves = "" + board.playedMove;
+                        moves = "1," + board.playedMove;
                     }
-
-                    game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
-
-                    if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
-                        game.setmGameString(null);
-                        game.parseGame(board);
-                        ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
-                    } else {
-                        finish();
+                } else if (game.isGoMarkStones() && game.isGo()) {
+                    moves = "" + (game.getGridSize()*game.getGridSize());
+                    for (int move: game.getGoDeadStonesByPlayer().get(1)) {
+                        moves = move + "," + moves;
                     }
+                    for (int move: game.getGoDeadStonesByPlayer().get(2)) {
+                        moves = move + "," + moves;
+                    }
+                } else if (board.playedMove == -1 && game.isGo()) {
+                    moves = "" + (game.getGridSize()*game.getGridSize());
+                } else if (board.playedMove == -1) {
+                    Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                } else {
+                    moves = "" + board.playedMove;
+                }
+
+                game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
+
+                if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
+                    game.setmGameString(null);
+                    game.parseGame(board);
+                    ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
+                } else {
+                    finish();
                 }
             });
         }
@@ -407,7 +433,7 @@ public class BoardActivity extends AppCompatActivity {
             extras.putString("npa", (personalizeAds?"0":"1"));
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
+            findViewById(R.id.boardAdView).setVisibility(View.GONE);
         }
     }
 
@@ -423,30 +449,27 @@ public class BoardActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.boardview_menu, menu);
-        messageIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                messageIcon.clearAnimation();
-                if (game != null && game.messages != null && game.messages.get(game.getUntilMove()) != null) {
-                    ((TextView) messageView.findViewById(R.id.opponentMessage)).setText(game.messages.get(game.getUntilMove()));
-                } else if (!game.isActive()) {
-                    return;
-                }
-                Display display = getWindowManager().getDefaultDisplay();
-                Point size = new Point();
-                display.getSize(size);
-    //                messageView.setBackgroundColor(Color.WHITE);
-                if (!game.isActive() || game.getUntilMove() < game.getMovesList().size()) {
-                    messageView.findViewById(R.id.messageInput).setVisibility(View.GONE);
-                }
-                messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
-                messageWindow.setFocusable(true);
-                messageWindow.setOutsideTouchable(true);
-                messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(BoardActivity.this, R.drawable.border));
-//                        messageWindow.setAnimationStyle(R.anim.animation);
-                messageWindow.showAtLocation(board, Gravity.TOP, 0, 260);
-//                return true;
+        messageIcon.setOnClickListener(v -> {
+            messageIcon.clearAnimation();
+            if (game != null && game.messages != null && game.messages.get(game.getUntilMove()) != null) {
+                ((TextView) messageView.findViewById(R.id.opponentMessage)).setText(game.messages.get(game.getUntilMove()));
+            } else if (!game.isActive()) {
+                return;
             }
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+//                messageView.setBackgroundColor(Color.WHITE);
+            if (!game.isActive() || game.getUntilMove() < game.getMovesList().size()) {
+                messageView.findViewById(R.id.messageInput).setVisibility(View.GONE);
+            }
+            messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+            messageWindow.setFocusable(true);
+            messageWindow.setOutsideTouchable(true);
+            messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(BoardActivity.this, R.drawable.border));
+//                        messageWindow.setAnimationStyle(R.anim.animation);
+            messageWindow.showAtLocation(board, Gravity.TOP, 0, 260);
+//                return true;
         });
         menu.findItem(R.id.action_new_message).setActionView(messageIcon);
 
@@ -569,9 +592,7 @@ public class BoardActivity extends AppCompatActivity {
             try {
                 String urlParameters  = "sid=" + sid + "&command=request&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData       = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
-                }
+                postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
                 int    postDataLength = postData.length;
                 String request        = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
@@ -606,7 +627,7 @@ public class BoardActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
                 System.out.println(output);
 
-                if (output.toString().indexOf("Error: Cancel request already exists.") > -1) {
+                if (output.toString().contains("Error: Cancel request already exists.")) {
                     return false;
                 }
 
