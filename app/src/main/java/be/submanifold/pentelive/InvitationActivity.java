@@ -37,7 +37,7 @@ public class InvitationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invitation);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Invitations");
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
@@ -50,70 +50,66 @@ public class InvitationActivity extends AppCompatActivity {
         if (getOpponent() != null) {
             ((AutoCompleteTextView) findViewById(R.id.opponent)).setText(getOpponent());
         }
-        ((AutoCompleteTextView) findViewById(R.id.opponent)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
+        ((AutoCompleteTextView) findViewById(R.id.opponent)).setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
 
-        Spinner spinner = (Spinner) findViewById(R.id.gameTypeSpinner);
+        Spinner spinner = findViewById(R.id.gameTypeSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.game_types_array, android.R.layout.simple_spinner_item);
+                R.array.turn_based_game_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner = (Spinner) findViewById(R.id.timeoutSpinner);
+        spinner = findViewById(R.id.timeoutSpinner);
         adapter = ArrayAdapter.createFromResource(this,
                 R.array.timeout_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(6);
-        spinner = (Spinner) findViewById(R.id.restrictionSpinner);
+        spinner = findViewById(R.id.restrictionSpinner);
         adapter = ArrayAdapter.createFromResource(this,
                 R.array.restriction_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        Button button = (Button) findViewById(R.id.sendInvitationButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
-                String gameType = "";
-                switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
-                    case 0: gameType = "51"; break;
-                    case 1: gameType = "53"; break;
-                    case 2: gameType = "55"; break;
-                    case 3: gameType = "57"; break;
-                    case 4: gameType = "59"; break;
-                    case 5: gameType = "61"; break;
-                    case 6: gameType = "63"; break;
-                    case 7: gameType = "65"; break;
-                    case 8: gameType = "67"; break;
-                    case 9: gameType = "69"; break;
-                    case 10: gameType = "71"; break;
-                    case 11: gameType = "73"; break;
-                    case 12: gameType = "75"; break;
-                }
-                String timeout =  ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
-                String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
-                String restriction = "";
-                switch (((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition()) {
-                    case 0: restriction = "B"; break;
-                    case 1: restriction = "A"; break;
-                    case 2: restriction = "N"; break;
-                    case 3: restriction = "L"; break;
-                    case 4: restriction = "H"; break;
-                    case 5: restriction = "S"; break;
-                    case 6: restriction = "C"; break;
-                }
-                String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
-                String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked()?"Y":"N";
-                SendInvitationTask submitTask = new SendInvitationTask(opponentName, gameType, timeout, rated, restriction, playAs, privateGame);
-                submitTask.execute((Void) null);
+        Button button = findViewById(R.id.sendInvitationButton);
+        if (button != null) button.setOnClickListener(v -> {
+            String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
+            String gameType = "";
+            switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
+                case 0: gameType = "51"; break;
+                case 1: gameType = "53"; break;
+                case 2: gameType = "55"; break;
+                case 3: gameType = "57"; break;
+                case 4: gameType = "59"; break;
+                case 5: gameType = "61"; break;
+                case 6: gameType = "63"; break;
+                case 7: gameType = "65"; break;
+                case 8: gameType = "67"; break;
+                case 9: gameType = "69"; break;
+                case 10: gameType = "71"; break;
+                case 11: gameType = "73"; break;
+                case 12: gameType = "75"; break;
+                case 13: gameType = "77"; break;
             }
+            String timeout =  ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
+            String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
+            String restriction = "";
+            switch (((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition()) {
+                case 0: restriction = "B"; break;
+                case 1: restriction = "A"; break;
+                case 2: restriction = "N"; break;
+                case 3: restriction = "L"; break;
+                case 4: restriction = "H"; break;
+                case 5: restriction = "S"; break;
+                case 6: restriction = "C"; break;
+            }
+            String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
+            String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked()?"Y":"N";
+            SendInvitationTask submitTask = new SendInvitationTask(opponentName, gameType, timeout, rated, restriction, playAs, privateGame);
+            submitTask.execute((Void) null);
         });
 
         AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.opponent);

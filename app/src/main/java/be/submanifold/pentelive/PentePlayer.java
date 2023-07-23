@@ -28,7 +28,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class PentePlayer implements Parcelable {
 
-    public static Boolean development = true;
+    public static Boolean development = false;
 
     public static String mPlayerName = "";
     public static String mPassword = "";
@@ -175,6 +175,10 @@ public class PentePlayer implements Parcelable {
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
             personalizeAds = "personalizeAds".equals(dashLine[8]);
             PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
+        }
+
+        if (development) {
+            mShowAds = true;
         }
 
         while (idx < dashLines.length && !dashLines[idx].contains("King of the Hill")) {

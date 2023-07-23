@@ -13,11 +13,14 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -79,7 +82,6 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
 
 
         // Set up the login form.
@@ -189,7 +191,7 @@ public class LoginActivity extends AppCompatActivity
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Play Pente with me?");
-                i.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " +storedUserName));
+                i.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
                 startActivity(Intent.createChooser(i, "Invite Friends"));
             }
         });
@@ -261,6 +263,7 @@ public class LoginActivity extends AppCompatActivity
         super.onPause();
         MyApplication.activityPaused();
     }
+
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -361,7 +364,6 @@ public class LoginActivity extends AppCompatActivity
     }
 
 
-
 //    @Override
 //    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
 //        return new CursorLoader(this,
@@ -419,14 +421,14 @@ public class LoginActivity extends AppCompatActivity
             try {
 //                CookieManager cookieManager = new CookieManager();
 //                CookieHandler.setDefault(cookieManager);
-                CookieHandler.setDefault( new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+                CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
                 CookieSyncManager.createInstance(LoginActivity.this);
 
-                URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+mEmail+"&password2="+mPassword);
+                    url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 }
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
                 cookie = connection.getHeaderField("Set-Cookie");
                 System.out.println("cookie: " + cookie);
@@ -435,7 +437,7 @@ public class LoginActivity extends AppCompatActivity
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -473,9 +475,9 @@ public class LoginActivity extends AppCompatActivity
                 }
 
             } catch (IOException e1) {
-                    e1.printStackTrace();
-                    return  false;
-                }
+                e1.printStackTrace();
+                return false;
+            }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
 //                if (pieces[0].equals(mEmail)) {
@@ -495,23 +497,20 @@ public class LoginActivity extends AppCompatActivity
             showProgress(false);
 
             if (success) {
-                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                     @Override
-                     public void onComplete(@NonNull Task<String> task) {
-                         if (!task.isSuccessful()) {
-                             return;
-                         }
+                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                            if (!task.isSuccessful()) {
+                                return;
+                            }
 
-                         // Get new FCM registration token
-                         String refreshedToken = task.getResult();
-                         System.out.println("New token: " + refreshedToken);
-                         // TODO: Implement this method to send any registration to your app's servers.
-                         if (refreshedToken != null) {
-                             SendTokenTask sendTokenTask = new SendTokenTask(refreshedToken);
-                             sendTokenTask.execute((Void) null);
-                         }
-                     }
-                 }
+                            // Get new FCM registration token
+                            String refreshedToken = task.getResult();
+                            System.out.println("New token: " + refreshedToken);
+                            // TODO: Implement this method to send any registration to your app's servers.
+                            if (refreshedToken != null) {
+                                SendTokenTask sendTokenTask = new SendTokenTask(refreshedToken);
+                                sendTokenTask.execute((Void) null);
+                            }
+                        }
                 );
 
                 PrefUtils.saveToPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, mEmail);
@@ -554,8 +553,6 @@ public class LoginActivity extends AppCompatActivity
     }
 
 
-
-
     public class SendTokenTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String token;
@@ -579,10 +576,13 @@ public class LoginActivity extends AppCompatActivity
                 Date date = new Date(System.currentTimeMillis()); //or simply new Date();
                 long millisNow = date.getTime();
                 long millisLastPing = PrefUtils.getLongFromPrefs(LoginActivity.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
-                if (((millisNow - millisLastPing)/(1000*3600*24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
+                if (((millisNow - millisLastPing) / (1000 * 3600 * 24) >= 1 && storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
 //                if ((storedPassword != null && storedUserName != null) || !storedToken.equals(token)) {
                     try {
                         URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
+                        if (PentePlayer.development) {
+                            url = new URL("https://development.pente.org/gameServer/notification?device=android&token=" + token);
+                        }
 //                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword
 //                        + "&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -615,7 +615,7 @@ public class LoginActivity extends AppCompatActivity
 
             } catch (Exception e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");

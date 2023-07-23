@@ -221,7 +221,7 @@ public class BoardView extends View {
         } else {
             myColor = 1;
         }
-        if (scaling == 2) {
+        if (scaling == 2 && playedMove != -1) {
             drawZoomedLine(canvas, stoneX, stoneY);
             drawZoomedStone(canvas, stoneX, stoneY, myColor);
         }
@@ -302,7 +302,11 @@ public class BoardView extends View {
                 if (!(abstractBoard[stoneI][stoneJ] != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
                     playedMove = -1;
                 }
-            } else if (abstractBoard[stoneI][stoneJ] != 0 || playedMove == game.koMove) {
+            } else if (abstractBoard[stoneI][stoneJ] != 0 || playedMove == game.koMove ||
+                    playedMove == dPenteMove1 || playedMove == dPenteMove2 ||
+                    playedMove == dPenteMove3 ||
+                    playedMove == swap2Move1 ||
+                    (playedMove == swap2Move2 && game.getMovesList().size() == 0)) {
                 playedMove = -1;
             }
         } else {
@@ -566,12 +570,12 @@ public class BoardView extends View {
                     if (swap2Move2 > -1) {
                         byte movei = (byte) (swap2Move2/19);
                         byte movej = (byte) (swap2Move2%19);
-                        drawStone(canvas, movei, movej, (byte) 1);
+                        drawStone(canvas, movei, movej, (byte) 2);
                     }
                     if (swap2Move1 > -1) {
                         byte movei = (byte) (swap2Move1/19);
                         byte movej = (byte) (swap2Move1%19);
-                        drawStone(canvas, movei, movej, (byte) 2);
+                        drawStone(canvas, movei, movej, (byte) 1);
                     }
                     if (swap2Move3 > -1) {
                         byte movei = (byte) (swap2Move3/19);
