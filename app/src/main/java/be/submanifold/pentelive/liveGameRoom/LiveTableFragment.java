@@ -154,62 +154,56 @@ public class LiveTableFragment extends Fragment {
         Toolbar toolbar = (Toolbar) getView().findViewById(R.id.toolbar);
 //        toolbar.setTitle(getString(R.string.home));
         toolbar.inflateMenu(R.menu.live_table_menu);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_players:
-                        if (table.getOwner().equals(me)) {
-                            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                            String options[] = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
-                            builder.setItems(options, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (which) {
-                                        case 0:
-                                            showTablePlayers();
-                                            break;
-                                        case 1:
-                                            showBootablePlayers();
-                                            break;
-                                        case 2:
-                                            showInvitePlayers();
-                                            break;
-                                    }
-                                }
-                            });
-                            builder.show();
+        toolbar.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.action_players:
+                    if (table.getOwner().equals(me)) {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                        String options[] = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
+                        builder.setItems(options, (dialog, which) -> {
+                            switch (which) {
+                                case 0:
+                                    showTablePlayers();
+                                    break;
+                                case 1:
+                                    showBootablePlayers();
+                                    break;
+                                case 2:
+                                    showInvitePlayers();
+                                    break;
+                            }
+                        });
+                        builder.show();
 
-                        } else {
-                            showTablePlayers();
-                        }
-                        return true;
+                    } else {
+                        showTablePlayers();
+                    }
+                    return true;
 
-                    case R.id.action_game:
-                        if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
-                            showGameActions(table.currentPlayerName().equals(me));
-                        } else {
-                            Toast.makeText(activity, getString(R.string.not_player),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                        return true;
+                case R.id.action_game:
+                    if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
+                        showGameActions(table.currentPlayerName().equals(me));
+                    } else {
+                        Toast.makeText(activity, getString(R.string.not_player),
+                                Toast.LENGTH_LONG).show();
+                    }
+                    return true;
 
-                    case R.id.action_settings:
-                        if (table.getOwner().equals(me)) {
-                            initializeSettingsView();
-                        } else {
-                            Toast.makeText(activity, getString(R.string.not_owner),
-                                    Toast.LENGTH_LONG).show();
-                        }
+                case R.id.action_settings:
+                    if (table.getOwner().equals(me)) {
+                        initializeSettingsView();
+                    } else {
+                        Toast.makeText(activity, getString(R.string.not_owner),
+                                Toast.LENGTH_LONG).show();
+                    }
 
-                        return true;
+                    return true;
 
-                    default:
-                        // If we got here, the user's action was not recognized.
-                        // Invoke the superclass to handle it.
-                        return false;
+                default:
+                    // If we got here, the user's action was not recognized.
+                    // Invoke the superclass to handle it.
+                    return false;
 
-                }
             }
         });
 
@@ -236,67 +230,52 @@ public class LiveTableFragment extends Fragment {
         capturesTextView = (TextView) getView().findViewById(R.id.capturesView);
         gameNameView = (TextView) getView().findViewById(R.id.gameNameView);
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
-                    int passMove = table.getGridSize() * table.getGridSize();
-                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
-                } else if (mListener != null && table.isSeated(me)) {
-                    mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
-                    playButton.setVisibility(View.INVISIBLE);
-                }
+        playButton.setOnClickListener(view14 -> {
+            if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
+                int passMove = table.getGridSize() * table.getGridSize();
+                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+            } else if (mListener != null && table.isSeated(me)) {
+                mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
+                playButton.setVisibility(View.INVISIBLE);
             }
         });
         p1Layout = (LinearLayout) getView().findViewById(R.id.p1Layout);
         p2Layout = (LinearLayout) getView().findViewById(R.id.p2Layout);
-        p1Layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mListener != null) {
-                    if (table.isSeated(me)) {
-                        mListener.sendEvent("{\"dsgStandTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
-                    } else if (table.getSeats().get(1) == null) {
-                        mListener.sendEvent("{\"dsgSitTableEvent\":{\"seat\":1,\"table\":" + table.getId() + ",\"time\":0}}");
-                    }
+        p1Layout.setOnClickListener(view13 -> {
+            if (mListener != null) {
+                if (table.isSeated(me)) {
+                    mListener.sendEvent("{\"dsgStandTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
+                } else if (table.getSeats().get(1) == null) {
+                    mListener.sendEvent("{\"dsgSitTableEvent\":{\"seat\":1,\"table\":" + table.getId() + ",\"time\":0}}");
                 }
             }
         });
-        p2Layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mListener != null) {
-                    if (table.isSeated(me)) {
-                        mListener.sendEvent("{\"dsgStandTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
-                    } else if (table.getSeats().get(2) == null) {
-                        mListener.sendEvent("{\"dsgSitTableEvent\":{\"seat\":2,\"table\":" + table.getId() + ",\"time\":0}}");
-                    }
+        p2Layout.setOnClickListener(view12 -> {
+            if (mListener != null) {
+                if (table.isSeated(me)) {
+                    mListener.sendEvent("{\"dsgStandTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
+                } else if (table.getSeats().get(2) == null) {
+                    mListener.sendEvent("{\"dsgSitTableEvent\":{\"seat\":2,\"table\":" + table.getId() + ",\"time\":0}}");
                 }
             }
         });
-        tableTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                final EditText input = new EditText(activity);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-                builder.setPositiveButton(activity.getString(R.string.send), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String m_Text = input.getText().toString();
-                        if (!"".equals(m_Text)) {
-                            String event = "{\"dsgTextTableEvent\":{\"text\":\"" + m_Text + "\",\"table\":" + table.getId() + ",\"time\":0}}";
-                            if (mListener != null) {
-                                mListener.sendEvent(event);
-                            }
-                        }
+        tableTextView.setOnClickListener(view1 -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            final EditText input = new EditText(activity);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(input);
+            builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
+                String m_Text = input.getText().toString();
+                if (!"".equals(m_Text)) {
+                    String event = "{\"dsgTextTableEvent\":{\"text\":\"" + m_Text + "\",\"table\":" + table.getId() + ",\"time\":0}}";
+                    if (mListener != null) {
+                        mListener.sendEvent(event);
                     }
-                });
-                AlertDialog dlg = builder.create();
-                dlg.show();
-                dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            }
+                }
+            });
+            AlertDialog dlg = builder.create();
+            dlg.show();
+            dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         });
         updateTable();
         if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
@@ -310,19 +289,16 @@ public class LiveTableFragment extends Fragment {
         super.onResume();
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
-        getView().setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                System.out.println("w000000000t");
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    System.out.println("whaaaaaaaaaat");
-                    if (mListener != null) {
-                        mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
-                        return true;
-                    }
+        getView().setOnKeyListener((v, keyCode, event) -> {
+            System.out.println("w000000000t");
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                System.out.println("whaaaaaaaaaat");
+                if (mListener != null) {
+                    mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
+                    return true;
                 }
-                return false;
             }
+            return false;
         });
     }
 
@@ -442,6 +418,19 @@ public class LiveTableFragment extends Fragment {
                 showDPenteChoice();
             }
         }
+        if (table.swap2ChoiceWithPass() || table.swap2ChoiceWithoutPass()) {
+            if (table.swap2ChoiceWithPass()) {
+                LivePlayer p2Player = table.getSeats().get(2);
+                if (p2Player != null && p2Player.getName().equals(me)) {
+                    showSwap2Choice();
+                }
+            } else if (table.swap2ChoiceWithoutPass()) {
+                LivePlayer p1Player = table.getSeats().get(1);
+                if (p1Player != null && p1Player.getName().equals(me)) {
+                    showSwap2Choice();
+                }
+            }
+        }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
             playButton.setText(R.string.pass);
@@ -465,6 +454,19 @@ public class LiveTableFragment extends Fragment {
             LivePlayer p2Player = table.getSeats().get(2);
             if (p2Player != null && p2Player.getName().equals(me)) {
                 showDPenteChoice();
+            }
+        }
+        if (table.swap2ChoiceWithPass() || table.swap2ChoiceWithoutPass()) {
+            if (table.swap2ChoiceWithPass()) {
+                LivePlayer p2Player = table.getSeats().get(2);
+                if (p2Player != null && p2Player.getName().equals(me)) {
+                    showSwap2Choice();
+                }
+            } else if (table.swap2ChoiceWithoutPass()) {
+                LivePlayer p1Player = table.getSeats().get(1);
+                if (p1Player != null && p1Player.getName().equals(me)) {
+                    showSwap2Choice();
+                }
             }
         }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
@@ -501,20 +503,17 @@ public class LiveTableFragment extends Fragment {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(table.getScoreMessage());
                 String options[] = {getString(R.string.accept), getString(R.string.reject)};
-                builder.setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int passMove = table.getGridSize() * table.getGridSize();
-                        switch (which) {
-                            case 0:
-                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
-                                break;
-                            case 1:
-                                mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
-                                break;
-                        }
-                        // the user clicked on colors[which]
+                builder.setItems(options, (dialog, which) -> {
+                    int passMove = table.getGridSize() * table.getGridSize();
+                    switch (which) {
+                        case 0:
+                            mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+                            break;
+                        case 1:
+                            mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+                            break;
                     }
+                    // the user clicked on colors[which]
                 });
                 AlertDialog dlg = builder.create();
                 dlg.setCanceledOnTouchOutside(false);
@@ -565,12 +564,7 @@ public class LiveTableFragment extends Fragment {
             timerHandler.removeCallbacks(timerUpdater);
             if (table.getGameState().state == State.PAUSED && table.isSeated(me)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setNegativeButton(getString(R.string.resign), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        sendResign();
-                    }
-                });
+                builder.setNegativeButton(getString(R.string.resign), (dialog, which) -> sendResign());
                 waitForPlayerReturnDialog = builder.create();
                 waitForPlayerReturnDialog.setTitle("1:00");
                 waitForPlayerReturnDialog.setMessage(getString(R.string.player_disconnected));
@@ -579,14 +573,11 @@ public class LiveTableFragment extends Fragment {
                 wlp.gravity = Gravity.BOTTOM;
 //                waitForPlayerReturnDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 window.setAttributes(wlp);
-                waitForPlayerReturnDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        if (countDownTimer != null) {
-                            countDownTimer.cancel();
-                            countDownTimer = null;
-                            waitForPlayerReturnDialog = null;
-                        }
+                waitForPlayerReturnDialog.setOnDismissListener(dialogInterface -> {
+                    if (countDownTimer != null) {
+                        countDownTimer.cancel();
+                        countDownTimer = null;
+                        waitForPlayerReturnDialog = null;
                     }
                 });
                 waitForPlayerReturnDialog.show();
@@ -635,40 +626,31 @@ public class LiveTableFragment extends Fragment {
         if (settingsView == null) {
             settingsView = activity.getLayoutInflater().inflate(R.layout.live_table_settings, null);
             timedChoice = (TextView) settingsView.findViewById(R.id.timedChoice);
-            timedChoice.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (timedChoice.getText().toString().equals(getString(R.string.yes))) {
-                        timedChoice.setText(getString(R.string.no));
-                    } else {
-                        timedChoice.setText(getString(R.string.yes));
-                    }
-                    sendTableChange();
+            timedChoice.setOnClickListener(view -> {
+                if (timedChoice.getText().toString().equals(getString(R.string.yes))) {
+                    timedChoice.setText(getString(R.string.no));
+                } else {
+                    timedChoice.setText(getString(R.string.yes));
                 }
+                sendTableChange();
             });
             ratedChoice = (TextView) settingsView.findViewById(R.id.ratedChoice);
-            ratedChoice.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (ratedChoice.getText().toString().equals(getString(R.string.yes))) {
-                        ratedChoice.setText(getString(R.string.no));
-                    } else {
-                        ratedChoice.setText(getString(R.string.yes));
-                    }
-                    sendTableChange();
+            ratedChoice.setOnClickListener(view -> {
+                if (ratedChoice.getText().toString().equals(getString(R.string.yes))) {
+                    ratedChoice.setText(getString(R.string.no));
+                } else {
+                    ratedChoice.setText(getString(R.string.yes));
                 }
+                sendTableChange();
             });
             privateChoice = (TextView) settingsView.findViewById(R.id.privateChoice);
-            privateChoice.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (privateChoice.getText().toString().equals(getString(R.string.public_table))) {
-                        privateChoice.setText(getString(R.string.private_table));
-                    } else {
-                        privateChoice.setText(getString(R.string.public_table));
-                    }
-                    sendTableChange();
+            privateChoice.setOnClickListener(view -> {
+                if (privateChoice.getText().toString().equals(getString(R.string.public_table))) {
+                    privateChoice.setText(getString(R.string.private_table));
+                } else {
+                    privateChoice.setText(getString(R.string.public_table));
                 }
+                sendTableChange();
             });
             initialMinutesView = (EditText) settingsView.findViewById(R.id.initialMinutesInput);
             incrementalSecondsView = (EditText) settingsView.findViewById(R.id.incrementalSecondsInput);
@@ -688,25 +670,17 @@ public class LiveTableFragment extends Fragment {
 
                 }
             });
-            gameSpinner.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    return false;
-                }
+            gameSpinner.setOnTouchListener((view, motionEvent) -> {
+                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
             });
             AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
             helpBuilder.setTitle(getString(R.string.table_settings));
             helpBuilder.setView(settingsView);
             tableSettingsWindow = helpBuilder.create();
             tableSettingsWindow.setCanceledOnTouchOutside(true);
-            tableSettingsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
-                    sendTableChange();
-                }
-            });
+            tableSettingsWindow.setOnDismissListener(dialogInterface -> sendTableChange());
         }
         gameSpinner.setSelection((table.getGame() - 1) / 2);
         if (table.isTimed()) {
@@ -754,53 +728,28 @@ public class LiveTableFragment extends Fragment {
             if (table.getGameState().state == State.STARTED &&
                     ((table.getGameState().goState == GoState.PLAY && !myTurn) || (table.getGameState().goState == GoState.MARKSTONES && myTurn))) {
                 String options[] = {getString(R.string.score), getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-                builder.setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                scoreGame();
-                                break;
-                            case 1:
-                                sendUndoRequest();
-                                break;
-                            case 2:
-                                sendResign();
-                                break;
-                            case 3:
-                                sendCancelRequest();
-                                break;
-                        }
+                builder.setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            scoreGame();
+                            break;
+                        case 1:
+                            sendUndoRequest();
+                            break;
+                        case 2:
+                            sendResign();
+                            break;
+                        case 3:
+                            sendCancelRequest();
+                            break;
                     }
                 });
             } else {
                 String options[] = {getString(R.string.score), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-                builder.setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                scoreGame();
-                                break;
-                            case 1:
-                                sendResign();
-                                break;
-                            case 2:
-                                sendCancelRequest();
-                                break;
-                        }
-                    }
-                });
-            }
-
-        } else if (!myTurn) {
-            String options[] = {getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-            builder.setItems(options, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                builder.setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            sendUndoRequest();
+                            scoreGame();
                             break;
                         case 1:
                             sendResign();
@@ -809,24 +758,37 @@ public class LiveTableFragment extends Fragment {
                             sendCancelRequest();
                             break;
                     }
-                    // the user clicked on colors[which]
+                });
+            }
+
+        } else if (!myTurn) {
+            String options[] = {getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+            builder.setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        sendUndoRequest();
+                        break;
+                    case 1:
+                        sendResign();
+                        break;
+                    case 2:
+                        sendCancelRequest();
+                        break;
                 }
+                // the user clicked on colors[which]
             });
         } else {
             String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-            builder.setItems(options, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case 0:
-                            sendResign();
-                            break;
-                        case 1:
-                            sendCancelRequest();
-                            break;
-                    }
-                    // the user clicked on colors[which]
+            builder.setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        sendResign();
+                        break;
+                    case 1:
+                        sendCancelRequest();
+                        break;
                 }
+                // the user clicked on colors[which]
             });
         }
         builder.show();
@@ -860,19 +822,16 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_cancellation, player));
         String options[] = {getString(R.string.accept), getString(R.string.decline)};
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        sendCancelReply(true);
-                        break;
-                    case 1:
-                        sendCancelReply(false);
-                        break;
-                }
-                // the user clicked on colors[which]
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    sendCancelReply(true);
+                    break;
+                case 1:
+                    sendCancelReply(false);
+                    break;
             }
+            // the user clicked on colors[which]
         });
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);
@@ -894,19 +853,16 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_undo, player));
         String options[] = {getString(R.string.accept), getString(R.string.decline)};
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        sendUndoReply(true);
-                        break;
-                    case 1:
-                        sendUndoReply(false);
-                        break;
-                }
-                // the user clicked on colors[which]
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    sendUndoReply(true);
+                    break;
+                case 1:
+                    sendUndoReply(false);
+                    break;
             }
+            // the user clicked on colors[which]
         });
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);
@@ -928,19 +884,16 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.continue_as));
         String options[] = {getString(R.string.p1white), getString(R.string.p2black)};
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        sendDPenteChoice(true);
-                        break;
-                    case 1:
-                        sendDPenteChoice(false);
-                        break;
-                }
-                // the user clicked on colors[which]
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    sendDPenteChoice(true);
+                    break;
+                case 1:
+                    sendDPenteChoice(false);
+                    break;
             }
+            // the user clicked on colors[which]
         });
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);
@@ -956,6 +909,58 @@ public class LiveTableFragment extends Fragment {
     private void sendDPenteChoice(boolean white) {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgSwapSeatsTableEvent\":{\"swap\":" + (white ? "true" : "false") + ",\"silent\":false,\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+    public void showSwap2Choice() {
+        System.out.println("swap2choice show");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.continue_as));
+        if (table.swap2ChoiceWithoutPass()) {
+            String options[] = {getString(R.string.p1white), getString(R.string.p2black)};
+            builder.setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        sendSwap2Choice(false);
+                        break;
+                    case 1:
+                        sendSwap2Choice(true);
+                        break;
+                }
+            });
+        } else {
+            String options[] = {getString(R.string.p1white), getString(R.string.p2black), getString(R.string.swap2pass)};
+            builder.setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        sendSwap2Choice(true);
+                        break;
+                    case 1:
+                        sendSwap2Choice(false);
+                        break;
+                    case 2:
+                        sendSwap2Pass();
+                        break;
+                }
+            });
+        }
+        AlertDialog dlg = builder.create();
+        dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        window.setAttributes(wlp);
+        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dlg.show();
+    }
+
+    private void sendSwap2Choice(boolean swap) {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgSwapSeatsTableEvent\":{\"swap\":" + (swap ? "true" : "false") + ",\"silent\":false,\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+    private void sendSwap2Pass() {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgSwap2PassTableEvent\":{\"silent\":false,\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
@@ -993,12 +998,8 @@ public class LiveTableFragment extends Fragment {
         AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
         listView.expandGroup(0);
-        listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true; // This way the expander cannot be collapsed
-            }
+        listView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
         });
 
         tablePlayers.show();
@@ -1018,24 +1019,17 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
         listView.expandGroup(0);
-        listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true; // This way the expander cannot be collapsed
-            }
+        listView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
         });
 
         tablePlayers.show();
 
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                LivePlayer player = listAdapter.playersArray.get(childPosition);
-                bootPlayer(player.getName());
-                tablePlayers.dismiss();
-                return true;
-            }
+        listView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            LivePlayer player = listAdapter.playersArray.get(childPosition);
+            bootPlayer(player.getName());
+            tablePlayers.dismiss();
+            return true;
         });
 
     }
@@ -1076,48 +1070,38 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
         listView.expandGroup(0);
-        listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true; // This way the expander cannot be collapsed
-            }
+        listView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
         });
 
         tablePlayers.show();
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                final LivePlayer player = listAdapter.playersArray.get(childPosition);
+        listView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            final LivePlayer player = listAdapter.playersArray.get(childPosition);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                final EditText invitationText = new EditText(activity);
-                invitationText.setHint("(" + getString(R.string.optional_message) + ")");
-                invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(invitationText);
-                builder.setTitle(getString(R.string.invite_player_to_table, player.coloredNameString(invitationText.getLineHeight())));
-                builder.setPositiveButton(activity.getString(R.string.send), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String m_Text = invitationText.getText().toString();
-                        String event = "{\"dsgInviteTableEvent\":{\"toInvite\":\"" + player.getName() + "\",\"inviteText\":\"" + m_Text + "\",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}";
-                        if (mListener != null) {
-                            mListener.sendEvent(event);
-                        }
-                    }
-                });
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            final EditText invitationText = new EditText(activity);
+            invitationText.setHint("(" + getString(R.string.optional_message) + ")");
+            invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(invitationText);
+            builder.setTitle(getString(R.string.invite_player_to_table, player.coloredNameString(invitationText.getLineHeight())));
+            builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
+                String m_Text = invitationText.getText().toString();
+                String event = "{\"dsgInviteTableEvent\":{\"toInvite\":\"" + player.getName() + "\",\"inviteText\":\"" + m_Text + "\",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}";
+                if (mListener != null) {
+                    mListener.sendEvent(event);
+                }
+            });
 //                builder.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
 //                    @Override
 //                    public void onClick(DialogInterface dialog, int which) {
 //                        dialog.cancel();
 //                    }
 //                });
-                builder.show();
+            builder.show();
 
 
-                tablePlayers.dismiss();
-                return true;
-            }
+            tablePlayers.dismiss();
+            return true;
         });
 
     }
@@ -1135,24 +1119,14 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(getString(R.string.opponent_unavailable));
         builder.setMessage(getString(R.string.player_not_returned));
-        builder.setPositiveButton(getString(R.string.cancel_set_game), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                sendForceCancelResignTableEvent(true);
-            }
-        });
+        builder.setPositiveButton(getString(R.string.cancel_set_game), (dialog, which) -> sendForceCancelResignTableEvent(true));
         builder.setNeutralButton(getString(R.string.resign), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 sendResign();
             }
         });
-        builder.setNegativeButton(getString(R.string.force_resign), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                sendForceCancelResignTableEvent(false);
-            }
-        });
+        builder.setNegativeButton(getString(R.string.force_resign), (dialog, which) -> sendForceCancelResignTableEvent(false));
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);
         Window window = dlg.getWindow();

@@ -207,6 +207,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                         Runnable uiRunnable = new Runnable() {
                             @Override
                             public void run() {
+                                System.out.println("jsonEvent: " + jsonEvent);
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
                                     updateMainRoom();
@@ -298,6 +299,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 } else if (jsonEvent.get("dsgSwapSeatsTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSwapSeatsTableEvent");
                                     swapSeats(data);
+                                } else if (jsonEvent.get("dsgSwap2PassTableEvent") != null) {
+                                    Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSwap2PassTableEvent");
+                                    swap2Pass(data);
                                 } else if (jsonEvent.get("dsgBootTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgBootTableEvent");
                                     String player = (String) data.get("player");
@@ -513,6 +517,15 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             } else {
                 addTableMessage(tableId, "* " + getString(R.string.seats_not_swapped));
             }
+        }
+    }
+
+    private void swap2Pass(Map<String, Object> data) {
+        final int tableId = (int) data.get("table");
+        final boolean silent = (boolean) data.get("silent");
+        Table table = tablesAndPlayers.tables.get(tableId);
+        if (table != null) {
+            table.swap2Pass(silent);
         }
     }
 

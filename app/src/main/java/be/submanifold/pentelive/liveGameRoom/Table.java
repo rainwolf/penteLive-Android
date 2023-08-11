@@ -27,7 +27,8 @@ public class Table {
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52BE80");
+            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52BE80"),
+            swap2Color = Color.parseColor("#E5AA70");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -55,6 +56,7 @@ public class Table {
         gameNames.put(21, "Go (9x9)");
         gameNames.put(23, "Go (13x13)");
         gameNames.put(25, "O-Pente");
+        gameNames.put(27, "Swap2-Pente");
         gameNames.put(2, "Speed Pente");
         gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku");
@@ -68,6 +70,7 @@ public class Table {
         gameNames.put(22, "Speed Go (9x9)");
         gameNames.put(24, "Speed Go (13x13)");
         gameNames.put(26, "Speed O-Pente");
+        gameNames.put(28, "Speed Swap2-Pente");
     }
 
     private List<Integer> moves = new ArrayList<>();
@@ -181,7 +184,8 @@ public class Table {
                 detectKeryoPenteCapture(move, color);
             }
         }
-        if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8 && game != 17 && game != 18 && (rated || game == 9 || game == 10)) {
+        if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8
+                && game != 17 && game != 18 && game != 27 && game != 28 && (rated || game == 9 || game == 10)) {
             if (moves.size() == 2) {
                 for (int i = 7; i < 12; i++) {
                     for (int j = 7; j < 12; j++) {
@@ -238,6 +242,10 @@ public class Table {
         return (game == 7 || game == 8 || game == 17 || game == 18);
     }
 
+    public boolean isSwap2() {
+        return (game == 27 || game == 28);
+    }
+
     public int currentColor() {
         if (isGo()) {
             if (getGameState().goState == GoState.PLAY) {
@@ -280,6 +288,20 @@ public class Table {
                     return 2;
                 }
             }
+            if (isSwap2()) {
+                if (moves.size() < 3) {
+                    return 1;
+                }
+                if (moves.size() == 3 && gameState.swap2State == Swap2State.NOCHOICE) {
+                    return 2;
+                }
+                if (moves.size() < 5 && (gameState.swap2State == Swap2State.NOCHOICE || gameState.swap2State == Swap2State.SWAP2PASS)) {
+                    return 2;
+                }
+                if (moves.size() == 5 && (gameState.swap2State == Swap2State.NOCHOICE || gameState.swap2State == Swap2State.SWAP2PASS)) {
+                    return 1;
+                }
+            }
             return 1 + (moves.size() % 2);
         } else {
             if (moves.size() == 0) {
@@ -310,9 +332,22 @@ public class Table {
                 gameState.timers.put(2, timer1);
             }
             gameState.dPenteState = DPenteState.SWAPPED;
+            gameState.swap2State = Swap2State.SWAPPED;
         } else {
             gameState.dPenteState = DPenteState.NOTSWAPPED;
+            gameState.swap2State = Swap2State.NOTSWAPPED;
         }
+    }
+
+    public void swap2Pass(boolean silent) {
+        gameState.swap2State = Swap2State.SWAP2PASS;
+    }
+    public boolean swap2ChoiceWithPass() {
+        return isSwap2() && gameState.swap2State == Swap2State.NOCHOICE && moves.size() == 3;
+    }
+    public boolean swap2ChoiceWithoutPass() {
+        return isSwap2() && (gameState.swap2State == Swap2State.SWAP2PASS ||
+                gameState.swap2State == Swap2State.NOCHOICE) && moves.size() == 5;
     }
 
     public synchronized void updateTimer(boolean reset, int currentPlayer, int minutes, int seconds) {
@@ -345,6 +380,7 @@ public class Table {
     public void resetState() {
         resetAbstractBoard();
         gameState.dPenteState = DPenteState.NOCHOICE;
+        gameState.swap2State = Swap2State.NOCHOICE;
         moves = new ArrayList<>();
         whiteCaptures = 0;
         blackCaptures = 0;
@@ -846,8 +882,10 @@ public class Table {
             return dkeryoColor;
         } else if (game < 25) {
             return goColor;
-        } else {
+        } else if (game < 27) {
             return oPenteColor;
+        } else {
+            return swap2Color;
         }
     }
 
