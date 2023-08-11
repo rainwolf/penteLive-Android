@@ -40,6 +40,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         this.roomName = roomName;
         this.activity = activity;
     }
+
     public void setInflater(LayoutInflater inflater) {
         this.inflater = inflater;
     }
@@ -135,15 +136,17 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
         super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
         super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         this.tablesArray = new ArrayList<>(tables.values());
         notifyDataSetChanged();
     }
+
     public List<Table> getTablesArray() {
         return tablesArray;
     }

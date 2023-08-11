@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
@@ -65,12 +66,16 @@ public class InviteAIActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String gameType = "";
                 switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
-                    case 0: gameType = "51"; break;
-                    case 1: gameType = "55"; break;
+                    case 0:
+                        gameType = "51";
+                        break;
+                    case 1:
+                        gameType = "55";
+                        break;
                 }
-                String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
-                String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
-                String difficulty =  "" + (((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition()+1);
+                String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked() ? "Y" : "N";
+                String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked() ? "2" : "1";
+                String difficulty = "" + (((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
                 SendInvitationTask submitTask = new SendInvitationTask(gameType, rated, difficulty, playAs);
                 submitTask.execute((Void) null);
             }
@@ -146,22 +151,22 @@ public class InviteAIActivity extends AppCompatActivity {
 
 //                String urlParameters  = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
 //                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N";
-                String urlParameters  = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
-                        "&daysPerMove=30&rated=" + rated +"&invitationRestriction=A&playAs=" + playAs + "&privateGame=N"
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "mobile=&difficulty=" + difficulty + "&invitee=computer&game=" + gameType +
+                        "&daysPerMove=30&rated=" + rated + "&invitationRestriction=A&playAs=" + playAs + "&privateGame=N"
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/newGame";
-                URL    url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/newGame";
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -169,26 +174,26 @@ public class InviteAIActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -204,7 +209,7 @@ public class InviteAIActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -256,17 +261,17 @@ public class InviteAIActivity extends AppCompatActivity {
     private void requestNewInterstitialAndShow() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds?"0":"1"));
+        extras.putString("npa", (personalizeAds ? "0" : "1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
 
-        InterstitialAd.load(this,"ca-app-pub-3326997956703582/8353630687", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         // The mInterstitialAd reference will be null until
                         // an ad is loaded.
                         mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 // Called when ad is dismissed.
@@ -282,6 +287,7 @@ public class InviteAIActivity extends AppCompatActivity {
                         });
                         mInterstitialAd.show(InviteAIActivity.this);
                     }
+
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error

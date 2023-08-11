@@ -55,10 +55,13 @@ public class RatingStat implements Parcelable {
         this.game = game;
     }
 
-    public int getGameId() { return gameId; }
+    public int getGameId() {
+        return gameId;
+    }
 
-    public void setGameId(int gameId) { this.gameId = gameId; }
-
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
 
 
     public RatingStat(String game, String rating, String lastGame, String totalGames, String crown, String gameId) {

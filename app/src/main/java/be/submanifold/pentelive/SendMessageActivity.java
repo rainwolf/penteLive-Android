@@ -2,9 +2,13 @@ package be.submanifold.pentelive;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
@@ -51,7 +55,7 @@ public class SendMessageActivity extends AppCompatActivity {
         if (PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(SendMessageActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
@@ -122,16 +126,16 @@ public class SendMessageActivity extends AppCompatActivity {
         SendMessageTask(String recipient, String subject, String message) {
             this.recipient = recipient.toLowerCase();
             try {
-                this.message = URLEncoder.encode(message,"UTF-8");
+                this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 this.message = "";
                 e.printStackTrace();
             }
             try {
                 if ("".equals(subject)) {
-                    this.subject = URLEncoder.encode("(no subject)","UTF-8");
+                    this.subject = URLEncoder.encode("(no subject)", "UTF-8");
                 } else {
-                    this.subject = URLEncoder.encode(subject,"UTF-8");
+                    this.subject = URLEncoder.encode(subject, "UTF-8");
                 }
             } catch (UnsupportedEncodingException e) {
                 this.subject = "nosubject";
@@ -145,21 +149,21 @@ public class SendMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
-                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
+                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/mymessages";
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/mymessages";
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -167,26 +171,26 @@ public class SendMessageActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -194,7 +198,7 @@ public class SendMessageActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
 //                System.out.println(output);
 
-                if (output.indexOf("Error: Player "+recipient+" not found.") > -1) {
+                if (output.indexOf("Error: Player " + recipient + " not found.") > -1) {
                     return false;
                 }
 
@@ -202,7 +206,7 @@ public class SendMessageActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -220,8 +224,8 @@ public class SendMessageActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
-               PrefUtils.savePlayerToPrefs(SendMessageActivity.this, recipient);
-               finish();
+                PrefUtils.savePlayerToPrefs(SendMessageActivity.this, recipient);
+                finish();
             } else {
                 ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(R.string.no_such_user));
             }

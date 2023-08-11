@@ -8,9 +8,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -51,7 +53,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private LiveGameRoom room;
 
     private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
-    public String getMe() { return me; }
+
+    public String getMe() {
+        return me;
+    }
 
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
     private boolean silent;
@@ -91,14 +96,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     }
 
 
-
     public void connectSocket() {
         connectSocket(room.getPort());
     }
-
-
-
-
 
 
     private void connectSocket(final int port) {
@@ -125,7 +125,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     if (self.me.startsWith("guest")) {
                         eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"guest\":true,\"time\":0}}");
                     } else {
-                        eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\""+username+"\",\"password\":\""+password+"\",\"guest\":false,\"time\":0}}");
+                        eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\"" + username + "\",\"password\":\"" + password + "\",\"guest\":false,\"time\":0}}");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -137,11 +137,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy");
-        (new Thread() { public void run() {
-            if (eventHandler != null) {
-                eventHandler.destroy();
+        (new Thread() {
+            public void run() {
+                if (eventHandler != null) {
+                    eventHandler.destroy();
+                }
             }
-        } }).start();
+        }).start();
         super.onDestroy();
     }
 
@@ -149,20 +151,24 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         if (!silent) {
             Uri soundUri;
             switch (sound) {
-                case NEW_INVITE_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.invitesound);
+                case NEW_INVITE_SOUND:
+                    soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.invitesound);
                     break;
-                case NEW_PLAYER_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
+                case NEW_PLAYER_SOUND:
+                    soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.newplayersound);
                     break;
-                case NEW_MOVE_SOUND: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+                case NEW_MOVE_SOUND:
+                    soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
                     break;
-                default: soundUri= Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
+                default:
+                    soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pentelivenotificationsound);
                     break;
             }
             if (mediaPlayer == null) {
                 mediaPlayer = new MediaPlayer();
             }
 //            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.reset();
+            mediaPlayer.reset();
 //            }
             try {
                 mediaPlayer.setDataSource(getApplicationContext(), soundUri);
@@ -285,7 +291,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgUndoRequestTableEvent");
                                     int tableId = (int) data.get("table");
                                     boolean accepted = (boolean) data.get("accepted");
-                                    addTableMessage(tableId, accepted?("* "+getString(R.string.undo_accepted)):("* " +getString(R.string.undo_declined)));
+                                    addTableMessage(tableId, accepted ? ("* " + getString(R.string.undo_accepted)) : ("* " + getString(R.string.undo_declined)));
                                 } else if (jsonEvent.get("dsgUndoReplyTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgUndoReplyTableEvent");
                                     undoReply(data);
@@ -314,11 +320,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     boolean ignore = (boolean) data.get("ignore");
                                     if (toPlayer.equals(me)) {
                                         if (accepted) {
-                                            addTableMessage(tableId, "* "+getString(R.string.accepted_your_invitation, player) + ": \""+responseText+"\"");
+                                            addTableMessage(tableId, "* " + getString(R.string.accepted_your_invitation, player) + ": \"" + responseText + "\"");
                                         } else {
-                                            addTableMessage(tableId, "* "+getString(R.string.declined_your_invitation, player) + ": \""+responseText+"\"");
+                                            addTableMessage(tableId, "* " + getString(R.string.declined_your_invitation, player) + ": \"" + responseText + "\"");
                                             if (ignore) {
-                                                addTableMessage(tableId, "* "+getString(R.string.is_ignoring_your_invitation, player) + ": \""+responseText+"\"");
+                                                addTableMessage(tableId, "* " + getString(R.string.is_ignoring_your_invitation, player) + ": \"" + responseText + "\"");
                                             }
                                         }
                                     }
@@ -349,7 +355,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 }
                             }
                         };
-                        synchronized( uiRunnable ) {
+                        synchronized (uiRunnable) {
                             runOnUiThread(uiRunnable);
                             try {
                                 uiRunnable.wait(); // unlocks myRunable while waiting
@@ -371,7 +377,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     }
 
 
-
     private void updateMainRoom() {
         LiveGameRoomFragment fragment = (LiveGameRoomFragment)
                 getSupportFragmentManager().findFragmentByTag("liveGameRoomFragment");
@@ -379,6 +384,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             fragment.updateMainRoom();
         }
     }
+
     private void updateTable(final int tableId) {
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
@@ -386,7 +392,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             fragment.updateTable();
         }
     }
-    private void addTableText(Map<String,Object> tableText) {
+
+    private void addTableText(Map<String, Object> tableText) {
         final String player = (String) tableText.get("player");
         final String text = (String) tableText.get("text");
         final int tableId = (int) tableText.get("table");
@@ -398,6 +405,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
+
     private void addTableMessage(final int tableId, final String text) {
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
@@ -407,7 +415,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
-    private void updateTableMove(Map<String,Object> data) {
+
+    private void updateTableMove(Map<String, Object> data) {
         final int tableId = (Integer) data.get("table");
         final List<Integer> moves = (List<Integer>) data.get("moves");
         final int move = (int) data.get("move");
@@ -424,7 +433,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
-    private void updateTableGameState(Map<String,Object> data) {
+
+    private void updateTableGameState(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         int state = (int) data.get("state");
         final String text = (String) data.get("changeText");
@@ -440,12 +450,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             tablesAndPlayers.updateGameState(tableId, state);
         }
     }
-    private void updateTableTimer(Map<String,Object> data) {
+
+    private void updateTableTimer(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         tablesAndPlayers.updateTableTimer(data);
         updateTable(tableId);
     }
-    private void cancelRequest(Map<String,Object> data) {
+
+    private void cancelRequest(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
         addTableMessage(tableId, "* " + getString(R.string.cancellation_requested));
@@ -457,7 +469,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
-    private void undoRequest(Map<String,Object> data) {
+
+    private void undoRequest(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
         addTableMessage(tableId, "* " + getString(R.string.undo_requested));
@@ -469,7 +482,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
-    private void rejectGoState(Map<String,Object> data) {
+
+    private void rejectGoState(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
         addTableMessage(tableId, "* " + getString(R.string.reject_go_state, player));
@@ -481,7 +495,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             System.out.println("**************** ah crap");
         }
     }
-    private void swapSeats(Map<String,Object> data) {
+
+    private void swapSeats(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         final boolean swapped = (boolean) data.get("swap");
         final boolean silent = (boolean) data.get("silent");
@@ -501,10 +516,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         }
     }
 
-    private void undoReply(Map<String,Object> data) {
+    private void undoReply(Map<String, Object> data) {
         int tableId = (int) data.get("table");
         boolean accepted = (boolean) data.get("accepted");
-        addTableMessage(tableId, accepted?("* "+getString(R.string.undo_accepted)):("* " +getString(R.string.undo_declined)));
+        addTableMessage(tableId, accepted ? ("* " + getString(R.string.undo_accepted)) : ("* " + getString(R.string.undo_declined)));
         if (accepted) {
             LiveTableFragment fragment = (LiveTableFragment)
                     getSupportFragmentManager().findFragmentByTag("liveTable");
@@ -515,7 +530,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             }
         }
     }
-    private void receivedInvitation(Map<String,Object> data) {
+
+    private void receivedInvitation(Map<String, Object> data) {
         playSound(NEW_INVITE_SOUND);
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
@@ -539,14 +555,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             LivePlayer plr = tablesAndPlayers.players.get(player);
             SpannableStringBuilder sb = plr.coloredNameString(playerText.getLineHeight());
             sb.append(" - ").append(plr.coloredRatingSquare(plr.getRating(tablesAndPlayers.tables.get(tableId).getGame())));
-            sb.append(" ").append(plr.getRating(tablesAndPlayers.tables.get(tableId).getGame())+"");
+            sb.append(" ").append(plr.getRating(tablesAndPlayers.tables.get(tableId).getGame()) + "");
             playerText.setText(sb);
             String gameStr = tablesAndPlayers.tables.get(tableId).getGameName();
             TextView tableText = (TextView) view.findViewById(R.id.tableText);
             tableText.setText(getString(R.string.invites_you, gameStr));
 
             TextView invitationText = (TextView) view.findViewById(R.id.invitationText);
-            invitationText.setText(getString(R.string.message) + ": \"" + inviteText+"\"");
+            invitationText.setText(getString(R.string.message) + ": \"" + inviteText + "\"");
             final EditText replyText = (EditText) view.findViewById(R.id.replyText);
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
 
@@ -558,11 +574,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     LiveTableFragment fragment = (LiveTableFragment)
                             getSupportFragmentManager().findFragmentByTag("liveTable");
                     if (fragment != null) {
-                        sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":"+ fragment.table.getId() + ",\"booted\":false,\"time\":0}}");
+                        sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + fragment.table.getId() + ",\"booted\":false,\"time\":0}}");
                     } else {
                         System.out.println("**************** ah crap");
                     }
-                    sendEvent("{\"dsgJoinTableEvent\":{\"table\":"+tableId+",\"time\":0}}");
+                    sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
                 }
             });
             builder.setNeutralButton(getString(R.string.decline), new DialogInterface.OnClickListener() {
@@ -582,10 +598,12 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             dlg.show();
         }
     }
+
     private void replyInvitation(String player, String replyText, int tableId, boolean accept, boolean ignore) {
-        sendEvent("{\"dsgInviteResponseTableEvent\":{\"toPlayer\":\""+player+"\",\"responseText\":\""+replyText+"\",\"accept\":"+(accept?"true":"false")+",\"ignore\":"+(ignore?"true":"false")+",\"table\":"+tableId+",\"time\":0}}");
+        sendEvent("{\"dsgInviteResponseTableEvent\":{\"toPlayer\":\"" + player + "\",\"responseText\":\"" + replyText + "\",\"accept\":" + (accept ? "true" : "false") + ",\"ignore\":" + (ignore ? "true" : "false") + ",\"table\":" + tableId + ",\"time\":0}}");
     }
-    private void waitingPlayerReturnTimeUp(Map<String,Object> data) {
+
+    private void waitingPlayerReturnTimeUp(Map<String, Object> data) {
         final int tableId = (int) data.get("table");
         final String player = (String) data.get("player");
         LiveTableFragment fragment = (LiveTableFragment)
@@ -598,18 +616,12 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     }
 
 
-
-
-
-
-
-
     private Map<String, Object> jsonToMap(String jsonStr) {
         try {
             JSONObject json = new JSONObject(jsonStr);
             Map<String, Object> retMap = null;
 
-            if(json != JSONObject.NULL) {
+            if (json != JSONObject.NULL) {
                 retMap = toMap(json);
                 return retMap;
             }
@@ -623,15 +635,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         Map<String, Object> map = new HashMap<String, Object>();
 
         Iterator<String> keysItr = object.keys();
-        while(keysItr.hasNext()) {
+        while (keysItr.hasNext()) {
             String key = keysItr.next();
             Object value = object.get(key);
 
-            if(value instanceof JSONArray) {
+            if (value instanceof JSONArray) {
                 value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
+            } else if (value instanceof JSONObject) {
                 value = toMap((JSONObject) value);
             }
             map.put(key, value);
@@ -641,13 +651,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
     private List<Object> toList(JSONArray array) throws JSONException {
         List<Object> list = new ArrayList<Object>();
-        for(int i = 0; i < array.length(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
-            if(value instanceof JSONArray) {
+            if (value instanceof JSONArray) {
                 value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
+            } else if (value instanceof JSONObject) {
                 value = toMap((JSONObject) value);
             }
             list.add(value);
@@ -666,34 +674,33 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         protected Boolean doInBackground(Void... params) {
 
             try {
-                    try {
-                        URL url = new URL("https://www.pente.org/gameServer/bootMeMobile.jsp?name2=" + storedUserName + "&password2=" + storedPassword);
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        int responseCode = connection.getResponseCode();
-                        if (responseCode != 200) {
-                            System.out.println("response code for submit was " + responseCode);
-                        }
+                try {
+                    URL url = new URL("https://www.pente.org/gameServer/bootMeMobile.jsp?name2=" + storedUserName + "&password2=" + storedPassword);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode != 200) {
+                        System.out.println("response code for submit was " + responseCode);
+                    }
 
-                        StringBuilder output = new StringBuilder();
-                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        String line = "";
-                        while ((line = br.readLine()) != null) {
-                            output.append(line + "\n");
-                        }
-                        br.close();
+                    StringBuilder output = new StringBuilder();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String line = "";
+                    while ((line = br.readLine()) != null) {
+                        output.append(line + "\n");
+                    }
+                    br.close();
 //                        System.out.println("output===============" + "\n" + output.toString());
 
 
-
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
 
                 // Add custom implementation, as needed.
 
             } catch (Exception e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
             return true;
         }
@@ -702,7 +709,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         protected void onPostExecute(final Boolean success) {
 
             if (success) {
-                eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\""+storedUserName+"\",\"password\":\""+storedPassword+"\",\"guest\":false,\"time\":0}}");
+                eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\"" + storedUserName + "\",\"password\":\"" + storedPassword + "\",\"guest\":false,\"time\":0}}");
             } else {
                 finish();
             }

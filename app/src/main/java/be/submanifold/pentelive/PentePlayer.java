@@ -33,13 +33,13 @@ public class PentePlayer implements Parcelable {
     public static String mPlayerName = "";
     public static String mPassword = "";
     public static Boolean mShowAds = true;
-    public static Boolean mSubscriber= false;
+    public static Boolean mSubscriber = false;
     public static Boolean dbAccess = false;
     private List<Game> mInvitations;
-    private List<Game>  mSentInvitations;
-    private List<Game>  mActiveGames;
-    private List<Game>  mNonActiveGames;
-    private List<Game>  mPublicInvitations;
+    private List<Game> mSentInvitations;
+    private List<Game> mActiveGames;
+    private List<Game> mNonActiveGames;
+    private List<Game> mPublicInvitations;
     private List<Message> mMessages;
     private List<RatingStat> mRatingStats;
     private List<KingOfTheHill> mHills;
@@ -57,13 +57,26 @@ public class PentePlayer implements Parcelable {
     public static Boolean personalizeAds = false;
 
     private int livePlayers;
-    public int getLivePlayers() { return this.livePlayers; }
+
+    public int getLivePlayers() {
+        return this.livePlayers;
+    }
+
     private int onlineFollowingers;
-    public int getOnlineFollowingers() { return onlineFollowingers; }
+
+    public int getOnlineFollowingers() {
+        return onlineFollowingers;
+    }
 
     private int tbRatings, tbHills;
-    public int getTbRatings() { return tbRatings; }
-    public int gettbHills() { return tbHills; }
+
+    public int getTbRatings() {
+        return tbRatings;
+    }
+
+    public int gettbHills() {
+        return tbHills;
+    }
 
     public PentePlayer(String playerName, String password) {
         mPlayerName = playerName;
@@ -73,7 +86,7 @@ public class PentePlayer implements Parcelable {
         this.mActiveGames = new ArrayList<Game>();
         this.mNonActiveGames = new ArrayList<Game>();
         this.mPublicInvitations = new ArrayList<Game>();
-        this.mMessages= new ArrayList<Message>();
+        this.mMessages = new ArrayList<Message>();
         this.mRatingStats = new ArrayList<RatingStat>();
         this.mTournaments = new ArrayList<Tournament>();
         this.mHills = new ArrayList<KingOfTheHill>();
@@ -92,54 +105,86 @@ public class PentePlayer implements Parcelable {
     public String getPlayerName() {
         return mPlayerName;
     }
+
     public List<Game> getInvitations() {
         return this.mInvitations;
     }
+
     public List<Game> getSentInvitations() {
         return this.mSentInvitations;
     }
+
     public List<Game> getActiveGames() {
         return this.mActiveGames;
     }
+
     public List<Game> getNonActiveGames() {
         return this.mNonActiveGames;
     }
+
     public List<Game> getPublicInvitations() {
         return this.mPublicInvitations;
     }
+
     public List<Message> getMessages() {
         return this.mMessages;
     }
-    public List<Tournament> getTournaments() { return this.mTournaments;    }
-    public Boolean showAds() { return mShowAds; }
+
+    public List<Tournament> getTournaments() {
+        return this.mTournaments;
+    }
+
+    public Boolean showAds() {
+        return mShowAds;
+    }
+
     public Boolean isSubscriber() {
         return mSubscriber;
     }
+
     public void setSubscriber(Boolean subscriber) {
         mSubscriber = subscriber;
     }
+
     public List<RatingStat> getRatingStats() {
         return mRatingStats;
     }
-    public List<KingOfTheHill> getHills() { return mHills; }
+
+    public List<KingOfTheHill> getHills() {
+        return mHills;
+    }
+
     public int getMyColor() {
         return myColor;
     }
+
     public void setMyColor(int color) {
         myColor = color;
     }
-    public static Boolean hasDBAccess() { return dbAccess; }
-    public boolean isEmailMe() { return emailMe; }
-    public void setEmailMe(boolean email) { emailMe = email; }
+
+    public static Boolean hasDBAccess() {
+        return dbAccess;
+    }
+
+    public boolean isEmailMe() {
+        return emailMe;
+    }
+
+    public void setEmailMe(boolean email) {
+        emailMe = email;
+    }
 
     public static void markIfOnline(String name, SpannableStringBuilder attributedString) {
         if (onlinePlayerNames != null && onlinePlayerNames.containsKey(name)) {
             attributedString.append("  \u25CF");
             ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
-            attributedString.setSpan(fcs, attributedString.length()-1, attributedString.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            attributedString.setSpan(fcs, attributedString.length() - 1, attributedString.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
     }
-    public static void setOnlinePlayerNames(Map<String, String> onlinePlayerNames) { PentePlayer.onlinePlayerNames = onlinePlayerNames; }
+
+    public static void setOnlinePlayerNames(Map<String, String> onlinePlayerNames) {
+        PentePlayer.onlinePlayerNames = onlinePlayerNames;
+    }
 
     private void populatePlayer(String dashString) {
         if (dashString == null) {
@@ -196,8 +241,8 @@ public class PentePlayer implements Parcelable {
                 if (dashLine.length < 7) {
                     continue;
                 }
-                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4] ,dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"), dashLine[6]);
-                if (hill.getGameId()>50) {
+                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4], dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"), dashLine[6]);
+                if (hill.getGameId() > 50) {
                     tbHills += 1;
                 }
                 newKOTH.add(hill);
@@ -219,7 +264,7 @@ public class PentePlayer implements Parcelable {
                     continue;
                 }
                 ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3], dashLine[5]);
-                if (ratingStat.getGameId()>50) {
+                if (ratingStat.getGameId() > 50) {
                     tbRatings += 1;
                 }
                 this.mRatingStats.add(ratingStat);
@@ -367,12 +412,12 @@ public class PentePlayer implements Parcelable {
             idx += 1;
         }
         if (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") == 0) {
-            dashLine = dashLines[idx].replace("OnlinePlayers:","").split(";");
+            dashLine = dashLines[idx].replace("OnlinePlayers:", "").split(";");
             if (onlinePlayerNames == null) {
                 onlinePlayerNames = new HashMap<>();
             }
             onlinePlayerNames.clear();
-            for (String name: dashLine) {
+            for (String name : dashLine) {
                 onlinePlayerNames.put(name, "");
             }
         }
@@ -399,10 +444,12 @@ public class PentePlayer implements Parcelable {
         LoadPlayerTask loadTask = new LoadPlayerTask(mPlayerName, mPassword, listAdapter);
         loadTask.execute((Void) null);
     }
+
     public void respondInvitation(String setID, boolean accept, DashboardListAdapter listAdapter) {
         AcceptDeclineInvitationTask responseTask = new AcceptDeclineInvitationTask(setID, accept, listAdapter);
         responseTask.execute((Void) null);
     }
+
     public void cancelInvitation(String setID, DashboardListAdapter listAdapter) {
         CancelInvitationTask responseTask = new CancelInvitationTask(setID, listAdapter);
         responseTask.execute((Void) null);
@@ -619,7 +666,7 @@ public class PentePlayer implements Parcelable {
         private Bitmap avatar;
 
         LoadAvatarTask(String username) {
-            this.mUsername= username;
+            this.mUsername = username;
         }
 
         @Override
@@ -627,8 +674,8 @@ public class PentePlayer implements Parcelable {
 
             try {
                 avatar = null;
-                URL url = new URL("https://www.pente.org/gameServer/avatar?name="+mUsername);
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                URL url = new URL("https://www.pente.org/gameServer/avatar?name=" + mUsername);
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
                 int responseCode = connection.getResponseCode();
@@ -643,7 +690,7 @@ public class PentePlayer implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -673,7 +720,7 @@ public class PentePlayer implements Parcelable {
         private DashboardListAdapter listAdapter;
 
         LoadPlayerTask(String username, String password, DashboardListAdapter listAdapter) {
-            this.mUsername= username;
+            this.mUsername = username;
             this.mPassword = password;
             this.listAdapter = listAdapter;
         }
@@ -683,19 +730,19 @@ public class PentePlayer implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
 //                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
 //                System.out.println("cookies: " +cookies);
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2") || item.contains("domain")) {
                             cookieStr += item + ";";
                         }
@@ -707,21 +754,21 @@ public class PentePlayer implements Parcelable {
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
 //                    System.out.println("response code for loadplayer was " + responseCode);
-                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (development) {
-                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
-                    connection = (HttpsURLConnection)url.openConnection();
+                    connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
                         System.out.println("Logging back in failed");
                         return false;
                     } else {
-                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword);
                         if (development) {
-                            url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                         }
-                        connection = (HttpsURLConnection)url.openConnection();
+                        connection = (HttpsURLConnection) url.openConnection();
                         responseCode = connection.getResponseCode();
                         if (responseCode != 200) {
                             System.out.println("Logging back in and retrieving game failed");
@@ -734,7 +781,7 @@ public class PentePlayer implements Parcelable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -745,21 +792,21 @@ public class PentePlayer implements Parcelable {
                 if (dashboardString.indexOf("Invalid name or password, please try again.") != -1) {
                     return false;
                 } else if (!dashboardString.contains("Invitations sent")) {
-                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (development) {
-                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
-                    connection = (HttpsURLConnection)url.openConnection();
+                    connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
                         System.out.println("Logging back in failed");
                         return false;
                     } else {
-                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword);
                         if (development) {
-                            url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                         }
-                        connection = (HttpsURLConnection)url.openConnection();
+                        connection = (HttpsURLConnection) url.openConnection();
                         responseCode = connection.getResponseCode();
                         if (responseCode != 200) {
                             System.out.println("Logging back in and retrieving game failed");
@@ -772,7 +819,7 @@ public class PentePlayer implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -813,32 +860,32 @@ public class PentePlayer implements Parcelable {
                 if (this.accept) {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID);
                     url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 } else {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID);
                     url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 if (development) {
                     if (this.accept) {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID);
                         url = new URL("https://development.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID
-                                +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     } else {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID);
                         url = new URL("https://development.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID
-                                +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
                 }
 
 //                System.out.println("accepting : " + url);
 
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -852,7 +899,7 @@ public class PentePlayer implements Parcelable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 System.out.println("accept invitationt output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -864,7 +911,7 @@ public class PentePlayer implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -887,7 +934,7 @@ public class PentePlayer implements Parcelable {
         private DashboardListAdapter listAdapter;
 
 
-        CancelInvitationTask(String setID,  DashboardListAdapter listAdapter) {
+        CancelInvitationTask(String setID, DashboardListAdapter listAdapter) {
             this.mSetID = setID;
             this.listAdapter = listAdapter;
         }
@@ -899,17 +946,17 @@ public class PentePlayer implements Parcelable {
                 URL url;
 //                url = new URL("https://www.pente.org/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID);
                 url = new URL("https://www.pente.org/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (development) {
                     url = new URL("https://development.pente.org/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -923,7 +970,7 @@ public class PentePlayer implements Parcelable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 System.out.println("cancel invitation output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -935,7 +982,7 @@ public class PentePlayer implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.

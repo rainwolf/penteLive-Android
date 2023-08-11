@@ -43,21 +43,21 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String newToken) {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-             @Override
-             public void onComplete(@NonNull Task<String> task) {
-                 if (!task.isSuccessful()) {
-                     return;
-                 }
+                                                                             @Override
+                                                                             public void onComplete(@NonNull Task<String> task) {
+                                                                                 if (!task.isSuccessful()) {
+                                                                                     return;
+                                                                                 }
 
-                 // Get new FCM registration token
-                 String refreshedToken = task.getResult();
+                                                                                 // Get new FCM registration token
+                                                                                 String refreshedToken = task.getResult();
 
-                 System.out.println("Refreshed token: " + refreshedToken);
-                 System.out.println("Refreshed token: " + newToken);
-                 // TODO: Implement this method to send any registration to your app's servers.
-                 sendRegistrationToServer(refreshedToken);
-             }
-         }
+                                                                                 System.out.println("Refreshed token: " + refreshedToken);
+                                                                                 System.out.println("Refreshed token: " + newToken);
+                                                                                 // TODO: Implement this method to send any registration to your app's servers.
+                                                                                 sendRegistrationToServer(refreshedToken);
+                                                                             }
+                                                                         }
         );
     }
     // [END refresh_token]
@@ -108,7 +108,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onMessageReceived(RemoteMessage message){
+    public void onMessageReceived(RemoteMessage message) {
         String from = message.getFrom();
         Map data = message.getData();
 
@@ -156,13 +156,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         String messageStr = (String) data.get("message");
         boolean silent = "silentNotification".equals(messageStr);
 
-        System.out.println("kitty: "+messageStr);
+        System.out.println("kitty: " + messageStr);
 
         String localMsgStr = "";
         if (messageStr.contains("device has been registered for notifications")) {
             localMsgStr = getString(R.string.registered_for_notifications);
         } else if (messageStr.contains("your move")) {
-            String[] splitStr = messageStr.replace("It's your move in a game of ","").split(" against ");
+            String[] splitStr = messageStr.replace("It's your move in a game of ", "").split(" against ");
             localMsgStr = getString(R.string.is_your_move_against, splitStr[1], splitStr[0]);
         } else if (messageStr.contains("new message")) {
             String[] splitStr = messageStr.split(" sent you a new message! ");

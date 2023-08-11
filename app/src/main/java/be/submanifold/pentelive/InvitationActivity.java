@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
@@ -44,7 +46,7 @@ public class InvitationActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            this.opponent =  extras.getString("opponent");
+            this.opponent = extras.getString("opponent");
             this.gameType = extras.getString("gameType");
         }
         if (getOpponent() != null) {
@@ -52,7 +54,7 @@ public class InvitationActivity extends AppCompatActivity {
         }
         ((AutoCompleteTextView) findViewById(R.id.opponent)).setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
-                InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
@@ -79,47 +81,89 @@ public class InvitationActivity extends AppCompatActivity {
             String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
             String gameType = "";
             switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
-                case 0: gameType = "51"; break;
-                case 1: gameType = "53"; break;
-                case 2: gameType = "55"; break;
-                case 3: gameType = "57"; break;
-                case 4: gameType = "59"; break;
-                case 5: gameType = "61"; break;
-                case 6: gameType = "63"; break;
-                case 7: gameType = "65"; break;
-                case 8: gameType = "67"; break;
-                case 9: gameType = "69"; break;
-                case 10: gameType = "71"; break;
-                case 11: gameType = "73"; break;
-                case 12: gameType = "75"; break;
-                case 13: gameType = "77"; break;
+                case 0:
+                    gameType = "51";
+                    break;
+                case 1:
+                    gameType = "53";
+                    break;
+                case 2:
+                    gameType = "55";
+                    break;
+                case 3:
+                    gameType = "57";
+                    break;
+                case 4:
+                    gameType = "59";
+                    break;
+                case 5:
+                    gameType = "61";
+                    break;
+                case 6:
+                    gameType = "63";
+                    break;
+                case 7:
+                    gameType = "65";
+                    break;
+                case 8:
+                    gameType = "67";
+                    break;
+                case 9:
+                    gameType = "69";
+                    break;
+                case 10:
+                    gameType = "71";
+                    break;
+                case 11:
+                    gameType = "73";
+                    break;
+                case 12:
+                    gameType = "75";
+                    break;
+                case 13:
+                    gameType = "77";
+                    break;
             }
-            String timeout =  ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
-            String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked()?"Y":"N";
+            String timeout = ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
+            String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked() ? "Y" : "N";
             String restriction = "";
             switch (((Spinner) findViewById(R.id.restrictionSpinner)).getSelectedItemPosition()) {
-                case 0: restriction = "B"; break;
-                case 1: restriction = "A"; break;
-                case 2: restriction = "N"; break;
-                case 3: restriction = "L"; break;
-                case 4: restriction = "H"; break;
-                case 5: restriction = "S"; break;
-                case 6: restriction = "C"; break;
+                case 0:
+                    restriction = "B";
+                    break;
+                case 1:
+                    restriction = "A";
+                    break;
+                case 2:
+                    restriction = "N";
+                    break;
+                case 3:
+                    restriction = "L";
+                    break;
+                case 4:
+                    restriction = "H";
+                    break;
+                case 5:
+                    restriction = "S";
+                    break;
+                case 6:
+                    restriction = "C";
+                    break;
             }
-            String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked()?"2":"1";
-            String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked()?"Y":"N";
+            String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked() ? "2" : "1";
+            String privateGame = ((ToggleButton) findViewById(R.id.privateToggleButton)).isChecked() ? "Y" : "N";
             SendInvitationTask submitTask = new SendInvitationTask(opponentName, gameType, timeout, rated, restriction, playAs, privateGame);
             submitTask.execute((Void) null);
         });
 
         AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.opponent);
-        ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(InvitationActivity.this)));
+        ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(InvitationActivity.this)));
         actv.setAdapter(acAdapter);
 
         if (getGameType() != null) {
             try {
                 int gameInt = Integer.parseInt(getGameType());
-                ((Spinner) findViewById(R.id.gameTypeSpinner)).setSelection((gameInt-51)/2);
+                ((Spinner) findViewById(R.id.gameTypeSpinner)).setSelection((gameInt - 51) / 2);
             } catch (NumberFormatException e) {
 
             }
@@ -223,26 +267,26 @@ public class InvitationActivity extends AppCompatActivity {
 //                String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
 //                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame;
-                String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
-                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
+                String urlParameters = "mobile=&invitee=" + opponentName + "&game=" + gameType +
+                        "&daysPerMove=" + timeout + "&rated=" + rated + "&invitationRestriction=" +
                         restriction + "&playAs=" + playAs + "&privateGame=" + privateGame
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/newGame";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/newGame";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/newGame";
+                    request = "https://development.pente.org/gameServer/tb/newGame";
                 }
-                URL    url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -250,26 +294,26 @@ public class InvitationActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -288,7 +332,7 @@ public class InvitationActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");

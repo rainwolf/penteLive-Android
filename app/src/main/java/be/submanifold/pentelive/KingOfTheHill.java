@@ -107,13 +107,21 @@ public class KingOfTheHill implements Parcelable {
     }
 
 
-    public boolean canIchallenge() { return canIchallenge; }
+    public boolean canIchallenge() {
+        return canIchallenge;
+    }
 
-    public void setCanIchallenge(boolean canIchallenge) { this.canIchallenge = canIchallenge; }
+    public void setCanIchallenge(boolean canIchallenge) {
+        this.canIchallenge = canIchallenge;
+    }
 
-    public int getGameId() { return gameId; }
+    public int getGameId() {
+        return gameId;
+    }
 
-    public void setGameId(int gameId) { this.gameId = gameId; }
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
 
     protected KingOfTheHill(Parcel in) {
         game = in.readString();

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -65,9 +66,9 @@ public class MMAIActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
         ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
-        settingsView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mmai_settings, null, false);
+        settingsView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mmai_settings, null, false);
 
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         board = (MMAIBoardView) findViewById(R.id.boardView);
         board.setActivity(this);
@@ -91,7 +92,7 @@ public class MMAIActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        settingsWindow = new PopupWindow(settingsView, size.x*2/3, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+        settingsWindow = new PopupWindow(settingsView, size.x * 2 / 3, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         settingsWindow.setFocusable(true);
         settingsWindow.setOutsideTouchable(true);
         settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(MMAIActivity.this, R.drawable.border));
@@ -121,11 +122,11 @@ public class MMAIActivity extends AppCompatActivity {
                 TextView tv = (TextView) v;
                 if (tv.getText().equals(getString(R.string.black))) {
                     tv.setText(getString(R.string.white));
-                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAICOLOR_KEY, "white");
+                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white");
                     board.setMyColor((byte) 1);
                 } else {
                     tv.setText(getString(R.string.black));
-                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAICOLOR_KEY, "black");
+                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "black");
                     board.setMyColor((byte) 2);
                 }
             }
@@ -137,12 +138,12 @@ public class MMAIActivity extends AppCompatActivity {
                 TextView tv = (TextView) v;
                 if (tv.getText().equals("Pente")) {
                     tv.setText("Keryo-Pente");
-                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
+                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
                     board.setBackgroundColor(board.keryoPenteColor);
                     board.setGame(3);
                 } else {
                     tv.setText("Pente");
-                    PrefUtils.saveToPrefs(MMAIActivity.this,PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
+                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
                     board.setBackgroundColor(board.penteColor);
                     board.setGame(1);
                 }
@@ -212,7 +213,6 @@ public class MMAIActivity extends AppCompatActivity {
         }
 
 
-
 ////        final BoardView layout = (BoardView) findViewById(R.id.boardView);
 //        ViewTreeObserver vto = board.getViewTreeObserver();
 //        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -232,7 +232,7 @@ public class MMAIActivity extends AppCompatActivity {
         if (PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
@@ -243,7 +243,7 @@ public class MMAIActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ((Button) v).setText(getString(R.string.restart_game));
                 board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
-                board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white"))?1:2));
+                board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
                 board.startGame();
             }
         });
@@ -257,7 +257,7 @@ public class MMAIActivity extends AppCompatActivity {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
+                switch (menuItem.getItemId()) {
                     case R.id.action_mmai_settings:
                         showAISettings();
 
@@ -307,6 +307,7 @@ public class MMAIActivity extends AppCompatActivity {
     public void showThinking() {
         progressBar.setVisibility(View.VISIBLE);
     }
+
     public void hideThinking() {
         progressBar.setVisibility(View.GONE);
     }
@@ -324,6 +325,7 @@ public class MMAIActivity extends AppCompatActivity {
     public Game getGame() {
         return game;
     }
+
     public void setGame(Game game) {
         this.game = game;
     }
@@ -331,17 +333,17 @@ public class MMAIActivity extends AppCompatActivity {
     private void requestNewInterstitialAndShow() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds?"0":"1"));
+        extras.putString("npa", (personalizeAds ? "0" : "1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
 
-        InterstitialAd.load(this,"ca-app-pub-3326997956703582/8353630687", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         // The mInterstitialAd reference will be null until
                         // an ad is loaded.
                         mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 // Called when ad is dismissed.
@@ -357,6 +359,7 @@ public class MMAIActivity extends AppCompatActivity {
                         });
                         mInterstitialAd.show(MMAIActivity.this);
                     }
+
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error

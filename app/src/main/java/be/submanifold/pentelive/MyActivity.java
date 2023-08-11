@@ -1,6 +1,7 @@
 package be.submanifold.pentelive;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 
 public class MyActivity extends AppCompatActivity {

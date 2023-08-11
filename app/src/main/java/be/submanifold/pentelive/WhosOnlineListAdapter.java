@@ -5,7 +5,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+
 import androidx.core.content.ContextCompat;
+
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -41,10 +43,12 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
     public WhosOnlineListAdapter(PentePlayer player) {
         this.playerData = player;
     }
+
     public void setInflater(LayoutInflater inflater, Activity activity) {
         this.inflater = inflater;
         this.activity = activity;
     }
+
     public void setOnlinePlayers(Map<String, List<KothPlayer>> onlinePlayers) {
         this.onlinePlayers = onlinePlayers;
         sections = new ArrayList<>(onlinePlayers.keySet());
@@ -59,7 +63,6 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             sections.add("Website");
         }
     }
-
 
 
     @Override
@@ -136,7 +139,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
-        if (PentePlayer.loadAvatars){
+        if (PentePlayer.loadAvatars) {
             Bitmap avatar = null;
             avatar = PentePlayer.avatars.get(player.getName());
             if (avatar == null) {
@@ -149,7 +152,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             imgVw.setVisibility(View.GONE);
         }
 
-        mainText  = player.getName();
+        mainText = player.getName();
         crown = player.getCrown();
         color = player.getColor();
         detailText = ctx.getString(R.string.total_games, player.getLastGame());
@@ -174,13 +177,13 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
                 break;
             default:
                 if (crown > 3) {
-                    int resourceId = ctx.getResources().getIdentifier("kothcrown"+(crown-3),"drawable", ctx.getPackageName());
+                    int resourceId = ctx.getResources().getIdentifier("kothcrown" + (crown - 3), "drawable", ctx.getPackageName());
                     crownIcon = ContextCompat.getDrawable(MyApplication.getContext(), resourceId);
                 }
                 break;
         }
         if (crownIcon != null && crown > 0) {
-            crownIcon.setBounds(0, 0, nameTextView.getLineHeight()*2/3,nameTextView.getLineHeight()*2/3);
+            crownIcon.setBounds(0, 0, nameTextView.getLineHeight() * 2 / 3, nameTextView.getLineHeight() * 2 / 3);
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
         }
         detailTextView.setText(detailText);
@@ -188,15 +191,16 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
         sb = new SpannableStringBuilder("\u25A0");
         int ratingInt = Integer.parseInt(ratingText);
-        ForegroundColorSpan ratingColor = null;new ForegroundColorSpan(color);
+        ForegroundColorSpan ratingColor = null;
+        new ForegroundColorSpan(color);
         if (ratingInt >= 1900) {
             ratingColor = new ForegroundColorSpan(Color.RED);
         } else if (ratingInt >= 1700) {
-            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98*255), (int) (0.96*255) ,(int) (0.03*255)));
+            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98 * 255), (int) (0.96 * 255), (int) (0.03 * 255)));
         } else if (ratingInt >= 1400) {
-            ratingColor =  new ForegroundColorSpan(Color.BLUE);
+            ratingColor = new ForegroundColorSpan(Color.BLUE);
         } else if (ratingInt >= 1000) {
-            ratingColor =  new ForegroundColorSpan(Color.rgb(30,130,76));
+            ratingColor = new ForegroundColorSpan(Color.rgb(30, 130, 76));
         } else {
             ratingColor = new ForegroundColorSpan(Color.GRAY);
         }
@@ -219,12 +223,13 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
         super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
         super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         notifyDataSetChanged();
     }
 }

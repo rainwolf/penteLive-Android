@@ -2,9 +2,13 @@ package be.submanifold.pentelive;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -60,7 +64,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         if (PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(ReplyMessageActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
@@ -118,7 +122,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
+                switch (menuItem.getItemId()) {
                     case R.id.action_trash:
                         DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
                         deleteTask.execute((Void) null);
@@ -176,46 +180,44 @@ public class ReplyMessageActivity extends AppCompatActivity {
         return true;
     }
 
-    protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span)
-    {
+    protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
         int start = strBuilder.getSpanStart(span);
         int end = strBuilder.getSpanEnd(span);
         int flags = strBuilder.getSpanFlags(span);
         ClickableSpan clickable = new ClickableSpan() {
             public void onClick(View view) {
 
-                    String url = span.getURL();
+                String url = span.getURL();
 //                    System.out.println(url);
-                    if (url.indexOf("viewLiveGame") > 0) {
-                        String gameID = url.substring(url.indexOf("g=") + 2);
-                        System.out.println(gameID);
-                        Game game = new Game(gameID, null, null, null, null, null, null, null, null, null, null);
-                        game.setActive(false);
-                        Intent intent = new Intent(getApplicationContext(), BoardActivity.class);
-                        intent.putExtra("game", game);
-                        startActivity(intent);
-                    } else if (url.indexOf("new.jsp?game=") > 0) {
-                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                        intent.putExtra("opponent", url.substring(url.indexOf("invitee=") + 8));
-                        intent.putExtra("gameType", url.substring(url.indexOf("game=") + 5, url.indexOf("game=") + 7));
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                        intent.putExtra("url", url);
-                        startActivity(intent);
-                    }
+                if (url.indexOf("viewLiveGame") > 0) {
+                    String gameID = url.substring(url.indexOf("g=") + 2);
+                    System.out.println(gameID);
+                    Game game = new Game(gameID, null, null, null, null, null, null, null, null, null, null);
+                    game.setActive(false);
+                    Intent intent = new Intent(getApplicationContext(), BoardActivity.class);
+                    intent.putExtra("game", game);
+                    startActivity(intent);
+                } else if (url.indexOf("new.jsp?game=") > 0) {
+                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                    intent.putExtra("opponent", url.substring(url.indexOf("invitee=") + 8));
+                    intent.putExtra("gameType", url.substring(url.indexOf("game=") + 5, url.indexOf("game=") + 7));
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                    intent.putExtra("url", url);
+                    startActivity(intent);
                 }
+            }
         };
         strBuilder.setSpan(clickable, start, end, flags);
         strBuilder.removeSpan(span);
     }
 
-    protected void setTextViewHTML(TextView text, String html)
-    {
+    protected void setTextViewHTML(TextView text, String html) {
         CharSequence sequence = Html.fromHtml(html);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
-        for(URLSpan span : urls) {
+        for (URLSpan span : urls) {
             makeLinkClickable(strBuilder, span);
         }
         text.setText(strBuilder);
@@ -232,16 +234,16 @@ public class ReplyMessageActivity extends AppCompatActivity {
         SendMessageTask(String recipient, String subject, String message) {
             this.recipient = recipient.toLowerCase();
             try {
-                this.message = URLEncoder.encode(message,"UTF-8");
+                this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 this.message = "";
                 e.printStackTrace();
             }
             try {
                 if ("".equals(subject)) {
-                    this.subject = URLEncoder.encode("(no subject)","UTF-8");
+                    this.subject = URLEncoder.encode("(no subject)", "UTF-8");
                 } else {
-                    this.subject = URLEncoder.encode(subject,"UTF-8");
+                    this.subject = URLEncoder.encode(subject, "UTF-8");
                 }
             } catch (UnsupportedEncodingException e) {
                 this.subject = "nosubject";
@@ -255,24 +257,24 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
-                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/mymessages";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/mymessages";
+                    request = "https://development.pente.org/gameServer/mymessages";
                 }
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -280,26 +282,26 @@ public class ReplyMessageActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -307,7 +309,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
 //                System.out.println(output);
 
-                if (output.indexOf("Error: Player "+recipient+" not found.") > -1) {
+                if (output.indexOf("Error: Player " + recipient + " not found.") > -1) {
                     return false;
                 }
 
@@ -315,7 +317,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -361,17 +363,17 @@ public class ReplyMessageActivity extends AppCompatActivity {
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID);
                 URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
                     url = new URL("https://development.pente.org/gameServer/mymessages?command=view&mid=" + messageID
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -389,7 +391,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -434,13 +436,14 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
                 String tmpStr1 = output.toString();
 
-                messageText = tmpStr1.substring(tmpStr1.indexOf("        <br>\n          ") + 23, tmpStr1.indexOf("          <br><br>"));;
+                messageText = tmpStr1.substring(tmpStr1.indexOf("        <br>\n          ") + 23, tmpStr1.indexOf("          <br><br>"));
+                ;
 
                 return true;
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -482,24 +485,24 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  ="command=delete&mid=" + messageID + "&mobile=";
-                String urlParameters  ="command=delete&mid=" + messageID + "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "command=delete&mid=" + messageID + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/mymessages";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {
-                     request        = "https://development.pente.org/gameServer/mymessages";
+                    request = "https://development.pente.org/gameServer/mymessages";
                 }
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -507,26 +510,26 @@ public class ReplyMessageActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -538,7 +541,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
             // TODO: register the new account here.
 //            return true;

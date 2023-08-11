@@ -3,6 +3,7 @@ package be.submanifold.pentelive;
 import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 
 import com.google.android.gms.ads.MobileAds;
@@ -16,7 +17,8 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
         });
 //        MobileAds.initialize(this, "ca-app-pub-3326997956703582~7930084241");
     }

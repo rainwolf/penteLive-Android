@@ -27,11 +27,15 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
     private Context ctx = MyApplication.getContext();
 
     private int tbRatings = 0;
-    public void setTbRatings(int tbRatings) { this.tbRatings = tbRatings; }
+
+    public void setTbRatings(int tbRatings) {
+        this.tbRatings = tbRatings;
+    }
 
     public RatingStatsListAdapter(List<RatingStat> ratingStats) {
         this.ratingStats = ratingStats;
     }
+
     public void setInflater(LayoutInflater inflater, Activity activity) {
         this.inflater = inflater;
         this.activity = activity;
@@ -112,11 +116,11 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
         if (ratingInt >= 1900) {
             ratingColor = new ForegroundColorSpan(Color.RED);
         } else if (ratingInt >= 1700) {
-            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98*255), (int) (0.96*255) ,(int) (0.03*255)));
+            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98 * 255), (int) (0.96 * 255), (int) (0.03 * 255)));
         } else if (ratingInt >= 1400) {
-            ratingColor =  new ForegroundColorSpan(Color.BLUE);
+            ratingColor = new ForegroundColorSpan(Color.BLUE);
         } else if (ratingInt >= 1000) {
-            ratingColor =  new ForegroundColorSpan(Color.rgb(30,130,76));
+            ratingColor = new ForegroundColorSpan(Color.rgb(30, 130, 76));
         } else {
             ratingColor = new ForegroundColorSpan(Color.GRAY);
         }
@@ -135,12 +139,13 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
 //        super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
 //        super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         notifyDataSetChanged();
     }
 }

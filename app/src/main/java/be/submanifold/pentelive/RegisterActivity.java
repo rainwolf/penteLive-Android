@@ -4,10 +4,14 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.AsyncTask;
+
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.Gravity;
@@ -47,9 +51,9 @@ public class RegisterActivity extends AppCompatActivity {
                 Point size = new Point();
                 display.getSize(size);
 
-                View policyView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
+                View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
                 policyView.setBackgroundColor(Color.WHITE);
-                PopupWindow messageWindow = new PopupWindow(policyView, size.x - 50, size.y*3/4, true );
+                PopupWindow messageWindow = new PopupWindow(policyView, size.x - 50, size.y * 3 / 4, true);
                 messageWindow.setFocusable(true);
                 messageWindow.setOutsideTouchable(true);
                 messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(RegisterActivity.this, R.drawable.border));
@@ -131,7 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
             this.username = username.toLowerCase();
             this.password = password;
             try {
-                this.email = URLEncoder.encode(email,"UTF-8");
+                this.email = URLEncoder.encode(email, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -141,38 +145,38 @@ public class RegisterActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "name=" + username + "&registerPassword=" + password + "&registerPasswordConfirm=" + password + "&registerEmail=" + email + "&agreePolicy=Y";
-                byte[] postData       = new byte[0];
+                String urlParameters = "name=" + username + "&registerPassword=" + password + "&registerPasswordConfirm=" + password + "&registerEmail=" + email + "&agreePolicy=Y";
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/join";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/join";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/join";
+                    request = "https://development.pente.org/join";
                 }
-                URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                URL url = new URL(request);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -187,11 +191,12 @@ public class RegisterActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {

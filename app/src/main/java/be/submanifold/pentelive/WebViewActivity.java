@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -24,11 +26,9 @@ public class WebViewActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             webview = (WebView) findViewById(R.id.webview);
-            webview.setWebViewClient(new WebViewClient()
-            {
+            webview.setWebViewClient(new WebViewClient() {
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url)
-                {
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     if (url.contains("?mobile&g=") || url.contains("gameServer/tb/game?gid=")) {
                         if (url.contains("?mobile&g=")) {
                             while (!url.startsWith("?mobile&g=")) {
@@ -42,7 +42,7 @@ public class WebViewActivity extends AppCompatActivity {
                             }
                             url = url.substring(23);
                         }
-                        for (int i = 0; i < url.length(); i++ ) {
+                        for (int i = 0; i < url.length(); i++) {
                             if (url.charAt(i) < '0' || url.charAt(i) > '9') {
                                 url = url.substring(0, i);
                                 break;
@@ -93,6 +93,7 @@ public class WebViewActivity extends AppCompatActivity {
         // Otherwise defer to system default behavior.
         super.onBackPressed();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -113,7 +114,7 @@ public class WebViewActivity extends AppCompatActivity {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
 
-            if (message!=null && message.length()>0) {
+            if (message != null && message.length() > 0) {
                 Toast.makeText(WebViewActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         }

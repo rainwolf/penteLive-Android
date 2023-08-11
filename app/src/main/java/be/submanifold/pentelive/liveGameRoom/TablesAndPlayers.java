@@ -23,7 +23,10 @@ public class TablesAndPlayers {
     private Context ctx = MyApplication.getContext();
 
     private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
-    public String getMe() { return me; }
+
+    public String getMe() {
+        return me;
+    }
 
     public void joinMainRoom(Map<String, ?> data) {
         String playerName = (String) data.get("player");
@@ -39,7 +42,7 @@ public class TablesAndPlayers {
         LivePlayer player = new LivePlayer(playerName, subscriber, 0, color);
 
         int myCrown = 0, myKotHCrown = 0;
-        for (Map<String, Object> singleGame: gameData) {
+        for (Map<String, Object> singleGame : gameData) {
             if (((String) singleGame.get("computer")).equals("N")) {
                 int game = (int) singleGame.get("game");
                 int rating = (int) ((double) singleGame.get("rating"));
@@ -59,23 +62,26 @@ public class TablesAndPlayers {
         if (myCrown > 0) {
             player.setCrown(myCrown);
         } else if (myKotHCrown > 0) {
-            player.setCrown(myKotHCrown+3);
+            player.setCrown(myKotHCrown + 3);
         } else {
             player.setCrown(0);
         }
         players.put(playerName, player);
         mainRoomText = mainRoomText + ctx.getString(R.string.has_joined_main_room, playerName) + "\n";
     }
+
     public void addMainRoomText(Map<String, ?> data) {
         String playerName = (String) data.get("player");
         String text = (String) data.get("text");
         mainRoomText = mainRoomText + playerName + ": " + text + "\n";
     }
+
     public void exitMainRoom(Map<String, ?> data) {
         String playerName = (String) data.get("player");
         players.remove(playerName);
         mainRoomText = mainRoomText + ctx.getString(R.string.has_exited_main_room, playerName) + "\n";
     }
+
     public void updatePlayerData(Map<String, ?> data) {
         Map<String, ?> playerData = (Map<String, ?>) data.get("data");
         String playerName = (String) playerData.get("name");
@@ -90,7 +96,7 @@ public class TablesAndPlayers {
         LivePlayer player = new LivePlayer(playerName, subscriber, 0, color);
 
         int myCrown = 0, myKotHCrown = 0;
-        for (Map<String, Object> singleGame: gameData) {
+        for (Map<String, Object> singleGame : gameData) {
             if (((String) singleGame.get("computer")).equals("N")) {
                 int game = (int) singleGame.get("game");
                 int rating = (int) ((double) singleGame.get("rating"));
@@ -110,22 +116,24 @@ public class TablesAndPlayers {
         if (myCrown > 0) {
             player.setCrown(myCrown);
         } else if (myKotHCrown > 0) {
-            player.setCrown(myKotHCrown+3);
+            player.setCrown(myKotHCrown + 3);
         } else {
             player.setCrown(0);
         }
         players.put(playerName, player);
     }
+
     public void login(Map<String, ?> data) {
         Map<String, ?> serverData = (Map<String, ?>) data.get("serverData");
         List<String> messages = (List<String>) serverData.get("loginMessages");
         if (messages != null) {
-            for (String message: messages) {
+            for (String message : messages) {
                 mainRoomText = mainRoomText + message + "\n";
             }
         }
         this.me = (String) data.get("player");
     }
+
     public int changeTableState(Map<String, Object> data) {
         boolean timed = (Boolean) data.get("timed");
         int initialMinutes = (Integer) data.get("initialMinutes");
@@ -149,6 +157,7 @@ public class TablesAndPlayers {
         table.resetState();
         return tableId;
     }
+
     public Table tableJoin(int tableId, String player) {
         LivePlayer livePlayer = players.get(player);
         Table table = tables.get(tableId);
@@ -168,12 +177,14 @@ public class TablesAndPlayers {
         }
         return null;
     }
+
     public void tableOwner(int tableId, String player) {
         Table table = tables.get(tableId);
         if (table != null) {
             table.setOwner(player);
         }
     }
+
     public int tableSit(Map<String, Object> data) {
         String player = (String) data.get("player");
         int tableId = (Integer) data.get("table");
@@ -184,6 +195,7 @@ public class TablesAndPlayers {
         }
         return tableId;
     }
+
     public int tableStand(Map<String, Object> data) {
         String player = (String) data.get("player");
         int tableId = (Integer) data.get("table");
@@ -193,6 +205,7 @@ public class TablesAndPlayers {
         }
         return tableId;
     }
+
     public boolean tableExit(int tableId, String player) {
         Table table = tables.get(tableId);
         if (table != null) {
@@ -206,12 +219,14 @@ public class TablesAndPlayers {
         }
         return false;
     }
+
     public void updateGameState(int tableId, int state) {
         Table table = tables.get(tableId);
         if (table != null) {
             table.updateGameState(state);
         }
     }
+
     public void updateTableTimer(Map<String, Object> data) {
         int tableId = (int) data.get("table");
         int minutes = (int) data.get("minutes");
@@ -228,6 +243,7 @@ public class TablesAndPlayers {
             table.updateTimer(false, seat, minutes, seconds);
         }
     }
+
     public void undoMove(int tableId) {
         Table table = tables.get(tableId);
         if (table != null) {

@@ -13,8 +13,11 @@ import android.provider.MediaStore;
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -100,7 +103,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/myprofile/prefs?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
@@ -109,7 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
@@ -147,7 +150,8 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         })
                         .build()
-                        .show();            }
+                        .show();
+            }
         });
         ((Button) findViewById(R.id.avatarButton)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,7 +238,7 @@ public class SettingsActivity extends AppCompatActivity {
             int photoH = bmOptions.outHeight;
 
             // Determine how much to scale down the image
-            int scaleFactor = Math.min(photoW/300, photoH/300);
+            int scaleFactor = Math.min(photoW / 300, photoH / 300);
 
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
@@ -256,20 +260,20 @@ public class SettingsActivity extends AppCompatActivity {
 //            return;
 //        }
 //        try {
-            Bitmap bitmap = imageBitmap;
+        Bitmap bitmap = imageBitmap;
 //        System.out.println("kitty image " + bitmap.getWidth() + " " + bitmap.getHeight());
-            float maxSize = 300f;
-            Bitmap newImg = scaleBitmap(bitmap, maxSize);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        float maxSize = 300f;
+        Bitmap newImg = scaleBitmap(bitmap, maxSize);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        newImg.compress(Bitmap.CompressFormat.JPEG, 75, stream);
+        byte[] byteArray = stream.toByteArray();
+        while (byteArray.length > 65535) {
+            maxSize -= 10f;
+            newImg = scaleBitmap(bitmap, maxSize);
+            stream = new ByteArrayOutputStream();
             newImg.compress(Bitmap.CompressFormat.JPEG, 75, stream);
-            byte[] byteArray = stream.toByteArray();
-            while (byteArray.length > 65535) {
-                maxSize -= 10f;
-                newImg = scaleBitmap(bitmap, maxSize);
-                stream = new ByteArrayOutputStream();
-                newImg.compress(Bitmap.CompressFormat.JPEG, 75, stream);
-                byteArray = stream.toByteArray();
-            }
+            byteArray = stream.toByteArray();
+        }
 
         UploadAvatarTask avatarTask = new UploadAvatarTask(byteArray);
         avatarTask.execute((Void) null);
@@ -308,9 +312,10 @@ public class SettingsActivity extends AppCompatActivity {
             ratio = maxSize / height;
         }
 
-        bm = Bitmap.createScaledBitmap(bm, (int) (ratio*width), (int) (ratio*height), true);
+        bm = Bitmap.createScaledBitmap(bm, (int) (ratio * width), (int) (ratio * height), true);
         return bm;
     }
+
     private static class UploadAvatarTask extends AsyncTask<Void, Void, Boolean> {
 
         private final byte[] bytes;
@@ -329,7 +334,7 @@ public class SettingsActivity extends AppCompatActivity {
                 String boundary = "*****";
                 //                System.out.println("colorStr was " + colorString);
                 URL url = new URL("https://www.pente.org/gameServer/changeAvatar");
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);//Allow Inputs
                 connection.setDoOutput(true);//Allow Outputs
                 connection.setUseCaches(false);//Don't use a cached Copy
@@ -346,7 +351,7 @@ public class SettingsActivity extends AppCompatActivity {
                         + 1 + "\"" + lineEnd);
                 dataOutputStream.writeBytes("Content-Type: image/jpg" + lineEnd);
                 dataOutputStream.writeBytes(lineEnd);
-                dataOutputStream.write(bytes,0,bytes.length);
+                dataOutputStream.write(bytes, 0, bytes.length);
                 dataOutputStream.writeBytes(lineEnd);
                 dataOutputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
@@ -364,7 +369,7 @@ public class SettingsActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -374,7 +379,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -390,6 +395,7 @@ public class SettingsActivity extends AppCompatActivity {
         protected void onCancelled() {
         }
     }
+
     private static class ChangeColorTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String colorString;
@@ -403,8 +409,8 @@ public class SettingsActivity extends AppCompatActivity {
 
             try {
 //                System.out.println("colorStr was " + colorString);
-                URL url = new URL("https://www.pente.org/gameServer/changeColor?changeNameColor="+colorString);
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                URL url = new URL("https://www.pente.org/gameServer/changeColor?changeNameColor=" + colorString);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for loadplayer was " + responseCode);
@@ -415,7 +421,7 @@ public class SettingsActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -426,7 +432,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -457,8 +463,8 @@ public class SettingsActivity extends AppCompatActivity {
             try {
 //                System.out.println("colorStr was " + colorString);
                 URL url = new URL("https://www.pente.org/gameServer/changeEmailPreference?emailMe=" +
-                        (emailMe?"Y":"N"));
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                        (emailMe ? "Y" : "N"));
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for changeEmailPreference was " + responseCode);
@@ -469,7 +475,7 @@ public class SettingsActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -480,7 +486,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
@@ -497,6 +503,7 @@ public class SettingsActivity extends AppCompatActivity {
         protected void onCancelled() {
         }
     }
+
     private class ChangeAdsPersonalizationPreferenceTask extends AsyncTask<Void, Void, Boolean> {
 
         private final boolean personalizeAds;
@@ -511,11 +518,12 @@ public class SettingsActivity extends AppCompatActivity {
             try {
 //                System.out.println("colorStr was " + colorString);
                 URL url = new URL("https://www.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
-                        (personalizeAds?"Y":"N"));
+                        (personalizeAds ? "Y" : "N"));
                 if (PentePlayer.development) {
                     new URL("https://development.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
-                            (personalizeAds?"Y":"N"));                }
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                            (personalizeAds ? "Y" : "N"));
+                }
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for personalizeAdsPreference was " + responseCode);
@@ -526,7 +534,7 @@ public class SettingsActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -537,7 +545,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;

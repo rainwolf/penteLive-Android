@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
@@ -73,7 +74,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         myToolbar.setTitle(kothSummary.getGame());
         setSupportActionBar(myToolbar);
 
-        challengeView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.koth_challenge_layout, null, false);
+        challengeView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.koth_challenge_layout, null, false);
 
 
         expandableList = (ExpandableListView) findViewById(R.id.list);
@@ -111,7 +112,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                             popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
                             expandableList.setAlpha(0.5f);
                         } else {
-                            String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                            String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                             Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -141,7 +142,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 @Override
                 public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
                     if (groupPosition > 0) {
-                        String url = "https://www.pente.org/gameServer/profile?viewName="+hill.get(groupPosition - 1).get(childPosition).getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                        String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                         Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                         intent.putExtra("url", url);
                         startActivity(intent);
@@ -158,7 +159,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        popupWindow = new PopupWindow(challengeView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+        popupWindow = new PopupWindow(challengeView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setFocusable(true);
         popupWindow.setOutsideTouchable(true);
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(KingOfTheHillActivity.this, R.drawable.border));
@@ -209,12 +210,24 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String restriction = "A";
                 switch (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0)) {
-                    case 0: restriction = "A"; break;
-                    case 1: restriction = "N"; break;
-                    case 2: restriction = "L"; break;
-                    case 3: restriction = "H"; break;
-                    case 4: restriction = "S"; break;
-                    case 5: restriction = "C"; break;
+                    case 0:
+                        restriction = "A";
+                        break;
+                    case 1:
+                        restriction = "N";
+                        break;
+                    case 2:
+                        restriction = "L";
+                        break;
+                    case 3:
+                        restriction = "H";
+                        break;
+                    case 4:
+                        restriction = "S";
+                        break;
+                    case 5:
+                        restriction = "C";
+                        break;
                 }
 
                 SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, kothSummary.getGameId(), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
@@ -226,7 +239,6 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     }
 
 
-
     //This is the handler that will manager to process the broadcast intent
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -235,7 +247,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
 
-            if (message!=null && message.length()>0) {
+            if (message != null && message.length() > 0) {
                 Toast.makeText(KingOfTheHillActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         }
@@ -247,6 +259,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         MyApplication.activityResumed(this);
         (KingOfTheHillActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -275,7 +288,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_web_koth:
                 int game = kothSummary.getGameId();
-                String url = "https://www.pente.org/gameServer/stairs.jsp?game="+game+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                String url = "https://www.pente.org/gameServer/stairs.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
@@ -295,7 +308,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            String url = "https://www.pente.org/gameServer/subscriptions"+"?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                            String url = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                             Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -378,21 +391,21 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName;
-                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "game=" + mGame + "&name=" + PentePlayer.mPlayerName + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/mobile/koth.jsp";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/mobile/koth.jsp";
 //                request        = "https://development.pente.org/gameServer/mobile/koth.jsp";
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -400,26 +413,26 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -431,7 +444,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
@@ -445,12 +458,12 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
                 boolean personalizeAds = PrefUtils.getBooleanFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
                 Bundle extras = new Bundle();
-                extras.putString("npa", (personalizeAds?"0":"1"));
+                extras.putString("npa", (personalizeAds ? "0" : "1"));
                 ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
             } else {
                 ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
             }
-            for ( int i = 0; i < listAdapter.getGroupCount(); ++i ) {
+            for (int i = 0; i < listAdapter.getGroupCount(); ++i) {
                 expandableList.expandGroup(i);
             }
         }
@@ -474,25 +487,25 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "game=" + mGame+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                String urlParameters = "game=" + mGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
 //                String urlParameters  = "game=" + mGame+"&name2="+PentePlayer.mPlayerName;
                 if (join) {
                     urlParameters += "&join=";
                 }
-                byte[] postData       = new byte[0];
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/koth";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/koth";
 //                request        = "https://development.pente.org/gameServer/koth";
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -500,26 +513,26 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -529,7 +542,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
@@ -568,23 +581,23 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
 //                String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y";
-                String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
+                String urlParameters = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
                         "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y"
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/newGame";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/newGame";
 //                request        = "https://development.pente.org/gameServer/tb/newGame";
-                URL    url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -592,26 +605,26 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -624,7 +637,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
 

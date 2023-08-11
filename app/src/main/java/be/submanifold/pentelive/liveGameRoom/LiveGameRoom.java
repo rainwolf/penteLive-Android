@@ -39,7 +39,7 @@ public class LiveGameRoom implements Parcelable {
         SpannableStringBuilder sb = new SpannableStringBuilder(name);
         if (players.size() > 0) {
             SpannableStringBuilder sbPlayers = new SpannableStringBuilder("");
-            for (LivePlayer player: players) {
+            for (LivePlayer player : players) {
                 if (sbPlayers.length() > 0) {
                     sbPlayers.append(", ");
                 }

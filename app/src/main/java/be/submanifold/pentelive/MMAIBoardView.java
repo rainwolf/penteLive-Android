@@ -9,8 +9,10 @@ import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -34,7 +36,7 @@ import java.util.List;
 public class MMAIBoardView extends View {
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
             keryoPenteColor = Color.parseColor("#BAFDA3");
-    private Paint blackPaint =  makePaint(blackColor), whitePaint = makePaint(whiteColor),
+    private Paint blackPaint = makePaint(blackColor), whitePaint = makePaint(whiteColor),
             pentePaint = makePaint(penteColor), shadowPaint = makePaint(Color.GRAY),
             keryoPentePaint = makePaint(keryoPenteColor);
     public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -94,23 +96,32 @@ public class MMAIBoardView extends View {
         this.game = game;
 //        this.game.parseGame(this);
     }
-    public void setMyColor(byte myColor) {        this.myColor = myColor;    }
-    public void setDifficulty(int difficulty) {        this.difficulty = difficulty;    }
+
+    public void setMyColor(byte myColor) {
+        this.myColor = myColor;
+    }
+
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
 
     public boolean isReplayed() {
         return replayed;
     }
+
     public void setReplayed(boolean replayed) {
         this.replayed = replayed;
     }
+
     public int getRedDot() {
         return redDot;
     }
+
     public void setRedDot(int redDot) {
         this.redDot = redDot;
     }
 
-//    public BoardView(Context context) {
+    //    public BoardView(Context context) {
 //        super(context);
 //        scaling = 1;
 //        translateX = 0;
@@ -185,19 +196,19 @@ public class MMAIBoardView extends View {
         }
         playedMove = -1;
         stoneX = x;
-        stoneI = (byte) (19*stoneX/size);
+        stoneI = (byte) (19 * stoneX / size);
         stoneY = y;
-        stoneJ = (byte) (19*stoneY/size);
-        switch(event.getAction()){
+        stoneJ = (byte) (19 * stoneY / size);
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 scaling = 2;
-                translateX = -x/2;
-                translateY = -y/2;
+                translateX = -x / 2;
+                translateY = -y / 2;
                 break;
             case MotionEvent.ACTION_MOVE:
                 scaling = 2;
-                translateX = -x/2;
-                translateY = -y/2;
+                translateX = -x / 2;
+                translateY = -y / 2;
                 break;
             case MotionEvent.ACTION_UP:
                 scaling = 1;
@@ -207,10 +218,10 @@ public class MMAIBoardView extends View {
         }
 
         if (!gameOver && active && abstractBoard[stoneI][stoneJ] == 0) {
-            playedMove = 19*stoneJ + stoneI;
+            playedMove = 19 * stoneJ + stoneI;
         }
         if (scaling == 1) {
-            if (playedMove > -1 && !gameOver){
+            if (playedMove > -1 && !gameOver) {
                 movesList.add(new Integer(playedMove));
                 replayGame(abstractBoard);
                 if (!gameOver) {
@@ -241,7 +252,7 @@ public class MMAIBoardView extends View {
         if (myColor == 1) {
             active = false;
             int[] moves = new int[movesList.size()];
-            for (int i = 0; i < movesList.size(); ++i ) {
+            for (int i = 0; i < movesList.size(); ++i) {
                 moves[i] = movesList.get(i).intValue();
             }
             aiThinking = true;
@@ -272,30 +283,30 @@ public class MMAIBoardView extends View {
     }
 
     public void undoMove() {
-        if (movesList.size()>1 && !aiThinking) {
+        if (movesList.size() > 1 && !aiThinking) {
             movesList.remove(movesList.size() - 1);
-            active = myColor == (1 + movesList.size()%2);
+            active = myColor == (1 + movesList.size() % 2);
             replayGame(abstractBoard);
         }
     }
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / 19, margin = step/2;
+        float step = (float) size / 19, margin = step / 2;
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
-        for ( int i = 0; i < 19; i++ ) {
-            canvas.drawLine(margin + step*i, margin, margin + step*i, size - margin, linePaint);
-            canvas.drawLine(margin, margin + step*i, size - margin, margin + step*i, linePaint);
+        for (int i = 0; i < 19; i++) {
+            canvas.drawLine(margin + step * i, margin, margin + step * i, size - margin, linePaint);
+            canvas.drawLine(margin, margin + step * i, size - margin, margin + step * i, linePaint);
         }
-        canvas.drawCircle(margin + 6*step, margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), margin + 6*step, margin / 2, linePaint);
-        canvas.drawCircle( margin + 6*step, size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6*step), size - (margin + 6*step), margin / 2, linePaint);
-        canvas.drawCircle(size/2, size/2, margin / 2, linePaint);
-        for ( byte i = 0; i < 19; i++ ) {
-            for ( byte j = 0; j < 19; j++ ) {
+        canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
+        canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
+        canvas.drawCircle(margin + 6 * step, size - (margin + 6 * step), margin / 2, linePaint);
+        canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
+        canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
+        for (byte i = 0; i < 19; i++) {
+            for (byte j = 0; j < 19; j++) {
                 drawStone(canvas, i, j, abstractBoard[i][j]);
             }
         }
@@ -308,8 +319,8 @@ public class MMAIBoardView extends View {
             return;
         }
         float radius = size / 39;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
-        float cgx = cx - size/200, cgy = cy - size/200;
+        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        float cgx = cx - size / 200, cgy = cy - size / 200;
         Paint stonePaint;
         stonePaint = new Paint();
         stonePaint.setStrokeWidth(1);
@@ -317,21 +328,22 @@ public class MMAIBoardView extends View {
         stonePaint.setColor(Color.BLACK);
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
-                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+                    radius * 5 / 4, Color.rgb(125, 125, 125), Color.BLACK, Shader.TileMode.CLAMP));
         } else {
-            stonePaint.setShader(new RadialGradient(cgx,cgy,
-                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius * 5 / 4, Color.WHITE, Color.rgb(210, 210, 210), Shader.TileMode.CLAMP));
         }
-        float shadowOffset = radius/7;
+        float shadowOffset = radius / 7;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         shadowPaint.setAlpha(110);
-        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        canvas.drawCircle(cx + shadowOffset, cy + shadowOffset, radius, shadowPaint);
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
+
     private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
         float radius = size / 30;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
-        float cgx = cx - size/200, cgy = cy - size/200;
+        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        float cgx = cx - size / 200, cgy = cy - size / 200;
         Paint stonePaint;
         stonePaint = new Paint();
         stonePaint.setStrokeWidth(1);
@@ -339,30 +351,32 @@ public class MMAIBoardView extends View {
         stonePaint.setColor(Color.BLACK);
         if (stoneColor == 2) {
             stonePaint.setShader(new RadialGradient(cgx, cgy,
-                    radius*5/4, Color.rgb(125,125,125), Color.BLACK, Shader.TileMode.CLAMP));
+                    radius * 5 / 4, Color.rgb(125, 125, 125), Color.BLACK, Shader.TileMode.CLAMP));
         } else {
-            stonePaint.setShader(new RadialGradient(cgx,cgy,
-                    radius*5/4, Color.WHITE, Color.rgb(210,210,210), Shader.TileMode.CLAMP));
+            stonePaint.setShader(new RadialGradient(cgx, cgy,
+                    radius * 5 / 4, Color.WHITE, Color.rgb(210, 210, 210), Shader.TileMode.CLAMP));
         }
-        float shadowOffset = radius/7;
+        float shadowOffset = radius / 7;
         shadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         shadowPaint.setAlpha(110);
-        canvas.drawCircle(cx+shadowOffset, cy+shadowOffset, radius, shadowPaint);
+        canvas.drawCircle(cx + shadowOffset, cy + shadowOffset, radius, shadowPaint);
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
+
     private void drawZoomedLine(Canvas canvas, float x, float y) {
         float radius = size / 30;
-        float cx = (float) Math.floor(19*x/size)*size/19 + size/38, cy = (float) Math.floor(19*y/size)*size/19 + size/38;
+        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
         Paint linePaint;
         linePaint = new Paint();
         linePaint.setStrokeWidth(4);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setColor(Color.WHITE);
-        canvas.drawLine(0,cy,size,cy, linePaint);
-        canvas.drawLine(cx,0,cx,size, linePaint);
+        canvas.drawLine(0, cy, size, cy, linePaint);
+        canvas.drawLine(cx, 0, cx, size, linePaint);
     }
+
     private void drawStone(Canvas canvas, byte i, byte j, byte stoneColor) {
-        drawStone(canvas, size*i/19 + size/38, size*j/19 + size/38, stoneColor);
+        drawStone(canvas, size * i / 19 + size / 38, size * j / 19 + size / 38, stoneColor);
     }
 
     private void drawRedDot(Canvas canvas) {
@@ -372,9 +386,9 @@ public class MMAIBoardView extends View {
         stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         stonePaint.setColor(Color.RED);
         float radius = size / 100;
-        byte j = (byte) (redDot/19);
-        byte i = (byte) (redDot%19);
-        float cx = size*i/19 + size/38, cy = size*j/19 + size/38;
+        byte j = (byte) (redDot / 19);
+        byte i = (byte) (redDot % 19);
+        float cx = size * i / 19 + size / 38, cy = size * j / 19 + size / 38;
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
 
@@ -382,11 +396,10 @@ public class MMAIBoardView extends View {
     private Paint makePaint(int color) {
         Paint p = new Paint();
         p.setColor(color);
-        return(p);
+        return (p);
     }
 
-    protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span)
-    {
+    protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
         int start = strBuilder.getSpanStart(span);
         int end = strBuilder.getSpanEnd(span);
         int flags = strBuilder.getSpanFlags(span);
@@ -403,12 +416,11 @@ public class MMAIBoardView extends View {
         strBuilder.removeSpan(span);
     }
 
-    protected void setTextViewHTML(TextView text, String html)
-    {
+    protected void setTextViewHTML(TextView text, String html) {
         CharSequence sequence = Html.fromHtml(html);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
-        for(URLSpan span : urls) {
+        for (URLSpan span : urls) {
             makeLinkClickable(strBuilder, span);
         }
         text.setText(strBuilder);
@@ -442,12 +454,12 @@ public class MMAIBoardView extends View {
     private void replayPenteGame(byte[][] abstractBoard) {
         resetAbstractBoard(abstractBoard);
         for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
+            byte color = (byte) (1 + (i % 2));
             abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
             detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
         }
         if (rated && (movesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -458,16 +470,16 @@ public class MMAIBoardView extends View {
         if (movesList.isEmpty()) {
             return;
         } else {
-            String str = "<center><b>"+ctx.getString(R.string.color)+":</b> "
-                    + (myColor == 1?ctx.getString(R.string.white):ctx.getString(R.string.black))
-                    + ", <b>"+ctx.getString(R.string.difficulty)+" </b>" + difficulty + "</center><br>";
+            String str = "<center><b>" + ctx.getString(R.string.color) + ":</b> "
+                    + (myColor == 1 ? ctx.getString(R.string.white) : ctx.getString(R.string.black))
+                    + ", <b>" + ctx.getString(R.string.difficulty) + " </b>" + difficulty + "</center><br>";
             for (int i = 0; i < movesList.size(); i++) {
-                if (i%2 == 0) {
-                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
+                if (i % 2 == 0) {
+                    str = str + " <b>" + (i / 2 + 1) + ".</b> ";
                 } else {
-                    str = str+"-";
+                    str = str + "-";
                 }
-                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
+                str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
             }
 
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
@@ -479,7 +491,7 @@ public class MMAIBoardView extends View {
         TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
-        if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
+        if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {
             gameOver = true;
             boolean iWon = false;
             if (whiteCaptures == 10) {
@@ -490,7 +502,7 @@ public class MMAIBoardView extends View {
                 if (myColor == 1) {
                     iWon = true;
                 }
-            } else if (myColor == (2 - movesList.size()%2)) {
+            } else if (myColor == (2 - movesList.size() % 2)) {
                 iWon = true;
             }
             String msg = ctx.getString(R.string.you_lost);
@@ -510,16 +522,17 @@ public class MMAIBoardView extends View {
         }
         invalidate();
     }
+
     private void replayKeryoPenteGame(byte[][] abstractBoard) {
         resetAbstractBoard(abstractBoard);
         for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
+            byte color = (byte) (1 + (i % 2));
             abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
             detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
             detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
         }
         if (rated && (movesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -530,16 +543,16 @@ public class MMAIBoardView extends View {
         if (movesList.isEmpty()) {
             return;
         } else {
-            String str = "<center><b>"+ctx.getString(R.string.color)+":</b> "
-                    + (myColor == 1?ctx.getString(R.string.white):ctx.getString(R.string.black))
-                    + ", <b>"+ctx.getString(R.string.difficulty)+" </b>" + difficulty + "</center><br>";
+            String str = "<center><b>" + ctx.getString(R.string.color) + ":</b> "
+                    + (myColor == 1 ? ctx.getString(R.string.white) : ctx.getString(R.string.black))
+                    + ", <b>" + ctx.getString(R.string.difficulty) + " </b>" + difficulty + "</center><br>";
             for (int i = 0; i < movesList.size(); i++) {
-                if (i%2 == 0) {
-                    str = str + " <b>" + (i/2 + 1) + ".</b> ";
+                if (i % 2 == 0) {
+                    str = str + " <b>" + (i / 2 + 1) + ".</b> ";
                 } else {
-                    str = str+"-";
+                    str = str + "-";
                 }
-                str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
+                str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
             }
 
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
@@ -551,7 +564,7 @@ public class MMAIBoardView extends View {
         TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
-        if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size()%2)), movesList.get(movesList.size() - 1))) {
+        if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {
             gameOver = true;
             boolean iWon = false;
             if (whiteCaptures >= 15) {
@@ -562,7 +575,7 @@ public class MMAIBoardView extends View {
                 if (myColor == 1) {
                     iWon = true;
                 }
-            } else if (myColor == (2 - movesList.size()%2)) {
+            } else if (myColor == (2 - movesList.size() % 2)) {
                 iWon = true;
             }
             String msg = ctx.getString(R.string.you_lost);
@@ -595,11 +608,11 @@ public class MMAIBoardView extends View {
 
     private void detectPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i-3) > -1) {
-            if (abstractBoard[i-3][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
+        if ((i - 3) > -1) {
+            if (abstractBoard[i - 3][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -608,11 +621,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-3) > -1)) {
-            if (abstractBoard[i-3][j-3] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
+        if (((i - 3) > -1) && ((j - 3) > -1)) {
+            if (abstractBoard[i - 3][j - 3] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -621,11 +634,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((j-3) > -1) {
-            if (abstractBoard[i][j-3] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
+        if ((j - 3) > -1) {
+            if (abstractBoard[i][j - 3] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -634,11 +647,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i+3) < 19) && ((j-3) > -1)) {
-            if (abstractBoard[i+3][j-3] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
+        if (((i + 3) < 19) && ((j - 3) > -1)) {
+            if (abstractBoard[i + 3][j - 3] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -647,11 +660,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((i+3) < 19) {
-            if (abstractBoard[i+3][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
+        if ((i + 3) < 19) {
+            if (abstractBoard[i + 3][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -660,11 +673,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i+3) < 19) && ((j+3) < 19)) {
-            if (abstractBoard[i+3][j+3] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
+        if (((i + 3) < 19) && ((j + 3) < 19)) {
+            if (abstractBoard[i + 3][j + 3] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -673,11 +686,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((j+3) < 19) {
-            if (abstractBoard[i][j+3] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
+        if ((j + 3) < 19) {
+            if (abstractBoard[i][j + 3] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -686,11 +699,11 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i-3) > -1) && ((j+3) < 19)) {
-            if (abstractBoard[i-3][j+3] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
+        if (((i - 3) > -1) && ((j + 3) < 19)) {
+            if (abstractBoard[i - 3][j + 3] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -815,12 +828,12 @@ public class MMAIBoardView extends View {
 
     private void detectKeryoPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i-4) > -1) {
-            if (abstractBoard[i-4][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i-3][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
-                    abstractBoard[i-3][j] = 0;
+        if ((i - 4) > -1) {
+            if (abstractBoard[i - 4][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i - 3][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
+                    abstractBoard[i - 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -829,12 +842,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i-4) > -1) && ((j-4) > -1)) {
-            if (abstractBoard[i-4][j-4] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i-3][j-3] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
-                    abstractBoard[i-3][j-3] = 0;
+        if (((i - 4) > -1) && ((j - 4) > -1)) {
+            if (abstractBoard[i - 4][j - 4] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i - 3][j - 3] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
+                    abstractBoard[i - 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -843,12 +856,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((j-4) > -1) {
-            if (abstractBoard[i][j-4] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j-3] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
-                    abstractBoard[i][j-3] = 0;
+        if ((j - 4) > -1) {
+            if (abstractBoard[i][j - 4] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j - 3] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
+                    abstractBoard[i][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -857,12 +870,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i+4) < 19) && ((j-4) > -1)) {
-            if (abstractBoard[i+4][j-4] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
-                    abstractBoard[i+3][j-3] = 0;
+        if (((i + 4) < 19) && ((j - 4) > -1)) {
+            if (abstractBoard[i + 4][j - 4] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
+                    abstractBoard[i + 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -871,12 +884,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((i+4) < 19) {
-            if (abstractBoard[i+4][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor) && (abstractBoard[i+3][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
-                    abstractBoard[i+3][j] = 0;
+        if ((i + 4) < 19) {
+            if (abstractBoard[i + 4][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i + 3][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
+                    abstractBoard[i + 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -885,12 +898,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i+4) < 19) && ((j+4) < 19)) {
-            if (abstractBoard[i+4][j+4] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
-                    abstractBoard[i+3][j+3] = 0;
+        if (((i + 4) < 19) && ((j + 4) < 19)) {
+            if (abstractBoard[i + 4][j + 4] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
+                    abstractBoard[i + 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -899,12 +912,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if ((j+4) < 19) {
-            if (abstractBoard[i][j+4] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
-                    abstractBoard[i][j+3] = 0;
+        if ((j + 4) < 19) {
+            if (abstractBoard[i][j + 4] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
+                    abstractBoard[i][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -913,12 +926,12 @@ public class MMAIBoardView extends View {
                 }
             }
         }
-        if (((i-4) > -1) && ((j+4) < 19)) {
-            if (abstractBoard[i-4][j+4] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
-                    abstractBoard[i-3][j+3] = 0;
+        if (((i - 4) > -1) && ((j + 4) < 19)) {
+            if (abstractBoard[i - 4][j + 4] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
+                    abstractBoard[i - 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -935,7 +948,6 @@ public class MMAIBoardView extends View {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, width);
     }
-
 
 
 }

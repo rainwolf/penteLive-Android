@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
@@ -81,7 +82,7 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
-    int countDownSeconds = 1*60;
+    int countDownSeconds = 1 * 60;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -220,7 +221,7 @@ public class LiveTableFragment extends Fragment {
         if (PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
@@ -239,10 +240,10 @@ public class LiveTableFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
-                    int passMove = table.getGridSize()*table.getGridSize();
-                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":"+passMove+",\"moves\":["+passMove+"],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                    int passMove = table.getGridSize() * table.getGridSize();
+                    mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
                 } else if (mListener != null && table.isSeated(me)) {
-                    mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":"+table.getId()+",\"time\":0}}");
+                    mListener.sendEvent("{\"dsgPlayTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
                     playButton.setVisibility(View.INVISIBLE);
                 }
             }
@@ -285,7 +286,7 @@ public class LiveTableFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         String m_Text = input.getText().toString();
                         if (!"".equals(m_Text)) {
-                            String event = "{\"dsgTextTableEvent\":{\"text\":\""+m_Text+"\",\"table\":"+table.getId()+",\"time\":0}}";
+                            String event = "{\"dsgTextTableEvent\":{\"text\":\"" + m_Text + "\",\"table\":" + table.getId() + ",\"time\":0}}";
                             if (mListener != null) {
                                 mListener.sendEvent(event);
                             }
@@ -294,7 +295,7 @@ public class LiveTableFragment extends Fragment {
                 });
                 AlertDialog dlg = builder.create();
                 dlg.show();
-                dlg.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
         updateTable();
@@ -309,24 +310,21 @@ public class LiveTableFragment extends Fragment {
         super.onResume();
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
-        getView().setOnKeyListener( new View.OnKeyListener(){
+        getView().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey( View v, int keyCode, KeyEvent event ) {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
                 System.out.println("w000000000t");
-                if( keyCode == KeyEvent.KEYCODE_BACK ) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
                     System.out.println("whaaaaaaaaaat");
                     if (mListener != null) {
-                        mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":"+ table.getId() + ",\"booted\":false,\"time\":0}}");
+                        mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
                         return true;
                     }
                 }
                 return false;
             }
-        } );
+        });
     }
-
-
-
 
 
     public void updateTable() {
@@ -358,10 +356,10 @@ public class LiveTableFragment extends Fragment {
         synchronized (this) {
             int minutes = table.getGameState().timers.get(1).get("minutes");
             int seconds = table.getGameState().timers.get(1).get("seconds");
-            p1Timer.setText(minutes+":"+seconds);
+            p1Timer.setText(minutes + ":" + seconds);
             minutes = table.getGameState().timers.get(2).get("minutes");
             seconds = table.getGameState().timers.get(2).get("seconds");
-            p2Timer.setText(minutes+":"+seconds);
+            p2Timer.setText(minutes + ":" + seconds);
         }
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
 
@@ -429,6 +427,7 @@ public class LiveTableFragment extends Fragment {
     public void setTable(Table table) {
         this.table = table;
     }
+
     public OnFragmentInteractionListener getListener() {
         return mListener;
     }
@@ -483,6 +482,7 @@ public class LiveTableFragment extends Fragment {
         board.invalidate();
         showGoDialog();
     }
+
     public void rejectGoState() {
         table.rejectAndContinue();
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
@@ -504,13 +504,13 @@ public class LiveTableFragment extends Fragment {
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        int passMove = table.getGridSize()*table.getGridSize();
+                        int passMove = table.getGridSize() * table.getGridSize();
                         switch (which) {
                             case 0:
-                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":"+passMove+",\"moves\":["+passMove+"],\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove + ",\"moves\":[" + passMove + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
                                 break;
                             case 1:
-                                mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+                                mListener.sendEvent("{\"dsgRejectGoStateEvent\":{\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
                                 break;
                         }
                         // the user clicked on colors[which]
@@ -590,11 +590,11 @@ public class LiveTableFragment extends Fragment {
                     }
                 });
                 waitForPlayerReturnDialog.show();
-                countDownTimer = new CountDownTimer(1*60*1000, 1000) {
+                countDownTimer = new CountDownTimer(1 * 60 * 1000, 1000) {
                     @Override
                     public void onTick(long l) {
-                        long seconds = l/1000;
-                        waitForPlayerReturnDialog.setTitle((seconds/60)+":"+(seconds%60));
+                        long seconds = l / 1000;
+                        waitForPlayerReturnDialog.setTitle((seconds / 60) + ":" + (seconds % 60));
                     }
 
                     @Override
@@ -691,7 +691,7 @@ public class LiveTableFragment extends Fragment {
             gameSpinner.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    InputMethodManager imm =  (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     return false;
                 }
@@ -708,7 +708,7 @@ public class LiveTableFragment extends Fragment {
                 }
             });
         }
-        gameSpinner.setSelection((table.getGame() - 1)/2);
+        gameSpinner.setSelection((table.getGame() - 1) / 2);
         if (table.isTimed()) {
             timedChoice.setText(getString(R.string.yes));
         } else {
@@ -719,8 +719,8 @@ public class LiveTableFragment extends Fragment {
         } else {
             ratedChoice.setText(getString(R.string.no));
         }
-        initialMinutesView.setText(table.getTimer().get("initialMinutes")+"");
-        incrementalSecondsView.setText(table.getTimer().get("incrementalSeconds")+"");
+        initialMinutesView.setText(table.getTimer().get("initialMinutes") + "");
+        incrementalSecondsView.setText(table.getTimer().get("incrementalSeconds") + "");
         tableSettingsWindow.show();
     }
 
@@ -738,13 +738,13 @@ public class LiveTableFragment extends Fragment {
             typeStr = "2";
         }
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgChangeStateTableEvent\":{\"timed\":"+timedStr+
-                    ",\"initialMinutes\":"+initialMinutesView.getText()+
-                    ",\"incrementalSeconds\":"+incrementalSecondsView.getText()+
-                    ",\"rated\":"+ratedStr+
-                            ",\"game\":"+(gameSpinner.getSelectedItemPosition()*2+1)+
-                    ",\"tableType\":"+typeStr+",\"player\":\""+me+
-                    "\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgChangeStateTableEvent\":{\"timed\":" + timedStr +
+                    ",\"initialMinutes\":" + initialMinutesView.getText() +
+                    ",\"incrementalSeconds\":" + incrementalSecondsView.getText() +
+                    ",\"rated\":" + ratedStr +
+                    ",\"game\":" + (gameSpinner.getSelectedItemPosition() * 2 + 1) +
+                    ",\"tableType\":" + typeStr + ",\"player\":\"" + me +
+                    "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
@@ -834,19 +834,22 @@ public class LiveTableFragment extends Fragment {
 
     private void sendResign() {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgResignTableEvent\":{\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgResignTableEvent\":{\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
+
     private void sendCancelRequest() {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgCancelRequestTableEvent\":{\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgCancelRequestTableEvent\":{\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
+
     private void sendUndoRequest() {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgUndoRequestTableEvent\":{\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgUndoRequestTableEvent\":{\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
+
     private void scoreGame() {
         board.setGoTerritoryByPlayer(table.getTerritories());
         addText("* " + table.getScoreMessage());
@@ -880,11 +883,13 @@ public class LiveTableFragment extends Fragment {
         window.setAttributes(wlp);
         dlg.show();
     }
+
     private void sendCancelReply(boolean accept) {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgCancelReplyTableEvent\":{\"accepted\":"+(accept?"true":"false")+",\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgCancelReplyTableEvent\":{\"accepted\":" + (accept ? "true" : "false") + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
+
     public void undoRequested(String player) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_undo, player));
@@ -912,9 +917,10 @@ public class LiveTableFragment extends Fragment {
         window.setAttributes(wlp);
         dlg.show();
     }
+
     private void sendUndoReply(boolean accept) {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgUndoReplyTableEvent\":{\"accepted\":"+(accept?"true":"false")+",\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgUndoReplyTableEvent\":{\"accepted\":" + (accept ? "true" : "false") + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
@@ -946,9 +952,10 @@ public class LiveTableFragment extends Fragment {
         dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         dlg.show();
     }
+
     private void sendDPenteChoice(boolean white) {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgSwapSeatsTableEvent\":{\"swap\":"+(white?"true":"false")+",\"silent\":false,\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgSwapSeatsTableEvent\":{\"swap\":" + (white ? "true" : "false") + ",\"silent\":false,\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
@@ -973,6 +980,7 @@ public class LiveTableFragment extends Fragment {
         board.invalidate();
         showGoDialog();
     }
+
     private void showTablePlayers() {
         PlayersListAdapter listAdapter = new PlayersListAdapter(table.getPlayers(), getString(R.string.table_players), table.getGame());
         listAdapter.setInflater(activity.getLayoutInflater());
@@ -995,6 +1003,7 @@ public class LiveTableFragment extends Fragment {
 
         tablePlayers.show();
     }
+
     private void showBootablePlayers() {
         final Map<String, LivePlayer> bootablePlayers = new HashMap<>(table.getPlayers());
         bootablePlayers.remove(me);
@@ -1030,17 +1039,19 @@ public class LiveTableFragment extends Fragment {
         });
 
     }
+
     private void bootPlayer(String player) {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgBootTableEvent\":{\"toBoot\":\""+player+"\",\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgBootTableEvent\":{\"toBoot\":\"" + player + "\",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
+
     private void showInvitePlayers() {
         final Map<String, LivePlayer> invitePlayers = new HashMap<>(activity.tablesAndPlayers.players);
-        for (String plr: table.getPlayers().keySet()) {
+        for (String plr : table.getPlayers().keySet()) {
             invitePlayers.remove(plr);
         }
-        for (Table tbl: activity.tablesAndPlayers.tables.values()) {
+        for (Table tbl : activity.tablesAndPlayers.tables.values()) {
             if (tbl.getId() == this.table.getId()) {
                 continue;
             }
@@ -1081,7 +1092,7 @@ public class LiveTableFragment extends Fragment {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 final EditText invitationText = new EditText(activity);
-                invitationText.setHint("("+getString(R.string.optional_message)+")");
+                invitationText.setHint("(" + getString(R.string.optional_message) + ")");
                 invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(invitationText);
                 builder.setTitle(getString(R.string.invite_player_to_table, player.coloredNameString(invitationText.getLineHeight())));
@@ -1089,7 +1100,7 @@ public class LiveTableFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String m_Text = invitationText.getText().toString();
-                        String event = "{\"dsgInviteTableEvent\":{\"toInvite\":\""+player.getName()+"\",\"inviteText\":\""+m_Text+"\",\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}";
+                        String event = "{\"dsgInviteTableEvent\":{\"toInvite\":\"" + player.getName() + "\",\"inviteText\":\"" + m_Text + "\",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}";
                         if (mListener != null) {
                             mListener.sendEvent(event);
                         }
@@ -1156,24 +1167,24 @@ public class LiveTableFragment extends Fragment {
 
     private void sendForceCancelResignTableEvent(boolean cancel) {
         if (mListener != null) {
-            mListener.sendEvent("{\"dsgForceCancelResignTableEvent\":{\"action\":"+(cancel?1:2)+",\"player\":\""+me+"\",\"table\":"+table.getId()+",\"time\":0}}");
+            mListener.sendEvent("{\"dsgForceCancelResignTableEvent\":{\"action\":" + (cancel ? 1 : 2) + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
     private void requestNewInterstitialAndShow() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds?"0":"1"));
+        extras.putString("npa", (personalizeAds ? "0" : "1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
 
-        InterstitialAd.load(activity,"ca-app-pub-3326997956703582/8353630687", adRequest,
+        InterstitialAd.load(activity, "ca-app-pub-3326997956703582/8353630687", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         // The mInterstitialAd reference will be null until
                         // an ad is loaded.
                         mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 // Called when ad is dismissed.
@@ -1189,6 +1200,7 @@ public class LiveTableFragment extends Fragment {
                         });
                         mInterstitialAd.show(activity);
                     }
+
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error

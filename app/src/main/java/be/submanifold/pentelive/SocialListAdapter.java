@@ -3,7 +3,9 @@ package be.submanifold.pentelive;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+
 import androidx.core.content.ContextCompat;
+
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +23,7 @@ import be.submanifold.pentelive.liveGameRoom.LivePlayer;
  * Created by waliedothman on 02/02/2017.
  */
 
-public class SocialListAdapter  extends BaseExpandableListAdapter {
+public class SocialListAdapter extends BaseExpandableListAdapter {
 
 
     List<LivePlayer> playersArray;
@@ -46,11 +48,18 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
         this.playersArray = new ArrayList<>();
         ctx = MyApplication.getContext();
     }
+
     public void setInflater(LayoutInflater inflater) {
         this.inflater = inflater;
     }
-    public void setPlayersArray(List<LivePlayer> playersArray) { this.playersArray = playersArray; }
-    public List<LivePlayer> getPlayersArray() { return playersArray; }
+
+    public void setPlayersArray(List<LivePlayer> playersArray) {
+        this.playersArray = playersArray;
+    }
+
+    public List<LivePlayer> getPlayersArray() {
+        return playersArray;
+    }
 
 
     @Override
@@ -134,7 +143,7 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
         nameTextView.setText(sb);
 
         int rating = player.getRating(game);
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText(""+rating);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
 
         return convertView;
@@ -150,12 +159,13 @@ public class SocialListAdapter  extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
         super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
         super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         notifyDataSetChanged();
     }
 }

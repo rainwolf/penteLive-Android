@@ -5,7 +5,9 @@ import be.submanifold.pentelive.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+
 import androidx.core.content.ContextCompat;
+
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -79,7 +81,7 @@ public class LivePlayer {
                     break;
                 default:
                     if (crown > 3) {
-                        int resourceId = ctx.getResources().getIdentifier("kothcrown"+(crown-3),"drawable", ctx.getPackageName());
+                        int resourceId = ctx.getResources().getIdentifier("kothcrown" + (crown - 3), "drawable", ctx.getPackageName());
                         crownIcon = ContextCompat.getDrawable(MyApplication.getContext(), resourceId);
                     }
                     break;
@@ -94,15 +96,16 @@ public class LivePlayer {
 
     public SpannableStringBuilder coloredRatingSquare(int ratingInt) {
         SpannableStringBuilder sb = new SpannableStringBuilder("\u25A0");
-        ForegroundColorSpan ratingColor = null;new ForegroundColorSpan(color);
+        ForegroundColorSpan ratingColor = null;
+        new ForegroundColorSpan(color);
         if (ratingInt >= 1900) {
             ratingColor = new ForegroundColorSpan(Color.RED);
         } else if (ratingInt >= 1700) {
-            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98*255), (int) (0.96*255) ,(int) (0.03*255)));
+            ratingColor = new ForegroundColorSpan(Color.rgb((int) (0.98 * 255), (int) (0.96 * 255), (int) (0.03 * 255)));
         } else if (ratingInt >= 1400) {
-            ratingColor =  new ForegroundColorSpan(Color.BLUE);
+            ratingColor = new ForegroundColorSpan(Color.BLUE);
         } else if (ratingInt >= 1000) {
-            ratingColor =  new ForegroundColorSpan(Color.rgb(30,130,76));
+            ratingColor = new ForegroundColorSpan(Color.rgb(30, 130, 76));
         } else {
             ratingColor = new ForegroundColorSpan(Color.GRAY);
         }

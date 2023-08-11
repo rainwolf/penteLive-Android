@@ -28,19 +28,27 @@ public class Message implements Parcelable {
     public String getMessageID() {
         return this.mMessageID;
     }
+
     public String getAuthor() {
         return this.mAuthor;
     }
-    public String getSubject() {return this.mSubject; }
+
+    public String getSubject() {
+        return this.mSubject;
+    }
+
     public String getTimeStamp() {
         return this.mTimeStamp;
     }
+
     public String getUnread() {
         return this.mUnread;
     }
+
     public int getNameColor() {
-        return  this.mNameColor;
+        return this.mNameColor;
     }
+
     public int getCrown() {
         return this.mCrown;
     }

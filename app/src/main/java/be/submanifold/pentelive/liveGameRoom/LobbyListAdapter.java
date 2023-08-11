@@ -3,6 +3,7 @@ package be.submanifold.pentelive.liveGameRoom;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+
 import androidx.core.content.ContextCompat;
 
 import android.os.Bundle;
@@ -38,14 +39,15 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
 
     public LobbyListAdapter() {
     }
+
     public void setInflater(LayoutInflater inflater, Activity activity) {
         this.inflater = inflater;
         this.activity = activity;
     }
+
     public void setRooms(List<LiveGameRoom> rooms) {
         this.rooms = rooms;
     }
-
 
 
     @Override
@@ -120,19 +122,20 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
         super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
         super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         notifyDataSetChanged();
 
         if (PentePlayer.mShowAds) {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.VISIBLE);
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);

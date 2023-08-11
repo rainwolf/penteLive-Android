@@ -31,7 +31,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
     List<LivePlayer> playersArray;
     int game = 1;
     private String roomName;
-//    PentePlayer playerData;
+    //    PentePlayer playerData;
     private LayoutInflater inflater;
 
     private Context ctx;
@@ -43,6 +43,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         this.roomName = roomName;
         this.game = game;
     }
+
     public void setInflater(LayoutInflater inflater) {
         this.inflater = inflater;
     }
@@ -127,7 +128,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
         nameTextView.setText(player.coloredNameString(nameTextView.getLineHeight()));
         int rating = player.getRating(game);
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText(""+rating);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
         return convertView;
     }
@@ -142,12 +143,13 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
     public void onGroupCollapsed(int groupPosition) {
         super.onGroupCollapsed(groupPosition);
     }
+
     @Override
     public void onGroupExpanded(int groupPosition) {
         super.onGroupExpanded(groupPosition);
     }
 
-    public void updateList(){
+    public void updateList() {
         this.playersArray = new ArrayList<>(players.values());
         notifyDataSetChanged();
     }

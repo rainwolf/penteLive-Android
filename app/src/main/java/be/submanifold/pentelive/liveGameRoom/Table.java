@@ -3,7 +3,9 @@ package be.submanifold.pentelive.liveGameRoom;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+
 import androidx.core.content.ContextCompat;
+
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 
@@ -25,7 +27,7 @@ public class Table {
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80");
+            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52BE80");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -37,33 +39,52 @@ public class Table {
     private int whiteCaptures = 0;
     private int blackCaptures = 0;
     private static Map<Integer, String> gameNames;
+
     static {
         gameNames = new HashMap<>();
-        gameNames.put(1, "Pente"); gameNames.put(3, "Keryo-Pente");
-        gameNames.put(5, "Gomoku"); gameNames.put(7, "D-Pente");
-        gameNames.put(9, "G-Pente"); gameNames.put(11, "Poof-Pente");
-        gameNames.put(13, "Connect6"); gameNames.put(15, "Boat-Pente");
-        gameNames.put(17, "DK-Pente"); gameNames.put(19, "Go");
-        gameNames.put(21, "Go (9x9)");gameNames.put(23, "Go (13x13)");
+        gameNames.put(1, "Pente");
+        gameNames.put(3, "Keryo-Pente");
+        gameNames.put(5, "Gomoku");
+        gameNames.put(7, "D-Pente");
+        gameNames.put(9, "G-Pente");
+        gameNames.put(11, "Poof-Pente");
+        gameNames.put(13, "Connect6");
+        gameNames.put(15, "Boat-Pente");
+        gameNames.put(17, "DK-Pente");
+        gameNames.put(19, "Go");
+        gameNames.put(21, "Go (9x9)");
+        gameNames.put(23, "Go (13x13)");
         gameNames.put(25, "O-Pente");
-        gameNames.put(2, "Speed Pente"); gameNames.put(4, "Speed Keryo-Pente");
-        gameNames.put(6, "Speed Gomoku"); gameNames.put(8, "Speed D-Pente");
-        gameNames.put(10, "Speed G-Pente"); gameNames.put(12, "Speed Poof-Pente");
-        gameNames.put(14, "Speed Connect6"); gameNames.put(16, "Speed Boat-Pente");
-        gameNames.put(18, "Speed DK-Pente"); gameNames.put(20, "Speed Go");
-        gameNames.put(22, "Speed Go (9x9)");gameNames.put(24, "Speed Go (13x13)");
+        gameNames.put(2, "Speed Pente");
+        gameNames.put(4, "Speed Keryo-Pente");
+        gameNames.put(6, "Speed Gomoku");
+        gameNames.put(8, "Speed D-Pente");
+        gameNames.put(10, "Speed G-Pente");
+        gameNames.put(12, "Speed Poof-Pente");
+        gameNames.put(14, "Speed Connect6");
+        gameNames.put(16, "Speed Boat-Pente");
+        gameNames.put(18, "Speed DK-Pente");
+        gameNames.put(20, "Speed Go");
+        gameNames.put(22, "Speed Go (9x9)");
+        gameNames.put(24, "Speed Go (13x13)");
         gameNames.put(26, "Speed O-Pente");
     }
+
     private List<Integer> moves = new ArrayList<>();
     private Map<String, Integer> timer;
     private Map<Integer, LivePlayer> seats = new HashMap<>();
     private GameState gameState = new GameState();
     private Context ctx = MyApplication.getContext();
 
-    public int getGridSize() { return gridSize; }
-    public void setGridSize(int gridSize) { this.gridSize = gridSize; }
+    public int getGridSize() {
+        return gridSize;
+    }
 
-    private int gridSize = 19, passMove = gridSize*gridSize;
+    public void setGridSize(int gridSize) {
+        this.gridSize = gridSize;
+    }
+
+    private int gridSize = 19, passMove = gridSize * gridSize;
     private boolean hasPass = false;
 
     public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -87,17 +108,24 @@ public class Table {
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
     private Map<Integer, Map<Integer, List<Integer>>> groupsByPlayerAndID;
-    private Map<Integer,Map<Integer, Integer>> stoneGroupIDsByPlayer;
+    private Map<Integer, Map<Integer, Integer>> stoneGroupIDsByPlayer;
     private int koMove = -1;
     private Map<Integer, List<Integer>> goTerritoryByPlayer;
     private Map<Integer, List<Integer>> goDeadStonesByPlayer;
-    public Map<Integer, List<Integer>> getGoDeadStonesByPlayer() { return goDeadStonesByPlayer; }
-    public Map<Integer, List<Integer>> getGoTerritoryByPlayer() { return goTerritoryByPlayer; }
+
+    public Map<Integer, List<Integer>> getGoDeadStonesByPlayer() {
+        return goDeadStonesByPlayer;
+    }
+
+    public Map<Integer, List<Integer>> getGoTerritoryByPlayer() {
+        return goTerritoryByPlayer;
+    }
 
 
     public Table() {
         timer = new HashMap<>();
-        timer.put("initialMinutes", 0); timer.put("incrementalSeconds", 0);
+        timer.put("initialMinutes", 0);
+        timer.put("incrementalSeconds", 0);
         this.groupsByPlayerAndID = new HashMap<Integer, Map<Integer, List<Integer>>>();
         this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
         this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
@@ -105,7 +133,8 @@ public class Table {
         this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
         this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
         this.goDeadStonesByPlayer = new HashMap<>();
-        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
         this.koMove = -1;
         gameState.goState = GoState.PLAY;
         hasPass = false;
@@ -118,15 +147,18 @@ public class Table {
             addMoves(oldMoves);
         }
     }
+
     public void addMoves(List<Integer> moveList) {
         resetBoard();
-        for (int move: moveList) {
+        for (int move : moveList) {
             addMove(move);
         }
     }
+
     public boolean isGo() {
         return game > 18 && game < 25;
     }
+
     public void addMove(int move) {
         if (isGo()) {
             addGoMove(move);
@@ -159,7 +191,7 @@ public class Table {
                     }
                 }
                 if (game == 9 || game == 10) {
-                    for(int i = 1; i < 3; ++i) {
+                    for (int i = 1; i < 3; ++i) {
                         if (abstractBoard[9][11 + i] == 0) {
                             abstractBoard[9][11 + i] = -1;
                         }
@@ -183,7 +215,7 @@ public class Table {
                     }
                 }
                 if (game == 9 || game == 10) {
-                    for(int i = 1; i < 3; ++i) {
+                    for (int i = 1; i < 3; ++i) {
                         if (abstractBoard[9][11 + i] == -1) {
                             abstractBoard[9][11 + i] = 0;
                         }
@@ -201,13 +233,15 @@ public class Table {
             }
         }
     }
+
     public boolean isDPente() {
         return (game == 7 || game == 8 || game == 17 || game == 18);
     }
+
     public int currentColor() {
         if (isGo()) {
             if (getGameState().goState == GoState.PLAY) {
-                return 2 - moves.size()%2;
+                return 2 - moves.size() % 2;
             } else {
                 return 3;
             }
@@ -220,9 +254,11 @@ public class Table {
             return 2 - (((moves.size() - 1) / 2) % 2);
         }
     }
+
     public boolean isMyTurn(String me) {
         return me.equals(seats.get(currentPlayer()).getName());
     }
+
     public int currentPlayer() {
         if (isGo()) {
             int cp = 0;
@@ -232,12 +268,12 @@ public class Table {
             } else if (getGameState().goState == GoState.MARKSTONES) {
                 cp = 2 - dp % 2;
             } else {
-                cp = 1 + moves.size()%2;
+                cp = 1 + moves.size() % 2;
             }
             return cp;
-        } else  if (game != 13 && game != 14) {
+        } else if (game != 13 && game != 14) {
             if (isDPente()) {
-                if (moves.size()<4) {
+                if (moves.size() < 4) {
                     return 1;
                 }
                 if (moves.size() == 4 && gameState.dPenteState == DPenteState.NOCHOICE) {
@@ -252,6 +288,7 @@ public class Table {
             return 2 - (((moves.size() - 1) / 2) % 2);
         }
     }
+
     public String currentPlayerName() {
         int seat = currentPlayer();
         LivePlayer player = seats.get(seat);
@@ -260,8 +297,9 @@ public class Table {
         }
         return "";
     }
+
     public void swapSeats(boolean swap, boolean silent) {
-        if (swap){
+        if (swap) {
             if (!silent) {
                 LivePlayer player1 = seats.get(1);
                 LivePlayer player2 = seats.get(2);
@@ -276,6 +314,7 @@ public class Table {
             gameState.dPenteState = DPenteState.NOTSWAPPED;
         }
     }
+
     public synchronized void updateTimer(boolean reset, int currentPlayer, int minutes, int seconds) {
         if (reset) {
             int timerMinutes = timer.get("initialMinutes");
@@ -302,6 +341,7 @@ public class Table {
             }
         }
     }
+
     public void resetState() {
         resetAbstractBoard();
         gameState.dPenteState = DPenteState.NOCHOICE;
@@ -315,12 +355,14 @@ public class Table {
         this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
         this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
         this.goDeadStonesByPlayer = new HashMap<>();
-        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
         this.koMove = -1;
         gameState.goState = GoState.PLAY;
         hasPass = false;
-        updateTimer(true,0,0,0);
+        updateTimer(true, 0, 0, 0);
     }
+
     public void resetBoard() {
         resetAbstractBoard();
         moves = new ArrayList<>();
@@ -333,7 +375,8 @@ public class Table {
         this.stoneGroupIDsByPlayer.put(1, new HashMap<Integer, Integer>());
         this.stoneGroupIDsByPlayer.put(2, new HashMap<Integer, Integer>());
         this.goDeadStonesByPlayer = new HashMap<>();
-        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>()); this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(1, new ArrayList<Integer>());
+        this.goDeadStonesByPlayer.put(2, new ArrayList<Integer>());
         this.koMove = -1;
         gameState.goState = GoState.PLAY;
         hasPass = false;
@@ -411,22 +454,22 @@ public class Table {
 
     private synchronized void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         int captures = 0;
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
@@ -453,37 +496,39 @@ public class Table {
     }
 
     private int getPosition(int move) {
-        int i = move/gridSize, j = move%gridSize;
+        int i = move / gridSize, j = move % gridSize;
         return abstractBoard[i][j];
     }
+
     private void setPosition(int move, int value) {
-        int i = move/gridSize, j = move%gridSize;
+        int i = move / gridSize, j = move % gridSize;
         abstractBoard[i][j] = (byte) value;
     }
+
     private synchronized boolean checkKo(int move) {
         int position = getPosition(move);
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
@@ -500,7 +545,7 @@ public class Table {
         if (group.size() > 0) {
             capturee = getPosition(group.get(0));
         }
-        for (int stone: group) {
+        for (int stone : group) {
             setPosition(stone, 0);
             stoneGroupIDs.remove(stone);
         }
@@ -513,36 +558,37 @@ public class Table {
     }
 
     protected synchronized boolean groupHasLiberties(List<Integer> group) {
-        for (int stone: group) {
+        for (int stone : group) {
             if (stoneHasLiberties(stone)) {
                 return true;
             }
         }
         return false;
     }
+
     private synchronized boolean stoneHasLiberties(int stone) {
-        if (stone%gridSize != 0) {
+        if (stone % gridSize != 0) {
             int neighborStone = stone - 1;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone%gridSize != gridSize - 1) {
+        if (stone % gridSize != gridSize - 1) {
             int neighborStone = stone + 1;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone/gridSize != 0) {
+        if (stone / gridSize != 0) {
             int neighborStone = stone - gridSize;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone/gridSize != gridSize - 1) {
+        if (stone / gridSize != gridSize - 1) {
             int neighborStone = stone + gridSize;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
@@ -557,28 +603,28 @@ public class Table {
         newGroup.add(move);
         groupsByID.put(move, newGroup);
         stoneGroupIDs.put(move, move);
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(move, neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
@@ -606,7 +652,7 @@ public class Table {
         }
         newGroup.addAll(oldGroup);
         groupsByID.remove(oldGroupID);
-        for (int oldStone: oldGroup) {
+        for (int oldStone : oldGroup) {
             stoneGroupIDs.put(oldStone, newGroupID);
         }
     }
@@ -624,7 +670,7 @@ public class Table {
                 }
             }
         }
-        return "P1 score is "+p1Count+", and P2 score is "+(p2Count+7)+".5";
+        return "P1 score is " + p1Count + ", and P2 score is " + (p2Count + 7) + ".5";
     }
 
     public void rejectAndContinue() {
@@ -636,37 +682,37 @@ public class Table {
 
         resetBoard();
 
-        for (int move: oldMoves) {
+        for (int move : oldMoves) {
             addMove(move);
         }
     }
 
     public boolean showEvaluateDialog(String player) {
-        boolean gameOver = moves.size() > 2 && containsDoublePass() < moves.size()-2 &&
-                moves.get(moves.size()-1) == passMove && moves.get(moves.size()-2) == passMove;
+        boolean gameOver = moves.size() > 2 && containsDoublePass() < moves.size() - 2 &&
+                moves.get(moves.size() - 1) == passMove && moves.get(moves.size() - 2) == passMove;
         return !gameOver && currentPlayerName().equals(player);
     }
 
     private synchronized int getEmptyNeighbour(int move) {
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
@@ -674,6 +720,7 @@ public class Table {
         }
         return -1;
     }
+
     private synchronized void floodFillWorker(int move, int value) {
         setPosition(move, value);
         int neighbourStone = getEmptyNeighbour(move);
@@ -682,6 +729,7 @@ public class Table {
             neighbourStone = getEmptyNeighbour(move);
         }
     }
+
     private synchronized List<Integer> floodFill(int player) {
         int color = 3 - player;
         for (int move = 0; move < passMove; move++) {
@@ -703,9 +751,10 @@ public class Table {
         }
         return floodedTerritory;
     }
+
     private synchronized void resetGoBeforeFlood() {
-        for (int i = 0; i < gridSize; i++ ) {
-            for (int j = 0; j < gridSize; j++ ) {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
                 int pos = abstractBoard[i][j];
                 if (pos != 1 && pos != 2) {
                     abstractBoard[i][j] = 0;
@@ -713,17 +762,19 @@ public class Table {
             }
         }
     }
+
     private synchronized List<Integer> getMovesForValue(int val) {
         List<Integer> results = new ArrayList<>();
         for (int i = 0; i < gridSize; i++) {
             for (int j = 0; j < gridSize; j++) {
                 if (abstractBoard[i][j] == val) {
-                    results.add(i*gridSize+j);
+                    results.add(i * gridSize + j);
                 }
             }
         }
         return results;
     }
+
     public synchronized Map<Integer, List<Integer>> getTerritories() {
         goTerritoryByPlayer = new HashMap<>();
         floodFill(1);
@@ -733,16 +784,16 @@ public class Table {
         List<Integer> p2Territory = getMovesForValue(4);
         resetGoBeforeFlood();
 
-        int i = p1Territory.size()-1, j = p2Territory.size()-1;
+        int i = p1Territory.size() - 1, j = p2Territory.size() - 1;
 
-        while (i>-1 && j>-1) {
+        while (i > -1 && j > -1) {
             int p1Stone = p1Territory.get(i), p2Stone = p2Territory.get(j);
             if (p1Stone == p2Stone) {
                 p1Territory.remove(i);
                 p2Territory.remove(j);
                 --i;
                 --j;
-            } else if (p1Stone>p2Stone) {
+            } else if (p1Stone > p2Stone) {
                 --i;
             } else {
                 --j;
@@ -773,6 +824,7 @@ public class Table {
     public boolean gameHasCaptures() {
         return (game != 5 && game != 6 && game != 13 && game != 14);
     }
+
     public int getGameColor() {
         if (game < 3) {
             return penteColor;
@@ -798,9 +850,11 @@ public class Table {
             return oPenteColor;
         }
     }
+
     public String getGameName() {
         return gameNames.get(game);
     }
+
     public String getSettingsText() {
         String str;
         if (timed) {
@@ -815,6 +869,7 @@ public class Table {
         }
         return str;
     }
+
     public SpannableStringBuilder getSeatsText(int lineHeight) {
         SpannableStringBuilder sb = new SpannableStringBuilder("");
         LivePlayer player = seats.get(1);
@@ -845,9 +900,10 @@ public class Table {
         }
         return sb;
     }
+
     public SpannableStringBuilder getWatchingText(int lineHeight) {
         SpannableStringBuilder sb = new SpannableStringBuilder(ctx.getString(R.string.watching) + " ");
-        for (LivePlayer livePlayer: players.values()) {
+        for (LivePlayer livePlayer : players.values()) {
             if (!isSeated(livePlayer.getName())) {
                 sb.append(livePlayer.coloredNameString(lineHeight));
                 sb.append(", ");
@@ -879,10 +935,18 @@ public class Table {
             resetState();
         }
         switch (state) {
-            case 1: gameState.state = State.NOTSTARTED; break;
-            case 2: gameState.state = State.STARTED; break;
-            case 3: gameState.state = State.PAUSED; break;
-            case 4: gameState.state = State.HALFSET; break;
+            case 1:
+                gameState.state = State.NOTSTARTED;
+                break;
+            case 2:
+                gameState.state = State.STARTED;
+                break;
+            case 3:
+                gameState.state = State.PAUSED;
+                break;
+            case 4:
+                gameState.state = State.HALFSET;
+                break;
         }
     }
 
@@ -897,10 +961,12 @@ public class Table {
         }
         return false;
     }
+
     public void sit(int seat, String player) {
         LivePlayer livePlayer = players.get(player);
         seats.put(seat, livePlayer);
     }
+
     public void stand(String player) {
         LivePlayer livePlayer = seats.get(1);
         if (livePlayer != null && livePlayer.getName().equals(player)) {
@@ -911,6 +977,7 @@ public class Table {
             seats.remove(2);
         }
     }
+
     public void exit(String player) {
         players.remove(player);
     }
@@ -945,11 +1012,14 @@ public class Table {
 
     public void setGame(int game) {
         if (game == 21 || game == 22) {
-            gridSize = 9; passMove = gridSize*gridSize;
+            gridSize = 9;
+            passMove = gridSize * gridSize;
         } else if (game == 23 || game == 24) {
-            gridSize = 13; passMove = gridSize*gridSize;
+            gridSize = 13;
+            passMove = gridSize * gridSize;
         } else {
-            gridSize = 19; passMove = gridSize*gridSize;
+            gridSize = 19;
+            passMove = gridSize * gridSize;
         }
         this.game = game;
     }
@@ -1038,11 +1108,11 @@ public class Table {
         int i = move / 19;
         int j = move % 19;
         byte opponentColor = (byte) (3 - myColor);
-        if ((i-3) > -1) {
-            if (abstractBoard[i-3][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
+        if ((i - 3) > -1) {
+            if (abstractBoard[i - 3][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1051,11 +1121,11 @@ public class Table {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-3) > -1)) {
-            if (abstractBoard[i-3][j-3] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
+        if (((i - 3) > -1) && ((j - 3) > -1)) {
+            if (abstractBoard[i - 3][j - 3] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1064,11 +1134,11 @@ public class Table {
                 }
             }
         }
-        if ((j-3) > -1) {
-            if (abstractBoard[i][j-3] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
+        if ((j - 3) > -1) {
+            if (abstractBoard[i][j - 3] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1077,11 +1147,11 @@ public class Table {
                 }
             }
         }
-        if (((i+3) < 19) && ((j-3) > -1)) {
-            if (abstractBoard[i+3][j-3] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
+        if (((i + 3) < 19) && ((j - 3) > -1)) {
+            if (abstractBoard[i + 3][j - 3] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1090,11 +1160,11 @@ public class Table {
                 }
             }
         }
-        if ((i+3) < 19) {
-            if (abstractBoard[i+3][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
+        if ((i + 3) < 19) {
+            if (abstractBoard[i + 3][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1103,11 +1173,11 @@ public class Table {
                 }
             }
         }
-        if (((i+3) < 19) && ((j+3) < 19)) {
-            if (abstractBoard[i+3][j+3] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
+        if (((i + 3) < 19) && ((j + 3) < 19)) {
+            if (abstractBoard[i + 3][j + 3] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1116,11 +1186,11 @@ public class Table {
                 }
             }
         }
-        if ((j+3) < 19) {
-            if (abstractBoard[i][j+3] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
+        if ((j + 3) < 19) {
+            if (abstractBoard[i][j + 3] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1129,11 +1199,11 @@ public class Table {
                 }
             }
         }
-        if (((i-3) > -1) && ((j+3) < 19)) {
-            if (abstractBoard[i-3][j+3] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
+        if (((i - 3) > -1) && ((j + 3) < 19)) {
+            if (abstractBoard[i - 3][j + 3] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1148,12 +1218,12 @@ public class Table {
         int i = move / 19;
         int j = move % 19;
         byte opponentColor = (byte) (3 - myColor);
-        if ((i-4) > -1) {
-            if (abstractBoard[i-4][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i-3][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
-                    abstractBoard[i-3][j] = 0;
+        if ((i - 4) > -1) {
+            if (abstractBoard[i - 4][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i - 3][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
+                    abstractBoard[i - 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1162,12 +1232,12 @@ public class Table {
                 }
             }
         }
-        if (((i-4) > -1) && ((j-4) > -1)) {
-            if (abstractBoard[i-4][j-4] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i-3][j-3] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
-                    abstractBoard[i-3][j-3] = 0;
+        if (((i - 4) > -1) && ((j - 4) > -1)) {
+            if (abstractBoard[i - 4][j - 4] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i - 3][j - 3] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
+                    abstractBoard[i - 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1176,12 +1246,12 @@ public class Table {
                 }
             }
         }
-        if ((j-4) > -1) {
-            if (abstractBoard[i][j-4] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j-3] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
-                    abstractBoard[i][j-3] = 0;
+        if ((j - 4) > -1) {
+            if (abstractBoard[i][j - 4] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j - 3] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
+                    abstractBoard[i][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1190,12 +1260,12 @@ public class Table {
                 }
             }
         }
-        if (((i+4) < 19) && ((j-4) > -1)) {
-            if (abstractBoard[i+4][j-4] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
-                    abstractBoard[i+3][j-3] = 0;
+        if (((i + 4) < 19) && ((j - 4) > -1)) {
+            if (abstractBoard[i + 4][j - 4] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
+                    abstractBoard[i + 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1204,12 +1274,12 @@ public class Table {
                 }
             }
         }
-        if ((i+4) < 19) {
-            if (abstractBoard[i+4][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor) && (abstractBoard[i+3][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
-                    abstractBoard[i+3][j] = 0;
+        if ((i + 4) < 19) {
+            if (abstractBoard[i + 4][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i + 3][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
+                    abstractBoard[i + 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1218,12 +1288,12 @@ public class Table {
                 }
             }
         }
-        if (((i+4) < 19) && ((j+4) < 19)) {
-            if (abstractBoard[i+4][j+4] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
-                    abstractBoard[i+3][j+3] = 0;
+        if (((i + 4) < 19) && ((j + 4) < 19)) {
+            if (abstractBoard[i + 4][j + 4] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
+                    abstractBoard[i + 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1232,12 +1302,12 @@ public class Table {
                 }
             }
         }
-        if ((j+4) < 19) {
-            if (abstractBoard[i][j+4] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
-                    abstractBoard[i][j+3] = 0;
+        if ((j + 4) < 19) {
+            if (abstractBoard[i][j + 4] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
+                    abstractBoard[i][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1246,12 +1316,12 @@ public class Table {
                 }
             }
         }
-        if (((i-4) > -1) && ((j+4) < 19)) {
-            if (abstractBoard[i-4][j+4] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
-                    abstractBoard[i-3][j+3] = 0;
+        if (((i - 4) > -1) && ((j + 4) < 19)) {
+            if (abstractBoard[i - 4][j + 4] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
+                    abstractBoard[i - 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1267,10 +1337,10 @@ public class Table {
         int j = move % 19;
         byte opponentColor = (byte) (3 - myColor);
         boolean poofed = false;
-        if (((i-2) > -1) && ((i+1) < 19)) {
-            if (abstractBoard[i-1][j] == myColor) {
-                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 2) > -1) && ((i + 1) < 19)) {
+            if (abstractBoard[i - 1][j] == myColor) {
+                if ((abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i + 1][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1281,10 +1351,10 @@ public class Table {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+1) < 19) && ((j+1) < 19)) {
-            if (abstractBoard[i-1][j-1] == myColor) {
-                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 1) < 19) && ((j + 1) < 19)) {
+            if (abstractBoard[i - 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i + 1][j + 1] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1295,10 +1365,10 @@ public class Table {
                 }
             }
         }
-        if (((j-2) > -1) && ((j+1) < 19)) {
-            if (abstractBoard[i][j-1] == myColor) {
-                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 2) > -1) && ((j + 1) < 19)) {
+            if (abstractBoard[i][j - 1] == myColor) {
+                if ((abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j + 1] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1309,10 +1379,10 @@ public class Table {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+1) < 19)) {
-            if (abstractBoard[i+1][j-1] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
+        if (((i - 1) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 1) < 19)) {
+            if (abstractBoard[i + 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1323,10 +1393,10 @@ public class Table {
                 }
             }
         }
-        if (((i+2) < 19) && ((i-1) > -1)) {
-            if (abstractBoard[i+1][j] == myColor) {
-                if ((abstractBoard[i+2][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
+        if (((i + 2) < 19) && ((i - 1) > -1)) {
+            if (abstractBoard[i + 1][j] == myColor) {
+                if ((abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i - 1][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1337,10 +1407,10 @@ public class Table {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-1) > -1) && ((i+2) < 19) && ((j+2) < 19)) {
-            if (abstractBoard[i+1][j+1] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
+        if (((i - 1) > -1) && ((j - 1) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) {
+            if (abstractBoard[i + 1][j + 1] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1351,10 +1421,10 @@ public class Table {
                 }
             }
         }
-        if (((j+2) < 19) && ((j-1) > -1)) {
-            if (abstractBoard[i][j+1] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
+        if (((j + 2) < 19) && ((j - 1) > -1)) {
+            if (abstractBoard[i][j + 1] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1365,10 +1435,10 @@ public class Table {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+2) < 19)) {
-            if (abstractBoard[i-1][j+1] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 2) > -1) && ((j - 1) > -1) && ((i + 1) < 19) && ((j + 2) < 19)) {
+            if (abstractBoard[i - 1][j + 1] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1394,11 +1464,11 @@ public class Table {
         int j = move % 19;
         byte opponentColor = (byte) (1 + (myColor % 2));
         boolean poofed = false;
-        if (((i-3) > -1) && ((i+1) < 19)) { // left
-            if (abstractBoard[i-1][j] == myColor && abstractBoard[i-2][j] == myColor) {
-                if ((abstractBoard[i-3][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
-                    abstractBoard[i-2][j] = 0;
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 3) > -1) && ((i + 1) < 19)) { // left
+            if (abstractBoard[i - 1][j] == myColor && abstractBoard[i - 2][j] == myColor) {
+                if ((abstractBoard[i - 3][j] == opponentColor) && (abstractBoard[i + 1][j] == opponentColor)) {
+                    abstractBoard[i - 2][j] = 0;
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1409,11 +1479,11 @@ public class Table {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-3) > -1) && ((i+1) < 19) && ((j+1) < 19)) { // up left
-            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i-2][j-2] == myColor) {
-                if ((abstractBoard[i-3][j-3] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
-                    abstractBoard[i-2][j-2] = 0;
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 3) > -1) && ((j - 3) > -1) && ((i + 1) < 19) && ((j + 1) < 19)) { // up left
+            if (abstractBoard[i - 1][j - 1] == myColor && abstractBoard[i - 2][j - 2] == myColor) {
+                if ((abstractBoard[i - 3][j - 3] == opponentColor) && (abstractBoard[i + 1][j + 1] == opponentColor)) {
+                    abstractBoard[i - 2][j - 2] = 0;
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1424,11 +1494,11 @@ public class Table {
                 }
             }
         }
-        if (((j-3) > -1) && ((j+1) < 19)) { // up
-            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j-2] == myColor) {
-                if ((abstractBoard[i][j-3] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
-                    abstractBoard[i][j-2] = 0;
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 3) > -1) && ((j + 1) < 19)) { // up
+            if (abstractBoard[i][j - 1] == myColor && abstractBoard[i][j - 2] == myColor) {
+                if ((abstractBoard[i][j - 3] == opponentColor) && (abstractBoard[i][j + 1] == opponentColor)) {
+                    abstractBoard[i][j - 2] = 0;
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1439,11 +1509,11 @@ public class Table {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-3) > -1) && ((i+3) < 19) && ((j+1) < 19)) { // up right
-            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+2][j-2] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
-                    abstractBoard[i+2][j-2] = 0;
-                    abstractBoard[i+1][j-1] = 0;
+        if (((i - 1) > -1) && ((j - 3) > -1) && ((i + 3) < 19) && ((j + 1) < 19)) { // up right
+            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i + 2][j - 2] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
+                    abstractBoard[i + 2][j - 2] = 0;
+                    abstractBoard[i + 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1454,11 +1524,11 @@ public class Table {
                 }
             }
         }
-        if (((i+3) < 19) && ((i-1) > -1)) { // right
-            if (abstractBoard[i+1][j] == myColor && abstractBoard[i+2][j] == myColor) {
-                if ((abstractBoard[i+3][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
-                    abstractBoard[i+2][j] = 0;
-                    abstractBoard[i+1][j] = 0;
+        if (((i + 3) < 19) && ((i - 1) > -1)) { // right
+            if (abstractBoard[i + 1][j] == myColor && abstractBoard[i + 2][j] == myColor) {
+                if ((abstractBoard[i + 3][j] == opponentColor) && (abstractBoard[i - 1][j] == opponentColor)) {
+                    abstractBoard[i + 2][j] = 0;
+                    abstractBoard[i + 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1469,11 +1539,11 @@ public class Table {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-1) > -1) && ((i+3) < 19) && ((j+3) < 19)) { // down right
-            if (abstractBoard[i+1][j+1] == myColor && abstractBoard[i+2][j+2] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
-                    abstractBoard[i+2][j+2] = 0;
-                    abstractBoard[i+1][j+1] = 0;
+        if (((i - 1) > -1) && ((j - 1) > -1) && ((i + 3) < 19) && ((j + 3) < 19)) { // down right
+            if (abstractBoard[i + 1][j + 1] == myColor && abstractBoard[i + 2][j + 2] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
+                    abstractBoard[i + 2][j + 2] = 0;
+                    abstractBoard[i + 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1484,11 +1554,11 @@ public class Table {
                 }
             }
         }
-        if (((j+2) < 19) && ((j-1) > -1)) { // down
-            if (abstractBoard[i][j+1] == myColor && abstractBoard[i][j+2] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
+        if (((j + 2) < 19) && ((j - 1) > -1)) { // down
+            if (abstractBoard[i][j + 1] == myColor && abstractBoard[i][j + 2] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1499,11 +1569,11 @@ public class Table {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+3) < 19)) { // down left
-            if (abstractBoard[i-1][j+1] == myColor && abstractBoard[i-2][j+2] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
-                    abstractBoard[i-2][j+2] = 0;
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 3) > -1) && ((j - 1) > -1) && ((i + 1) < 19) && ((j + 3) < 19)) { // down left
+            if (abstractBoard[i - 1][j + 1] == myColor && abstractBoard[i - 2][j + 2] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
+                    abstractBoard[i - 2][j + 2] = 0;
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1516,11 +1586,11 @@ public class Table {
         }
 
         // 4 directions with center of 3 stones placed to poof
-        if (((i-2) > -1) && ((i+2) < 19)) { // horizontal
-            if (abstractBoard[i-1][j] == myColor && abstractBoard[i+1][j] == myColor) {
-                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 2) > -1) && ((i + 2) < 19)) { // horizontal
+            if (abstractBoard[i - 1][j] == myColor && abstractBoard[i + 1][j] == myColor) {
+                if ((abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1531,11 +1601,11 @@ public class Table {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up left
-            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i+1][j+1] == myColor) {
-                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) { // up left
+            if (abstractBoard[i - 1][j - 1] == myColor && abstractBoard[i + 1][j + 1] == myColor) {
+                if ((abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1546,11 +1616,11 @@ public class Table {
                 }
             }
         }
-        if (((j-2) > -1) && ((j+2) < 19)) { // vertical
-            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j+1] == myColor) {
-                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 2) > -1) && ((j + 2) < 19)) { // vertical
+            if (abstractBoard[i][j - 1] == myColor && abstractBoard[i][j + 1] == myColor) {
+                if ((abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -1561,11 +1631,11 @@ public class Table {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up right
-            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+1][j-1] == myColor) {
-                if ((abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) { // up right
+            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i + 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;

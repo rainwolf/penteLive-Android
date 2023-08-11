@@ -9,10 +9,12 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -66,8 +68,8 @@ public class BoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_board);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
-        messageView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.in_game_message, null, false);
-        messageIcon = (ImageView)((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
+        messageView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.in_game_message, null, false);
+        messageIcon = (ImageView) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
         rotation = AnimationUtils.loadAnimation(BoardActivity.this, R.anim.rotation_animation);
         rotation.setRepeatCount(Animation.INFINITE);
 
@@ -135,7 +137,7 @@ public class BoardActivity extends AppCompatActivity {
         if (button != null) button.setOnClickListener(v -> goForward());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()){
+            switch (menuItem.getItemId()) {
                 case R.id.action_cancel_resign:
                     if (!game.isActive()) {
                         return false;
@@ -147,13 +149,16 @@ public class BoardActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
-                                    case 0: resignTask = new ResignTask(game.getGameID());
+                                    case 0:
+                                        resignTask = new ResignTask(game.getGameID());
                                         askConfirmation(true);
                                         break;
-                                    case 1: cancelTask = new CancelTask(game.getSetID());
+                                    case 1:
+                                        cancelTask = new CancelTask(game.getSetID());
                                         askConfirmation(false);
                                         break;
-                                    case 2: game.changeHideString();
+                                    case 2:
+                                        game.changeHideString();
                                         break;
                                 }
                                 // the user clicked on colors[which]
@@ -164,10 +169,12 @@ public class BoardActivity extends AppCompatActivity {
                         String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
                         builder.setItems(options, (dialog, which) -> {
                             switch (which) {
-                                case 0: resignTask = new ResignTask(game.getGameID());
+                                case 0:
+                                    resignTask = new ResignTask(game.getGameID());
                                     askConfirmation(true);
                                     break;
-                                case 1: cancelTask = new CancelTask(game.getSetID());
+                                case 1:
+                                    cancelTask = new CancelTask(game.getSetID());
                                     askConfirmation(false);
                                     break;
                             }
@@ -183,7 +190,7 @@ public class BoardActivity extends AppCompatActivity {
                         menuItem.setIcon(R.drawable.ic_action_lock_closed);
                     }
                     PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
-                    return  true;
+                    return true;
                 case R.id.go_territory:
                     game.getTerritories();
                     board.invalidate();
@@ -193,7 +200,7 @@ public class BoardActivity extends AppCompatActivity {
                             p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
                             p1Stones = game.getMovesForValue(2).size(),
                             p2Stones = game.getMovesForValue(1).size();
-                    builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
+                    builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones + p1Territory, p2Territory, p2Stones, p2Territory + p2Stones + 7));
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface) {
@@ -305,15 +312,15 @@ public class BoardActivity extends AppCompatActivity {
                         moves = "1," + board.playedMove;
                     }
                 } else if (game.isGoMarkStones() && game.isGo()) {
-                    moves = "" + (game.getGridSize()*game.getGridSize());
-                    for (int move: game.getGoDeadStonesByPlayer().get(1)) {
+                    moves = "" + (game.getGridSize() * game.getGridSize());
+                    for (int move : game.getGoDeadStonesByPlayer().get(1)) {
                         moves = move + "," + moves;
                     }
-                    for (int move: game.getGoDeadStonesByPlayer().get(2)) {
+                    for (int move : game.getGoDeadStonesByPlayer().get(2)) {
                         moves = move + "," + moves;
                     }
                 } else if (board.playedMove == -1 && game.isGo()) {
-                    moves = "" + (game.getGridSize()*game.getGridSize());
+                    moves = "" + (game.getGridSize() * game.getGridSize());
                 } else if (board.playedMove == -1) {
                     Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                             Toast.LENGTH_LONG).show();
@@ -367,13 +374,13 @@ public class BoardActivity extends AppCompatActivity {
                 ((Button) findViewById(R.id.submitButton)).setText(str);
             } else if (board.dPenteMove3 > -1) {
                 board.dPenteMove3 = -1;
-                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
-                        "-" + coordinateLetters[board.dPenteMove2%19] + "" + (19 - (board.dPenteMove2/19)) +
+                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
+                        "-" + coordinateLetters[board.dPenteMove2 % 19] + "" + (19 - (board.dPenteMove2 / 19)) +
                         "-...";
                 ((Button) findViewById(R.id.submitButton)).setText(str);
-            }  else if (board.dPenteMove2 > -1) {
+            } else if (board.dPenteMove2 > -1) {
                 board.dPenteMove2 = -1;
-                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1%19] + "" + (19 - (board.dPenteMove1/19)) +
+                str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
                         "-...";
                 ((Button) findViewById(R.id.submitButton)).setText(str);
             } else if (board.dPenteMove1 > -1) {
@@ -401,7 +408,8 @@ public class BoardActivity extends AppCompatActivity {
             messageIcon.clearAnimation();
         }
     }
-    public void  goForward() {
+
+    public void goForward() {
         if (game.getMovesList() == null) {
             return;
         }
@@ -422,6 +430,7 @@ public class BoardActivity extends AppCompatActivity {
         }
 
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -430,7 +439,7 @@ public class BoardActivity extends AppCompatActivity {
         if (PentePlayer.mShowAds == null || PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             findViewById(R.id.boardAdView).setVisibility(View.GONE);
@@ -463,7 +472,7 @@ public class BoardActivity extends AppCompatActivity {
             if (!game.isActive() || game.getUntilMove() < game.getMovesList().size()) {
                 messageView.findViewById(R.id.messageInput).setVisibility(View.GONE);
             }
-            messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+            messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true);
             messageWindow.setFocusable(true);
             messageWindow.setOutsideTouchable(true);
             messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(BoardActivity.this, R.drawable.border));
@@ -504,6 +513,7 @@ public class BoardActivity extends AppCompatActivity {
     public Game getGame() {
         return game;
     }
+
     public void setGame(Game game) {
         this.game = game;
     }
@@ -520,38 +530,38 @@ public class BoardActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "gid=" + gid + "&command=resign&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "gid=" + gid + "&command=resign&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/resign";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/resign";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/resign";
+                    request = "https://development.pente.org/gameServer/tb/resign";
                 }
-                URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                URL url = new URL(request);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -561,11 +571,12 @@ public class BoardActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
@@ -590,36 +601,36 @@ public class BoardActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters  = "sid=" + sid + "&command=request&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
-                postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/cancel";
+                String urlParameters = "sid=" + sid + "&command=request&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/cancel";
+                    request = "https://development.pente.org/gameServer/tb/cancel";
                 }
-                URL url            = new URL( request );
-                HttpURLConnection conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                URL url = new URL(request);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -633,11 +644,12 @@ public class BoardActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {

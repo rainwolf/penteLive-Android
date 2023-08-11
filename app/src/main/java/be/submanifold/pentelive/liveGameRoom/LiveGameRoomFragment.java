@@ -5,12 +5,15 @@ import be.submanifold.pentelive.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.material.tabs.TabLayout;
+
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
+
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
@@ -86,10 +89,14 @@ public class LiveGameRoomFragment extends Fragment {
                     ((ExpandableListView) getView().findViewById(R.id.tablesList)).setVisibility(View.VISIBLE);
                 }
             }
+
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
 
         activity = (LiveGameRoomActivity) getActivity();
@@ -120,17 +127,16 @@ public class LiveGameRoomFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
                 int tableId = tableListAdapter.getTablesArray().get(i1).getId();
-                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":"+tableId+",\"time\":0}}");
+                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
                 return true;
             }
         });
 
 
-
         if (PentePlayer.mShowAds) {
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds?"0":"1"));
+            extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
             ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
@@ -155,7 +161,7 @@ public class LiveGameRoomFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         String m_Text = input.getText().toString();
                         if (!"".equals(m_Text)) {
-                            String event = "{\"dsgTextMainRoomEvent\":{\"text\":\""+m_Text+"\", \"time\":0}}";
+                            String event = "{\"dsgTextMainRoomEvent\":{\"text\":\"" + m_Text + "\", \"time\":0}}";
                             if (mListener != null) {
                                 mListener.sendEvent(event);
                             }
@@ -170,7 +176,7 @@ public class LiveGameRoomFragment extends Fragment {
 //                });
                 AlertDialog dlg = builder.create();
                 dlg.show();
-                dlg.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
     }

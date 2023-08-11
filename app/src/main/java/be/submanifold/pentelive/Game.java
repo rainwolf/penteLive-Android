@@ -73,7 +73,6 @@ public class Game implements Parcelable {
     public boolean swap2Choice = false;
 
 
-
     public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -122,47 +121,65 @@ public class Game implements Parcelable {
     public String getGameID() {
         return this.mGameID;
     }
+
     public String getSetID() {
         return this.mSetID;
     }
+
     public String getGameType() {
         return this.mGameType;
     }
+
     public String getOpponentName() {
         return this.mOpponentName;
     }
+
     public String getOpponentRating() {
         return this.mOpponentRating;
     }
+
     public String getMyColor() {
         return this.mMyColor;
     }
+
     public String getRemainingTime() {
         return this.mRemainingTime;
     }
+
     public String getRatedNot() {
         return this.mRatedNot;
     }
+
     public String getPrivateGame() {
         return this.mPrivateGame;
     }
+
     public int getNameColor() {
         return this.mNameColor;
     }
+
     public int getCrown() {
         return this.mCrown;
     }
+
     public boolean isActive() {
 //        return true;
         return mActive;
     }
-    public boolean isCanHide() { return canHide; }
-    public boolean isCanUnHide() { return canUnHide; }
+
+    public boolean isCanHide() {
+        return canHide;
+    }
+
+    public boolean isCanUnHide() {
+        return canUnHide;
+    }
 
 
     public void setActive(boolean active) {
         this.mActive = active;
     }
+
     public void setmGameString(String mGameString) {
         this.mGameString = mGameString;
     }
@@ -171,8 +188,13 @@ public class Game implements Parcelable {
         return movesString;
     }
 
-    public String getHideStr() { return hideStr; }
-    public void setHideStr(String hideStr) { this.hideStr = hideStr; }
+    public String getHideStr() {
+        return hideStr;
+    }
+
+    public void setHideStr(String hideStr) {
+        this.hideStr = hideStr;
+    }
 
 
     protected Game(Parcel in) {
@@ -311,17 +333,17 @@ public class Game implements Parcelable {
             Context ctx = MyApplication.getContext();
             String ratingStr = ctx.getString(R.string.rating),
                     timeStr = ctx.getString(R.string.remainingtime),
-                    privateStr = mPrivateGame.contains("non")?ctx.getString(R.string.non_private):ctx.getString(R.string.private_str),
+                    privateStr = mPrivateGame.contains("non") ? ctx.getString(R.string.non_private) : ctx.getString(R.string.private_str),
                     thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
                 String players[] = mOpponentName.split(" vs ");
-                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0]+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" +players[0] + "</a> vs " +
-                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1]+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" +players[1] + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
+                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[0] + "</a> vs " +
+                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[1] + "</a>"
+                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             } else {
-                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword + "\">" + mOpponentName + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>"+timeStr+" " + getLocalizedTime()
+                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + mOpponentName + "</a>"
+                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             }
         }
@@ -330,22 +352,23 @@ public class Game implements Parcelable {
 
     public String getHideString() {
         Context ctx = MyApplication.getContext();
-        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length()>0)) {
+        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length() > 0)) {
             return ctx.getString(R.string.hide_from_public);
         }
-        if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length()>0)) {
+        if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length() > 0)) {
             return ctx.getString(R.string.unhide_from_public);
         }
         return "";
     }
+
     public void changeHideString() {
-        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length()>0)) {
+        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length() > 0)) {
             if (hideStr.length() == 0) {
                 hideStr = "&hide=yes";
             } else {
                 hideStr = "";
             }
-        } else if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length()>0)) {
+        } else if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length() > 0)) {
             if (hideStr.length() == 0) {
                 hideStr = "&hide=no";
             } else {
@@ -369,18 +392,18 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -398,7 +421,7 @@ public class Game implements Parcelable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output==========" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -408,11 +431,11 @@ public class Game implements Parcelable {
                 mGameString = output.toString();
 
                 if (mGameString.indexOf("moves=") == -1) {
-                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (PentePlayer.development) {
-                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
-                    connection = (HttpsURLConnection)url.openConnection();
+                    connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
 //
 //                    output = new StringBuilder();
@@ -428,11 +451,11 @@ public class Game implements Parcelable {
 //                    System.out.println(output);
 
 
-                    url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
+                    url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID);
                     if (PentePlayer.development) {
-                        url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
+                        url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID);
                     }
-                    connection = (HttpsURLConnection)url.openConnection();
+                    connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
                         System.out.println("response code for loadgame was " + responseCode);
@@ -443,7 +466,7 @@ public class Game implements Parcelable {
                     br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                    System.out.println("output==========" + br);
                     line = "";
-                    while((line = br.readLine()) != null ) {
+                    while ((line = br.readLine()) != null) {
                         output.append(line + "\n");
                     }
                     br.close();
@@ -455,7 +478,7 @@ public class Game implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
@@ -470,6 +493,7 @@ public class Game implements Parcelable {
         protected void onCancelled() {
         }
     }
+
     public class SubmitMoveTask extends AsyncTask<Void, Void, Boolean> {
 
         private String move;
@@ -477,7 +501,7 @@ public class Game implements Parcelable {
 
         SubmitMoveTask(String move, String message) {
             try {
-                this.message = URLEncoder.encode(message,"UTF-8");
+                this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 this.message = "";
             }
@@ -489,18 +513,18 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move"+hideStr+"&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move"+hideStr+"&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message
-                            +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -518,7 +542,7 @@ public class Game implements Parcelable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output==========" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -568,7 +592,7 @@ public class Game implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
@@ -601,24 +625,24 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/cancel";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/cancel";
+                    request = "https://development.pente.org/gameServer/tb/cancel";
                 }
-                    URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -626,26 +650,26 @@ public class Game implements Parcelable {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output==========" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -656,11 +680,12 @@ public class Game implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
@@ -689,24 +714,24 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters  = "gid=" + gid + "&command=requestUndo" +  "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/game";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/game";
+                    request = "https://development.pente.org/gameServer/tb/game";
                 }
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -714,26 +739,26 @@ public class Game implements Parcelable {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output==========" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -744,11 +769,12 @@ public class Game implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
@@ -760,6 +786,7 @@ public class Game implements Parcelable {
         protected void onCancelled() {
         }
     }
+
     public class ReplyUndoTask extends AsyncTask<Void, Void, Boolean> {
 
         private String gid;
@@ -771,7 +798,7 @@ public class Game implements Parcelable {
             this.gid = gid;
             this.activity = activity;
             this.accept = accept;
-            reply = accept?"acceptUndo":"declineUndo";
+            reply = accept ? "acceptUndo" : "declineUndo";
         }
 
         @Override
@@ -779,24 +806,24 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters  = "gid=" + gid + "&command=" + reply + "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
-                byte[] postData       = new byte[0];
+                String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile="
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 }
-                int    postDataLength = postData.length;
-                String request        = "https://www.pente.org/gameServer/tb/game";
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
-                    request        = "https://development.pente.org/gameServer/tb/game";
+                    request = "https://development.pente.org/gameServer/tb/game";
                 }
-                URL url            = new URL( request );
-                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
+                URL url = new URL(request);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -804,26 +831,26 @@ public class Game implements Parcelable {
                     conn.setRequestProperty("Cookie", cookieStr);
 //                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty( "charset", "utf-8");
-                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                conn.setUseCaches( false );
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
                 try {
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return  false;
+                    return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 //                System.out.println("output==========" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
                 }
                 br.close();
@@ -834,11 +861,12 @@ public class Game implements Parcelable {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             return true;
         }
+
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
@@ -857,7 +885,6 @@ public class Game implements Parcelable {
     }
 
 
-
     public List<Integer> getMovesList() {
         return mMovesList;
     }
@@ -874,24 +901,28 @@ public class Game implements Parcelable {
     public boolean isSwap2() {
         return this.mGameType.startsWith("Swap2");
     }
+
     public boolean rated() {
         if (mRatedNot == null) {
             return false;
         }
         return !(mRatedNot.contains("Not"));
     }
+
     public boolean isConnect6() {
         if (getGameType() == null) {
             return false;
         }
         return getGameType().contains("Connect6");
     }
+
     public boolean isGomoku() {
         if (getGameType() == null) {
             return false;
         }
         return getGameType().contains("Gomoku");
     }
+
     public boolean isDPente() {
         if (getGameType() == null) {
             return false;
@@ -916,7 +947,9 @@ public class Game implements Parcelable {
         canHide = mGameString.contains("can_hide=yes");
         canUnHide = mGameString.contains("can_unhide=yes");
 
-        go = false; goMarkStones = false; goEvaluateDeadStones = false;
+        go = false;
+        goMarkStones = false;
+        goEvaluateDeadStones = false;
 
         String[] dashLines = mGameString.split("\n");
         String dashLine;
@@ -940,7 +973,7 @@ public class Game implements Parcelable {
                 }
             }
             if (dashLine.indexOf("current_player=") == 0) {
-                mActive = dashLine.equals("current_player="+PentePlayer.mPlayerName.toLowerCase());
+                mActive = dashLine.equals("current_player=" + PentePlayer.mPlayerName.toLowerCase());
                 amIPlaying = mActive;
             }
             if (dashLine.contains("undo=requested")) {
@@ -972,14 +1005,14 @@ public class Game implements Parcelable {
                     }
 
                     boardView.gridSize = gridSize;
-                    passMove = gridSize*gridSize;
+                    passMove = gridSize * gridSize;
                     go = true;
                 }
             }
             if (dashLine.indexOf("moves=") == 0) {
                 String movesString[] = dashLine.substring(6).split(",");
                 this.mMovesList = new ArrayList<Integer>();
-                for ( int i = 0; i < movesString.length; i++ ) {
+                for (int i = 0; i < movesString.length; i++) {
                     if ("".equals(movesString[i])) {
                         continue;
                     }
@@ -992,14 +1025,14 @@ public class Game implements Parcelable {
                     this.swap2Choice = true;
                 }
             }
-            if (dashLine.indexOf("cancel="+getOpponentName()) == 0) {
+            if (dashLine.indexOf("cancel=" + getOpponentName()) == 0) {
                 final Activity host = (Activity) boardView.getContext();
                 AlertDialog.Builder builder = new AlertDialog.Builder(host);
                 builder.setTitle(host.getString(R.string.cancellation_requested));
 
                 String msg = "";
-                if (!dashLine.substring(dashLine.indexOf(",")+1).equals("")) {
-                    msg = "\n(" + dashLine.substring(dashLine.indexOf(",")+1) + ")";
+                if (!dashLine.substring(dashLine.indexOf(",") + 1).equals("")) {
+                    msg = "\n(" + dashLine.substring(dashLine.indexOf(",") + 1) + ")";
                 }
                 builder.setMessage(host.getString(R.string.requests_cancellation, getOpponentName()) + msg);
                 builder.setPositiveButton(host.getString(R.string.accept), (dialog, id) -> {
@@ -1069,7 +1102,7 @@ public class Game implements Parcelable {
 
                     builder.setMessage(host.getString(R.string.undo_subscribers_only));
                     builder.setPositiveButton(host.getString(R.string.subscribe_now), (dialog, id) -> {
-                        String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
+                        String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
                         Intent intent = new Intent(host, WebViewActivity.class);
                         intent.putExtra("url", url);
                         host.startActivity(intent);
@@ -1122,7 +1155,7 @@ public class Game implements Parcelable {
 
         messages = new HashMap<Integer, String>();
         if (messagesArray != null && messagesArray.length > 0) {
-            for (int i = 0; i < messagesArray.length; ++i ) {
+            for (int i = 0; i < messagesArray.length; ++i) {
                 Integer msgNum;
                 try {
                     msgNum = Integer.parseInt(messageNums[i]);
@@ -1165,9 +1198,9 @@ public class Game implements Parcelable {
                     p2Territory = getGoTerritoryByPlayer().get(2).size(),
                     p1Stones = getMovesForValue(2).size(),
                     p2Stones = getMovesForValue(1).size();
-            builder.setMessage(host.getString(R.string.scorestring, p1Territory, p1Stones, p1Stones+p1Territory, p2Territory, p2Stones, p2Territory+p2Stones+7));
+            builder.setMessage(host.getString(R.string.scorestring, p1Territory, p1Stones, p1Stones + p1Territory, p2Territory, p2Stones, p2Territory + p2Stones + 7));
             builder.setPositiveButton(host.getString(R.string.accept), (dialogInterface, i) -> {
-                submitMove("1","");
+                submitMove("1", "");
                 host.finish();
             });
             builder.setNegativeButton(host.getString(R.string.reject), (dialogInterface, i) -> {
@@ -1215,7 +1248,7 @@ public class Game implements Parcelable {
                 dlg.show();
             }
         }
-        ((BoardActivity)boardView.getContext()).invalidateOptionsMenu();
+        ((BoardActivity) boardView.getContext()).invalidateOptionsMenu();
     }
 
     private String filterMessage(String msgStr) {
@@ -1254,10 +1287,10 @@ public class Game implements Parcelable {
             boardView.invalidate();
             if (mGameType.equals("Pente") && mOpponentName.equals("computer")) {
 //                System.out.println("what white: " + whiteCaptures + " black: " + blackCaptures + " pente? " + detectPente(abstractBoard, (byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1)));
-                if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+                if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size() % 2)), mMovesList.get(mMovesList.size() - 1))) {
                     boolean iWon = false;
                     mActive = false;
-                    int myColor = (mMyColor.contains("white")?1:2);
+                    int myColor = (mMyColor.contains("white") ? 1 : 2);
                     if (whiteCaptures == 10) {
                         if (myColor == 2) {
                             iWon = true;
@@ -1266,7 +1299,7 @@ public class Game implements Parcelable {
                         if (myColor == 1) {
                             iWon = true;
                         }
-                    } else if (myColor == (2 - mMovesList.size()%2)) {
+                    } else if (myColor == (2 - mMovesList.size() % 2)) {
                         iWon = true;
                     }
                     String msg = "You lost";
@@ -1288,6 +1321,7 @@ public class Game implements Parcelable {
     }
 
     private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+
     public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
         if (mMovesList == null) {
             return;
@@ -1344,21 +1378,21 @@ public class Game implements Parcelable {
                         movesString += "-";
                     }
                 }
-                int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+                int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
                 movesString += coordinateLetters[moveJ] + "" + (19 - (moveI));
             }
         } else {
             for (int i = 0; i < Math.min(mMovesList.size(), untilMove); i++) {
-                if (i%2 == 0) {
-                    movesString += "<b>" + (i/2 + 1) + ".</b> ";
+                if (i % 2 == 0) {
+                    movesString += "<b>" + (i / 2 + 1) + ".</b> ";
                 }
-                int move = mMovesList.get(i), moveI = move/gridSize, moveJ = move%gridSize;
-                if (move == gridSize*gridSize) {
+                int move = mMovesList.get(i), moveI = move / gridSize, moveJ = move % gridSize;
+                if (move == gridSize * gridSize) {
                     movesString += "PASS ";
                 } else {
                     movesString += coordinateLetters[moveJ] + "" + (gridSize - (moveI)) + " ";
                 }
-                if (i%2 == 0) {
+                if (i % 2 == 0) {
                     movesString += "- ";
                 } else {
                     movesString += "  ";
@@ -1367,7 +1401,7 @@ public class Game implements Parcelable {
         }
 
 
-        if (boardView != null && mMovesList.size()>=untilMove && untilMove > 0) {
+        if (boardView != null && mMovesList.size() >= untilMove && untilMove > 0) {
             boardView.setRedDot(this.mMovesList.get(untilMove - 1));
             if (isConnect6()) {
                 if (untilMove == 1) {
@@ -1424,7 +1458,6 @@ public class Game implements Parcelable {
     }
 
 
-
     private void resetAbstractBoard() {
         whiteCaptures = 0;
         blackCaptures = 0;
@@ -1438,8 +1471,8 @@ public class Game implements Parcelable {
     private void replayGomokuGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
         }
     }
@@ -1447,13 +1480,13 @@ public class Game implements Parcelable {
     private void replayPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
             detectPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -1462,7 +1495,7 @@ public class Game implements Parcelable {
             }
         }
         if (mOpponentName.equals("computer") && mGameType.equals("Pente")) {
-            if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size()%2)), mMovesList.get(mMovesList.size() - 1))) {
+            if (whiteCaptures == 10 || blackCaptures == 10 || detectPente((byte) (2 - (mMovesList.size() % 2)), mMovesList.get(mMovesList.size() - 1))) {
 //                for (int i = 0; i < 19; i++) {
 //                    for (int j = 0; j < 19; j++) {
 //                        System.out.print(abstractBoard[i][j]);
@@ -1473,15 +1506,16 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void replayPenteGame(byte moveI, byte moveJ, byte moveG, byte moveH) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), mvI = move / 19, mvJ = move % 19;
             abstractBoard[mvI][mvJ] = color;
             detectPenteCapture(mvI, mvJ, color);
         }
-        byte color = (byte) (1 + (mMovesList.size()%2));
+        byte color = (byte) (1 + (mMovesList.size() % 2));
 //        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + moveG + " and " + moveH + " and " + color);
         if (moveG != (byte) 255 && moveH != (byte) 255) {
             abstractBoard[moveG][moveH] = color;
@@ -1498,14 +1532,14 @@ public class Game implements Parcelable {
     private void replayKeryoPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
             detectPenteCapture(moveI, moveJ, color);
             detectKeryoPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -1514,11 +1548,12 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void replayOPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
             detectPoof(moveI, moveJ, color);
             detectKeryoPoof(moveI, moveJ, color);
@@ -1526,7 +1561,7 @@ public class Game implements Parcelable {
             detectKeryoPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -1535,18 +1570,19 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void replayOPenteGame(byte moveI, byte moveJ) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), mvI = move / 19, mvJ = move % 19;
             abstractBoard[mvI][mvJ] = color;
             detectPoof(mvI, mvJ, color);
             detectKeryoPoof(mvI, mvJ, color);
             detectPenteCapture(mvI, mvJ, color);
             detectKeryoPenteCapture(mvI, mvJ, color);
         }
-        byte color = (byte) (1 + (mMovesList.size()%2));
+        byte color = (byte) (1 + (mMovesList.size() % 2));
         abstractBoard[moveI][moveJ] = color;
         detectPoof(moveI, moveJ, color);
         detectKeryoPoof(moveI, moveJ, color);
@@ -1557,13 +1593,13 @@ public class Game implements Parcelable {
     private void replayKeryoPenteGame(byte moveI, byte moveJ) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), mvI = move / 19, mvJ = move % 19;
             abstractBoard[mvI][mvJ] = color;
             detectPenteCapture(mvI, mvJ, color);
             detectKeryoPenteCapture(mvI, mvJ, color);
         }
-        byte color = (byte) (1 + (mMovesList.size()%2));
+        byte color = (byte) (1 + (mMovesList.size() % 2));
         abstractBoard[moveI][moveJ] = color;
         detectPenteCapture(moveI, moveJ, color);
         detectKeryoPenteCapture(moveI, moveJ, color);
@@ -1573,7 +1609,7 @@ public class Game implements Parcelable {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
         }
     }
@@ -1581,20 +1617,20 @@ public class Game implements Parcelable {
     private void replayGPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
             detectPenteCapture(moveI, moveJ, color);
         }
         if (mMovesList.size() == 2) {
-            for(byte i = 7; i < 12; i++) {
-                for(byte j = 7; j < 12; j++) {
+            for (byte i = 7; i < 12; i++) {
+                for (byte j = 7; j < 12; j++) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
                     }
                 }
             }
-            for(byte  i = 1; i < 3; i++) {
+            for (byte i = 1; i < 3; i++) {
                 if (abstractBoard[9][11 + i] == 0) {
                     abstractBoard[9][11 + i] = -1;
                 }
@@ -1614,14 +1650,14 @@ public class Game implements Parcelable {
     private void replayPoofPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), moveI = move/19, moveJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
             abstractBoard[moveI][moveJ] = color;
             detectPoof(moveI, moveJ, color);
             detectPenteCapture(moveI, moveJ, color);
         }
         if (rated() && (mMovesList.size() == 2)) {
-            for( int i = 7; i < 12; ++i) {
+            for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
                     if (abstractBoard[i][j] == 0) {
                         abstractBoard[i][j] = -1;
@@ -1630,16 +1666,17 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void replayPoofPenteGame(byte moveI, byte moveJ) {
         resetAbstractBoard();
         for (int i = 0; i < mMovesList.size(); i++) {
-            byte color = (byte) (1 + (i%2));
-            int move = mMovesList.get(i), mvI = move/19, mvJ = move%19;
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), mvI = move / 19, mvJ = move % 19;
             abstractBoard[mvI][mvJ] = color;
             detectPoof(mvI, mvJ, color);
             detectPenteCapture(mvI, mvJ, color);
         }
-        byte color = (byte) (1 + (mMovesList.size()%2));
+        byte color = (byte) (1 + (mMovesList.size() % 2));
         abstractBoard[moveI][moveJ] = color;
         detectPoof(moveI, moveJ, color);
         detectPenteCapture(moveI, moveJ, color);
@@ -1648,11 +1685,11 @@ public class Game implements Parcelable {
 
     private void detectPenteCapture(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i-3) > -1) {
-            if (abstractBoard[i-3][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
+        if ((i - 3) > -1) {
+            if (abstractBoard[i - 3][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1661,11 +1698,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-3) > -1)) {
-            if (abstractBoard[i-3][j-3] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
+        if (((i - 3) > -1) && ((j - 3) > -1)) {
+            if (abstractBoard[i - 3][j - 3] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1674,11 +1711,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((j-3) > -1) {
-            if (abstractBoard[i][j-3] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
+        if ((j - 3) > -1) {
+            if (abstractBoard[i][j - 3] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1687,11 +1724,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+3) < 19) && ((j-3) > -1)) {
-            if (abstractBoard[i+3][j-3] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
+        if (((i + 3) < 19) && ((j - 3) > -1)) {
+            if (abstractBoard[i + 3][j - 3] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1700,11 +1737,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((i+3) < 19) {
-            if (abstractBoard[i+3][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
+        if ((i + 3) < 19) {
+            if (abstractBoard[i + 3][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1713,11 +1750,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+3) < 19) && ((j+3) < 19)) {
-            if (abstractBoard[i+3][j+3] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
+        if (((i + 3) < 19) && ((j + 3) < 19)) {
+            if (abstractBoard[i + 3][j + 3] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1726,11 +1763,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((j+3) < 19) {
-            if (abstractBoard[i][j+3] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
+        if ((j + 3) < 19) {
+            if (abstractBoard[i][j + 3] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1739,11 +1776,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-3) > -1) && ((j+3) < 19)) {
-            if (abstractBoard[i-3][j+3] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
+        if (((i - 3) > -1) && ((j + 3) < 19)) {
+            if (abstractBoard[i - 3][j + 3] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 2;
                     } else {
@@ -1753,14 +1790,15 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void detectKeryoPenteCapture(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i-4) > -1) {
-            if (abstractBoard[i-4][j] == myColor) {
-                if ((abstractBoard[i-1][j] == opponentColor) && (abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i-3][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
-                    abstractBoard[i-2][j] = 0;
-                    abstractBoard[i-3][j] = 0;
+        if ((i - 4) > -1) {
+            if (abstractBoard[i - 4][j] == myColor) {
+                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i - 3][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
+                    abstractBoard[i - 2][j] = 0;
+                    abstractBoard[i - 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1769,12 +1807,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-4) > -1) && ((j-4) > -1)) {
-            if (abstractBoard[i-4][j-4] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i-3][j-3] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
-                    abstractBoard[i-2][j-2] = 0;
-                    abstractBoard[i-3][j-3] = 0;
+        if (((i - 4) > -1) && ((j - 4) > -1)) {
+            if (abstractBoard[i - 4][j - 4] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i - 3][j - 3] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
+                    abstractBoard[i - 2][j - 2] = 0;
+                    abstractBoard[i - 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1783,12 +1821,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((j-4) > -1) {
-            if (abstractBoard[i][j-4] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j-3] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
-                    abstractBoard[i][j-2] = 0;
-                    abstractBoard[i][j-3] = 0;
+        if ((j - 4) > -1) {
+            if (abstractBoard[i][j - 4] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j - 3] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
+                    abstractBoard[i][j - 2] = 0;
+                    abstractBoard[i][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1797,12 +1835,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+4) < 19) && ((j-4) > -1)) {
-            if (abstractBoard[i+4][j-4] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i+2][j-2] = 0;
-                    abstractBoard[i+3][j-3] = 0;
+        if (((i + 4) < 19) && ((j - 4) > -1)) {
+            if (abstractBoard[i + 4][j - 4] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i + 2][j - 2] = 0;
+                    abstractBoard[i + 3][j - 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1811,12 +1849,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((i+4) < 19) {
-            if (abstractBoard[i+4][j] == myColor) {
-                if ((abstractBoard[i+1][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor) && (abstractBoard[i+3][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i+2][j] = 0;
-                    abstractBoard[i+3][j] = 0;
+        if ((i + 4) < 19) {
+            if (abstractBoard[i + 4][j] == myColor) {
+                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i + 3][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i + 2][j] = 0;
+                    abstractBoard[i + 3][j] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1825,12 +1863,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+4) < 19) && ((j+4) < 19)) {
-            if (abstractBoard[i+4][j+4] == myColor) {
-                if ((abstractBoard[i+1][j+1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i+2][j+2] = 0;
-                    abstractBoard[i+3][j+3] = 0;
+        if (((i + 4) < 19) && ((j + 4) < 19)) {
+            if (abstractBoard[i + 4][j + 4] == myColor) {
+                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i + 2][j + 2] = 0;
+                    abstractBoard[i + 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1839,12 +1877,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if ((j+4) < 19) {
-            if (abstractBoard[i][j+4] == myColor) {
-                if ((abstractBoard[i][j+1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
-                    abstractBoard[i][j+3] = 0;
+        if ((j + 4) < 19) {
+            if (abstractBoard[i][j + 4] == myColor) {
+                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
+                    abstractBoard[i][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1853,12 +1891,12 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-4) > -1) && ((j+4) < 19)) {
-            if (abstractBoard[i-4][j+4] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
-                    abstractBoard[i-2][j+2] = 0;
-                    abstractBoard[i-3][j+3] = 0;
+        if (((i - 4) > -1) && ((j + 4) < 19)) {
+            if (abstractBoard[i - 4][j + 4] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
+                    abstractBoard[i - 2][j + 2] = 0;
+                    abstractBoard[i - 3][j + 3] = 0;
                     if (opponentColor == 1) {
                         whiteCaptures += 3;
                     } else {
@@ -1868,13 +1906,14 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void detectPoof(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
         boolean poofed = false;
-        if (((i-2) > -1) && ((i+1) < 19)) {
-            if (abstractBoard[i-1][j] == myColor) {
-                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 2) > -1) && ((i + 1) < 19)) {
+            if (abstractBoard[i - 1][j] == myColor) {
+                if ((abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i + 1][j] == opponentColor)) {
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1885,10 +1924,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+1) < 19) && ((j+1) < 19)) {
-            if (abstractBoard[i-1][j-1] == myColor) {
-                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 1) < 19) && ((j + 1) < 19)) {
+            if (abstractBoard[i - 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i + 1][j + 1] == opponentColor)) {
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1899,10 +1938,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((j-2) > -1) && ((j+1) < 19)) {
-            if (abstractBoard[i][j-1] == myColor) {
-                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 2) > -1) && ((j + 1) < 19)) {
+            if (abstractBoard[i][j - 1] == myColor) {
+                if ((abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j + 1] == opponentColor)) {
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1913,10 +1952,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+1) < 19)) {
-            if (abstractBoard[i+1][j-1] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
+        if (((i - 1) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 1) < 19)) {
+            if (abstractBoard[i + 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1927,10 +1966,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+2) < 19) && ((i-1) > -1)) {
-            if (abstractBoard[i+1][j] == myColor) {
-                if ((abstractBoard[i+2][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
+        if (((i + 2) < 19) && ((i - 1) > -1)) {
+            if (abstractBoard[i + 1][j] == myColor) {
+                if ((abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i - 1][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1941,10 +1980,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-1) > -1) && ((i+2) < 19) && ((j+2) < 19)) {
-            if (abstractBoard[i+1][j+1] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
+        if (((i - 1) > -1) && ((j - 1) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) {
+            if (abstractBoard[i + 1][j + 1] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1955,10 +1994,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((j+2) < 19) && ((j-1) > -1)) {
-            if (abstractBoard[i][j+1] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
+        if (((j + 2) < 19) && ((j - 1) > -1)) {
+            if (abstractBoard[i][j + 1] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1969,10 +2008,10 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+2) < 19)) {
-            if (abstractBoard[i-1][j+1] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-2][j+2] == opponentColor)) {
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 2) > -1) && ((j - 1) > -1) && ((i + 1) < 19) && ((j + 2) < 19)) {
+            if (abstractBoard[i - 1][j + 1] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         ++whiteCaptures;
@@ -1996,11 +2035,11 @@ public class Game implements Parcelable {
     private void detectKeryoPoof(int i, int j, byte myColor) {
         byte opponentColor = (byte) (1 + (myColor % 2));
         boolean poofed = false;
-        if (((i-3) > -1) && ((i+1) < 19)) { // left
-            if (abstractBoard[i-1][j] == myColor && abstractBoard[i-2][j] == myColor) {
-                if ((abstractBoard[i-3][j] == opponentColor) && (abstractBoard[i+1][j] == opponentColor)) {
-                    abstractBoard[i-2][j] = 0;
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 3) > -1) && ((i + 1) < 19)) { // left
+            if (abstractBoard[i - 1][j] == myColor && abstractBoard[i - 2][j] == myColor) {
+                if ((abstractBoard[i - 3][j] == opponentColor) && (abstractBoard[i + 1][j] == opponentColor)) {
+                    abstractBoard[i - 2][j] = 0;
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2011,11 +2050,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-3) > -1) && ((i+1) < 19) && ((j+1) < 19)) { // up left
-            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i-2][j-2] == myColor) {
-                if ((abstractBoard[i-3][j-3] == opponentColor) && (abstractBoard[i+1][j+1] == opponentColor)) {
-                    abstractBoard[i-2][j-2] = 0;
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 3) > -1) && ((j - 3) > -1) && ((i + 1) < 19) && ((j + 1) < 19)) { // up left
+            if (abstractBoard[i - 1][j - 1] == myColor && abstractBoard[i - 2][j - 2] == myColor) {
+                if ((abstractBoard[i - 3][j - 3] == opponentColor) && (abstractBoard[i + 1][j + 1] == opponentColor)) {
+                    abstractBoard[i - 2][j - 2] = 0;
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2026,11 +2065,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((j-3) > -1) && ((j+1) < 19)) { // up
-            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j-2] == myColor) {
-                if ((abstractBoard[i][j-3] == opponentColor) && (abstractBoard[i][j+1] == opponentColor)) {
-                    abstractBoard[i][j-2] = 0;
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 3) > -1) && ((j + 1) < 19)) { // up
+            if (abstractBoard[i][j - 1] == myColor && abstractBoard[i][j - 2] == myColor) {
+                if ((abstractBoard[i][j - 3] == opponentColor) && (abstractBoard[i][j + 1] == opponentColor)) {
+                    abstractBoard[i][j - 2] = 0;
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2041,11 +2080,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-3) > -1) && ((i+3) < 19) && ((j+1) < 19)) { // up right
-            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+2][j-2] == myColor) {
-                if ((abstractBoard[i-1][j+1] == opponentColor) && (abstractBoard[i+3][j-3] == opponentColor)) {
-                    abstractBoard[i+2][j-2] = 0;
-                    abstractBoard[i+1][j-1] = 0;
+        if (((i - 1) > -1) && ((j - 3) > -1) && ((i + 3) < 19) && ((j + 1) < 19)) { // up right
+            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i + 2][j - 2] == myColor) {
+                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
+                    abstractBoard[i + 2][j - 2] = 0;
+                    abstractBoard[i + 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2056,11 +2095,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i+3) < 19) && ((i-1) > -1)) { // right
-            if (abstractBoard[i+1][j] == myColor && abstractBoard[i+2][j] == myColor) {
-                if ((abstractBoard[i+3][j] == opponentColor) && (abstractBoard[i-1][j] == opponentColor)) {
-                    abstractBoard[i+2][j] = 0;
-                    abstractBoard[i+1][j] = 0;
+        if (((i + 3) < 19) && ((i - 1) > -1)) { // right
+            if (abstractBoard[i + 1][j] == myColor && abstractBoard[i + 2][j] == myColor) {
+                if ((abstractBoard[i + 3][j] == opponentColor) && (abstractBoard[i - 1][j] == opponentColor)) {
+                    abstractBoard[i + 2][j] = 0;
+                    abstractBoard[i + 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2071,11 +2110,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-1) > -1) && ((j-1) > -1) && ((i+3) < 19) && ((j+3) < 19)) { // down right
-            if (abstractBoard[i+1][j+1] == myColor && abstractBoard[i+2][j+2] == myColor) {
-                if ((abstractBoard[i-1][j-1] == opponentColor) && (abstractBoard[i+3][j+3] == opponentColor)) {
-                    abstractBoard[i+2][j+2] = 0;
-                    abstractBoard[i+1][j+1] = 0;
+        if (((i - 1) > -1) && ((j - 1) > -1) && ((i + 3) < 19) && ((j + 3) < 19)) { // down right
+            if (abstractBoard[i + 1][j + 1] == myColor && abstractBoard[i + 2][j + 2] == myColor) {
+                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
+                    abstractBoard[i + 2][j + 2] = 0;
+                    abstractBoard[i + 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2086,11 +2125,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((j+2) < 19) && ((j-1) > -1)) { // down
-            if (abstractBoard[i][j+1] == myColor && abstractBoard[i][j+2] == myColor) {
-                if ((abstractBoard[i][j-1] == opponentColor) && (abstractBoard[i][j+3] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j+2] = 0;
+        if (((j + 2) < 19) && ((j - 1) > -1)) { // down
+            if (abstractBoard[i][j + 1] == myColor && abstractBoard[i][j + 2] == myColor) {
+                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j + 2] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2101,11 +2140,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-3) > -1) && ((j-1) > -1) && ((i+1) < 19) && ((j+3) < 19)) { // down left
-            if (abstractBoard[i-1][j+1] == myColor && abstractBoard[i-2][j+2] == myColor) {
-                if ((abstractBoard[i+1][j-1] == opponentColor) && (abstractBoard[i-3][j+3] == opponentColor)) {
-                    abstractBoard[i-2][j+2] = 0;
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 3) > -1) && ((j - 1) > -1) && ((i + 1) < 19) && ((j + 3) < 19)) { // down left
+            if (abstractBoard[i - 1][j + 1] == myColor && abstractBoard[i - 2][j + 2] == myColor) {
+                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
+                    abstractBoard[i - 2][j + 2] = 0;
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2118,11 +2157,11 @@ public class Game implements Parcelable {
         }
 
         // 4 directions with center of 3 stones placed to poof
-        if (((i-2) > -1) && ((i+2) < 19)) { // horizontal
-            if (abstractBoard[i-1][j] == myColor && abstractBoard[i+1][j] == myColor) {
-                if ((abstractBoard[i-2][j] == opponentColor) && (abstractBoard[i+2][j] == opponentColor)) {
-                    abstractBoard[i+1][j] = 0;
-                    abstractBoard[i-1][j] = 0;
+        if (((i - 2) > -1) && ((i + 2) < 19)) { // horizontal
+            if (abstractBoard[i - 1][j] == myColor && abstractBoard[i + 1][j] == myColor) {
+                if ((abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
+                    abstractBoard[i + 1][j] = 0;
+                    abstractBoard[i - 1][j] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2133,11 +2172,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up left
-            if (abstractBoard[i-1][j-1] == myColor && abstractBoard[i+1][j+1] == myColor) {
-                if ((abstractBoard[i-2][j-2] == opponentColor) && (abstractBoard[i+2][j+2] == opponentColor)) {
-                    abstractBoard[i+1][j+1] = 0;
-                    abstractBoard[i-1][j-1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) { // up left
+            if (abstractBoard[i - 1][j - 1] == myColor && abstractBoard[i + 1][j + 1] == myColor) {
+                if ((abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
+                    abstractBoard[i + 1][j + 1] = 0;
+                    abstractBoard[i - 1][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2148,11 +2187,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((j-2) > -1) && ((j+2) < 19)) { // vertical
-            if (abstractBoard[i][j-1] == myColor && abstractBoard[i][j+1] == myColor) {
-                if ((abstractBoard[i][j-2] == opponentColor) && (abstractBoard[i][j+2] == opponentColor)) {
-                    abstractBoard[i][j+1] = 0;
-                    abstractBoard[i][j-1] = 0;
+        if (((j - 2) > -1) && ((j + 2) < 19)) { // vertical
+            if (abstractBoard[i][j - 1] == myColor && abstractBoard[i][j + 1] == myColor) {
+                if ((abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
+                    abstractBoard[i][j + 1] = 0;
+                    abstractBoard[i][j - 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2163,11 +2202,11 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (((i-2) > -1) && ((j-2) > -1) && ((i+2) < 19) && ((j+2) < 19)) { // up right
-            if (abstractBoard[i+1][j-1] == myColor && abstractBoard[i+1][j-1] == myColor) {
-                if ((abstractBoard[i-2][j+2] == opponentColor) && (abstractBoard[i+2][j-2] == opponentColor)) {
-                    abstractBoard[i+1][j-1] = 0;
-                    abstractBoard[i-1][j+1] = 0;
+        if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) { // up right
+            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i + 1][j - 1] == myColor) {
+                if ((abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
+                    abstractBoard[i + 1][j - 1] = 0;
+                    abstractBoard[i - 1][j + 1] = 0;
                     abstractBoard[i][j] = 0;
                     if (myColor == 1) {
                         whiteCaptures += 2;
@@ -2188,7 +2227,7 @@ public class Game implements Parcelable {
         }
     }
 
-        private boolean detectPente(byte color, int rowCol) {
+    private boolean detectPente(byte color, int rowCol) {
         boolean pente = false;
         int penteCounter = 1;
         int row = rowCol / 19, col = rowCol % 19, i, j;
@@ -2306,16 +2345,16 @@ public class Game implements Parcelable {
     }
 
 
-
     private int getPosition(int move) {
-        int i = move/gridSize, j = move%gridSize;
+        int i = move / gridSize, j = move % gridSize;
         return abstractBoard[i][j];
     }
 
     private void setPosition(int move, int val) {
-        int i = move/gridSize, j = move%gridSize;
+        int i = move / gridSize, j = move % gridSize;
         abstractBoard[i][j] = (byte) val;
     }
+
     private int getPosition(int i, int j) {
         return abstractBoard[i][j];
     }
@@ -2325,31 +2364,49 @@ public class Game implements Parcelable {
     }
 
 
-
-
-
-    private HashMap<Integer,HashMap<Integer, List<Integer>>> groupsByPlayerAndID;
-    private HashMap<Integer,HashMap<Integer, Integer>> stoneGroupIDsByPlayer;
+    private HashMap<Integer, HashMap<Integer, List<Integer>>> groupsByPlayerAndID;
+    private HashMap<Integer, HashMap<Integer, Integer>> stoneGroupIDsByPlayer;
     public int koMove = -1;
     private List<Integer> deadStones;
     private HashMap<Integer, List<Integer>> goTerritoryByPlayer;
     private HashMap<Integer, List<Integer>> goDeadStonesByPlayer;
 
-    public HashMap<Integer, HashMap<Integer, List<Integer>>> getGroupsByPlayerAndID() { return groupsByPlayerAndID; }
-    public HashMap<Integer, HashMap<Integer, Integer>> getStoneGroupIDsByPlayer() { return stoneGroupIDsByPlayer; }
-    public HashMap<Integer, List<Integer>> getGoDeadStonesByPlayer() { return goDeadStonesByPlayer; }
-    public HashMap<Integer, List<Integer>> getGoTerritoryByPlayer() { return goTerritoryByPlayer; }
+    public HashMap<Integer, HashMap<Integer, List<Integer>>> getGroupsByPlayerAndID() {
+        return groupsByPlayerAndID;
+    }
 
-    public int getGridSize() { return gridSize; }
+    public HashMap<Integer, HashMap<Integer, Integer>> getStoneGroupIDsByPlayer() {
+        return stoneGroupIDsByPlayer;
+    }
+
+    public HashMap<Integer, List<Integer>> getGoDeadStonesByPlayer() {
+        return goDeadStonesByPlayer;
+    }
+
+    public HashMap<Integer, List<Integer>> getGoTerritoryByPlayer() {
+        return goTerritoryByPlayer;
+    }
+
+    public int getGridSize() {
+        return gridSize;
+    }
 
     private int gridSize = 19;
     private int passMove = 361;
 
     private boolean go, goMarkStones, goEvaluateDeadStones;
 
-    public boolean isGo() { return go; }
-    public boolean isGoMarkStones() { return goMarkStones; }
-    public boolean isGoEvaluateDeadStones() { return goEvaluateDeadStones; }
+    public boolean isGo() {
+        return go;
+    }
+
+    public boolean isGoMarkStones() {
+        return goMarkStones;
+    }
+
+    public boolean isGoEvaluateDeadStones() {
+        return goEvaluateDeadStones;
+    }
 
 
     private void initGo() {
@@ -2397,7 +2454,7 @@ public class Game implements Parcelable {
                     setPosition(move, 0);
                 }
             } else {
-                int currentPlayer = 1 + i%2;
+                int currentPlayer = 1 + i % 2;
                 int color = 3 - currentPlayer;
                 if (0 <= move && move < passMove) {
                     setPosition(move, color);
@@ -2424,6 +2481,7 @@ public class Game implements Parcelable {
             }
         }
     }
+
     private void replayGoGame(byte moveI, byte moveJ) {
         resetAbstractBoard();
         initGo();
@@ -2450,7 +2508,7 @@ public class Game implements Parcelable {
                     setPosition(move, 0);
                 }
             } else {
-                int currentPlayer = 1 + i%2;
+                int currentPlayer = 1 + i % 2;
                 int color = 3 - currentPlayer;
                 if (0 <= move && move < passMove) {
                     setPosition(move, color);
@@ -2476,7 +2534,7 @@ public class Game implements Parcelable {
                 }
             }
         }
-        int move = moveI*gridSize+moveJ;
+        int move = moveI * gridSize + moveJ;
         if (doublePass) {
             if (0 <= move && move < passMove) {
                 if (getPosition(move) == 1) {
@@ -2487,7 +2545,7 @@ public class Game implements Parcelable {
                 setPosition(move, 0);
             }
         } else {
-            int currentPlayer = 1 + getMovesList().size()%2;
+            int currentPlayer = 1 + getMovesList().size() % 2;
             int color = 3 - currentPlayer;
             if (0 <= move && move < passMove) {
                 setPosition(move, color);
@@ -2559,22 +2617,22 @@ public class Game implements Parcelable {
 
     private void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         int captures = 0;
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             captures = getCaptures(move, groupsByID, stoneGroupIDs, captures, neighborStone, neighborStoneGroupID);
@@ -2603,28 +2661,28 @@ public class Game implements Parcelable {
 
     private boolean checkKo(int move) {
         int position = getPosition(move);
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
                 return false;
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             int neighborPosition = getPosition(neighborStone);
             if (position != 3 - neighborPosition) {
@@ -2647,7 +2705,7 @@ public class Game implements Parcelable {
                 blackCaptures += group.size();
             }
         }
-        for (int stone: group) {
+        for (int stone : group) {
 //            captureMove(stone, capturer);
             setPosition(stone, 0);
             stoneGroupIDs.remove(stone);
@@ -2656,36 +2714,37 @@ public class Game implements Parcelable {
     }
 
     private boolean groupHasLiberties(List<Integer> group) {
-        for (int stone: group) {
+        for (int stone : group) {
             if (stoneHasLiberties(stone)) {
                 return true;
             }
         }
         return false;
     }
+
     private boolean stoneHasLiberties(int stone) {
-        if (stone%gridSize != 0) {
+        if (stone % gridSize != 0) {
             int neighborStone = stone - 1;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone%gridSize != gridSize - 1) {
+        if (stone % gridSize != gridSize - 1) {
             int neighborStone = stone + 1;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone/gridSize != 0) {
+        if (stone / gridSize != 0) {
             int neighborStone = stone - gridSize;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
                 return true;
             }
         }
-        if (stone/gridSize != gridSize - 1) {
+        if (stone / gridSize != gridSize - 1) {
             int neighborStone = stone + gridSize;
             int position = getPosition(neighborStone);
             if (position != 1 && position != 2) {
@@ -2700,28 +2759,28 @@ public class Game implements Parcelable {
         newGroup.add(move);
         groupsByID.put(move, newGroup);
         stoneGroupIDs.put(move, move);
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(move, neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
                 mergeGroups(stoneGroupIDs.get(move), neighborStoneGroupID, groupsByID, stoneGroupIDs);
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             Integer neighborStoneGroupID = stoneGroupIDs.get(neighborStone);
             if (neighborStoneGroupID != null) {
@@ -2749,7 +2808,7 @@ public class Game implements Parcelable {
         }
         groupsByID.remove(oldGroupID);
         newGroup.addAll(oldGroup);
-        for (int oldStone: oldGroup) {
+        for (int oldStone : oldGroup) {
             stoneGroupIDs.put(oldStone, newGroupID);
         }
     }
@@ -2802,25 +2861,25 @@ public class Game implements Parcelable {
 //    }
 
     private int getEmptyNeighbour(int move) {
-        if (move%gridSize != 0) {
+        if (move % gridSize != 0) {
             int neighborStone = move - 1;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move%gridSize != gridSize - 1) {
+        if (move % gridSize != gridSize - 1) {
             int neighborStone = move + 1;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move/gridSize != 0) {
+        if (move / gridSize != 0) {
             int neighborStone = move - gridSize;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
             }
         }
-        if (move/gridSize != gridSize - 1) {
+        if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             if (getPosition(neighborStone) == 0) {
                 return neighborStone;
@@ -2828,6 +2887,7 @@ public class Game implements Parcelable {
         }
         return -1;
     }
+
     private void floodFillWorker(int move, int value) {
         setPosition(move, value);
         int neighbourStone = getEmptyNeighbour(move);
@@ -2836,10 +2896,11 @@ public class Game implements Parcelable {
             neighbourStone = getEmptyNeighbour(move);
         }
     }
+
     private List<Integer> floodFill(int player) {
         for (int move = 0; move < passMove; move++) {
             int pos = getPosition(move);
-            if (pos == 3-player) {
+            if (pos == 3 - player) {
                 int neighbourStone = getEmptyNeighbour(move);
                 while (neighbourStone != -1) {
                     floodFillWorker(neighbourStone, player + 2);
@@ -2856,27 +2917,30 @@ public class Game implements Parcelable {
         }
         return floodedTerritory;
     }
+
     private void resetGoBeforeFlood() {
-        for (int i = 0; i < gridSize; i++ ) {
-            for (int j = 0; j < gridSize; j++ ) {
-                int pos = getPosition(i,j);
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                int pos = getPosition(i, j);
                 if (pos != 1 && pos != 2) {
-                    setPosition(i,j,0);
+                    setPosition(i, j, 0);
                 }
             }
         }
     }
+
     public List<Integer> getMovesForValue(int val) {
         List<Integer> results = new ArrayList<>();
         for (int j = 0; j < gridSize; j++) {
             for (int i = 0; i < gridSize; i++) {
-                if (getPosition(i,j) == val) {
-                    results.add(j*gridSize+i);
+                if (getPosition(i, j) == val) {
+                    results.add(j * gridSize + i);
                 }
             }
         }
         return results;
     }
+
     public void getTerritories() {
         goTerritoryByPlayer = new HashMap<Integer, List<Integer>>();
         floodFill(1);
@@ -2886,16 +2950,16 @@ public class Game implements Parcelable {
         List<Integer> p2Territory = getMovesForValue(4);
         resetGoBeforeFlood();
 
-        int i = p1Territory.size()-1, j = p2Territory.size()-1;
+        int i = p1Territory.size() - 1, j = p2Territory.size() - 1;
 
-        while (i>-1 && j>-1) {
+        while (i > -1 && j > -1) {
             int p1Stone = p1Territory.get(i), p2Stone = p2Territory.get(j);
             if (p1Stone == p2Stone) {
                 p1Territory.remove(i);
                 p2Territory.remove(j);
                 --i;
                 --j;
-            } else if (p1Stone>p2Stone) {
+            } else if (p1Stone > p2Stone) {
                 --i;
             } else {
                 --j;
@@ -2905,9 +2969,10 @@ public class Game implements Parcelable {
         goTerritoryByPlayer.put(1, p1Territory);
         goTerritoryByPlayer.put(2, p2Territory);
     }
+
     private int containsDoublePass() {
         boolean hasPass = false;
-        for (int i = 0; i < mMovesList.size() ; i++) {
+        for (int i = 0; i < mMovesList.size(); i++) {
             int move = mMovesList.get(i);
             if (move == passMove) {
                 if (hasPass) {
@@ -2923,7 +2988,7 @@ public class Game implements Parcelable {
     }
 
     public void processDeadStone(int move) {
-        int i = move/gridSize, j = move%gridSize;
+        int i = move / gridSize, j = move % gridSize;
         int pos = abstractBoard[i][j];
         if (pos == 0) {
             if (goDeadStonesByPlayer.get(1).remove(Integer.valueOf(move))) {

@@ -31,6 +31,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -74,13 +75,13 @@ public class MainActivity extends AppCompatActivity {
     private PopupWindow popupWindow;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
         });
 
         PrefUtils.saveBooleanToPrefs(MainActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, true);
@@ -132,16 +133,19 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
                     String url = "google.com";
                     if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
-                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
+                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        ;
 //                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                     } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
-                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
+                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        ;
 //                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                     } else {
                         url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
-                        + "&round=" + player.getTournaments().get(childPosition).getRound()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;;
+                                + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        ;
 //                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
@@ -352,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 Intent intent;
-                switch (menuItem.getItemId()){
+                switch (menuItem.getItemId()) {
                     case R.id.play_human:
                         intent = new Intent(getApplicationContext(), InvitationActivity.class);
                         startActivity(intent);
@@ -378,19 +382,19 @@ public class MainActivity extends AppCompatActivity {
                             Point size = new Point();
                             display.getSize(size);
 
-                            View policyView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+                            View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
                             policyView.setBackgroundColor(Color.WHITE);
                             ((Button) policyView.findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     popupWindow.dismiss();
-                                    String url = "https://www.pente.org/gameServer/subscriptions?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword; // missing 'http://' will cause crashed
+                                    String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
                                     Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                                     intent.putExtra("url", url);
                                     startActivity(intent);
                                 }
                             });
-                            popupWindow = new PopupWindow(policyView, size.x*9/10, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                            popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                             popupWindow.setFocusable(true);
                             popupWindow.setOutsideTouchable(true);
                             popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
@@ -422,9 +426,9 @@ public class MainActivity extends AppCompatActivity {
                         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
                         popUpView.setBackgroundColor(Color.BLUE);
-                        popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
+                        popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                         ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
-                        ratingListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                        ratingListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
                         RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
                         adapter.setInflater(inflater, MainActivity.this);
                         adapter.setTbRatings(player.getTbRatings());
@@ -442,7 +446,7 @@ public class MainActivity extends AppCompatActivity {
                             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                                 String username = PentePlayer.mPlayerName;
                                 int gameInt = player.getRatingStats().get(childPosition).getGameId();
-                                String url = "https://www.pente.org/gameServer/viewLiveGames?p="+username+"&g="+gameInt;
+                                String url = "https://www.pente.org/gameServer/viewLiveGames?p=" + username + "&g=" + gameInt;
                                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                                 intent.putExtra("url", url);
                                 startActivity(intent);
@@ -492,7 +496,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //This is the handler that will manager to process the broadcast intent
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -504,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
                     showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
             player.loadPlayer(listAdapter, loadAvatars, showOnlyTB);
 
-            if (message!=null && message.length()>0) {
+            if (message != null && message.length() > 0) {
                 Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         }
@@ -519,6 +522,7 @@ public class MainActivity extends AppCompatActivity {
         this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
         (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -587,17 +591,17 @@ public class MainActivity extends AppCompatActivity {
     private void requestNewInterstitial() {
         boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
         Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds?"0":"1"));
+        extras.putString("npa", (personalizeAds ? "0" : "1"));
         AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
 
-        InterstitialAd.load(this,"ca-app-pub-3326997956703582/8353630687", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         // The mInterstitialAd reference will be null until
                         // an ad is loaded.
                         mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 // Called when ad is dismissed.
@@ -614,6 +618,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
+
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error
@@ -652,19 +657,19 @@ public class MainActivity extends AppCompatActivity {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://development.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
 //                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
 //                System.out.println("cookies: " +cookies);
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -682,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 //                System.out.println("output===============" + br);
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -693,7 +698,7 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -712,11 +717,11 @@ public class MainActivity extends AppCompatActivity {
                 while (idx < dashLines.length) {
                     String roomLine = dashLines[idx];
                     String[] splitRoomLine = roomLine.split(":");
-                    if (splitRoomLine.length>1) {
+                    if (splitRoomLine.length > 1) {
                         List<KothPlayer> playersList = new ArrayList<>();
                         String roomName = splitRoomLine[0];
                         String[] users = splitRoomLine[1].split(";");
-                        for (String dashLine: users) {
+                        for (String dashLine : users) {
                             String[] splitLine = dashLine.split(",");
                             if (splitLine.length > 4) {
                                 KothPlayer player = new KothPlayer(splitLine[0], splitLine[1], splitLine[4], false, Integer.parseInt(splitLine[3]), Integer.parseInt(splitLine[2]));
@@ -743,13 +748,13 @@ public class MainActivity extends AppCompatActivity {
                 popUpView.setBackgroundColor(Color.BLUE);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                 final float scale = getResources().getDisplayMetrics().density;
-                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+Math.min(Math.floor((((size.y/scale)*2/3)/44))*44, 30 + total*44))*scale), true );
+                popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
 //                System.out.println("totaaaaaaaal "+total);
-                ExpandableListView onlineUsersListView =  (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
+                ExpandableListView onlineUsersListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
                 onlineUsersListView.setDividerHeight(0);
                 onlineUsersListView.setAdapter(listAdapter);
-                for (int i = 0; i < onlinePlayers.size(); i++ ) {
+                for (int i = 0; i < onlinePlayers.size(); i++) {
                     onlineUsersListView.expandGroup(i);
                 }
                 onlineUsersListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
@@ -764,7 +769,7 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                         KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
                         if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
-                            String url = "https://www.pente.org/gameServer/profile?viewName="+onlinePlayer.getName()+"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword;
+                            String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                             Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                             intent.putExtra("url", url);
                             startActivity(intent);
@@ -807,7 +812,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Drawable buildCounterDrawable(int count, int backgroundImageId){
+    private Drawable buildCounterDrawable(int count, int backgroundImageId) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.counter_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
@@ -828,7 +833,8 @@ public class MainActivity extends AppCompatActivity {
         view.setDrawingCacheEnabled(false);
         return new BitmapDrawable(getResources(), bitmap);
     }
-    private Drawable buildGreenCounterDrawable(int count, int backgroundImageId){
+
+    private Drawable buildGreenCounterDrawable(int count, int backgroundImageId) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.counter_green_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
@@ -860,16 +866,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 //        if (installDateLong  < currentTime) {
-        if (installDateLong + 1000L*3600*24*10 < currentTime) {
+        if (installDateLong + 1000L * 3600 * 24 * 10 < currentTime) {
             long lastRated = PrefUtils.getLongFromPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, 0);
-            if (lastRated == 0 || lastRated + 1000L*3600*24*120 < currentTime) {
+            if (lastRated == 0 || lastRated + 1000L * 3600 * 24 * 120 < currentTime) {
                 PrefUtils.saveLongToPrefs(this, PrefUtils.PREFS_LASTRATED_KEY, currentTime);
                 RateThisApp.onCreate(this);
 //        RateThisApp.showRateDialogIfNeeded(this);
                 RateThisApp.showRateDialog(this);
             }
         }
-
 
 
     }

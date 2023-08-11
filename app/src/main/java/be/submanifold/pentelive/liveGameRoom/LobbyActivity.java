@@ -9,10 +9,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -123,7 +127,7 @@ public class LobbyActivity extends AppCompatActivity {
                     builder.show();
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    View infoView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+                    View infoView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
                     ((TextView) infoView.findViewById(R.id.informationView)).setText(getString(R.string.broadcasting_subscribers_only));
                     infoView.setBackgroundColor(Color.WHITE);
                     builder.setView(infoView);
@@ -152,8 +156,6 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
 
-
-
     //This is the handler that will manager to process the broadcast intent
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -174,6 +176,7 @@ public class LobbyActivity extends AppCompatActivity {
         (LobbyActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
         MyApplication.activityResumed(this);
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -196,17 +199,17 @@ public class LobbyActivity extends AppCompatActivity {
             try {
                 URL url;
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://development.pente.org/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 } else {
-                    url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                    url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -221,7 +224,7 @@ public class LobbyActivity extends AppCompatActivity {
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -232,7 +235,7 @@ public class LobbyActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.
@@ -256,7 +259,7 @@ public class LobbyActivity extends AppCompatActivity {
                         LiveGameRoom room = new LiveGameRoom(serverLine[1], Integer.parseInt(serverLine[0]));
                         if (splitLine.length > 1) {
                             String[] playersString = splitLine[1].split(";");
-                            for (String playerString: playersString) {
+                            for (String playerString : playersString) {
                                 String[] splitPlayer = playerString.split(",");
                                 if (splitPlayer.length < 4) {
                                     continue;
@@ -296,17 +299,17 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/broadcast?sendTo="+
-                        (friends?"friends":"followers")+"&game="+ URLEncoder.encode(game, "UTF-8")+
+                URL url = new URL("https://www.pente.org/gameServer/broadcast?sendTo=" +
+                        (friends ? "friends" : "followers") + "&game=" + URLEncoder.encode(game, "UTF-8") +
                         "&mobile="
-                        +"&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
 
-                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
-                    for (String item: splitCookie) {
+                    for (String item : splitCookie) {
                         if (item.contains("name2") || item.contains("password2")) {
                             cookieStr += item + ";";
                         }
@@ -321,7 +324,7 @@ public class LobbyActivity extends AppCompatActivity {
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line = "";
-                while((line = br.readLine()) != null ) {
+                while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
                 }
                 br.close();
@@ -332,7 +335,7 @@ public class LobbyActivity extends AppCompatActivity {
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return  false;
+                return false;
             }
 
             // TODO: register the new account here.

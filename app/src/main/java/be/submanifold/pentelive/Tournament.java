@@ -26,18 +26,23 @@ public class Tournament implements Parcelable {
     public String getDate() {
         return date;
     }
+
     public String getTournamentState() {
         return tournamentState;
     }
+
     public String getRound() {
         return round;
     }
+
     public String getTournamentID() {
         return tournamentID;
     }
+
     public String getName() {
         return name;
     }
+
     public String getGame() {
         return game;
     }
