@@ -28,7 +28,7 @@ public class Table {
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52BE80"),
-            swap2Color = Color.parseColor("#E5AA70");
+            swap2Color = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -57,6 +57,7 @@ public class Table {
         gameNames.put(23, "Go (13x13)");
         gameNames.put(25, "O-Pente");
         gameNames.put(27, "Swap2-Pente");
+        gameNames.put(29, "Swap2-Keryo");
         gameNames.put(2, "Speed Pente");
         gameNames.put(4, "Speed Keryo-Pente");
         gameNames.put(6, "Speed Gomoku");
@@ -71,6 +72,7 @@ public class Table {
         gameNames.put(24, "Speed Go (13x13)");
         gameNames.put(26, "Speed O-Pente");
         gameNames.put(28, "Speed Swap2-Pente");
+        gameNames.put(30, "Speed Swap2-Keryo");
     }
 
     private List<Integer> moves = new ArrayList<>();
@@ -180,7 +182,8 @@ public class Table {
                 detectKeryoPoof(move, color);
             }
             detectPenteCapture(move, color);
-            if (game == 3 || game == 4 || game == 17 || game == 18 || game == 25 || game == 26) {
+            if (game == 3 || game == 4 || game == 17 || game == 18 ||
+                    game == 25 || game == 26 || game == 29 || game == 30) {
                 detectKeryoPenteCapture(move, color);
             }
         }
@@ -243,7 +246,7 @@ public class Table {
     }
 
     public boolean isSwap2() {
-        return (game == 27 || game == 28);
+        return (game == 27 || game == 28 || game == 29 || game == 30);
     }
 
     public int currentColor() {
@@ -884,8 +887,10 @@ public class Table {
             return goColor;
         } else if (game < 27) {
             return oPenteColor;
-        } else {
+        } else if (game < 29) {
             return swap2Color;
+        } else {
+            return swap2KeryoColor;
         }
     }
 

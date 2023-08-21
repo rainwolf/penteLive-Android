@@ -899,7 +899,7 @@ public class Game implements Parcelable {
 
 
     public boolean isSwap2() {
-        return this.mGameType.startsWith("Swap2");
+        return this.mGameType.contains("Swap2");
     }
 
     public boolean rated() {
@@ -1356,12 +1356,15 @@ public class Game implements Parcelable {
         } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(untilMove);
-        } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
+        } else if (getGameType().contains("O-Pente")) {
             boardView.setBackgroundColor(boardView.oPenteColor);
             replayOPenteGame(untilMove);
-        } else if (getGameType().equals("Swap2-Pente") || getGameType().equals("Speed Swap2-Pente")) {
+        } else if (getGameType().contains("Swap2-Pente")) {
             boardView.setBackgroundColor(boardView.swap2PenteColor);
             replayPenteGame(untilMove);
+        } else if (getGameType().contains("Swap2-Keryo")) {
+            boardView.setBackgroundColor(boardView.swap2KeryoColor);
+            replayKeryoPenteGame(untilMove);
         }
 
         movesString = "";
@@ -1443,12 +1446,15 @@ public class Game implements Parcelable {
         } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
             replayGoGame(moveI, moveJ);
-        } else if (getGameType().equals("O-Pente") || getGameType().equals("Speed O-Pente")) {
+        } else if (getGameType().contains("O-Pente")) {
             boardView.setBackgroundColor(boardView.oPenteColor);
             replayOPenteGame(moveI, moveJ);
-        } else if (getGameType().equals("Swap2-Pente") || getGameType().equals("Speed Swap2-Pente")) {
+        } else if (getGameType().contains("Swap2-Pente")) {
             boardView.setBackgroundColor(boardView.swap2PenteColor);
             replayPenteGame(moveI, moveJ, moveG, moveH);
+        } else if (getGameType().contains("Swap2-Keryo")) {
+            boardView.setBackgroundColor(boardView.swap2KeryoColor);
+            replayKeryoGame(moveI, moveJ, moveG, moveH);
         }
 
         if (boardView != null) {
@@ -1526,6 +1532,32 @@ public class Game implements Parcelable {
         } else {
             abstractBoard[moveI][moveJ] = color;
             detectPenteCapture(moveI, moveJ, color);
+        }
+    }
+
+    private void replayKeryoGame(byte moveI, byte moveJ, byte moveG, byte moveH) {
+        resetAbstractBoard();
+        for (int i = 0; i < mMovesList.size(); i++) {
+            byte color = (byte) (1 + (i % 2));
+            int move = mMovesList.get(i), mvI = move / 19, mvJ = move % 19;
+            abstractBoard[mvI][mvJ] = color;
+            detectPenteCapture(mvI, mvJ, color);
+            detectKeryoPenteCapture(mvI, mvJ, color);
+        }
+        byte color = (byte) (1 + (mMovesList.size() % 2));
+//        System.out.println(" kitty heeeelp " + moveI + " and " + moveJ + " and " + moveG + " and " + moveH + " and " + color);
+        if (moveG != (byte) 255 && moveH != (byte) 255) {
+            abstractBoard[moveG][moveH] = color;
+            detectPenteCapture(moveG, moveH, color);
+            detectKeryoPenteCapture(moveG, moveH, color);
+            color = (byte) (3 - color);
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
+            detectKeryoPenteCapture(moveI, moveJ, color);
+        } else {
+            abstractBoard[moveI][moveJ] = color;
+            detectPenteCapture(moveI, moveJ, color);
+            detectKeryoPenteCapture(moveI, moveJ, color);
         }
     }
 

@@ -332,6 +332,7 @@
         <item>Go (13x13)</item>
         <item>O-Pente</item>
         <item>Swap2-Pente</item>
+        <item>Swap2-Keryo</item>
     </string-array>
     <string-array name="turn_based_game_types_array">
         <item>Pente</item>
@@ -348,6 +349,7 @@
         <item>Go (13x13)</item>
         <item>O-Pente</item>
         <item>Swap2-Pente</item>
+        <item>Swap2-Keryo</item>
     </string-array>
     <string-array name="database_game_types_array">
         <item>Pente</item>
@@ -386,6 +388,7 @@
         <item>Go (13x13)</item>
         <item>O-Pente</item>
         <item>Swap2-Pente</item>
+        <item>Swap2-Keryo</item>
         <item>Speed Pente</item>
         <item>Speed Keryo-Pente</item>
         <item>Speed Gomoku</item>
@@ -400,6 +403,7 @@
         <item>Speed Go (13x13)</item>
         <item>Speed O-Pente</item>
         <item>Speed Swap2-Pente</item>
+        <item>Speed Swap2-Keryo</item>
     </string-array>
     <string-array name="all_game_types_array">
         <item>Pente</item>
@@ -416,6 +420,7 @@
         <item>Go (13x13)</item>
         <item>O-Pente</item>
         <item>Swap2-Pente</item>
+        <item>Swap2-Keryo</item>
         <item>Turn-based Pente</item>
         <item>Turn-based Keryo-Pente</item>
         <item>Turn-based Gomoku</item>
@@ -430,6 +435,7 @@
         <item>Turn-based Go (13x13)</item>
         <item>Turn-based O-Pente</item>
         <item>Turn-based Swap2-Pente</item>
+        <item>Turn-based Swap2-Keryo</item>
         <item>Speed Pente</item>
         <item>Speed Keryo-Pente</item>
         <item>Speed Gomoku</item>
@@ -444,6 +450,7 @@
         <item>Speed Go (13x13)</item>
         <item>Speed O-Pente</item>
         <item>Speed Swap2-Pente</item>
+        <item>Speed Swap2-Keryo</item>
     </string-array>
     <string-array name="ai_game_types_array">
         <item>Pente</item>
