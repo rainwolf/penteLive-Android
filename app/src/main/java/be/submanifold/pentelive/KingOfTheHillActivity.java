@@ -359,10 +359,10 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 step.add(player);
             }
-//            if (step.size() > 0) {
-//                hill.add(0, step);
-//            }
-            hill.add(0, step);
+            if (step.size() > 0) {
+                hill.add(0, step);
+            }
+//            hill.add(0, step);
             idx += 1;
         }
         if (htmlString.contains(PentePlayer.mPlayerName)) {
