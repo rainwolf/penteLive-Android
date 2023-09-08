@@ -43,7 +43,7 @@ public class TablesAndPlayers {
 
         int myCrown = 0, myKotHCrown = 0;
         for (Map<String, Object> singleGame : gameData) {
-            if (((String) singleGame.get("computer")).equals("N")) {
+            if ("N".equals((String) singleGame.get("computer"))) {
                 int game = (int) singleGame.get("game");
                 int rating = (int) ((double) singleGame.get("rating"));
                 player.addRating(game, rating);
