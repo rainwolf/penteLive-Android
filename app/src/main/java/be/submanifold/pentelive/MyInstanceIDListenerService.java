@@ -20,22 +20,19 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(String newToken) {
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                                                                             @Override
-                                                                             public void onComplete(@NonNull Task<String> task) {
-                                                                                 if (!task.isSuccessful()) {
-                                                                                     return;
-                                                                                 }
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                return;
+            }
 
-                                                                                 // Get new FCM registration token
-                                                                                 String refreshedToken = task.getResult();
+            // Get new FCM registration token
+            String refreshedToken = task.getResult();
 
-                                                                                 System.out.println("Refreshed token: " + refreshedToken);
-                                                                                 System.out.println("Refreshed token: " + newToken);
-                                                                                 // TODO: Implement this method to send any registration to your app's servers.
-                                                                                 sendRegistrationToServer(refreshedToken);
-                                                                             }
-                                                                         }
+            System.out.println("Refreshed token: " + refreshedToken);
+            System.out.println("Refreshed token: " + newToken);
+            // TODO: Implement this method to send any registration to your app's servers.
+            sendRegistrationToServer(refreshedToken);
+        }
         );
 
     }

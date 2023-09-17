@@ -116,45 +116,34 @@ public class MMAIActivity extends AppCompatActivity {
             }
         });
         TextView playAs = (TextView) settingsView.findViewById(R.id.playAsChoice);
-        playAs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv = (TextView) v;
-                if (tv.getText().equals(getString(R.string.black))) {
-                    tv.setText(getString(R.string.white));
-                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white");
-                    board.setMyColor((byte) 1);
-                } else {
-                    tv.setText(getString(R.string.black));
-                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "black");
-                    board.setMyColor((byte) 2);
-                }
+        playAs.setOnClickListener(v -> {
+            TextView tv = (TextView) v;
+            if (tv.getText().equals(getString(R.string.black))) {
+                tv.setText(getString(R.string.white));
+                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white");
+                board.setMyColor((byte) 1);
+            } else {
+                tv.setText(getString(R.string.black));
+                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "black");
+                board.setMyColor((byte) 2);
             }
         });
         TextView gameChoice = (TextView) settingsView.findViewById(R.id.gameChoice);
-        gameChoice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv = (TextView) v;
-                if (tv.getText().equals("Pente")) {
-                    tv.setText("Keryo-Pente");
-                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
-                    board.setBackgroundColor(board.keryoPenteColor);
-                    board.setGame(3);
-                } else {
-                    tv.setText("Pente");
-                    PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
-                    board.setBackgroundColor(board.penteColor);
-                    board.setGame(1);
-                }
+        gameChoice.setOnClickListener(v -> {
+            TextView tv = (TextView) v;
+            if (tv.getText().equals("Pente")) {
+                tv.setText("Keryo-Pente");
+                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
+                board.setBackgroundColor(board.keryoPenteColor);
+                board.setGame(3);
+            } else {
+                tv.setText("Pente");
+                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
+                board.setBackgroundColor(board.penteColor);
+                board.setGame(1);
             }
         });
-        settingsWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                board.setAlpha(1.0f);
-            }
-        });
+        settingsWindow.setOnDismissListener(() -> board.setAlpha(1.0f));
 
 
         InputStream tbl = null;
@@ -239,42 +228,29 @@ public class MMAIActivity extends AppCompatActivity {
         }
 
         Button button = (Button) findViewById(R.id.startButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ((Button) v).setText(getString(R.string.restart_game));
-                board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
-                board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
-                board.startGame();
-            }
+        if (button != null) button.setOnClickListener(v -> {
+            ((Button) v).setText(getString(R.string.restart_game));
+            board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
+            board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
+            board.startGame();
         });
         button = (Button) findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                board.undoMove();
+        if (button != null) button.setOnClickListener(v -> board.undoMove());
+
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.action_mmai_settings:
+                    showAISettings();
+
+                    return true;
             }
-        });
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_mmai_settings:
-                        showAISettings();
-
-                        return true;
-                }
-
-                return false;
-            }
+            return false;
         });
         if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
             requestNewInterstitialAndShow();
         }
-        board.post(new Runnable() {
-            public void run() {
-                showAISettings();
-            }
-        });
+        board.post(() -> showAISettings());
     }
 
     private void showAISettings() {

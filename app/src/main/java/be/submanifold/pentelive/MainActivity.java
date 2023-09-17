@@ -78,10 +78,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
+        MobileAds.initialize(this, initializationStatus -> {
         });
 
         PrefUtils.saveBooleanToPrefs(MainActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, true);
@@ -105,224 +102,192 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        refreshPlayer();
-                    }
-                }
+                () -> refreshPlayer()
         );
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
+        expandableList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
-                if (groupPosition == DashboardListAdapter.KOTHGROUP) {
-                    Intent intent = new Intent(getApplicationContext(), KingOfTheHillActivity.class);
-                    intent.putExtra("pentePlayer", player);
-                    intent.putExtra("kothSummary", player.getHills().get(childPosition));
-                    startActivity(intent);
-                    return true;
-                }
-                if (groupPosition == DashboardListAdapter.MESSAGESGROUP) {
-                    Intent intent = new Intent(getApplicationContext(), ReplyMessageActivity.class);
-                    intent.putExtra("message", player.getMessages().get(childPosition));
-                    startActivity(intent);
-                    return true;
-                }
-                if (groupPosition == DashboardListAdapter.TOURNAMENTGROUP) {
-                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                    String url = "google.com";
-                    if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
-                        url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                        ;
+            if (groupPosition == DashboardListAdapter.KOTHGROUP) {
+                Intent intent = new Intent(getApplicationContext(), KingOfTheHillActivity.class);
+                intent.putExtra("pentePlayer", player);
+                intent.putExtra("kothSummary", player.getHills().get(childPosition));
+                startActivity(intent);
+                return true;
+            }
+            if (groupPosition == DashboardListAdapter.MESSAGESGROUP) {
+                Intent intent = new Intent(getApplicationContext(), ReplyMessageActivity.class);
+                intent.putExtra("message", player.getMessages().get(childPosition));
+                startActivity(intent);
+                return true;
+            }
+            if (groupPosition == DashboardListAdapter.TOURNAMENTGROUP) {
+                Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                String url = "google.com";
+                if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
+                    url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    ;
 //                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
-                    } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
-                        url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                        ;
+                } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
+                    url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    ;
 //                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
-                    } else {
-                        url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
-                                + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                        ;
+                } else {
+                    url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+                            + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    ;
 //                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
-                    }
-                    intent.putExtra("url", url);
-                    startActivity(intent);
                 }
-                if (viewWithOpenButtons != null && !viewWithOpenButtons.equals(v)) {
+                intent.putExtra("url", url);
+                startActivity(intent);
+            }
+            if (viewWithOpenButtons != null && !viewWithOpenButtons.equals(v)) {
 //                    Button button = (Button) findViewById(R.id.acceptButton);
 
-                    viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                    viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                    viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                    viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                    viewWithOpenButtons = null;
-                }
-                if (groupPosition == DashboardListAdapter.INVITATIONSGROUP ||
-                        groupPosition == DashboardListAdapter.PUBLICINVITATIONSGROUP ||
-                        groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
-                    if (groupPosition != DashboardListAdapter.SENTINVITATIONSGROUP) {
-                        if (v.findViewById(R.id.acceptButton).getVisibility() == View.VISIBLE) {
-                            v.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                        } else {
-                            v.findViewById(R.id.acceptButton).setVisibility(View.VISIBLE);
-                            Button button = (Button) v.findViewById(R.id.acceptButton);
-                            button.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View v) {
-                                    String setID;
-                                    String opponentName = "";
-                                    if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
-                                        setID = player.getInvitations().get(childPosition).getGameID();
-                                        opponentName = player.getInvitations().get(childPosition).getOpponentName();
-                                    } else {
-                                        setID = player.getPublicInvitations().get(childPosition).getGameID();
-                                        opponentName = player.getPublicInvitations().get(childPosition).getOpponentName();
-                                        if (player.getPublicInvitations().get(childPosition).getRatedNot().contains(", beginner")) {
-                                            boolean noRemind = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false);
-                                            if (!noRemind) {
-                                                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                                builder.setTitle(getString(R.string.warning));
-                                                builder.setMessage(getString(R.string.beginner_invitation_accept));
-                                                final String finalsetID = setID;
-                                                final String finalOpponentName = opponentName;
-                                                builder.setPositiveButton(getString(R.string.yes_accept), new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        player.respondInvitation(finalsetID, true, listAdapter);
-                                                        PrefUtils.savePlayerToPrefs(MainActivity.this, finalOpponentName);
-
-                                                        if (player.showAds()) {
-                                                            if (mInterstitialAd != null) {
-                                                                mInterstitialAd.show(MainActivity.this);
-                                                            }
-                                                        }
-                                                        viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                                                    }
-                                                });
-                                                builder.setNeutralButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                                                        viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                                                    }
-                                                });
-                                                AlertDialog dlg = builder.create();
-                                                dlg.show();
-                                                return;
-                                            }
-
-                                        } else if (!player.isSubscriber()) { // check if enough credit.
-                                            int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
-                                            if (remainingCredit < 1) {
-                                                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                                builder.setTitle(getString(R.string.public_invitations_limit_reached));
-                                                builder.setMessage(getString(R.string.public_invitations_limit_message));
-                                                builder.setPositiveButton(getString(R.string.post_now), new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                                                        startActivity(intent);
-                                                    }
-                                                });
-                                                builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
-                                                        Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                                                        intent.putExtra("url", url);
-                                                        startActivity(intent);
-                                                    }
-                                                });
-                                                AlertDialog dlg = builder.create();
-                                                dlg.show();
-                                                return;
-                                            } else {
-                                                remainingCredit -= 1;
-                                                PrefUtils.saveIntToPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
-                                            }
-                                        }
-                                    }
-                                    player.respondInvitation(setID, true, listAdapter);
-                                    PrefUtils.savePlayerToPrefs(MainActivity.this, opponentName);
-
-                                    if (player.showAds()) {
-                                        if (mInterstitialAd != null) {
-                                            mInterstitialAd.show(MainActivity.this);
-                                        }
-                                    }
-                                    viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                                    viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                                    viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                                    viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                                }
-                            });
-                            viewWithOpenButtons = v;
-                        }
-                    }
-                    if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
-                        if (v.findViewById(R.id.declineButton).getVisibility() == View.VISIBLE) {
-                            v.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                        } else {
-                            v.findViewById(R.id.declineButton).setVisibility(View.VISIBLE);
-                            Button button = (Button) v.findViewById(R.id.declineButton);
-                            button.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View v) {
-                                    player.respondInvitation(player.getInvitations().get(childPosition).getGameID(), false, listAdapter);
-                                }
-                            });
-                        }
-                    }
-                    if (groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
-                        if (v.findViewById(R.id.cancelButton).getVisibility() == View.VISIBLE) {
-                            v.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                        } else {
-                            v.findViewById(R.id.cancelButton).setVisibility(View.VISIBLE);
-                            Button button = (Button) v.findViewById(R.id.cancelButton);
-                            button.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View v) {
-                                    player.cancelInvitation(player.getSentInvitations().get(childPosition).getGameID(), listAdapter);
-                                }
-                            });
-                        }
-                    }
-                    if (v.findViewById(R.id.dismissButton).getVisibility() == View.VISIBLE) {
-                        v.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                    } else {
-                        v.findViewById(R.id.dismissButton).setVisibility(View.VISIBLE);
-                        viewWithOpenButtons = v;
-                        Button button = (Button) v.findViewById(R.id.dismissButton);
-                        button.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View view) {
-                                viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
-                                viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
-                                viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
-                                viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
-                            }
-                        });
-                    }
-                }
-                if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP || groupPosition == DashboardListAdapter.NONACTIVEGAMESGROUP) {
-                    Game game;
-                    if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP) {
-                        game = player.getActiveGames().get(childPosition);
-                    } else {
-                        game = player.getNonActiveGames().get(childPosition);
-                    }
-                    Intent intent = new Intent(getApplicationContext(), BoardActivity.class);
-                    intent.putExtra("game", game);
-                    startActivity(intent);
-                }
-                return false;
+                viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                viewWithOpenButtons = null;
             }
+            if (groupPosition == DashboardListAdapter.INVITATIONSGROUP ||
+                    groupPosition == DashboardListAdapter.PUBLICINVITATIONSGROUP ||
+                    groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
+                if (groupPosition != DashboardListAdapter.SENTINVITATIONSGROUP) {
+                    if (v.findViewById(R.id.acceptButton).getVisibility() == View.VISIBLE) {
+                        v.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                    } else {
+                        v.findViewById(R.id.acceptButton).setVisibility(View.VISIBLE);
+                        Button button = (Button) v.findViewById(R.id.acceptButton);
+                        button.setOnClickListener(v13 -> {
+                            String setID;
+                            String opponentName = "";
+                            if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
+                                setID = player.getInvitations().get(childPosition).getGameID();
+                                opponentName = player.getInvitations().get(childPosition).getOpponentName();
+                            } else {
+                                setID = player.getPublicInvitations().get(childPosition).getGameID();
+                                opponentName = player.getPublicInvitations().get(childPosition).getOpponentName();
+                                if (player.getPublicInvitations().get(childPosition).getRatedNot().contains(", beginner")) {
+                                    boolean noRemind = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false);
+                                    if (!noRemind) {
+                                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                        builder.setTitle(getString(R.string.warning));
+                                        builder.setMessage(getString(R.string.beginner_invitation_accept));
+                                        final String finalsetID = setID;
+                                        final String finalOpponentName = opponentName;
+                                        builder.setPositiveButton(getString(R.string.yes_accept), (dialog, which) -> {
+                                            player.respondInvitation(finalsetID, true, listAdapter);
+                                            PrefUtils.savePlayerToPrefs(MainActivity.this, finalOpponentName);
+
+                                            if (player.showAds()) {
+                                                if (mInterstitialAd != null) {
+                                                    mInterstitialAd.show(MainActivity.this);
+                                                }
+                                            }
+                                            viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                        });
+                                        builder.setNeutralButton(getString(R.string.dismiss), (dialog, which) -> {
+                                            viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                        });
+                                        AlertDialog dlg = builder.create();
+                                        dlg.show();
+                                        return;
+                                    }
+
+                                } else if (!player.isSubscriber()) { // check if enough credit.
+                                    int remainingCredit = PrefUtils.getIntFromPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, 2);
+                                    if (remainingCredit < 1) {
+                                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                        builder.setTitle(getString(R.string.public_invitations_limit_reached));
+                                        builder.setMessage(getString(R.string.public_invitations_limit_message));
+                                        builder.setPositiveButton(getString(R.string.post_now), (dialog, which) -> {
+                                            Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                                            startActivity(intent);
+                                        });
+                                        builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
+                                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                                            Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                                            intent.putExtra("url", url);
+                                            startActivity(intent);
+                                        });
+                                        AlertDialog dlg = builder.create();
+                                        dlg.show();
+                                        return;
+                                    } else {
+                                        remainingCredit -= 1;
+                                        PrefUtils.saveIntToPrefs(MainActivity.this, PrefUtils.PREFS_OPENINVITATIONCREDIT_KEY, remainingCredit);
+                                    }
+                                }
+                            }
+                            player.respondInvitation(setID, true, listAdapter);
+                            PrefUtils.savePlayerToPrefs(MainActivity.this, opponentName);
+
+                            if (player.showAds()) {
+                                if (mInterstitialAd != null) {
+                                    mInterstitialAd.show(MainActivity.this);
+                                }
+                            }
+                            viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                            viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                            viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                            viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                        });
+                        viewWithOpenButtons = v;
+                    }
+                }
+                if (groupPosition == DashboardListAdapter.INVITATIONSGROUP) {
+                    if (v.findViewById(R.id.declineButton).getVisibility() == View.VISIBLE) {
+                        v.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                    } else {
+                        v.findViewById(R.id.declineButton).setVisibility(View.VISIBLE);
+                        Button button = (Button) v.findViewById(R.id.declineButton);
+                        button.setOnClickListener(v12 -> player.respondInvitation(player.getInvitations().get(childPosition).getGameID(), false, listAdapter));
+                    }
+                }
+                if (groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
+                    if (v.findViewById(R.id.cancelButton).getVisibility() == View.VISIBLE) {
+                        v.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                    } else {
+                        v.findViewById(R.id.cancelButton).setVisibility(View.VISIBLE);
+                        Button button = (Button) v.findViewById(R.id.cancelButton);
+                        button.setOnClickListener(v1 -> player.cancelInvitation(player.getSentInvitations().get(childPosition).getGameID(), listAdapter));
+                    }
+                }
+                if (v.findViewById(R.id.dismissButton).getVisibility() == View.VISIBLE) {
+                    v.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                } else {
+                    v.findViewById(R.id.dismissButton).setVisibility(View.VISIBLE);
+                    viewWithOpenButtons = v;
+                    Button button = (Button) v.findViewById(R.id.dismissButton);
+                    button.setOnClickListener(view -> {
+                        viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
+                        viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
+                        viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                        viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
+                    });
+                }
+            }
+            if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP || groupPosition == DashboardListAdapter.NONACTIVEGAMESGROUP) {
+                Game game;
+                if (groupPosition == DashboardListAdapter.ACTIVEGAMESGROUP) {
+                    game = player.getActiveGames().get(childPosition);
+                } else {
+                    game = player.getNonActiveGames().get(childPosition);
+                }
+                Intent intent = new Intent(getApplicationContext(), BoardActivity.class);
+                intent.putExtra("game", game);
+                startActivity(intent);
+            }
+            return false;
         });
         if (!PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_MESSAGES_COLLAPSED_KEY, false)) {
             expandableList.expandGroup(DashboardListAdapter.MESSAGESGROUP);
@@ -352,138 +317,115 @@ public class MainActivity extends AppCompatActivity {
                 showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
         this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
 //        System.out.println("messages " + player.getMessages().size());
-        myToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                Intent intent;
-                switch (menuItem.getItemId()) {
-                    case R.id.play_human:
-                        intent = new Intent(getApplicationContext(), InvitationActivity.class);
+        myToolbar.setOnMenuItemClickListener(menuItem -> {
+            Intent intent;
+            switch (menuItem.getItemId()) {
+                case R.id.play_human:
+                    intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.play_computer:
+                    intent = new Intent(getApplicationContext(), InviteAIActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.social:
+                    intent = new Intent(getApplicationContext(), SocialActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.play_mmai:
+                    intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.database:
+                    if (player != null && PentePlayer.hasDBAccess()) {
+                        intent = new Intent(getApplicationContext(), DatabaseActivity.class);
                         startActivity(intent);
-                        return true;
-                    case R.id.play_computer:
-                        intent = new Intent(getApplicationContext(), InviteAIActivity.class);
-                        startActivity(intent);
-                        return true;
-                    case R.id.social:
-                        intent = new Intent(getApplicationContext(), SocialActivity.class);
-                        startActivity(intent);
-                        return true;
-                    case R.id.play_mmai:
-                        intent = new Intent(getApplicationContext(), MMAIActivity.class);
-                        startActivity(intent);
-                        return true;
-                    case R.id.database:
-                        if (player != null && PentePlayer.hasDBAccess()) {
-                            intent = new Intent(getApplicationContext(), DatabaseActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Display display = getWindowManager().getDefaultDisplay();
-                            Point size = new Point();
-                            display.getSize(size);
-
-                            View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
-                            policyView.setBackgroundColor(Color.WHITE);
-                            ((Button) policyView.findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    popupWindow.dismiss();
-                                    String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
-                                    Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                                    intent.putExtra("url", url);
-                                    startActivity(intent);
-                                }
-                            });
-                            popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                            popupWindow.setFocusable(true);
-                            popupWindow.setOutsideTouchable(true);
-                            popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
-                            popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                            ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
-//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
-                            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                                @Override
-                                public void onDismiss() {
-                                    ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
-                                }
-                            });
-                            ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
-                        }
-                        return true;
-                    case R.id.action_new_message:
-                        intent = new Intent(getApplicationContext(), SendMessageActivity.class);
-                        startActivity(intent);
-                        return true;
-                    case R.id.moreSettings:
-                        intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                        startActivity(intent);
-                        return true;
-                    case R.id.action_show_stats:
-                        Point size = new Point();
+                    } else {
                         Display display = getWindowManager().getDefaultDisplay();
+                        Point size = new Point();
                         display.getSize(size);
 
-                        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
-                        popUpView.setBackgroundColor(Color.BLUE);
-                        popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                        ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
-                        ratingListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
-                        RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
-                        adapter.setInflater(inflater, MainActivity.this);
-                        adapter.setTbRatings(player.getTbRatings());
-                        ratingListView.setAdapter(adapter);
-                        ratingListView.expandGroup(0);
-                        ratingListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-                            @Override
-                            public boolean onGroupClick(ExpandableListView parent, View v,
-                                                        int groupPosition, long id) {
-                                return true; // This way the expander cannot be collapsed
-                            }
+                        View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+                        policyView.setBackgroundColor(Color.WHITE);
+                        ((Button) policyView.findViewById(R.id.subscribeButton)).setOnClickListener(view -> {
+                            popupWindow.dismiss();
+                            String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
+                            Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
+                            intent12.putExtra("url", url);
+                            startActivity(intent12);
                         });
-                        ratingListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-                            @Override
-                            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                                String username = PentePlayer.mPlayerName;
-                                int gameInt = player.getRatingStats().get(childPosition).getGameId();
-                                String url = "https://www.pente.org/gameServer/viewLiveGames?p=" + username + "&g=" + gameInt;
-                                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                                intent.putExtra("url", url);
-                                startActivity(intent);
-
-                                return true;
-                            }
-                        });
-
+                        popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                         popupWindow.setFocusable(true);
-                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                         popupWindow.setOutsideTouchable(true);
+                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                         popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                            @Override
-                            public void onDismiss() {
-                                ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
-                            }
-                        });
+                        ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
+//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
+                        popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
                         ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+                    }
+                    return true;
+                case R.id.action_new_message:
+                    intent = new Intent(getApplicationContext(), SendMessageActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.moreSettings:
+                    intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                case R.id.action_show_stats:
+                    Point size = new Point();
+                    Display display = getWindowManager().getDefaultDisplay();
+                    display.getSize(size);
+
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
+                    popUpView.setBackgroundColor(Color.BLUE);
+                    popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+                    ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
+                    ratingListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                    RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
+                    adapter.setInflater(inflater, MainActivity.this);
+                    adapter.setTbRatings(player.getTbRatings());
+                    ratingListView.setAdapter(adapter);
+                    ratingListView.expandGroup(0);
+                    ratingListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+                        return true; // This way the expander cannot be collapsed
+                    });
+                    ratingListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+                        String username = PentePlayer.mPlayerName;
+                        int gameInt = player.getRatingStats().get(childPosition).getGameId();
+                        String url = "https://www.pente.org/gameServer/viewLiveGames?p=" + username + "&g=" + gameInt;
+                        Intent intent1 = new Intent(MainActivity.this, WebViewActivity.class);
+                        intent1.putExtra("url", url);
+                        startActivity(intent1);
 
                         return true;
-                    case R.id.onlineUsers:
-                        WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
-                        onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
+                    });
 
-                        LoadWhosOnlineTask loadWhosOnlineTask = new LoadWhosOnlineTask(player, onlineListAdapter);
-                        loadWhosOnlineTask.execute((Void) null);
+                    popupWindow.setFocusable(true);
+                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+                    popupWindow.setOutsideTouchable(true);
+                    popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
+                    popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
+                    ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
 
-                        return true;
-                    case R.id.live_games:
-                        intent = new Intent(getApplicationContext(), LobbyActivity.class);
-                        startActivity(intent);
-                        return true;
-                }
+                    return true;
+                case R.id.onlineUsers:
+                    WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
+                    onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
 
-                return false;
+                    LoadWhosOnlineTask loadWhosOnlineTask = new LoadWhosOnlineTask(player, onlineListAdapter);
+                    loadWhosOnlineTask.execute((Void) null);
+
+                    return true;
+                case R.id.live_games:
+                    intent = new Intent(getApplicationContext(), LobbyActivity.class);
+                    startActivity(intent);
+                    return true;
             }
+
+            return false;
         });
 //        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
 //        startActivity(intent);
@@ -630,12 +572,9 @@ public class MainActivity extends AppCompatActivity {
     public void ask2GetStarted() {
         Snackbar snackbar = Snackbar
                 .make(findViewById(R.id.list), getString(R.string.nothing_to_see_here), Snackbar.LENGTH_LONG)
-                .setAction(getString(R.string.post_now), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                        startActivity(intent);
-                    }
+                .setAction(getString(R.string.post_now), view -> {
+                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                    startActivity(intent);
                 });
 
         snackbar.show();
@@ -757,34 +696,27 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < onlinePlayers.size(); i++) {
                     onlineUsersListView.expandGroup(i);
                 }
-                onlineUsersListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-                    @Override
-                    public boolean onGroupClick(ExpandableListView parent, View v,
-                                                int groupPosition, long id) {
-                        return true; // This way the expander cannot be collapsed
-                    }
+                onlineUsersListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+                    return true; // This way the expander cannot be collapsed
                 });
-                onlineUsersListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-                    @Override
-                    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                        KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
-                        if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
-                            String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                            Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                            intent.putExtra("url", url);
-                            startActivity(intent);
-
-                            return false;
-                        }
-                        if (player.getPlayerName().equals(onlinePlayer.getName())) {
-                            return false;
-                        }
-                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                        intent.putExtra("opponent", onlinePlayer.getName());
+                onlineUsersListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+                    KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
+                    if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
+                        String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                        intent.putExtra("url", url);
                         startActivity(intent);
 
-                        return true;
+                        return false;
                     }
+                    if (player.getPlayerName().equals(onlinePlayer.getName())) {
+                        return false;
+                    }
+                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                    intent.putExtra("opponent", onlinePlayer.getName());
+                    startActivity(intent);
+
+                    return true;
                 });
 
 //                if (totalHeight > size.y*4/5) {
@@ -795,12 +727,7 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                 popupWindow.setOutsideTouchable(true);
                 popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                    @Override
-                    public void onDismiss() {
-                        ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f);
-                    }
-                });
+                popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
                 ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
 
 //                listAdapter.updateList();

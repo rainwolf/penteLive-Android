@@ -145,24 +145,21 @@ public class BoardActivity extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                     if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
                         String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
-                        builder.setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case 0:
-                                        resignTask = new ResignTask(game.getGameID());
-                                        askConfirmation(true);
-                                        break;
-                                    case 1:
-                                        cancelTask = new CancelTask(game.getSetID());
-                                        askConfirmation(false);
-                                        break;
-                                    case 2:
-                                        game.changeHideString();
-                                        break;
-                                }
-                                // the user clicked on colors[which]
+                        builder.setItems(options, (dialog, which) -> {
+                            switch (which) {
+                                case 0:
+                                    resignTask = new ResignTask(game.getGameID());
+                                    askConfirmation(true);
+                                    break;
+                                case 1:
+                                    cancelTask = new CancelTask(game.getSetID());
+                                    askConfirmation(false);
+                                    break;
+                                case 2:
+                                    game.changeHideString();
+                                    break;
                             }
+                            // the user clicked on colors[which]
                         });
 
                     } else {
@@ -201,14 +198,11 @@ public class BoardActivity extends AppCompatActivity {
                             p1Stones = game.getMovesForValue(2).size(),
                             p2Stones = game.getMovesForValue(1).size();
                     builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones + p1Territory, p2Territory, p2Stones, p2Territory + p2Stones + 7));
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            if (!game.isGoMarkStones()) {
-                                game.getGoTerritoryByPlayer().get(1).clear();
-                                game.getGoTerritoryByPlayer().get(2).clear();
-                                board.invalidate();
-                            }
+                    builder.setOnDismissListener(dialogInterface -> {
+                        if (!game.isGoMarkStones()) {
+                            game.getGoTerritoryByPlayer().get(1).clear();
+                            game.getGoTerritoryByPlayer().get(2).clear();
+                            board.invalidate();
                         }
                     });
                     AlertDialog dlg = builder.create();

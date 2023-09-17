@@ -1120,12 +1120,7 @@ public class LiveTableFragment extends Fragment {
         builder.setTitle(getString(R.string.opponent_unavailable));
         builder.setMessage(getString(R.string.player_not_returned));
         builder.setPositiveButton(getString(R.string.cancel_set_game), (dialog, which) -> sendForceCancelResignTableEvent(true));
-        builder.setNeutralButton(getString(R.string.resign), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                sendResign();
-            }
-        });
+        builder.setNeutralButton(getString(R.string.resign), (dialog, which) -> sendResign());
         builder.setNegativeButton(getString(R.string.force_resign), (dialog, which) -> sendForceCancelResignTableEvent(false));
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);

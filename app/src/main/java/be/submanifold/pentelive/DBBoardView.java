@@ -408,24 +408,22 @@ public class DBBoardView extends View {
 //    }
 
     public void processAImove(final int move) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                byte color = (byte) (1 + (movesList.size() % 2));
-                movesList.add(new Integer(move));
-                redDot = move;
-                stoneJ = (byte) (move / 19);
-                stoneI = (byte) (move % 19);
-                abstractBoard[stoneI][stoneJ] = color;
-                detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.contains("Keryo-Pente")) {
-                    detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                }
-                playedMove = -1;
-                ((DatabaseActivity) activity).aiStopped();
-                invalidate();
-                RelativeLayout parentLayout = (RelativeLayout) getParent();
-                setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
+        activity.runOnUiThread(() -> {
+            byte color = (byte) (1 + (movesList.size() % 2));
+            movesList.add(new Integer(move));
+            redDot = move;
+            stoneJ = (byte) (move / 19);
+            stoneI = (byte) (move % 19);
+            abstractBoard[stoneI][stoneJ] = color;
+            detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
+            if (game.contains("Keryo-Pente")) {
+                detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
             }
+            playedMove = -1;
+            ((DatabaseActivity) activity).aiStopped();
+            invalidate();
+            RelativeLayout parentLayout = (RelativeLayout) getParent();
+            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
         });//        aiPlayer.destroy();
     }
 

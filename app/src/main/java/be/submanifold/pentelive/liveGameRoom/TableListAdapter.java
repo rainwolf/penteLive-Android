@@ -89,12 +89,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(ContextCompat.getColor(ctx, R.color.britishracinggreen));
         String title = roomName + " (" + tablesArray.size() + ")";
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);
-        ((Button) convertView.findViewById(R.id.newTableButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}");
-            }
-        });
+        ((Button) convertView.findViewById(R.id.newTableButton)).setOnClickListener(view -> activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}"));
         return convertView;
     }
 

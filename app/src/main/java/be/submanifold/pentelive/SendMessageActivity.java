@@ -65,40 +65,35 @@ public class SendMessageActivity extends AppCompatActivity {
         }
 
         Button button = (Button) findViewById(R.id.sendButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (actv.getText().toString().equals("")) {
-                    Toast.makeText(SendMessageActivity.this, getString(R.string.enter_recipient),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
-                    Toast.makeText(SendMessageActivity.this, getString(R.string.enter_subject),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                SendMessageTask submitTask = new SendMessageTask(actv.getText().toString(), ((EditText) findViewById(R.id.subject)).getText().toString(), ((EditText) findViewById(R.id.message)).getText().toString());
-                submitTask.execute((Void) null);
+        if (button != null) button.setOnClickListener(v -> {
+            if (actv.getText().toString().equals("")) {
+                Toast.makeText(SendMessageActivity.this, getString(R.string.enter_recipient),
+                        Toast.LENGTH_LONG).show();
+                return;
             }
+            if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
+                Toast.makeText(SendMessageActivity.this, getString(R.string.enter_subject),
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            SendMessageTask submitTask = new SendMessageTask(actv.getText().toString(), ((EditText) findViewById(R.id.subject)).getText().toString(), ((EditText) findViewById(R.id.message)).getText().toString());
+            submitTask.execute((Void) null);
         });
 
         KeyboardVisibilityEvent.setEventListener(
                 SendMessageActivity.this,
-                new KeyboardVisibilityEventListener() {
-                    @Override
-                    public void onVisibilityChanged(boolean isOpen) {
-                        // some code depending on keyboard visiblity status
+                isOpen -> {
+                    // some code depending on keyboard visiblity status
 
-                        if (isOpen) {
-                            ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
-                            if (PentePlayer.mShowAds) {
+                    if (isOpen) {
+                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
+                        if (PentePlayer.mShowAds) {
 //                                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
-                            }
-                        } else {
-                            ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
-                            if (PentePlayer.mShowAds) {
-                                ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
-                            }
+                        }
+                    } else {
+                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
+                        if (PentePlayer.mShowAds) {
+                            ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
                         }
                     }
                 });

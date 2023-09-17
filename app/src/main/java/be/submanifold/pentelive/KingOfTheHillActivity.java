@@ -82,74 +82,56 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
         listAdapter.setKothSummary(kothSummary);
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true; // This way the expander cannot be collapsed
-            }
+        expandableList.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
         });
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshKOTH);
         swipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        refreshPlayer();
-                    }
-                }
+                () -> refreshPlayer()
         );
         if (kothSummary.getGameId() > 50) {
-            expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-                @Override
-                public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
+            expandableList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 //                System.out.println("kittycat " + childPosition + " of " + groupPosition );
-                    if (groupPosition > 0) {
-                        if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
-                            challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
-                            ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
-                            ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
-                            popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
-                            expandableList.setAlpha(0.5f);
-                        } else {
-                            String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                            Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
-                            intent.putExtra("url", url);
-                            startActivity(intent);
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
-            expandableList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    int groupPosition = ExpandableListView.getPackedPositionGroup(id);
-                    int childPosition = ExpandableListView.getPackedPositionChild(id);
-                    if (groupPosition == 0 && childPosition == 0) {
-                        JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(kothSummary.getGameId(), !kothSummary.isMember());
-                        joinLeaveTask.execute((Void) null);
-
-                        return true;
-                    }
-
-                    return false;
-                }
-            });
-        } else {
-            expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-                @Override
-                public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
-                    if (groupPosition > 0) {
+                if (groupPosition > 0) {
+                    if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
+                        challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
+                        ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
+                        ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
+                        popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
+                        expandableList.setAlpha(0.5f);
+                    } else {
                         String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                         Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                         intent.putExtra("url", url);
                         startActivity(intent);
-                        return true;
                     }
-                    return false;
+                    return true;
                 }
+                return false;
+            });
+            expandableList.setOnItemLongClickListener((parent, view, position, id) -> {
+                int groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                int childPosition = ExpandableListView.getPackedPositionChild(id);
+                if (groupPosition == 0 && childPosition == 0) {
+                    JoinLeaveHillTask joinLeaveTask = new JoinLeaveHillTask(kothSummary.getGameId(), !kothSummary.isMember());
+                    joinLeaveTask.execute((Void) null);
+
+                    return true;
+                }
+
+                return false;
+            });
+        } else {
+            expandableList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+                if (groupPosition > 0) {
+                    String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                    intent.putExtra("url", url);
+                    startActivity(intent);
+                    return true;
+                }
+                return false;
             });
         }
 
@@ -199,41 +181,33 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             }
         });
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                expandableList.setAlpha(1.0f);
+        popupWindow.setOnDismissListener(() -> expandableList.setAlpha(1.0f));
+        ((Button) challengeView.findViewById(R.id.sendChallengeButton)).setOnClickListener(v -> {
+            String restriction = "A";
+            switch (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0)) {
+                case 0:
+                    restriction = "A";
+                    break;
+                case 1:
+                    restriction = "N";
+                    break;
+                case 2:
+                    restriction = "L";
+                    break;
+                case 3:
+                    restriction = "H";
+                    break;
+                case 4:
+                    restriction = "S";
+                    break;
+                case 5:
+                    restriction = "C";
+                    break;
             }
-        });
-        ((Button) challengeView.findViewById(R.id.sendChallengeButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String restriction = "A";
-                switch (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0)) {
-                    case 0:
-                        restriction = "A";
-                        break;
-                    case 1:
-                        restriction = "N";
-                        break;
-                    case 2:
-                        restriction = "L";
-                        break;
-                    case 3:
-                        restriction = "H";
-                        break;
-                    case 4:
-                        restriction = "S";
-                        break;
-                    case 5:
-                        restriction = "C";
-                        break;
-                }
 
-                SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, kothSummary.getGameId(), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
-                inviteTask.execute((Void) null);
-                popupWindow.dismiss();
-            }
+            SendInvitationTask inviteTask = new SendInvitationTask(challengedUser, kothSummary.getGameId(), "" + (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHTIMEOUT_KEY, 6) + 1), restriction);
+            inviteTask.execute((Void) null);
+            popupWindow.dismiss();
         });
 
     }
@@ -300,19 +274,13 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(KingOfTheHillActivity.this);
                     builder.setTitle(getString(R.string.public_invitations_limit_reached));
                     builder.setMessage(getString(R.string.koth_limit));
-                    builder.setPositiveButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
+                    builder.setPositiveButton(getString(R.string.dismiss), (dialog, which) -> {
                     });
-                    builder.setNeutralButton(getString(R.string.subscribe_now), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String url = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                            Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
-                            intent.putExtra("url", url);
-                            startActivity(intent);
-                        }
+                    builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
+                        String url1 = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        Intent intent1 = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                        intent1.putExtra("url", url1);
+                        startActivity(intent1);
                     });
                     AlertDialog dlg = builder.create();
                     dlg.show();

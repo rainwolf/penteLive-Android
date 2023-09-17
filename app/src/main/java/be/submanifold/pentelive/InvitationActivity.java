@@ -173,20 +173,17 @@ public class InvitationActivity extends AppCompatActivity {
             ((Spinner) findViewById(R.id.restrictionSpinner)).setSelection(PrefUtils.getIntFromPrefs(InvitationActivity.this, PrefUtils.PREFS_INVITATIONRESTRICTION_KEY, 0));
         }
 
-        ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if ((isChecked)) {
-                    ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
-                    ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.GONE);
-                    ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.GONE);
-                    ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
-                } else {
-                    ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
-                    ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.VISIBLE);
-                    ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.VISIBLE);
-                    ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
-                }
+        ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if ((isChecked)) {
+                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
+                ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.GONE);
+                ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.GONE);
+                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
+            } else {
+                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.VISIBLE);
+                ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.VISIBLE);
+                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
             }
         });
     }

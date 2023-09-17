@@ -57,147 +57,101 @@ public class SettingsActivity extends AppCompatActivity {
         ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, false));
         ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setChecked(PentePlayer.emailMe);
         ((ToggleButton) findViewById(R.id.personalizeAdsToggleButton)).setChecked(PentePlayer.personalizeAds);
-        ((ToggleButton) findViewById(R.id.avatarToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, isChecked);
-                if (!isChecked) {
-                    PentePlayer.avatars.clear();
-                    PentePlayer.pendingAvatarChecks.clear();
-                }
+        ((ToggleButton) findViewById(R.id.avatarToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, isChecked);
+            if (!isChecked) {
+                PentePlayer.avatars.clear();
+                PentePlayer.pendingAvatarChecks.clear();
             }
         });
-        ((ToggleButton) findViewById(R.id.tbOnlyToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_TBONLY_KEY, isChecked);
-                PentePlayer.showOnlyTB = isChecked;
-            }
+        ((ToggleButton) findViewById(R.id.tbOnlyToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_TBONLY_KEY, isChecked);
+            PentePlayer.showOnlyTB = isChecked;
         });
-        ((ToggleButton) findViewById(R.id.inAppSoundsToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, isChecked);
-            }
+        ((ToggleButton) findViewById(R.id.inAppSoundsToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_INAPPSOUNDSOFF_KEY, isChecked));
+        ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, isChecked));
+        ((ToggleButton) findViewById(R.id.personalizeAdsToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ChangeAdsPersonalizationPreferenceTask task = new ChangeAdsPersonalizationPreferenceTask(isChecked);
+            task.execute((Void) null);
         });
-        ((ToggleButton) findViewById(R.id.noBeginnerWarningsToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(SettingsActivity.this, PrefUtils.PREFS_NOBEGINNERACCEPTREMIND_KEY, isChecked);
-            }
+        ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ChangeEmailPreferenceTask task = new ChangeEmailPreferenceTask(isChecked);
+            task.execute((Void) null);
         });
-        ((ToggleButton) findViewById(R.id.personalizeAdsToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                ChangeAdsPersonalizationPreferenceTask task = new ChangeAdsPersonalizationPreferenceTask(isChecked);
-                task.execute((Void) null);
-            }
+        ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(v -> {
+            String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
         });
-        ((ToggleButton) findViewById(R.id.emailMeToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                ChangeEmailPreferenceTask task = new ChangeEmailPreferenceTask(isChecked);
-                task.execute((Void) null);
-            }
+        ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(v -> {
+            String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
         });
-        ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
-                intent.putExtra("url", url);
-                startActivity(intent);
+        ((Button) findViewById(R.id.colorButton)).setOnClickListener(v -> {
+            if (!PentePlayer.mSubscriber) {
+                return;
             }
-        });
-        ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
-                intent.putExtra("url", url);
-                startActivity(intent);
-            }
-        });
-        ((Button) findViewById(R.id.colorButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!PentePlayer.mSubscriber) {
-                    return;
-                }
-                ColorPickerDialogBuilder
-                        .with(SettingsActivity.this)
-                        .setTitle(getString(R.string.choose_color))
-                        .initialColor(PentePlayer.myColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                        .density(12)
-                        .setOnColorSelectedListener(new OnColorSelectedListener() {
-                            @Override
-                            public void onColorSelected(int selectedColor) {
+            ColorPickerDialogBuilder
+                    .with(SettingsActivity.this)
+                    .setTitle(getString(R.string.choose_color))
+                    .initialColor(PentePlayer.myColor)
+                    .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                    .density(12)
+                    .setOnColorSelectedListener(selectedColor -> {
 //                                toast("onColorSelected: 0x" + Integer.toHexString(selectedColor));
-                            }
-                        })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
-                                PentePlayer.myColor = selectedColor;
-                                ChangeColorTask colorTask = new ChangeColorTask(Integer.toHexString(selectedColor).substring(2));
-                                colorTask.execute((Void) null);
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .build()
-                        .show();
-            }
+                    })
+                    .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+                        PentePlayer.myColor = selectedColor;
+                        ChangeColorTask colorTask = new ChangeColorTask(Integer.toHexString(selectedColor).substring(2));
+                        colorTask.execute((Void) null);
+                    })
+                    .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                    })
+                    .build()
+                    .show();
         });
-        ((Button) findViewById(R.id.avatarButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!PentePlayer.mSubscriber) {
-                    return;
-                }
-                final CharSequence[] items = {getString(R.string.take_photo), getString(R.string.choose_from_library),
-                        getString(R.string.cancel)};
-                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                builder.setTitle(getString(R.string.change_avatar));
-                builder.setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int item) {
-                        if (items[item].equals(getString(R.string.take_photo))) {
-                            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        ((Button) findViewById(R.id.avatarButton)).setOnClickListener(v -> {
+            if (!PentePlayer.mSubscriber) {
+                return;
+            }
+            final CharSequence[] items = {getString(R.string.take_photo), getString(R.string.choose_from_library),
+                    getString(R.string.cancel)};
+            AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+            builder.setTitle(getString(R.string.change_avatar));
+            builder.setItems(items, (dialog, item) -> {
+                if (items[item].equals(getString(R.string.take_photo))) {
+                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                            // Ensure that there's a camera activity to handle the intent
-                            if (takePicture.resolveActivity(getPackageManager()) != null) {
-                                // Create the File where the photo should go
-                                File photoFile = null;
-                                try {
-                                    photoFile = createImageFile();
-                                } catch (IOException ex) {
-                                    System.out.println("oops");
-                                }
-                                // Continue only if the File was successfully created
-                                if (photoFile != null) {
-                                    Uri photoURI = FileProvider.getUriForFile(SettingsActivity.this,
-                                            "be.submanifold.pentelive.fileprovider",
-                                            photoFile);
-                                    takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                                    startActivityForResult(takePicture, 0);
-                                }
-                            }
-                        } else if (items[item].equals(getString(R.string.choose_from_library))) {
-                            Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(pickPhoto, 1);//one can be replaced with any action code
-                        } else if (items[item].equals(getString(R.string.cancel))) {
-                            dialog.dismiss();
+                    // Ensure that there's a camera activity to handle the intent
+                    if (takePicture.resolveActivity(getPackageManager()) != null) {
+                        // Create the File where the photo should go
+                        File photoFile = null;
+                        try {
+                            photoFile = createImageFile();
+                        } catch (IOException ex) {
+                            System.out.println("oops");
+                        }
+                        // Continue only if the File was successfully created
+                        if (photoFile != null) {
+                            Uri photoURI = FileProvider.getUriForFile(SettingsActivity.this,
+                                    "be.submanifold.pentelive.fileprovider",
+                                    photoFile);
+                            takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                            startActivityForResult(takePicture, 0);
                         }
                     }
-                });
-                builder.show();
-            }
+                } else if (items[item].equals(getString(R.string.choose_from_library))) {
+                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto, 1);//one can be replaced with any action code
+                } else if (items[item].equals(getString(R.string.cancel))) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
         });
     }
 

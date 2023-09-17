@@ -1123,22 +1123,19 @@ public class Game implements Parcelable {
             final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(host);
             builder.setTitle(host.getString(R.string.requests_undo, getOpponentName()));
             String options[] = {host.getString(R.string.accept), host.getString(R.string.decline)};
-            builder.setItems(options, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    ReplyUndoTask task;
-                    switch (which) {
-                        case 0:
-                            task = new ReplyUndoTask(getGameID(), true, host);
-                            task.execute((Void) null);
-                            break;
-                        case 1:
-                            task = new ReplyUndoTask(getGameID(), false, host);
-                            task.execute((Void) null);
-                            break;
-                    }
-                    // the user clicked on colors[which]
+            builder.setItems(options, (dialog, which) -> {
+                ReplyUndoTask task;
+                switch (which) {
+                    case 0:
+                        task = new ReplyUndoTask(getGameID(), true, host);
+                        task.execute((Void) null);
+                        break;
+                    case 1:
+                        task = new ReplyUndoTask(getGameID(), false, host);
+                        task.execute((Void) null);
+                        break;
                 }
+                // the user clicked on colors[which]
             });
             androidx.appcompat.app.AlertDialog dlg = builder.create();
             dlg.setCanceledOnTouchOutside(false);
@@ -1232,12 +1229,7 @@ public class Game implements Parcelable {
                 builder.setMessage(host.getString(R.string.double_pass));
                 builder.setPositiveButton(host.getString(R.string.dismiss), (dialogInterface, i) -> {
                 });
-                builder.setNegativeButton(host.getString(R.string.no_reminder), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        PrefUtils.saveBooleanToPrefs(host, PrefUtils.PREFS_DOUBLEPASSREMINDER_KEY, false);
-                    }
-                });
+                builder.setNegativeButton(host.getString(R.string.no_reminder), (dialogInterface, i) -> PrefUtils.saveBooleanToPrefs(host, PrefUtils.PREFS_DOUBLEPASSREMINDER_KEY, false));
                 AlertDialog dlg = builder.create();
                 dlg.setCanceledOnTouchOutside(true);
                 Window window = dlg.getWindow();

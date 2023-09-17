@@ -88,14 +88,11 @@ public class DatabaseActivity extends AppCompatActivity {
         helpBuilder.setTitle(getString(R.string.search_parameters));
         helpBuilder.setView(settingsView);
         searchPrmtrsWindow = helpBuilder.create();
-        searchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                board.setAlpha(1.0f);
-                if (board.getMovesList().size() == 0 || (board.getMovesList().size() > 0 && board.getMovesList().get(0) != 180)) {
-                    if (!board.getGame().contains("D-Pente") && !board.getGame().contains("DK-Pente")) {
-                        board.resetState();
-                    }
+        searchPrmtrsWindow.setOnDismissListener(dialogInterface -> {
+            board.setAlpha(1.0f);
+            if (board.getMovesList().size() == 0 || (board.getMovesList().size() > 0 && board.getMovesList().get(0) != 180)) {
+                if (!board.getGame().contains("D-Pente") && !board.getGame().contains("DK-Pente")) {
+                    board.resetState();
                 }
             }
         });
@@ -105,12 +102,7 @@ public class DatabaseActivity extends AppCompatActivity {
         helpBuilder.setTitle(getString(R.string.ai_parameters));
         helpBuilder.setView(aiSettingsView);
         aiSearchPrmtrsWindow = helpBuilder.create();
-        aiSearchPrmtrsWindow.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                board.setAlpha(1.0f);
-            }
-        });
+        aiSearchPrmtrsWindow.setOnDismissListener(dialogInterface -> board.setAlpha(1.0f));
         aiSearchPrmtrsWindow.setCanceledOnTouchOutside(true);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -181,44 +173,35 @@ public class DatabaseActivity extends AppCompatActivity {
 
             }
         });
-        spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                return false;
-            }
+        spinner.setOnTouchListener((view, motionEvent) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            return false;
         });
         TextView sortChoice = (TextView) settingsView.findViewById(R.id.sortChoice);
-        sortChoice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                TextView tv = (TextView) v;
-                if (tv.getText().equals(getString(R.string.popularity))) {
-                    tv.setText(getString(R.string.win_percantage));
-                    PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "win percentage");
-                } else {
-                    tv.setText(getString(R.string.popularity));
-                    PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity");
-                }
+        sortChoice.setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            TextView tv = (TextView) v;
+            if (tv.getText().equals(getString(R.string.popularity))) {
+                tv.setText(getString(R.string.win_percantage));
+                PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "win percentage");
+            } else {
+                tv.setText(getString(R.string.popularity));
+                PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity");
             }
         });
         TextView winner = (TextView) settingsView.findViewById(R.id.winner);
-        winner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                TextView tv = (TextView) v;
-                if (tv.getText().equals(getString(R.string.either))) {
-                    tv.setText(getString(R.string.player1));
-                } else if (tv.getText().equals(getString(R.string.player1))) {
-                    tv.setText(getString(R.string.player2));
-                } else {
-                    tv.setText(getString(R.string.either));
-                }
+        winner.setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            TextView tv = (TextView) v;
+            if (tv.getText().equals(getString(R.string.either))) {
+                tv.setText(getString(R.string.player1));
+            } else if (tv.getText().equals(getString(R.string.player1))) {
+                tv.setText(getString(R.string.player2));
+            } else {
+                tv.setText(getString(R.string.either));
             }
         });
 //            settingsWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
@@ -286,100 +269,61 @@ public class DatabaseActivity extends AppCompatActivity {
 
 
         Button button = (Button) findViewById(R.id.searchButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                doSearch();
-            }
-        });
+        if (button != null) button.setOnClickListener(v -> doSearch());
         button = (Button) findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                board.undoMove();
+        if (button != null) button.setOnClickListener(v -> board.undoMove());
+
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.action_db_settings:
+                    showDBSettings();
+
+                    return true;
             }
+
+            return false;
         });
-
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_db_settings:
-                        showDBSettings();
-
-                        return true;
-                }
-
-                return false;
-            }
-        });
-        ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
+        ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).setOnFocusChangeListener((v, hasFocus) -> {
 //                    System.out.println("kitty");
-                if (!hasFocus) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
-        ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
+        ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
 
         Calendar newCalendar = Calendar.getInstance();
-        afterDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
-
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(year, monthOfYear, dayOfMonth);
-                DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-                ((TextView) settingsView.findViewById(R.id.afterDate)).setText(dateFormatter.format(newDate.getTime()));
-            }
-
+        afterDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, (view, year, monthOfYear, dayOfMonth) -> {
+            Calendar newDate = Calendar.getInstance();
+            newDate.set(year, monthOfYear, dayOfMonth);
+            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+            ((TextView) settingsView.findViewById(R.id.afterDate)).setText(dateFormatter.format(newDate.getTime()));
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-        afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_NEGATIVE) {
-                    // Do Stuff
-                    ((TextView) settingsView.findViewById(R.id.afterDate)).setText("");
-                }
+        afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (dialog, which) -> {
+            if (which == DialogInterface.BUTTON_NEGATIVE) {
+                // Do Stuff
+                ((TextView) settingsView.findViewById(R.id.afterDate)).setText("");
             }
         });
-        ((TextView) settingsView.findViewById(R.id.afterDate)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                afterDatePickerDialog.show();
-            }
-        });
-        beforeDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
-
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(year, monthOfYear, dayOfMonth);
-                DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-                ((TextView) settingsView.findViewById(R.id.beforeDate)).setText(dateFormatter.format(newDate.getTime()));
-            }
-
+        ((TextView) settingsView.findViewById(R.id.afterDate)).setOnClickListener(view -> afterDatePickerDialog.show());
+        beforeDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, (view, year, monthOfYear, dayOfMonth) -> {
+            Calendar newDate = Calendar.getInstance();
+            newDate.set(year, monthOfYear, dayOfMonth);
+            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+            ((TextView) settingsView.findViewById(R.id.beforeDate)).setText(dateFormatter.format(newDate.getTime()));
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-        beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_NEGATIVE) {
-                    // Do Stuff
-                    ((TextView) settingsView.findViewById(R.id.beforeDate)).setText("");
-                }
+        beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (dialog, which) -> {
+            if (which == DialogInterface.BUTTON_NEGATIVE) {
+                // Do Stuff
+                ((TextView) settingsView.findViewById(R.id.beforeDate)).setText("");
             }
         });
-        ((TextView) settingsView.findViewById(R.id.beforeDate)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                beforeDatePickerDialog.show();
-            }
-        });
+        ((TextView) settingsView.findViewById(R.id.beforeDate)).setOnClickListener(view -> beforeDatePickerDialog.show());
         spinner = (Spinner) settingsView.findViewById(R.id.p1RatingSpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.db_ratings_array, android.R.layout.simple_spinner_item);
@@ -398,13 +342,10 @@ public class DatabaseActivity extends AppCompatActivity {
 
             }
         });
-        spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                return false;
-            }
+        spinner.setOnTouchListener((view, motionEvent) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            return false;
         });
         spinner = (Spinner) settingsView.findViewById(R.id.p2RatingSpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
@@ -424,63 +365,46 @@ public class DatabaseActivity extends AppCompatActivity {
 
             }
         });
-        spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                return false;
-            }
+        spinner.setOnTouchListener((view, motionEvent) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            return false;
         });
         TextView txtvw = (TextView) settingsView.findViewById(R.id.eitherOrBoth);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, getString(R.string.both)));
-        txtvw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (((TextView) view).getText().equals(getString(R.string.both))) {
-                    ((TextView) view).setText(getString(R.string.either));
-                } else {
-                    ((TextView) view).setText(getString(R.string.both));
-                }
-                PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, ((TextView) view).getText().toString());
+        txtvw.setOnClickListener(view -> {
+            if (((TextView) view).getText().equals(getString(R.string.both))) {
+                ((TextView) view).setText(getString(R.string.either));
+            } else {
+                ((TextView) view).setText(getString(R.string.both));
             }
+            PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, ((TextView) view).getText().toString());
         });
         txtvw = (TextView) settingsView.findViewById(R.id.excludeTimeouts);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, getString(R.string.no)));
-        txtvw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (((TextView) view).getText().equals(getString(R.string.no))) {
-                    ((TextView) view).setText(getString(R.string.yes));
-                } else {
-                    ((TextView) view).setText(getString(R.string.no));
-                }
-                PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, ((TextView) view).getText().toString());
+        txtvw.setOnClickListener(view -> {
+            if (((TextView) view).getText().equals(getString(R.string.no))) {
+                ((TextView) view).setText(getString(R.string.yes));
+            } else {
+                ((TextView) view).setText(getString(R.string.no));
             }
+            PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, ((TextView) view).getText().toString());
         });
         txtvw = (TextView) settingsView.findViewById(R.id.liveOrTB);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, getString(R.string.all)));
-        txtvw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (((TextView) view).getText().equals(getString(R.string.all))) {
-                    ((TextView) view).setText(getString(R.string.turn_based_only));
-                } else if (((TextView) view).getText().equals(getString(R.string.turn_based_only))) {
-                    ((TextView) view).setText(getString(R.string.live_only));
-                } else {
-                    ((TextView) view).setText(getString(R.string.all));
-                }
-                PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, ((TextView) view).getText().toString());
+        txtvw.setOnClickListener(view -> {
+            if (((TextView) view).getText().equals(getString(R.string.all))) {
+                ((TextView) view).setText(getString(R.string.turn_based_only));
+            } else if (((TextView) view).getText().equals(getString(R.string.turn_based_only))) {
+                ((TextView) view).setText(getString(R.string.live_only));
+            } else {
+                ((TextView) view).setText(getString(R.string.all));
             }
+            PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, ((TextView) view).getText().toString());
         });
 
 
-        ((Button) findViewById(R.id.aiButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAISettings();
-            }
-        });
+        ((Button) findViewById(R.id.aiButton)).setOnClickListener(view -> showAISettings());
         spinner = (Spinner) aiSettingsView.findViewById(R.id.difficultySpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.ai_difficulty_array, android.R.layout.simple_spinner_item);
@@ -497,61 +421,51 @@ public class DatabaseActivity extends AppCompatActivity {
 
             }
         });
-        ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b);
-            }
-        });
-        ((Button) aiSettingsView.findViewById(R.id.runAIbutton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                board.setSearchResults(null);
-                aiSearchPrmtrsWindow.dismiss();
-                if (board.getAiPlayer() == null) {
-                    InputStream tbl = null;
-                    InputStream scs = null;
-                    InputStream opnbk = null;
-                    try {
-                        Resources resources = getResources();
-                        tbl = resources.openRawResource(R.raw.pente_tbl);
-                        scs = resources.openRawResource(R.raw.pente_scs);
-                        opnbk = resources.openRawResource(R.raw.opngbk);
+        ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener((compoundButton, b) -> PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b));
+        ((Button) aiSettingsView.findViewById(R.id.runAIbutton)).setOnClickListener(view -> {
+            board.setSearchResults(null);
+            aiSearchPrmtrsWindow.dismiss();
+            if (board.getAiPlayer() == null) {
+                InputStream tbl = null;
+                InputStream scs = null;
+                InputStream opnbk = null;
+                try {
+                    Resources resources = getResources();
+                    tbl = resources.openRawResource(R.raw.pente_tbl);
+                    scs = resources.openRawResource(R.raw.pente_scs);
+                    opnbk = resources.openRawResource(R.raw.opngbk);
 
-                        //computer.setSize(size);
+                    //computer.setSize(size);
 
-                        Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
-                        nativeComputer.init(scs, opnbk, tbl);
-                        board.setAiPlayer(nativeComputer);
-                    } catch (Throwable t) {
-                        Log.v("ai", "error init", t);
-                    }
+                    Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
+                    nativeComputer.init(scs, opnbk, tbl);
+                    board.setAiPlayer(nativeComputer);
+                } catch (Throwable t) {
+                    Log.v("ai", "error init", t);
                 }
-                Ai ai = board.getAiPlayer();
-                boolean useBook = ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).isChecked();
-                ai.useOpeningBook(useBook);
-                if (board.getGame().contains("Keryo-Pente")) {
-                    ai.setGame(3);
-                } else if (board.getGame().equals("Pente") || board.getGame().equals("Speed Pente")) {
-                    ai.setGame(1);
-                }
-                ai.setLevel(((Spinner) aiSettingsView.findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
-                ai.setDbBoard(board);
-                int[] moves = new int[board.getMovesList().size()];
-                for (int i = 0; i < board.getMovesList().size(); ++i) {
-                    moves[i] = board.getMovesList().get(i).intValue();
-                }
-                ai.getMove(moves);
             }
+            Ai ai = board.getAiPlayer();
+            boolean useBook = ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).isChecked();
+            ai.useOpeningBook(useBook);
+            if (board.getGame().contains("Keryo-Pente")) {
+                ai.setGame(3);
+            } else if (board.getGame().equals("Pente") || board.getGame().equals("Speed Pente")) {
+                ai.setGame(1);
+            }
+            ai.setLevel(((Spinner) aiSettingsView.findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
+            ai.setDbBoard(board);
+            int[] moves = new int[board.getMovesList().size()];
+            for (int i = 0; i < board.getMovesList().size(); ++i) {
+                moves[i] = board.getMovesList().get(i).intValue();
+            }
+            ai.getMove(moves);
         });
 
-        board.post(new Runnable() {
-            public void run() {
-                if (board.getMovesList().size() <= 1) {
-                    showDBSettings();
-                } else {
-                    doSearch();
-                }
+        board.post(() -> {
+            if (board.getMovesList().size() <= 1) {
+                showDBSettings();
+            } else {
+                doSearch();
             }
         });
 

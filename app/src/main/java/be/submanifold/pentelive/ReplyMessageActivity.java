@@ -74,20 +74,18 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
 
         Button button = (Button) findViewById(R.id.sendButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
-                    Toast.makeText(ReplyMessageActivity.this, getString(R.string.enter_subject),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                String subject = ((EditText) findViewById(R.id.subject)).getText().toString();
-                if (subject.indexOf("Re:") != 0) {
-                    subject = "Re: " + subject;
-                }
-                SendMessageTask submitTask = new SendMessageTask(recipient, subject, ((EditText) findViewById(R.id.reply)).getText().toString());
-                submitTask.execute((Void) null);
+        if (button != null) button.setOnClickListener(v -> {
+            if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
+                Toast.makeText(ReplyMessageActivity.this, getString(R.string.enter_subject),
+                        Toast.LENGTH_LONG).show();
+                return;
             }
+            String subject = ((EditText) findViewById(R.id.subject)).getText().toString();
+            if (subject.indexOf("Re:") != 0) {
+                subject = "Re: " + subject;
+            }
+            SendMessageTask submitTask = new SendMessageTask(recipient, subject, ((EditText) findViewById(R.id.reply)).getText().toString());
+            submitTask.execute((Void) null);
         });
 
         final TextView messageTextView = ((TextView) findViewById(R.id.message));
@@ -119,42 +117,36 @@ public class ReplyMessageActivity extends AppCompatActivity {
         LoadMessageTask loadTask = new LoadMessageTask(message.getMessageID());
         loadTask.execute((Void) null);
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_trash:
-                        DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
-                        deleteTask.execute((Void) null);
-                        return true;
-                    case R.id.action_challenge:
-                        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                        intent.putExtra("opponent", recipient);
-                        startActivity(intent);
-                        return true;
-                }
-
-                return false;
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.action_trash:
+                    DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
+                    deleteTask.execute((Void) null);
+                    return true;
+                case R.id.action_challenge:
+                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                    intent.putExtra("opponent", recipient);
+                    startActivity(intent);
+                    return true;
             }
+
+            return false;
         });
 
         KeyboardVisibilityEvent.setEventListener(
                 ReplyMessageActivity.this,
-                new KeyboardVisibilityEventListener() {
-                    @Override
-                    public void onVisibilityChanged(boolean isOpen) {
-                        // some code depending on keyboard visiblity status
+                isOpen -> {
+                    // some code depending on keyboard visiblity status
 
-                        if (isOpen) {
-                            ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
-                            if (PentePlayer.mShowAds) {
+                    if (isOpen) {
+                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
+                        if (PentePlayer.mShowAds) {
 //                                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
-                            }
-                        } else {
-                            ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
-                            if (PentePlayer.mShowAds) {
-                                ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
-                            }
+                        }
+                    } else {
+                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
+                        if (PentePlayer.mShowAds) {
+                            ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
                         }
                     }
                 });

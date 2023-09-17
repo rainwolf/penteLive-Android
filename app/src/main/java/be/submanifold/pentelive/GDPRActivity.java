@@ -20,27 +20,18 @@ public class GDPRActivity extends AppCompatActivity {
         myToolbar.setTitle(getString(R.string.terms_conditions));
         setSupportActionBar(myToolbar);
 
-        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(view -> {
+            Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
-        ((Button) findViewById(R.id.acceptTermsButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PrefUtils.saveBooleanToPrefs(GDPRActivity.this, PrefUtils.PREFS_GDPR_KEY, true);
-                finish();
-            }
+        ((Button) findViewById(R.id.acceptTermsButton)).setOnClickListener(view -> {
+            PrefUtils.saveBooleanToPrefs(GDPRActivity.this, PrefUtils.PREFS_GDPR_KEY, true);
+            finish();
         });
-        ((Button) findViewById(R.id.rejectTermsButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MyApplication.setShouldQuit(true);
-                finish();
-            }
+        ((Button) findViewById(R.id.rejectTermsButton)).setOnClickListener(view -> {
+            MyApplication.setShouldQuit(true);
+            finish();
         });
     }
 

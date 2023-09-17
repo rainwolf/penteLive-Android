@@ -91,90 +91,62 @@ public class LoginActivity extends AppCompatActivity
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
 
-        ((Button) findViewById(R.id.registerButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.registerButton)).setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+            startActivity(intent);
         });
 
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
+        mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
+            if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                attemptLogin();
+                return true;
             }
+            return false;
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+        mEmailSignInButton.setOnClickListener(view -> attemptLogin());
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        ((Button) findViewById(R.id.facebookButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uri = Uri.parse("https://www.facebook.com/pente.org");
-                try {
-                    ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo("com.facebook.katana", 0);
-                    if (applicationInfo.enabled) {
-                        // http://stackoverflow.com/a/24547437/1048340
-                        uri = Uri.parse("fb://facewebmodal/f?href=" + "https://www.facebook.com/pente.org");
-                    }
-                } catch (PackageManager.NameNotFoundException ignored) {
+        ((Button) findViewById(R.id.facebookButton)).setOnClickListener(v -> {
+            Uri uri = Uri.parse("https://www.facebook.com/pente.org");
+            try {
+                ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo("com.facebook.katana", 0);
+                if (applicationInfo.enabled) {
+                    // http://stackoverflow.com/a/24547437/1048340
+                    uri = Uri.parse("fb://facewebmodal/f?href=" + "https://www.facebook.com/pente.org");
                 }
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
+            } catch (PackageManager.NameNotFoundException ignored) {
             }
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
 
-        ((Button) findViewById(R.id.rulesButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uri = Uri.parse("https://www.pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.rulesButton)).setOnClickListener(v -> {
+            Uri uri = Uri.parse("https://www.pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
-        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(v -> {
+            Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
-        ((Button) findViewById(R.id.forgot_password_button)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uri = Uri.parse("https://www.pente.org/gameServer/forgotpassword.jsp");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.forgot_password_button)).setOnClickListener(v -> {
+            Uri uri = Uri.parse("https://www.pente.org/gameServer/forgotpassword.jsp");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
 
 
         ((ToggleButton) findViewById(R.id.autoLoginToggle)).setChecked(PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false));
 
-        ((ToggleButton) findViewById(R.id.autoLoginToggle)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PrefUtils.saveBooleanToPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, isChecked);
-            }
-        });
+        ((ToggleButton) findViewById(R.id.autoLoginToggle)).setOnCheckedChangeListener((buttonView, isChecked) -> PrefUtils.saveBooleanToPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, isChecked));
 
         final String storedUserName = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
         String storedPassword = PrefUtils.getFromPrefs(LoginActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
@@ -186,30 +158,21 @@ public class LoginActivity extends AppCompatActivity
 //            mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setText(storedPassword);
         }
-        ((Button) findViewById(R.id.inviteFriendsButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Play Pente with me?");
-                i.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
-                startActivity(Intent.createChooser(i, "Invite Friends"));
-            }
+        ((Button) findViewById(R.id.inviteFriendsButton)).setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.putExtra(Intent.EXTRA_SUBJECT, "Play Pente with me?");
+            i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
+            startActivity(Intent.createChooser(i, "Invite Friends"));
         });
-        ((Button) findViewById(R.id.getHelpButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Android Pente Live help for " + storedUserName);
-                startActivity(Intent.createChooser(i, "Get Help"));
-            }
+        ((Button) findViewById(R.id.getHelpButton)).setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.putExtra(Intent.EXTRA_SUBJECT, "Android Pente Live help for " + storedUserName);
+            startActivity(Intent.createChooser(i, "Get Help"));
         });
 
-        ((Button) findViewById(R.id.moreSettingsButton)).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
-            }
+        ((Button) findViewById(R.id.moreSettingsButton)).setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(intent);
         });
 
         if ((storedPassword != null) && (storedUserName != null) && PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_AUTOLOGIN_KEY, false)) {
@@ -236,20 +199,14 @@ public class LoginActivity extends AppCompatActivity
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getString(R.string.not_registered_yet));
             builder.setMessage(getString(R.string.account_needed));
-            builder.setPositiveButton(getString(R.string.play_live_as_guest), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = new Intent(getApplicationContext(), LiveGameRoomActivity.class);
-                    intent.putExtra("room", new LiveGameRoom("Main Room", 16000));
-                    startActivity(intent);
-                }
+            builder.setPositiveButton(getString(R.string.play_live_as_guest), (dialogInterface, i) -> {
+                Intent intent = new Intent(getApplicationContext(), LiveGameRoomActivity.class);
+                intent.putExtra("room", new LiveGameRoom("Main Room", 16000));
+                startActivity(intent);
             });
-            builder.setNeutralButton(getString(R.string.play_ai), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
-                    startActivity(intent);
-                }
+            builder.setNeutralButton(getString(R.string.play_ai), (dialogInterface, i) -> {
+                Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                startActivity(intent);
             });
             builder.setNegativeButton(getString(R.string.register), null);
 
@@ -530,12 +487,9 @@ public class LoginActivity extends AppCompatActivity
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     builder.setTitle(getString(R.string.connection_wrong));
-                    builder.setPositiveButton(getString(R.string.play_ai), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
-                            startActivity(intent);
-                        }
+                    builder.setPositiveButton(getString(R.string.play_ai), (dialogInterface, i) -> {
+                        Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                        startActivity(intent);
                     });
                     builder.setNegativeButton(getString(R.string.dismiss), null);
 

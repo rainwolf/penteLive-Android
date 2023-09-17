@@ -55,21 +55,14 @@ public class LobbyActivity extends AppCompatActivity {
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
         expandableList.expandGroup(0);
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true; // This way the expander cannot be collapsed
-            }
+        expandableList.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
         });
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
-                Intent intent = new Intent(LobbyActivity.this, LiveGameRoomActivity.class);
-                intent.putExtra("room", listAdapter.rooms.get(i1));
-                startActivity(intent);
-                return true;
-            }
+        expandableList.setOnChildClickListener((expandableListView, view, i, i1, l) -> {
+            Intent intent = new Intent(LobbyActivity.this, LiveGameRoomActivity.class);
+            intent.putExtra("room", listAdapter.rooms.get(i1));
+            startActivity(intent);
+            return true;
         });
         LoadActiveServersTask loadServersTask = new LoadActiveServersTask(listAdapter);
         loadServersTask.execute();
@@ -102,21 +95,15 @@ public class LobbyActivity extends AppCompatActivity {
                     builder.setView(gameSpinner);
                     builder.setTitle(getString(R.string.broadcast));
                     builder.setMessage(getString(R.string.alert_friends_followers));
-                    builder.setPositiveButton(getString(R.string.to_followers), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String game = gameSpinner.getSelectedItem().toString();
-                            BroadcastTask task = new BroadcastTask(false, game);
-                            task.execute();
-                        }
+                    builder.setPositiveButton(getString(R.string.to_followers), (dialog, which) -> {
+                        String game = gameSpinner.getSelectedItem().toString();
+                        BroadcastTask task = new BroadcastTask(false, game);
+                        task.execute();
                     });
-                    builder.setNeutralButton(getString(R.string.to_friends), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String game = gameSpinner.getSelectedItem().toString();
-                            BroadcastTask task = new BroadcastTask(true, game);
-                            task.execute();
-                        }
+                    builder.setNeutralButton(getString(R.string.to_friends), (dialog, which) -> {
+                        String game = gameSpinner.getSelectedItem().toString();
+                        BroadcastTask task = new BroadcastTask(true, game);
+                        task.execute();
                     });
 //                builder.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
 //                    @Override
@@ -132,15 +119,12 @@ public class LobbyActivity extends AppCompatActivity {
                     infoView.setBackgroundColor(Color.WHITE);
                     builder.setView(infoView);
                     final AlertDialog dlg = builder.create();
-                    ((Button) infoView.findViewById(R.id.subscribeButton)).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dlg.dismiss();
-                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
-                            Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
-                            intent.putExtra("url", url);
-                            startActivity(intent);
-                        }
+                    ((Button) infoView.findViewById(R.id.subscribeButton)).setOnClickListener(view -> {
+                        dlg.dismiss();
+                        String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                        Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
+                        intent.putExtra("url", url);
+                        startActivity(intent);
                     });
                     dlg.show();
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());

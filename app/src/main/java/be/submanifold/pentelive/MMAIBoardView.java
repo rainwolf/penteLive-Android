@@ -265,20 +265,18 @@ public class MMAIBoardView extends View {
     }
 
     public void processAImove(final int move) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                active = true;
-                movesList.add(new Integer(move));
-                replayGame(abstractBoard);
-                playedMove = -1;
+        activity.runOnUiThread(() -> {
+            active = true;
+            movesList.add(new Integer(move));
+            replayGame(abstractBoard);
+            playedMove = -1;
 //                try {
 //                    Thread.sleep(100);
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-                aiThinking = false;
-                ((MMAIActivity) activity).hideThinking();
-            }
+            aiThinking = false;
+            ((MMAIActivity) activity).hideThinking();
         });//        aiPlayer.destroy();
     }
 

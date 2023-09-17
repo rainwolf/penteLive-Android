@@ -104,32 +104,19 @@ public class LiveGameRoomFragment extends Fragment {
         playersListAdapter = new PlayersListAdapter(activity.tablesAndPlayers.players, roomName, 1);
         expandableList.setAdapter(playersListAdapter);
         playersListAdapter.setInflater(activity.getLayoutInflater());
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                return true;
-            }
-        });
+        expandableList.setOnGroupClickListener((expandableListView, view14, i, l) -> true);
         expandableList.expandGroup(0);
 
         expandableList = (ExpandableListView) getView().findViewById(R.id.tablesList);
         tableListAdapter = new TableListAdapter(activity.tablesAndPlayers.tables, roomName, activity);
         expandableList.setAdapter(tableListAdapter);
         tableListAdapter.setInflater(activity.getLayoutInflater());
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                return true;
-            }
-        });
+        expandableList.setOnGroupClickListener((expandableListView, view13, i, l) -> true);
         expandableList.expandGroup(0);
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
-                int tableId = tableListAdapter.getTablesArray().get(i1).getId();
-                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
-                return true;
-            }
+        expandableList.setOnChildClickListener((expandableListView, view12, i, i1, l) -> {
+            int tableId = tableListAdapter.getTablesArray().get(i1).getId();
+            activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
+            return true;
         });
 
 
@@ -149,35 +136,29 @@ public class LiveGameRoomFragment extends Fragment {
 
         activity.connectSocket();
 
-        mainRoomTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                final EditText input = new EditText(activity);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-                builder.setPositiveButton(activity.getString(R.string.send), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String m_Text = input.getText().toString();
-                        if (!"".equals(m_Text)) {
-                            String event = "{\"dsgTextMainRoomEvent\":{\"text\":\"" + m_Text + "\", \"time\":0}}";
-                            if (mListener != null) {
-                                mListener.sendEvent(event);
-                            }
-                        }
+        mainRoomTextView.setOnClickListener(view1 -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            final EditText input = new EditText(activity);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(input);
+            builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
+                String m_Text = input.getText().toString();
+                if (!"".equals(m_Text)) {
+                    String event = "{\"dsgTextMainRoomEvent\":{\"text\":\"" + m_Text + "\", \"time\":0}}";
+                    if (mListener != null) {
+                        mListener.sendEvent(event);
                     }
-                });
+                }
+            });
 //                builder.setNegativeButton(activity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
 //                    @Override
 //                    public void onClick(DialogInterface dialog, int which) {
 //                        dialog.cancel();
 //                    }
 //                });
-                AlertDialog dlg = builder.create();
-                dlg.show();
-                dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            }
+            AlertDialog dlg = builder.create();
+            dlg.show();
+            dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         });
     }
 

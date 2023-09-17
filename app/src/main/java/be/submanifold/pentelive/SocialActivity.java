@@ -137,24 +137,16 @@ public class SocialActivity extends AppCompatActivity {
         followerListAdapter = new SocialListAdapter();
         expandableList.setAdapter(followerListAdapter);
         followerListAdapter.setInflater(getLayoutInflater());
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                return true;
-            }
-        });
+        expandableList.setOnGroupClickListener((expandableListView, view, i, l) -> true);
         expandableList.expandGroup(0);
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+        expandableList.setOnChildClickListener((expandableListView, view, i, i1, l) -> {
 
-                String url = "https://www.pente.org/gameServer/profile?viewName=" + followerListAdapter.getPlayersArray().get(i1).getName();
-                Intent intent = new Intent(SocialActivity.this, WebViewActivity.class);
-                intent.putExtra("url", url);
-                startActivity(intent);
+            String url = "https://www.pente.org/gameServer/profile?viewName=" + followerListAdapter.getPlayersArray().get(i1).getName();
+            Intent intent = new Intent(SocialActivity.this, WebViewActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
 
-                return true;
-            }
+            return true;
         });
 
         expandableList = (ExpandableListView) findViewById(R.id.followingList);
@@ -162,33 +154,22 @@ public class SocialActivity extends AppCompatActivity {
         followingListAdapter.setFollowing(true);
         expandableList.setAdapter(followingListAdapter);
         followingListAdapter.setInflater(getLayoutInflater());
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                return true;
-            }
-        });
+        expandableList.setOnGroupClickListener((expandableListView, view, i, l) -> true);
         expandableList.expandGroup(0);
-        expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
-                String url = "https://www.pente.org/gameServer/profile?viewName=" + followingListAdapter.getPlayersArray().get(i1).getName();
-                Intent intent = new Intent(SocialActivity.this, WebViewActivity.class);
-                intent.putExtra("url", url);
-                startActivity(intent);
+        expandableList.setOnChildClickListener((expandableListView, view, i, i1, l) -> {
+            String url = "https://www.pente.org/gameServer/profile?viewName=" + followingListAdapter.getPlayersArray().get(i1).getName();
+            Intent intent = new Intent(SocialActivity.this, WebViewActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
 
-                return true;
-            }
+            return true;
         });
-        expandableList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                int childPosition = ExpandableListView.getPackedPositionChild(id);
+        expandableList.setOnItemLongClickListener((parent, view, position, id) -> {
+            int childPosition = ExpandableListView.getPackedPositionChild(id);
 
-                FollowersingTask task = new FollowersingTask(false, followingListAdapter.getPlayersArray().get(childPosition).getName());
-                task.execute();
-                return true;
-            }
+            FollowersingTask task = new FollowersingTask(false, followingListAdapter.getPlayersArray().get(childPosition).getName());
+            task.execute();
+            return true;
         });
 
 
@@ -257,20 +238,12 @@ public class SocialActivity extends AppCompatActivity {
                 invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(invitationText);
                 builder.setTitle(getString(R.string.follow_player));
-                builder.setPositiveButton(getString(R.string.follow), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String m_Text = invitationText.getText().toString();
-                        FollowersingTask task = new FollowersingTask(true, m_Text);
-                        task.execute();
-                    }
+                builder.setPositiveButton(getString(R.string.follow), (dialog, which) -> {
+                    String m_Text = invitationText.getText().toString();
+                    FollowersingTask task = new FollowersingTask(true, m_Text);
+                    task.execute();
                 });
-                builder.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                builder.setNegativeButton(getString(R.string.dismiss), (dialog, which) -> dialog.cancel());
                 builder.show();
                 return true;
 
@@ -389,18 +362,8 @@ public class SocialActivity extends AppCompatActivity {
                         }
                     }
                 }
-                Collections.sort(followers, new Comparator<LivePlayer>() {
-                    @Override
-                    public int compare(LivePlayer o1, LivePlayer o2) {
-                        return o2.getRating(game) - o1.getRating(game);
-                    }
-                });
-                Collections.sort(following, new Comparator<LivePlayer>() {
-                    @Override
-                    public int compare(LivePlayer o1, LivePlayer o2) {
-                        return o2.getRating(game) - o1.getRating(game);
-                    }
-                });
+                Collections.sort(followers, (o1, o2) -> o2.getRating(game) - o1.getRating(game));
+                Collections.sort(following, (o1, o2) -> o2.getRating(game) - o1.getRating(game));
                 followingListAdapter.setGame(game);
                 followingListAdapter.setPlayersArray(following);
                 followingListAdapter.updateList();

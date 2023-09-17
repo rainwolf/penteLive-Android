@@ -62,35 +62,30 @@ public class InviteAIActivity extends AppCompatActivity {
         spinner.setSelection(PrefUtils.getIntFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONDIFFICULTY_KEY, 0));
 
         Button button = (Button) findViewById(R.id.sendInvitationButton);
-        if (button != null) button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String gameType = "";
-                switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
-                    case 0:
-                        gameType = "51";
-                        break;
-                    case 1:
-                        gameType = "55";
-                        break;
-                }
-                String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked() ? "Y" : "N";
-                String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked() ? "2" : "1";
-                String difficulty = "" + (((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
-                SendInvitationTask submitTask = new SendInvitationTask(gameType, rated, difficulty, playAs);
-                submitTask.execute((Void) null);
+        if (button != null) button.setOnClickListener(v -> {
+            String gameType = "";
+            switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
+                case 0:
+                    gameType = "51";
+                    break;
+                case 1:
+                    gameType = "55";
+                    break;
             }
+            String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked() ? "Y" : "N";
+            String playAs = ((ToggleButton) findViewById(R.id.playAsToggleButton)).isChecked() ? "2" : "1";
+            String difficulty = "" + (((Spinner) findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
+            SendInvitationTask submitTask = new SendInvitationTask(gameType, rated, difficulty, playAs);
+            submitTask.execute((Void) null);
         });
 
-        ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if ((isChecked)) {
-                    ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
-                    ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
-                } else {
-                    ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
-                    ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
-                }
+        ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if ((isChecked)) {
+                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
+                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
+            } else {
+                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
+                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
             }
         });
         if (PentePlayer.mShowAds) {

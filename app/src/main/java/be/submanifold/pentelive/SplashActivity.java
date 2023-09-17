@@ -15,10 +15,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
+        MobileAds.initialize(this, initializationStatus -> {
         });
 //        MobileAds.initialize(this, "ca-app-pub-3326997956703582~7930084241");
     }

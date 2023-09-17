@@ -181,12 +181,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 } else {
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
                 }
-                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mediaPlayer) {
-                        mediaPlayer.start();
-                    }
-                });
+                mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                 mediaPlayer.prepare();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -580,32 +575,19 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
 
             builder.setView(view);
-            builder.setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    replyInvitation(player, replyText.getText().toString(), tableId, true, false);
-                    LiveTableFragment fragment = (LiveTableFragment)
-                            getSupportFragmentManager().findFragmentByTag("liveTable");
-                    if (fragment != null) {
-                        sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + fragment.table.getId() + ",\"booted\":false,\"time\":0}}");
-                    } else {
-                        System.out.println("**************** ah crap");
-                    }
-                    sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
+            builder.setPositiveButton(getString(R.string.accept), (dialog, which) -> {
+                replyInvitation(player, replyText.getText().toString(), tableId, true, false);
+                LiveTableFragment fragment1 = (LiveTableFragment)
+                        getSupportFragmentManager().findFragmentByTag("liveTable");
+                if (fragment1 != null) {
+                    sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + fragment1.table.getId() + ",\"booted\":false,\"time\":0}}");
+                } else {
+                    System.out.println("**************** ah crap");
                 }
+                sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
             });
-            builder.setNeutralButton(getString(R.string.decline), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    replyInvitation(player, replyText.getText().toString(), tableId, false, false);
-                }
-            });
-            builder.setNegativeButton(getString(R.string.ignore_invitations), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    replyInvitation(player, replyText.getText().toString(), tableId, false, true);
-                }
-            });
+            builder.setNeutralButton(getString(R.string.decline), (dialog, which) -> replyInvitation(player, replyText.getText().toString(), tableId, false, false));
+            builder.setNegativeButton(getString(R.string.ignore_invitations), (dialog, which) -> replyInvitation(player, replyText.getText().toString(), tableId, false, true));
             AlertDialog dlg = builder.create();
             dlg.setCanceledOnTouchOutside(false);
             dlg.show();
