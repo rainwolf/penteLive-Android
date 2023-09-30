@@ -43,25 +43,25 @@ public class InviteAIActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_ai);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Bruce Cropley's AI");
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-        Spinner spinner = (Spinner) findViewById(R.id.gameTypeSpinner);
+        Spinner spinner = findViewById(R.id.gameTypeSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.ai_game_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(PrefUtils.getIntFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONGAME_KEY, 0));
-        spinner = (Spinner) findViewById(R.id.difficultySpinner);
+        spinner = findViewById(R.id.difficultySpinner);
         adapter = ArrayAdapter.createFromResource(this,
                 R.array.ai_difficulty_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(PrefUtils.getIntFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_AIINVITATIONDIFFICULTY_KEY, 0));
 
-        Button button = (Button) findViewById(R.id.sendInvitationButton);
+        Button button = findViewById(R.id.sendInvitationButton);
         if (button != null) button.setOnClickListener(v -> {
             String gameType = "";
             switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
@@ -81,11 +81,11 @@ public class InviteAIActivity extends AppCompatActivity {
 
         ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
             if ((isChecked)) {
-                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
-                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
+                findViewById(R.id.playAsLabel).setVisibility(View.GONE);
+                findViewById(R.id.playAsToggleButton).setVisibility(View.GONE);
             } else {
-                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
-                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
+                findViewById(R.id.playAsLabel).setVisibility(View.VISIBLE);
+                findViewById(R.id.playAsToggleButton).setVisibility(View.VISIBLE);
             }
         });
         if (PentePlayer.mShowAds) {
@@ -196,11 +196,7 @@ public class InviteAIActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
                 System.out.println(output);
 
-                if (output.indexOf("against the AI player. You can start a new one after finishing the current one") > -1) {
-                    return false;
-                }
-
-                return true;
+                return output.indexOf("against the AI player. You can start a new one after finishing the current one") <= -1;
 
             } catch (IOException e1) {
                 e1.printStackTrace();

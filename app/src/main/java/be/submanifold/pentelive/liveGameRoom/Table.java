@@ -22,13 +22,21 @@ import be.submanifold.pentelive.R;
  */
 
 public class Table {
-    private int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
-            keryoPenteColor = Color.parseColor("#BAFDA3"), gomokuColor = Color.parseColor("#A3FDEB"),
-            dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
-            poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
-            boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52BE80"),
-            swap2Color = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
+    private final int blackColor = Color.BLACK;
+    private final int whiteColor = Color.WHITE;
+    private final int penteColor = Color.parseColor("#FDDEA3");
+    private final int keryoPenteColor = Color.parseColor("#BAFDA3");
+    private final int gomokuColor = Color.parseColor("#A3FDEB");
+    private final int dPenteColor = Color.parseColor("#A3CDFD");
+    private final int gPenteColor = Color.parseColor("#AEA3FD");
+    private final int poofPenteColor = Color.parseColor("#EDA3FD");
+    private final int connect6Color = Color.parseColor("#EDA3FD");
+    private final int boatPenteColor = Color.parseColor("#25BAFF");
+    private final int dkeryoColor = Color.parseColor("#FFA500");
+    private final int goColor = Color.parseColor("#FAC832");
+    private final int oPenteColor = Color.parseColor("#52BE80");
+    private final int swap2Color = Color.parseColor("#E5AA70");
+    private final int swap2KeryoColor = Color.parseColor("#50C878");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -79,7 +87,7 @@ public class Table {
     private Map<String, Integer> timer;
     private Map<Integer, LivePlayer> seats = new HashMap<>();
     private GameState gameState = new GameState();
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     public int getGridSize() {
         return gridSize;
@@ -570,9 +578,7 @@ public class Table {
         if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             int neighborPosition = getPosition(neighborStone);
-            if (position != 3 - neighborPosition) {
-                return false;
-            }
+            return position == 3 - neighborPosition;
         }
         return true;
     }
@@ -630,9 +636,7 @@ public class Table {
         if (stone / gridSize != gridSize - 1) {
             int neighborStone = stone + gridSize;
             int position = getPosition(neighborStone);
-            if (position != 1 && position != 2) {
-                return true;
-            }
+            return position != 1 && position != 2;
         }
         return false;
     }
@@ -999,10 +1003,7 @@ public class Table {
             return true;
         }
         livePlayer = seats.get(2);
-        if (livePlayer != null && livePlayer.getName().equals(player)) {
-            return true;
-        }
-        return false;
+        return livePlayer != null && livePlayer.getName().equals(player);
     }
 
     public void sit(int seat, String player) {

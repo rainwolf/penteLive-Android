@@ -4,9 +4,12 @@ package be.submanifold.pentelive;
  * Created by waliedothman on 06/07/16.
  */
 public class KothPlayer {
-    private String name, rating, lastGame;
-    private boolean canBeChallenged;
-    private int crown, color;
+    private final String name;
+    private final String rating;
+    private final String lastGame;
+    private final boolean canBeChallenged;
+    private final int crown;
+    private final int color;
 
     public KothPlayer(String name, String rating, String lastGame, boolean canBeChallenged, int crown, int color) {
         this.name = name;

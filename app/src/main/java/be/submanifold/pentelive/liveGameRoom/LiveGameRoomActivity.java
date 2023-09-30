@@ -49,7 +49,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private ClientSocketDSGEventHandler eventHandler;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
-    private LiveGameRoomFragment roomFragment = null;
+    private final LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
 
     private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
@@ -264,7 +264,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     int tableId = (Integer) data.get("table");
                                     if (tablesAndPlayers.tableExit(tableId, player)) {
                                         int index = getSupportFragmentManager().getBackStackEntryCount() - 1;
-                                        FragmentManager.BackStackEntry backEntry = (FragmentManager.BackStackEntry) getSupportFragmentManager().getBackStackEntryAt(index);
+                                        FragmentManager.BackStackEntry backEntry = getSupportFragmentManager().getBackStackEntryAt(index);
                                         String tag = backEntry.getName();
                                         if ("liveTable".equals(tag)) {
                                             getSupportFragmentManager().popBackStack();
@@ -559,19 +559,19 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             }
             AlertDialog.Builder builder = new AlertDialog.Builder(LiveGameRoomActivity.this);
             View view = getLayoutInflater().inflate(R.layout.invitation_response_layout, null);
-            TextView playerText = (TextView) view.findViewById(R.id.playerText);
+            TextView playerText = view.findViewById(R.id.playerText);
             LivePlayer plr = tablesAndPlayers.players.get(player);
             SpannableStringBuilder sb = plr.coloredNameString(playerText.getLineHeight());
             sb.append(" - ").append(plr.coloredRatingSquare(plr.getRating(tablesAndPlayers.tables.get(tableId).getGame())));
             sb.append(" ").append(plr.getRating(tablesAndPlayers.tables.get(tableId).getGame()) + "");
             playerText.setText(sb);
             String gameStr = tablesAndPlayers.tables.get(tableId).getGameName();
-            TextView tableText = (TextView) view.findViewById(R.id.tableText);
+            TextView tableText = view.findViewById(R.id.tableText);
             tableText.setText(getString(R.string.invites_you, gameStr));
 
-            TextView invitationText = (TextView) view.findViewById(R.id.invitationText);
+            TextView invitationText = view.findViewById(R.id.invitationText);
             invitationText.setText(getString(R.string.message) + ": \"" + inviteText + "\"");
-            final EditText replyText = (EditText) view.findViewById(R.id.replyText);
+            final EditText replyText = view.findViewById(R.id.replyText);
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
 
             builder.setView(view);

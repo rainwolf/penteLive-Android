@@ -27,11 +27,11 @@ public class TableListAdapter extends BaseExpandableListAdapter {
 
     Map<Integer, Table> tables;
     List<Table> tablesArray;
-    private String roomName;
+    private final String roomName;
     //    PentePlayer playerData;
     private LayoutInflater inflater;
-    private LiveGameRoomActivity activity;
-    private Context ctx;
+    private final LiveGameRoomActivity activity;
+    private final Context ctx;
 
     public TableListAdapter(Map<Integer, Table> tables, String roomName, LiveGameRoomActivity activity) {
         this.tables = tables;
@@ -89,7 +89,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(ContextCompat.getColor(ctx, R.color.britishracinggreen));
         String title = roomName + " (" + tablesArray.size() + ")";
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);
-        ((Button) convertView.findViewById(R.id.newTableButton)).setOnClickListener(view -> activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}"));
+        convertView.findViewById(R.id.newTableButton).setOnClickListener(view -> activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}"));
         return convertView;
     }
 
@@ -101,22 +101,22 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         }
         Table table = tablesArray.get(childPosition);
         if (table.isOpen()) {
-            ((ImageView) convertView.findViewById(R.id.imageView)).setVisibility(View.GONE);
+            convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
         } else {
-            ((ImageView) convertView.findViewById(R.id.imageView)).setVisibility(View.VISIBLE);
+            convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
         }
         convertView.setBackgroundColor(table.getGameColor());
         ((TextView) convertView.findViewById(R.id.gameNameText)).setText(table.getGameName());
-        TextView seatsTextView = ((TextView) convertView.findViewById(R.id.seatsText));
+        TextView seatsTextView = convertView.findViewById(R.id.seatsText);
         if (table.getSeats().size() > 0) {
             seatsTextView.setVisibility(View.VISIBLE);
             seatsTextView.setText(table.getSeatsText(seatsTextView.getLineHeight()));
         } else {
             seatsTextView.setVisibility(View.GONE);
         }
-        TextView settingsTextView = ((TextView) convertView.findViewById(R.id.settingsText));
+        TextView settingsTextView = convertView.findViewById(R.id.settingsText);
         settingsTextView.setText(table.getSettingsText());
-        TextView watchingTextView = ((TextView) convertView.findViewById(R.id.watchingText));
+        TextView watchingTextView = convertView.findViewById(R.id.watchingText);
         watchingTextView.setText(table.getWatchingText(watchingTextView.getLineHeight()));
         return convertView;
     }

@@ -45,15 +45,15 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
     private Activity activity;
     private boolean asked2GetStarted;
 
-    private String messagesStr;
-    private String invitationsStr;
-    private String activeGamesStr;
-    private String publicInvitationsStr;
-    private String sentInvitationsStr;
-    private String nonActiveGamesStr;
-    private String tournamentStr;
-    private String kothStr;
-    private Context ctx;
+    private final String messagesStr;
+    private final String invitationsStr;
+    private final String activeGamesStr;
+    private final String publicInvitationsStr;
+    private final String sentInvitationsStr;
+    private final String nonActiveGamesStr;
+    private final String tournamentStr;
+    private final String kothStr;
+    private final Context ctx;
 
     public DashboardListAdapter(PentePlayer player) {
         this.playerData = player;
@@ -251,7 +251,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
-        ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
         int crown = 0, color = 0;
@@ -307,7 +307,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             }
             color = 0;
         } else if (groupPosition == TOURNAMENTGROUP) {
-            ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+            convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
             mainText = "\u2B24  " + tournament.getName();
             if (tournament.getTournamentState().equals("1")) {
                 detailText = ctx.getString(R.string.registration_open_until, tournament.getDate());
@@ -339,7 +339,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP ||
                 groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP ||
                 groupPosition == PUBLICINVITATIONSGROUP || groupPosition == MESSAGESGROUP) {
-            ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+            ImageView imgVw = convertView.findViewById(R.id.imageView);
             imgVw.setVisibility(View.VISIBLE);
             imgVw.setAlpha(1f);
             Bitmap avatar = null;
@@ -419,8 +419,8 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
             }
         }
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
-        TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView detailTextView = convertView.findViewById(R.id.detailText);
         Drawable crownIcon = null;
         switch (crown) {
             case 1:
@@ -551,13 +551,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         notifyDataSetChanged();
 
         if (playerData.showAds()) {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.adView).setVisibility(View.VISIBLE);
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
+            activity.findViewById(R.id.adView).setVisibility(View.GONE);
         }
 
         activity.invalidateOptionsMenu();

@@ -126,17 +126,17 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
-        ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.VISIBLE);
-        ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingText).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
-        TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView detailTextView = convertView.findViewById(R.id.detailText);
 
         int crown = 0, color = 0;
         KothPlayer player = null;
         player = onlinePlayers.get(sections.get(groupPosition)).get(childPosition);
-        ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+        ImageView imgVw = convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
         if (PentePlayer.loadAvatars) {

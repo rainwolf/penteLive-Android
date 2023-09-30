@@ -40,11 +40,11 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Register new account");
         setSupportActionBar(toolbar);
 
-        ((Button) findViewById(R.id.viewPolicy)).setOnClickListener(v -> {
+        findViewById(R.id.viewPolicy).setOnClickListener(v -> {
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
@@ -67,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
                     "That's it, and remember to have fun of course!");
             ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
         });
-        ((Button) findViewById(R.id.registerButton)).setOnClickListener(v -> attemptRegistration());
+        findViewById(R.id.registerButton).setOnClickListener(v -> attemptRegistration());
     }
 
     @Override
@@ -119,7 +119,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     public class RegisterTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String username, password, email;
+        private final String username;
+        private final String password;
+        private String email;
         private String response;
 
 

@@ -20,6 +20,7 @@ package org.pente.gameServer.event;
 
 import java.net.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class SocketDSGEventHandler implements DSGEventListener {
@@ -55,8 +56,7 @@ public class SocketDSGEventHandler implements DSGEventListener {
                         if (b != 255) {
                             baos.write(b);
                         } else {
-                            byte result[] = baos.toByteArray();
-                            jsonStr = new String(result, "UTF-8");
+                            jsonStr = baos.toString(StandardCharsets.UTF_8);
 //                            System.out.println("ObjectReader: " + jsonStr);
                             baos.reset();
                             break;
@@ -81,7 +81,7 @@ public class SocketDSGEventHandler implements DSGEventListener {
 
             handleError(t);
         }
-    };
+    }
 
     class ObjectWriter implements Runnable {
         public void run() {
@@ -102,7 +102,7 @@ public class SocketDSGEventHandler implements DSGEventListener {
 
 //                    System.out.println("ObjectWriter: " + jsonStr);
 
-                    byte[] bytes = jsonStr.getBytes("UTF-8");
+                    byte[] bytes = jsonStr.getBytes(StandardCharsets.UTF_8);
                     // byte[] arr = {10, 20, 30, 40, 50};
                     // outStream.write(arr, 0, 5);
                     // outStream.flush();

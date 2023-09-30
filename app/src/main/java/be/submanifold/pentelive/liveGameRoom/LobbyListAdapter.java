@@ -35,7 +35,7 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
     Activity activity;
 
     private LayoutInflater inflater;
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     public LobbyListAdapter() {
     }
@@ -105,7 +105,7 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
         }
         convertView.setBackgroundColor(Color.WHITE);
 
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
 
         nameTextView.setText(rooms.get(childPosition).getRoomText(nameTextView.getLineHeight()));
 
@@ -132,13 +132,13 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
         notifyDataSetChanged();
 
         if (PentePlayer.mShowAds) {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.adView).setVisibility(View.VISIBLE);
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
+            activity.findViewById(R.id.adView).setVisibility(View.GONE);
         }
         System.out.println("updateList");
     }

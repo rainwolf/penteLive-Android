@@ -42,7 +42,7 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         this.following = following;
     }
 
-    private Context ctx;
+    private final Context ctx;
 
     public SocialListAdapter() {
         this.playersArray = new ArrayList<>();
@@ -124,7 +124,7 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(Color.WHITE);
         LivePlayer player = playersArray.get(childPosition);
 
-        ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+        ImageView imgVw = convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
         Bitmap avatar = null;
@@ -137,7 +137,7 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         } else {
             imgVw.setVisibility(View.GONE);
         }
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
         SpannableStringBuilder sb = player.coloredNameString(nameTextView.getLineHeight());
         PentePlayer.markIfOnline(player.getName(), sb);
         nameTextView.setText(sb);

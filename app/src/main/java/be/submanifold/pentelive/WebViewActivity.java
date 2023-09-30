@@ -25,7 +25,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            webview = (WebView) findViewById(R.id.webview);
+            webview = findViewById(R.id.webview);
             webview.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -107,7 +107,7 @@ public class WebViewActivity extends AppCompatActivity {
     }
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 

@@ -82,7 +82,7 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
-    int countDownSeconds = 1 * 60;
+    int countDownSeconds = 60;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -151,7 +151,7 @@ public class LiveTableFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Toolbar toolbar = (Toolbar) getView().findViewById(R.id.toolbar);
+        Toolbar toolbar = getView().findViewById(R.id.toolbar);
 //        toolbar.setTitle(getString(R.string.home));
         toolbar.inflateMenu(R.menu.live_table_menu);
         toolbar.setOnMenuItemClickListener(item -> {
@@ -159,7 +159,7 @@ public class LiveTableFragment extends Fragment {
                 case R.id.action_players:
                     if (table.getOwner().equals(me)) {
                         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                        String options[] = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
+                        String[] options = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
                         builder.setItems(options, (dialog, which) -> {
                             switch (which) {
                                 case 0:
@@ -209,7 +209,7 @@ public class LiveTableFragment extends Fragment {
 
         activity = (LiveGameRoomActivity) getActivity();
         me = activity.getMe();
-        board = (LiveBoardView) getView().findViewById(R.id.boardView);
+        board = getView().findViewById(R.id.boardView);
         board.setTable(table, me);
         board.setFragment(this);
         if (PentePlayer.mShowAds) {
@@ -218,17 +218,17 @@ public class LiveTableFragment extends Fragment {
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
+            getView().findViewById(R.id.adView).setVisibility(View.GONE);
         }
-        p1Name = (TextView) getView().findViewById(R.id.p1Name);
-        p2Name = (TextView) getView().findViewById(R.id.p2Name);
-        p1Timer = (TextView) getView().findViewById(R.id.p1Timer);
-        p2Timer = (TextView) getView().findViewById(R.id.p2Timer);
-        settingsText = (TextView) getView().findViewById(R.id.settingsText);
-        playButton = (Button) getView().findViewById(R.id.playButton);
-        tableTextView = (TextView) getView().findViewById(R.id.tableTextView);
-        capturesTextView = (TextView) getView().findViewById(R.id.capturesView);
-        gameNameView = (TextView) getView().findViewById(R.id.gameNameView);
+        p1Name = getView().findViewById(R.id.p1Name);
+        p2Name = getView().findViewById(R.id.p2Name);
+        p1Timer = getView().findViewById(R.id.p1Timer);
+        p2Timer = getView().findViewById(R.id.p2Timer);
+        settingsText = getView().findViewById(R.id.settingsText);
+        playButton = getView().findViewById(R.id.playButton);
+        tableTextView = getView().findViewById(R.id.tableTextView);
+        capturesTextView = getView().findViewById(R.id.capturesView);
+        gameNameView = getView().findViewById(R.id.gameNameView);
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
         playButton.setOnClickListener(view14 -> {
             if (playButton.getText().equals(getString(R.string.pass)) && table.isGo() && mListener != null) {
@@ -239,8 +239,8 @@ public class LiveTableFragment extends Fragment {
                 playButton.setVisibility(View.INVISIBLE);
             }
         });
-        p1Layout = (LinearLayout) getView().findViewById(R.id.p1Layout);
-        p2Layout = (LinearLayout) getView().findViewById(R.id.p2Layout);
+        p1Layout = getView().findViewById(R.id.p1Layout);
+        p2Layout = getView().findViewById(R.id.p2Layout);
         p1Layout.setOnClickListener(view13 -> {
             if (mListener != null) {
                 if (table.isSeated(me)) {
@@ -371,7 +371,7 @@ public class LiveTableFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement OnFragmentInteractionListener");
         }
     }
@@ -502,7 +502,7 @@ public class LiveTableFragment extends Fragment {
             if (table.getGameState().goState == GoState.EVALUATESTONES && table.showEvaluateDialog(me)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(table.getScoreMessage());
-                String options[] = {getString(R.string.accept), getString(R.string.reject)};
+                String[] options = {getString(R.string.accept), getString(R.string.reject)};
                 builder.setItems(options, (dialog, which) -> {
                     int passMove = table.getGridSize() * table.getGridSize();
                     switch (which) {
@@ -581,7 +581,7 @@ public class LiveTableFragment extends Fragment {
                     }
                 });
                 waitForPlayerReturnDialog.show();
-                countDownTimer = new CountDownTimer(1 * 60 * 1000, 1000) {
+                countDownTimer = new CountDownTimer(60 * 1000, 1000) {
                     @Override
                     public void onTick(long l) {
                         long seconds = l / 1000;
@@ -625,7 +625,7 @@ public class LiveTableFragment extends Fragment {
     private void initializeSettingsView() {
         if (settingsView == null) {
             settingsView = activity.getLayoutInflater().inflate(R.layout.live_table_settings, null);
-            timedChoice = (TextView) settingsView.findViewById(R.id.timedChoice);
+            timedChoice = settingsView.findViewById(R.id.timedChoice);
             timedChoice.setOnClickListener(view -> {
                 if (timedChoice.getText().toString().equals(getString(R.string.yes))) {
                     timedChoice.setText(getString(R.string.no));
@@ -634,7 +634,7 @@ public class LiveTableFragment extends Fragment {
                 }
                 sendTableChange();
             });
-            ratedChoice = (TextView) settingsView.findViewById(R.id.ratedChoice);
+            ratedChoice = settingsView.findViewById(R.id.ratedChoice);
             ratedChoice.setOnClickListener(view -> {
                 if (ratedChoice.getText().toString().equals(getString(R.string.yes))) {
                     ratedChoice.setText(getString(R.string.no));
@@ -643,7 +643,7 @@ public class LiveTableFragment extends Fragment {
                 }
                 sendTableChange();
             });
-            privateChoice = (TextView) settingsView.findViewById(R.id.privateChoice);
+            privateChoice = settingsView.findViewById(R.id.privateChoice);
             privateChoice.setOnClickListener(view -> {
                 if (privateChoice.getText().toString().equals(getString(R.string.public_table))) {
                     privateChoice.setText(getString(R.string.private_table));
@@ -652,9 +652,9 @@ public class LiveTableFragment extends Fragment {
                 }
                 sendTableChange();
             });
-            initialMinutesView = (EditText) settingsView.findViewById(R.id.initialMinutesInput);
-            incrementalSecondsView = (EditText) settingsView.findViewById(R.id.incrementalSecondsInput);
-            gameSpinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
+            initialMinutesView = settingsView.findViewById(R.id.initialMinutesInput);
+            incrementalSecondsView = settingsView.findViewById(R.id.incrementalSecondsInput);
+            gameSpinner = settingsView.findViewById(R.id.gameSpinner);
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(activity,
                     R.array.game_types_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -727,7 +727,7 @@ public class LiveTableFragment extends Fragment {
         if (table.isGo()) {
             if (table.getGameState().state == State.STARTED &&
                     ((table.getGameState().goState == GoState.PLAY && !myTurn) || (table.getGameState().goState == GoState.MARKSTONES && myTurn))) {
-                String options[] = {getString(R.string.score), getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                String[] options = {getString(R.string.score), getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
                 builder.setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -745,7 +745,7 @@ public class LiveTableFragment extends Fragment {
                     }
                 });
             } else {
-                String options[] = {getString(R.string.score), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                String[] options = {getString(R.string.score), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
                 builder.setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -762,7 +762,7 @@ public class LiveTableFragment extends Fragment {
             }
 
         } else if (!myTurn) {
-            String options[] = {getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+            String[] options = {getString(R.string.request_undo), getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0:
@@ -778,7 +778,7 @@ public class LiveTableFragment extends Fragment {
                 // the user clicked on colors[which]
             });
         } else {
-            String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+            String[] options = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0:
@@ -821,7 +821,7 @@ public class LiveTableFragment extends Fragment {
     public void cancelRequest(String player) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_cancellation, player));
-        String options[] = {getString(R.string.accept), getString(R.string.decline)};
+        String[] options = {getString(R.string.accept), getString(R.string.decline)};
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
@@ -852,7 +852,7 @@ public class LiveTableFragment extends Fragment {
     public void undoRequested(String player) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_undo, player));
-        String options[] = {getString(R.string.accept), getString(R.string.decline)};
+        String[] options = {getString(R.string.accept), getString(R.string.decline)};
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
@@ -883,7 +883,7 @@ public class LiveTableFragment extends Fragment {
     public void showDPenteChoice() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.continue_as));
-        String options[] = {getString(R.string.p1white), getString(R.string.p2black)};
+        String[] options = {getString(R.string.p1white), getString(R.string.p2black)};
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
@@ -916,7 +916,7 @@ public class LiveTableFragment extends Fragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.continue_as));
         if (table.swap2ChoiceWithoutPass()) {
-            String options[] = {getString(R.string.p1white), getString(R.string.p2black)};
+            String[] options = {getString(R.string.p1white), getString(R.string.p2black)};
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0:
@@ -928,7 +928,7 @@ public class LiveTableFragment extends Fragment {
                 }
             });
         } else {
-            String options[] = {getString(R.string.p1white), getString(R.string.p2black), getString(R.string.swap2pass)};
+            String[] options = {getString(R.string.p1white), getString(R.string.p2black), getString(R.string.swap2pass)};
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0:
@@ -989,8 +989,8 @@ public class LiveTableFragment extends Fragment {
     private void showTablePlayers() {
         PlayersListAdapter listAdapter = new PlayersListAdapter(table.getPlayers(), getString(R.string.table_players), table.getGame());
         listAdapter.setInflater(activity.getLayoutInflater());
-        View view = (View) activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
-        ExpandableListView listView = (ExpandableListView) view.findViewById(R.id.onlineUsersListView);
+        View view = activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
+        ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
         AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
@@ -1010,8 +1010,8 @@ public class LiveTableFragment extends Fragment {
         bootablePlayers.remove(me);
         final PlayersListAdapter listAdapter = new PlayersListAdapter(bootablePlayers, getString(R.string.boot_player), table.getGame());
         listAdapter.setInflater(activity.getLayoutInflater());
-        View view = (View) activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
-        ExpandableListView listView = (ExpandableListView) view.findViewById(R.id.onlineUsersListView);
+        View view = activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
+        ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
         AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
@@ -1061,8 +1061,8 @@ public class LiveTableFragment extends Fragment {
 
         final PlayersListAdapter listAdapter = new PlayersListAdapter(invitePlayers, getString(R.string.invite_player), table.getGame());
         listAdapter.setInflater(activity.getLayoutInflater());
-        View view = (View) activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
-        ExpandableListView listView = (ExpandableListView) view.findViewById(R.id.onlineUsersListView);
+        View view = activity.getLayoutInflater().inflate(R.layout.onlineusers_listview, null);
+        ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
         AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());

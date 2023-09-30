@@ -72,7 +72,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //    private int untilMove;
 
     //        private Game game;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
     private DatePickerDialog afterDatePickerDialog, beforeDatePickerDialog;
 
@@ -80,7 +80,7 @@ public class DatabaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_database);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
         ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
         settingsView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.database_options, null, false);
@@ -105,16 +105,16 @@ public class DatabaseActivity extends AppCompatActivity {
         aiSearchPrmtrsWindow.setOnDismissListener(dialogInterface -> board.setAlpha(1.0f));
         aiSearchPrmtrsWindow.setCanceledOnTouchOutside(true);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
-        board = (DBBoardView) findViewById(R.id.boardView);
+        board = findViewById(R.id.boardView);
         board.setActivity(this);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String gameStr = extras.getString("game");
             if (gameStr.equals("Pente") || gameStr.equals("Speed Pente") || gameStr.contains("Keryo-Pente")) {
-                ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
+                findViewById(R.id.aiButton).setVisibility(VISIBLE);
             }
             board.setGame(gameStr);
             board.setMovesList(extras.getIntegerArrayList("moves"));
@@ -126,7 +126,7 @@ public class DatabaseActivity extends AppCompatActivity {
             adextras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.dbAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, adextras).build());
         } else {
-            ((AdView) findViewById(R.id.dbAdView)).setVisibility(View.GONE);
+            findViewById(R.id.dbAdView).setVisibility(View.GONE);
         }
 
 
@@ -142,7 +142,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //            settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(DatabaseActivity.this, R.drawable.border));
 ////                        messageWindow.setAnimationStyle(R.anim.animation);
 
-        Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
+        Spinner spinner = settingsView.findViewById(R.id.gameSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.database_game_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -155,15 +155,15 @@ public class DatabaseActivity extends AppCompatActivity {
                 board.setGame(game);
                 if (game.contains("Gomoku") || game.contains("Connect6")) {
                     ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("");
-                    ((TextView) findViewById(R.id.capturesView)).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.capturesView).setVisibility(View.INVISIBLE);
                 } else {
                     ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("\u2B24 x 0 - \u25EF x 0");
-                    ((TextView) findViewById(R.id.capturesView)).setVisibility(VISIBLE);
+                    findViewById(R.id.capturesView).setVisibility(VISIBLE);
                 }
                 if (game.equals("Pente") || game.equals("Speed Pente") || game.contains("Keryo-Pente")) {
-                    ((Button) findViewById(R.id.aiButton)).setVisibility(VISIBLE);
+                    findViewById(R.id.aiButton).setVisibility(VISIBLE);
                 } else {
-                    ((Button) findViewById(R.id.aiButton)).setVisibility(View.GONE);
+                    findViewById(R.id.aiButton).setVisibility(View.GONE);
                 }
                 board.resetState();
             }
@@ -178,7 +178,7 @@ public class DatabaseActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             return false;
         });
-        TextView sortChoice = (TextView) settingsView.findViewById(R.id.sortChoice);
+        TextView sortChoice = settingsView.findViewById(R.id.sortChoice);
         sortChoice.setOnClickListener(v -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -191,7 +191,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity");
             }
         });
-        TextView winner = (TextView) settingsView.findViewById(R.id.winner);
+        TextView winner = settingsView.findViewById(R.id.winner);
         winner.setOnClickListener(v -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -268,29 +268,28 @@ public class DatabaseActivity extends AppCompatActivity {
 //            }
 
 
-        Button button = (Button) findViewById(R.id.searchButton);
+        Button button = findViewById(R.id.searchButton);
         if (button != null) button.setOnClickListener(v -> doSearch());
-        button = (Button) findViewById(R.id.backButton);
+        button = findViewById(R.id.backButton);
         if (button != null) button.setOnClickListener(v -> board.undoMove());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_db_settings:
-                    showDBSettings();
+            if (menuItem.getItemId() == R.id.action_db_settings) {
+                showDBSettings();
 
-                    return true;
+                return true;
             }
 
             return false;
         });
-        ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).setOnFocusChangeListener((v, hasFocus) -> {
+        settingsView.findViewById(R.id.player1).setOnFocusChangeListener((v, hasFocus) -> {
 //                    System.out.println("kitty");
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
-        ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).setOnFocusChangeListener((v, hasFocus) -> {
+        settingsView.findViewById(R.id.player2).setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -310,7 +309,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 ((TextView) settingsView.findViewById(R.id.afterDate)).setText("");
             }
         });
-        ((TextView) settingsView.findViewById(R.id.afterDate)).setOnClickListener(view -> afterDatePickerDialog.show());
+        settingsView.findViewById(R.id.afterDate).setOnClickListener(view -> afterDatePickerDialog.show());
         beforeDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, (view, year, monthOfYear, dayOfMonth) -> {
             Calendar newDate = Calendar.getInstance();
             newDate.set(year, monthOfYear, dayOfMonth);
@@ -323,8 +322,8 @@ public class DatabaseActivity extends AppCompatActivity {
                 ((TextView) settingsView.findViewById(R.id.beforeDate)).setText("");
             }
         });
-        ((TextView) settingsView.findViewById(R.id.beforeDate)).setOnClickListener(view -> beforeDatePickerDialog.show());
-        spinner = (Spinner) settingsView.findViewById(R.id.p1RatingSpinner);
+        settingsView.findViewById(R.id.beforeDate).setOnClickListener(view -> beforeDatePickerDialog.show());
+        spinner = settingsView.findViewById(R.id.p1RatingSpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.db_ratings_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -347,7 +346,7 @@ public class DatabaseActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             return false;
         });
-        spinner = (Spinner) settingsView.findViewById(R.id.p2RatingSpinner);
+        spinner = settingsView.findViewById(R.id.p2RatingSpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.db_ratings_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -370,7 +369,7 @@ public class DatabaseActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             return false;
         });
-        TextView txtvw = (TextView) settingsView.findViewById(R.id.eitherOrBoth);
+        TextView txtvw = settingsView.findViewById(R.id.eitherOrBoth);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, getString(R.string.both)));
         txtvw.setOnClickListener(view -> {
             if (((TextView) view).getText().equals(getString(R.string.both))) {
@@ -380,7 +379,7 @@ public class DatabaseActivity extends AppCompatActivity {
             }
             PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBPEITHERORBOTH_KEY, ((TextView) view).getText().toString());
         });
-        txtvw = (TextView) settingsView.findViewById(R.id.excludeTimeouts);
+        txtvw = settingsView.findViewById(R.id.excludeTimeouts);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, getString(R.string.no)));
         txtvw.setOnClickListener(view -> {
             if (((TextView) view).getText().equals(getString(R.string.no))) {
@@ -390,7 +389,7 @@ public class DatabaseActivity extends AppCompatActivity {
             }
             PrefUtils.saveToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBEXCLUDETIMEOUTS_KEY, ((TextView) view).getText().toString());
         });
-        txtvw = (TextView) settingsView.findViewById(R.id.liveOrTB);
+        txtvw = settingsView.findViewById(R.id.liveOrTB);
         txtvw.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBLIVEORTB_KEY, getString(R.string.all)));
         txtvw.setOnClickListener(view -> {
             if (((TextView) view).getText().equals(getString(R.string.all))) {
@@ -404,8 +403,8 @@ public class DatabaseActivity extends AppCompatActivity {
         });
 
 
-        ((Button) findViewById(R.id.aiButton)).setOnClickListener(view -> showAISettings());
-        spinner = (Spinner) aiSettingsView.findViewById(R.id.difficultySpinner);
+        findViewById(R.id.aiButton).setOnClickListener(view -> showAISettings());
+        spinner = aiSettingsView.findViewById(R.id.difficultySpinner);
         adapter = ArrayAdapter.createFromResource(DatabaseActivity.this,
                 R.array.ai_difficulty_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -422,7 +421,7 @@ public class DatabaseActivity extends AppCompatActivity {
             }
         });
         ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener((compoundButton, b) -> PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b));
-        ((Button) aiSettingsView.findViewById(R.id.runAIbutton)).setOnClickListener(view -> {
+        aiSettingsView.findViewById(R.id.runAIbutton).setOnClickListener(view -> {
             board.setSearchResults(null);
             aiSearchPrmtrsWindow.dismiss();
             if (board.getAiPlayer() == null) {
@@ -536,24 +535,24 @@ public class DatabaseActivity extends AppCompatActivity {
         }
 
 
-        Spinner spinner = (Spinner) settingsView.findViewById(R.id.gameSpinner);
+        Spinner spinner = settingsView.findViewById(R.id.gameSpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
-        spinner = (Spinner) settingsView.findViewById(R.id.p1RatingSpinner);
+        spinner = settingsView.findViewById(R.id.p1RatingSpinner);
         int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP1RATING_KEY, 0);
         spinner.setSelection(position);
         String[] p1RatingArray = getResources().getStringArray(R.array.db_ratings_array);
         dbP1Rating = p1RatingArray[position];
-        spinner = (Spinner) settingsView.findViewById(R.id.p2RatingSpinner);
+        spinner = settingsView.findViewById(R.id.p2RatingSpinner);
         position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP2RATING_KEY, 0);
         spinner.setSelection(position);
         String[] p2RatingArray = getResources().getStringArray(R.array.db_ratings_array);
         dbP1Rating = p2RatingArray[position];
-        TextView sortOrder = (TextView) settingsView.findViewById(R.id.sortChoice);
+        TextView sortOrder = settingsView.findViewById(R.id.sortChoice);
         sortOrder.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity"));
-        AutoCompleteTextView actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player1);
+        AutoCompleteTextView actv = settingsView.findViewById(R.id.player1);
         ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
         actv.setAdapter(acAdapter);
-        actv = (AutoCompleteTextView) settingsView.findViewById(R.id.player2);
+        actv = settingsView.findViewById(R.id.player2);
         acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
         actv.setAdapter(acAdapter);
 //            board.setAlpha(0.75f);
@@ -561,7 +560,7 @@ public class DatabaseActivity extends AppCompatActivity {
 
     private void showAISettings() {
         aiSearchPrmtrsWindow.show();
-        Spinner spinner = (Spinner) aiSettingsView.findViewById(R.id.difficultySpinner);
+        Spinner spinner = aiSettingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIDIFFICULTY_KEY, 0));
         ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, false));
     }
@@ -613,9 +612,19 @@ public class DatabaseActivity extends AppCompatActivity {
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String moves, game, player1, player2, afterDate, beforeDate, p1Rating, p2Rating,
-                eitherOrBoth, excludeTimeouts, liveOrTB;
-        private int sortOrder, winner;
+        private final String moves;
+        private final String game;
+        private final String player1;
+        private final String player2;
+        private final String afterDate;
+        private final String beforeDate;
+        private final String p1Rating;
+        private final String p2Rating;
+        private final String eitherOrBoth;
+        private final String excludeTimeouts;
+        private final String liveOrTB;
+        private final int sortOrder;
+        private final int winner;
         private String searchResult;
 
         SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner,
@@ -758,7 +767,7 @@ public class DatabaseActivity extends AppCompatActivity {
             board.setSearchResults(searchResults);
             board.invalidate();
             if (searchResults.size() == 0 && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
-                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), "<br><br>" + getString(R.string.no_search_results));
+                board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
             } else {
                 if (player1.length() > 0) {
                     String[] pList = player1.replace(" ", "").split(",");
@@ -776,7 +785,7 @@ public class DatabaseActivity extends AppCompatActivity {
                         }
                     }
                 }
-                board.setTextViewHTML(((TextView) findViewById(R.id.playerInfo)), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
+                board.setTextViewHTML(findViewById(R.id.playerInfo), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
             }
             progressBar.setVisibility(View.GONE);
         }

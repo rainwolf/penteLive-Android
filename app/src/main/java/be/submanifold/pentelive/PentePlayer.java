@@ -41,7 +41,7 @@ public class PentePlayer implements Parcelable {
     private List<Game> mNonActiveGames;
     private List<Game> mPublicInvitations;
     private List<Message> mMessages;
-    private List<RatingStat> mRatingStats;
+    private final List<RatingStat> mRatingStats;
     private List<KingOfTheHill> mHills;
     private List<Tournament> mTournaments;
     public static int myColor = 0;
@@ -662,7 +662,7 @@ public class PentePlayer implements Parcelable {
 
     private class LoadAvatarTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String mUsername;
+        private final String mUsername;
         private Bitmap avatar;
 
         LoadAvatarTask(String username) {
@@ -717,7 +717,7 @@ public class PentePlayer implements Parcelable {
     private class LoadPlayerTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mUsername, mPassword;
-        private DashboardListAdapter listAdapter;
+        private final DashboardListAdapter listAdapter;
 
         LoadPlayerTask(String username, String password, DashboardListAdapter listAdapter) {
             this.mUsername = username;
@@ -842,8 +842,8 @@ public class PentePlayer implements Parcelable {
     private class AcceptDeclineInvitationTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mSetID;
-        private boolean accept;
-        private DashboardListAdapter listAdapter;
+        private final boolean accept;
+        private final DashboardListAdapter listAdapter;
 
 
         AcceptDeclineInvitationTask(String setID, boolean accept, DashboardListAdapter listAdapter) {
@@ -931,7 +931,7 @@ public class PentePlayer implements Parcelable {
     private class CancelInvitationTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mSetID;
-        private DashboardListAdapter listAdapter;
+        private final DashboardListAdapter listAdapter;
 
 
         CancelInvitationTask(String setID, DashboardListAdapter listAdapter) {

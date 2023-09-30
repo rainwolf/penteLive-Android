@@ -54,7 +54,7 @@ import be.submanifold.pentelive.liveGameRoom.LivePlayer;
 public class SocialActivity extends AppCompatActivity {
 
     private SocialListAdapter followerListAdapter, followingListAdapter;
-    private static Map<String, Integer> gameNames;
+    private static final Map<String, Integer> gameNames;
 
     static {
         gameNames = new HashMap<>();
@@ -108,7 +108,7 @@ public class SocialActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_social);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle(getString(R.string.social));
         setSupportActionBar(myToolbar);
 
@@ -116,11 +116,11 @@ public class SocialActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText() == getString(R.string.followers)) {
-                    ((ExpandableListView) findViewById(R.id.followerList)).setVisibility(View.VISIBLE);
-                    ((ExpandableListView) findViewById(R.id.followingList)).setVisibility(View.GONE);
+                    findViewById(R.id.followerList).setVisibility(View.VISIBLE);
+                    findViewById(R.id.followingList).setVisibility(View.GONE);
                 } else {
-                    ((ExpandableListView) findViewById(R.id.followerList)).setVisibility(View.GONE);
-                    ((ExpandableListView) findViewById(R.id.followingList)).setVisibility(View.VISIBLE);
+                    findViewById(R.id.followerList).setVisibility(View.GONE);
+                    findViewById(R.id.followingList).setVisibility(View.VISIBLE);
                 }
             }
 
@@ -133,7 +133,7 @@ public class SocialActivity extends AppCompatActivity {
             }
         });
 
-        ExpandableListView expandableList = (ExpandableListView) findViewById(R.id.followerList);
+        ExpandableListView expandableList = findViewById(R.id.followerList);
         followerListAdapter = new SocialListAdapter();
         expandableList.setAdapter(followerListAdapter);
         followerListAdapter.setInflater(getLayoutInflater());
@@ -149,7 +149,7 @@ public class SocialActivity extends AppCompatActivity {
             return true;
         });
 
-        expandableList = (ExpandableListView) findViewById(R.id.followingList);
+        expandableList = findViewById(R.id.followingList);
         followingListAdapter = new SocialListAdapter();
         followingListAdapter.setFollowing(true);
         expandableList.setAdapter(followingListAdapter);
@@ -261,7 +261,7 @@ public class SocialActivity extends AppCompatActivity {
 
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 

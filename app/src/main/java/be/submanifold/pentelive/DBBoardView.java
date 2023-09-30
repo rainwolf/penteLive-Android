@@ -40,13 +40,20 @@ public class DBBoardView extends View {
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             oPenteColor = Color.parseColor("#52be80");
-    private Paint blackPaint = makePaint(blackColor), whitePaint = makePaint(whiteColor), pentePaint = makePaint(penteColor),
-            keryoPentePaint = makePaint(keryoPenteColor), gomokuPaint = makePaint(gomokuColor),
-            dPentePaint = makePaint(dPenteColor), gPentePaint = makePaint(gPenteColor),
-            poofPentePaint = makePaint(poofPenteColor), connect6Paint = makePaint(connect6Color),
-            boatPentePaint = makePaint(boatPenteColor), dkeryoPaint = makePaint(dkeryoColor),
-            oPentePaint = makePaint(oPenteColor), shadowPaint = makePaint(Color.BLACK);
-    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    private final Paint blackPaint = makePaint(blackColor);
+    private final Paint whitePaint = makePaint(whiteColor);
+    private final Paint pentePaint = makePaint(penteColor);
+    private final Paint keryoPentePaint = makePaint(keryoPenteColor);
+    private final Paint gomokuPaint = makePaint(gomokuColor);
+    private final Paint dPentePaint = makePaint(dPenteColor);
+    private final Paint gPentePaint = makePaint(gPenteColor);
+    private final Paint poofPentePaint = makePaint(poofPenteColor);
+    private final Paint connect6Paint = makePaint(connect6Color);
+    private final Paint boatPentePaint = makePaint(boatPenteColor);
+    private final Paint dkeryoPaint = makePaint(dkeryoColor);
+    private final Paint oPentePaint = makePaint(oPenteColor);
+    private final Paint shadowPaint = makePaint(Color.BLACK);
+    public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -115,7 +122,7 @@ public class DBBoardView extends View {
 
 
     private boolean replayed = false;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
 
     public String getGame() {
@@ -289,7 +296,7 @@ public class DBBoardView extends View {
                 int i = movesList.size();
                 color = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
             }
-            abstractBoard[playedMove % 19][(int) (playedMove / 19)] = color;
+            abstractBoard[playedMove % 19][playedMove / 19] = color;
             movesList.add(playedMove);
             if (!(game.contains("Gomoku") || game.contains("Connect6"))) {
 //                int opponentColor = (color == 2) ? 1 : 2;
@@ -351,10 +358,10 @@ public class DBBoardView extends View {
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
                 if (parentLayout != null) {
                     ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+                    TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
                     capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
                 }
-                setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
+                setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
             }
 //            if (playedMove > -1 && !gameOver){
 //                movesList.add(new Integer(playedMove));
@@ -410,7 +417,7 @@ public class DBBoardView extends View {
     public void processAImove(final int move) {
         activity.runOnUiThread(() -> {
             byte color = (byte) (1 + (movesList.size() % 2));
-            movesList.add(new Integer(move));
+            movesList.add(Integer.valueOf(move));
             redDot = move;
             stoneJ = (byte) (move / 19);
             stoneI = (byte) (move % 19);
@@ -423,7 +430,7 @@ public class DBBoardView extends View {
             ((DatabaseActivity) activity).aiStopped();
             invalidate();
             RelativeLayout parentLayout = (RelativeLayout) getParent();
-            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
+            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
         });//        aiPlayer.destroy();
     }
 
@@ -439,7 +446,7 @@ public class DBBoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / 19, margin = step / 2;
+        float step = size / 19, margin = step / 2;
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
@@ -673,7 +680,7 @@ public class DBBoardView extends View {
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
                 if (parentLayout != null) {
                     ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+                    TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
                     capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
                 }
             }
@@ -734,7 +741,7 @@ public class DBBoardView extends View {
 //            str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
 //        }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+        setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
     }
 
 //    private void replayPenteGame(byte[][] abstractBoard) {
@@ -846,10 +853,10 @@ public class DBBoardView extends View {
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         if (parentLayout != null) {
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-            TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+            TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
             capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
         }
-        setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), "");
+        setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
         invalidate();
     }
 

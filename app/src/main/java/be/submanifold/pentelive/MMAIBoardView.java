@@ -36,10 +36,12 @@ import java.util.List;
 public class MMAIBoardView extends View {
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
             keryoPenteColor = Color.parseColor("#BAFDA3");
-    private Paint blackPaint = makePaint(blackColor), whitePaint = makePaint(whiteColor),
-            pentePaint = makePaint(penteColor), shadowPaint = makePaint(Color.GRAY),
-            keryoPentePaint = makePaint(keryoPenteColor);
-    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    private final Paint blackPaint = makePaint(blackColor);
+    private final Paint whitePaint = makePaint(whiteColor);
+    private final Paint pentePaint = makePaint(penteColor);
+    private final Paint shadowPaint = makePaint(Color.GRAY);
+    private final Paint keryoPentePaint = makePaint(keryoPenteColor);
+    public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -75,7 +77,7 @@ public class MMAIBoardView extends View {
     public int redDot = -1;
 
     private boolean active, rated, gameOver, aiThinking = false;
-    private List<Integer> movesList;
+    private final List<Integer> movesList;
 
     private Ai aiPlayer;
 
@@ -85,11 +87,11 @@ public class MMAIBoardView extends View {
 
     private Activity activity;
 
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
 
     private boolean replayed = false;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
 
     public void setGame(int game) {
@@ -138,7 +140,7 @@ public class MMAIBoardView extends View {
 
     public void setAiPlayer(Ai aiPlayer) {
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
         this.aiPlayer = aiPlayer;
     }
@@ -222,7 +224,7 @@ public class MMAIBoardView extends View {
         }
         if (scaling == 1) {
             if (playedMove > -1 && !gameOver) {
-                movesList.add(new Integer(playedMove));
+                movesList.add(Integer.valueOf(playedMove));
                 replayGame(abstractBoard);
                 if (!gameOver) {
                     ((MMAIActivity) activity).showThinking();
@@ -248,7 +250,7 @@ public class MMAIBoardView extends View {
         aiPlayer.setGame(game);
         aiPlayer.setBoard(this);
         movesList.clear();
-        movesList.add(new Integer(180));
+        movesList.add(Integer.valueOf(180));
         if (myColor == 1) {
             active = false;
             int[] moves = new int[movesList.size()];
@@ -267,7 +269,7 @@ public class MMAIBoardView extends View {
     public void processAImove(final int move) {
         activity.runOnUiThread(() -> {
             active = true;
-            movesList.add(new Integer(move));
+            movesList.add(Integer.valueOf(move));
             replayGame(abstractBoard);
             playedMove = -1;
 //                try {
@@ -290,7 +292,7 @@ public class MMAIBoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / 19, margin = step / 2;
+        float step = size / 19, margin = step / 2;
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
@@ -453,8 +455,8 @@ public class MMAIBoardView extends View {
         resetAbstractBoard(abstractBoard);
         for (int i = 0; i < movesList.size(); i++) {
             byte color = (byte) (1 + (i % 2));
-            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
+            abstractBoard[movesList.get(i) % 19][movesList.get(i) / 19] = color;
+            detectPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
         }
         if (rated && (movesList.size() == 2)) {
             for (int i = 7; i < 12; ++i) {
@@ -481,12 +483,12 @@ public class MMAIBoardView extends View {
             }
 
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
             redDot = movesList.get(movesList.size() - 1);
         }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
         if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {
@@ -525,9 +527,9 @@ public class MMAIBoardView extends View {
         resetAbstractBoard(abstractBoard);
         for (int i = 0; i < movesList.size(); i++) {
             byte color = (byte) (1 + (i % 2));
-            abstractBoard[movesList.get(i) % 19][(int) (movesList.get(i) / 19)] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
-            detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, (int) (movesList.get(i) / 19), color);
+            abstractBoard[movesList.get(i) % 19][movesList.get(i) / 19] = color;
+            detectPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
+            detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
         }
         if (rated && (movesList.size() == 2)) {
             for (int i = 7; i < 12; ++i) {
@@ -554,12 +556,12 @@ public class MMAIBoardView extends View {
             }
 
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(((TextView) parentLayout.findViewById(R.id.playerInfo)), str);
+            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
             redDot = movesList.get(movesList.size() - 1);
         }
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
         ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        TextView capturesTextView = ((TextView) parentLayout.findViewById(R.id.capturesView));
+        TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
         if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {

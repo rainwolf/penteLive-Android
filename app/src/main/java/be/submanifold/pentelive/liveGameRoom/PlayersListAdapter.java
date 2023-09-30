@@ -30,11 +30,11 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
     Map<String, LivePlayer> players;
     List<LivePlayer> playersArray;
     int game = 1;
-    private String roomName;
+    private final String roomName;
     //    PentePlayer playerData;
     private LayoutInflater inflater;
 
-    private Context ctx;
+    private final Context ctx;
 
     public PlayersListAdapter(Map<String, LivePlayer> players, String roomName, int game) {
         this.players = players;
@@ -110,7 +110,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(Color.WHITE);
         LivePlayer player = playersArray.get(childPosition);
 
-        ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+        ImageView imgVw = convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
         Bitmap avatar = null;
@@ -125,7 +125,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         } else {
             imgVw.setVisibility(View.GONE);
         }
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
         nameTextView.setText(player.coloredNameString(nameTextView.getLineHeight()));
         int rating = player.getRating(game);
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);

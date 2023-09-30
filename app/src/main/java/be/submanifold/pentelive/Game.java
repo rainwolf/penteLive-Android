@@ -37,13 +37,13 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by waliedothman on 10/04/16.
  */
 public class Game implements Parcelable {
-    private String mGameID;
+    private final String mGameID;
     private String mSetID;
     private String mGameType;
     private String mOpponentName;
     private String mOpponentRating;
-    private String mMyColor;
-    private String mRemainingTime;
+    private final String mMyColor;
+    private final String mRemainingTime;
     private String mRatedNot;
     private String mPrivateGame;
     private int mNameColor;
@@ -73,7 +73,7 @@ public class Game implements Parcelable {
     public boolean swap2Choice = false;
 
 
-    public byte abstractBoard[][] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -336,7 +336,7 @@ public class Game implements Parcelable {
                     privateStr = mPrivateGame.contains("non") ? ctx.getString(R.string.non_private) : ctx.getString(R.string.private_str),
                     thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
-                String players[] = mOpponentName.split(" vs ");
+                String[] players = mOpponentName.split(" vs ");
                 mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[0] + "</a> vs " +
                         "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[1] + "</a>"
                         + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
@@ -380,7 +380,7 @@ public class Game implements Parcelable {
     public class RetrieveGame extends AsyncTask<Void, Void, Boolean> {
 
         private final String mGameID;
-        private BoardView boardView;
+        private final BoardView boardView;
 
         RetrieveGame(String gameID, BoardView boardView) {
             this.mGameID = gameID;
@@ -496,7 +496,7 @@ public class Game implements Parcelable {
 
     public class SubmitMoveTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String move;
+        private final String move;
         private String message;
 
         SubmitMoveTask(String move, String message) {
@@ -609,8 +609,10 @@ public class Game implements Parcelable {
 
     public class ReplyCancelTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String sid, reply, gid;
-        private Activity activity;
+        private final String sid;
+        private final String reply;
+        private final String gid;
+        private final Activity activity;
 
 
         ReplyCancelTask(String sid, String gid, String reply, Activity activity) {
@@ -700,8 +702,8 @@ public class Game implements Parcelable {
 
     public class RequestUndoTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String gid;
-        private Activity activity;
+        private final String gid;
+        private final Activity activity;
 
 
         RequestUndoTask(String gid, Activity activity) {
@@ -789,10 +791,10 @@ public class Game implements Parcelable {
 
     public class ReplyUndoTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String gid;
-        private Activity activity;
-        private boolean accept;
-        private String reply;
+        private final String gid;
+        private final Activity activity;
+        private final boolean accept;
+        private final String reply;
 
         ReplyUndoTask(String gid, boolean accept, Activity activity) {
             this.gid = gid;
@@ -874,7 +876,7 @@ public class Game implements Parcelable {
                     activity.finish();
                 } else {
                     mGameString = null;
-                    parseGame((BoardView) activity.findViewById(R.id.boardView));
+                    parseGame(activity.findViewById(R.id.boardView));
                 }
             }
         }
@@ -941,8 +943,8 @@ public class Game implements Parcelable {
 
         boolean amIPlaying = false, undoRequested = false;
 
-        String messageNums[] = null;
-        String messagesArray[] = null;
+        String[] messageNums = null;
+        String[] messagesArray = null;
 
         canHide = mGameString.contains("can_hide=yes");
         canUnHide = mGameString.contains("can_unhide=yes");
@@ -965,7 +967,7 @@ public class Game implements Parcelable {
             }
             if (dashLine.indexOf("player1=") == 0) {
                 p1Name = dashLine.substring(8).split(",")[0];
-                if (!p1Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                if (!p1Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
                     this.mOpponentName = p1Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 } else {
@@ -981,7 +983,7 @@ public class Game implements Parcelable {
             }
             if (dashLine.indexOf("player2=") == 0) {
                 p2Name = dashLine.substring(8).split(",")[0];
-                if (!p2Name.toLowerCase().equals(PentePlayer.mPlayerName.toLowerCase())) {
+                if (!p2Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
                     this.mOpponentName = p2Name;
                     this.mOpponentRating = dashLine.substring(8).split(",")[1];
                 } else {
@@ -1010,7 +1012,7 @@ public class Game implements Parcelable {
                 }
             }
             if (dashLine.indexOf("moves=") == 0) {
-                String movesString[] = dashLine.substring(6).split(",");
+                String[] movesString = dashLine.substring(6).split(",");
                 this.mMovesList = new ArrayList<Integer>();
                 for (int i = 0; i < movesString.length; i++) {
                     if ("".equals(movesString[i])) {
@@ -1083,7 +1085,7 @@ public class Game implements Parcelable {
 
         if (!mActive && amIPlaying && !undoRequested) {
             final BoardActivity host = (BoardActivity) boardView.getContext();
-            Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
+            Button undoBtn = host.findViewById(R.id.submitButton);
             undoBtn.setText(host.getString(R.string.request_undo));
             undoBtn.setOnClickListener(view -> {
                 if (PentePlayer.mSubscriber) {
@@ -1115,14 +1117,14 @@ public class Game implements Parcelable {
             });
         } else if (!mActive && amIPlaying && undoRequested) {
             final BoardActivity host = (BoardActivity) boardView.getContext();
-            Button undoBtn = ((Button) host.findViewById(R.id.submitButton));
+            Button undoBtn = host.findViewById(R.id.submitButton);
             undoBtn.setText(host.getString(R.string.undo_requested));
             undoBtn.setOnClickListener(null);
         } else if (mActive && amIPlaying && undoRequested) {
             final BoardActivity host = (BoardActivity) boardView.getContext();
             final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(host);
             builder.setTitle(host.getString(R.string.requests_undo, getOpponentName()));
-            String options[] = {host.getString(R.string.accept), host.getString(R.string.decline)};
+            String[] options = {host.getString(R.string.accept), host.getString(R.string.decline)};
             builder.setItems(options, (dialog, which) -> {
                 ReplyUndoTask task;
                 switch (which) {
@@ -1312,7 +1314,7 @@ public class Game implements Parcelable {
 
     }
 
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
     public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
         if (mMovesList == null) {
@@ -2709,9 +2711,7 @@ public class Game implements Parcelable {
         if (move / gridSize != gridSize - 1) {
             int neighborStone = move + gridSize;
             int neighborPosition = getPosition(neighborStone);
-            if (position != 3 - neighborPosition) {
-                return false;
-            }
+            return position == 3 - neighborPosition;
         }
         return true;
     }
@@ -2771,9 +2771,7 @@ public class Game implements Parcelable {
         if (stone / gridSize != gridSize - 1) {
             int neighborStone = stone + gridSize;
             int position = getPosition(neighborStone);
-            if (position != 1 && position != 2) {
-                return true;
-            }
+            return position != 1 && position != 2;
         }
         return false;
     }

@@ -46,11 +46,11 @@ public class LobbyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle(getString(R.string.lobby));
         setSupportActionBar(myToolbar);
 
-        ExpandableListView expandableList = (ExpandableListView) findViewById(R.id.list);
+        ExpandableListView expandableList = findViewById(R.id.list);
         final LobbyListAdapter listAdapter = new LobbyListAdapter();
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
@@ -78,70 +78,65 @@ public class LobbyActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-//            case R.id.action_settings:
-//                // User chose the "Settings" item, show the app settings UI...
-//                return true;
+        //            case R.id.action_settings:
+        //                // User chose the "Settings" item, show the app settings UI...
+        //                return true;
+        if (item.getItemId() == R.id.broadcast) {
+            if (PentePlayer.mSubscriber) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final Spinner gameSpinner = new Spinner(this);
+                final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                        R.array.live_game_types_array, android.R.layout.simple_spinner_item);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                gameSpinner.setAdapter(adapter);
 
-            case R.id.broadcast:
-                if (PentePlayer.mSubscriber) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    final Spinner gameSpinner = new Spinner(this);
-                    final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                            R.array.live_game_types_array, android.R.layout.simple_spinner_item);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    gameSpinner.setAdapter(adapter);
-
-                    builder.setView(gameSpinner);
-                    builder.setTitle(getString(R.string.broadcast));
-                    builder.setMessage(getString(R.string.alert_friends_followers));
-                    builder.setPositiveButton(getString(R.string.to_followers), (dialog, which) -> {
-                        String game = gameSpinner.getSelectedItem().toString();
-                        BroadcastTask task = new BroadcastTask(false, game);
-                        task.execute();
-                    });
-                    builder.setNeutralButton(getString(R.string.to_friends), (dialog, which) -> {
-                        String game = gameSpinner.getSelectedItem().toString();
-                        BroadcastTask task = new BroadcastTask(true, game);
-                        task.execute();
-                    });
+                builder.setView(gameSpinner);
+                builder.setTitle(getString(R.string.broadcast));
+                builder.setMessage(getString(R.string.alert_friends_followers));
+                builder.setPositiveButton(getString(R.string.to_followers), (dialog, which) -> {
+                    String game = gameSpinner.getSelectedItem().toString();
+                    BroadcastTask task = new BroadcastTask(false, game);
+                    task.execute();
+                });
+                builder.setNeutralButton(getString(R.string.to_friends), (dialog, which) -> {
+                    String game = gameSpinner.getSelectedItem().toString();
+                    BroadcastTask task = new BroadcastTask(true, game);
+                    task.execute();
+                });
 //                builder.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
 //                    @Override
 //                    public void onClick(DialogInterface dialog, int which) {
 //                        dialog.cancel();
 //                    }
 //                });
-                    builder.show();
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    View infoView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
-                    ((TextView) infoView.findViewById(R.id.informationView)).setText(getString(R.string.broadcasting_subscribers_only));
-                    infoView.setBackgroundColor(Color.WHITE);
-                    builder.setView(infoView);
-                    final AlertDialog dlg = builder.create();
-                    ((Button) infoView.findViewById(R.id.subscribeButton)).setOnClickListener(view -> {
-                        dlg.dismiss();
-                        String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
-                        Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
-                        intent.putExtra("url", url);
-                        startActivity(intent);
-                    });
-                    dlg.show();
+                builder.show();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                View infoView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+                ((TextView) infoView.findViewById(R.id.informationView)).setText(getString(R.string.broadcasting_subscribers_only));
+                infoView.setBackgroundColor(Color.WHITE);
+                builder.setView(infoView);
+                final AlertDialog dlg = builder.create();
+                infoView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
+                    dlg.dismiss();
+                    String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
+                    Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
+                    intent.putExtra("url", url);
+                    startActivity(intent);
+                });
+                dlg.show();
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
 
-                }
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
+            }
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -170,7 +165,7 @@ public class LobbyActivity extends AppCompatActivity {
 
     private class LoadActiveServersTask extends AsyncTask<Void, Void, Boolean> {
 
-        private LobbyListAdapter listAdapter;
+        private final LobbyListAdapter listAdapter;
         String dashboardString;
 
         LoadActiveServersTask(LobbyListAdapter listAdapter) {

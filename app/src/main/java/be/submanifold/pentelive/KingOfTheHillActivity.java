@@ -68,7 +68,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_king_of_the_hill);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
         this.kothSummary = getIntent().getParcelableExtra("kothSummary");
         myToolbar.setTitle(kothSummary.getGame());
@@ -77,7 +77,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         challengeView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.koth_challenge_layout, null, false);
 
 
-        expandableList = (ExpandableListView) findViewById(R.id.list);
+        expandableList = findViewById(R.id.list);
         listAdapter = new KingOfTheHillListAdapter(this.player);
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
@@ -86,7 +86,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             return true; // This way the expander cannot be collapsed
         });
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshKOTH);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshKOTH);
         swipeRefreshLayout.setOnRefreshListener(
                 () -> refreshPlayer()
         );
@@ -97,7 +97,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     if (hill.get(groupPosition - 1).get(childPosition).isCanBeChallenged()) {
                         challengedUser = hill.get(groupPosition - 1).get(childPosition).getName();
                         ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.challenge, challengedUser));
-                        ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.GONE);
+                        challengeView.findViewById(R.id.restrictionLayout).setVisibility(View.GONE);
                         popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
                         expandableList.setAlpha(0.5f);
                     } else {
@@ -147,7 +147,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(KingOfTheHillActivity.this, R.drawable.border));
 //                        messageWindow.setAnimationStyle(R.anim.animation);
 
-        Spinner spinner = (Spinner) challengeView.findViewById(R.id.timeoutSpinner);
+        Spinner spinner = challengeView.findViewById(R.id.timeoutSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(KingOfTheHillActivity.this,
                 R.array.timeout_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -164,7 +164,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
             }
         });
-        spinner = (Spinner) challengeView.findViewById(R.id.restrictionSpinner);
+        spinner = challengeView.findViewById(R.id.restrictionSpinner);
         adapter = ArrayAdapter.createFromResource(KingOfTheHillActivity.this,
                 R.array.restriction_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -182,7 +182,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             }
         });
         popupWindow.setOnDismissListener(() -> expandableList.setAlpha(1.0f));
-        ((Button) challengeView.findViewById(R.id.sendChallengeButton)).setOnClickListener(v -> {
+        challengeView.findViewById(R.id.sendChallengeButton).setOnClickListener(v -> {
             String restriction = "A";
             switch (PrefUtils.getIntFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_KOTHRESTRICTION_KEY, 0)) {
                 case 0:
@@ -214,7 +214,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -288,7 +288,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
                     challengedUser = "";
                     popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                    ((LinearLayout) challengeView.findViewById(R.id.restrictionLayout)).setVisibility(View.VISIBLE);
+                    challengeView.findViewById(R.id.restrictionLayout).setVisibility(View.VISIBLE);
                     expandableList.setAlpha(0.5f);
                 }
                 return true;
@@ -333,11 +333,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 //            hill.add(0, step);
             idx += 1;
         }
-        if (htmlString.contains(PentePlayer.mPlayerName)) {
-            kothSummary.setMember(true);
-        } else {
-            kothSummary.setMember(false);
-        }
+        kothSummary.setMember(htmlString.contains(PentePlayer.mPlayerName));
         while (hill.size() > 0 && hill.get(0).size() == 0) {
             hill.remove(0);
         }
@@ -423,13 +419,13 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             loadHill(htmlString);
             listAdapter.updateList();
             if (player.showAds()) {
-                ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+                findViewById(R.id.adView).setVisibility(View.VISIBLE);
                 boolean personalizeAds = PrefUtils.getBooleanFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
                 Bundle extras = new Bundle();
                 extras.putString("npa", (personalizeAds ? "0" : "1"));
                 ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
             } else {
-                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
+                findViewById(R.id.adView).setVisibility(View.GONE);
             }
             for (int i = 0; i < listAdapter.getGroupCount(); ++i) {
                 expandableList.expandGroup(i);
@@ -444,7 +440,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     private class JoinLeaveHillTask extends AsyncTask<Void, Void, Boolean> {
 
         private final int mGame;
-        private boolean join;
+        private final boolean join;
 
         JoinLeaveHillTask(int game, boolean join) {
             this.mGame = game;

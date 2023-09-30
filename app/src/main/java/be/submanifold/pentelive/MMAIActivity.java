@@ -56,21 +56,21 @@ public class MMAIActivity extends AppCompatActivity {
 //    private int untilMove;
 
     private Game game;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mmai);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
         ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
         settingsView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mmai_settings, null, false);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
-        board = (MMAIBoardView) findViewById(R.id.boardView);
+        board = findViewById(R.id.boardView);
         board.setActivity(this);
         if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente").equals("Pente")) {
             board.setBackgroundColor(board.penteColor);
@@ -98,7 +98,7 @@ public class MMAIActivity extends AppCompatActivity {
         settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(MMAIActivity.this, R.drawable.border));
 //                        messageWindow.setAnimationStyle(R.anim.animation);
 
-        Spinner spinner = (Spinner) settingsView.findViewById(R.id.difficultySpinner);
+        Spinner spinner = settingsView.findViewById(R.id.difficultySpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MMAIActivity.this,
                 R.array.mmai_difficulty_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -115,7 +115,7 @@ public class MMAIActivity extends AppCompatActivity {
 
             }
         });
-        TextView playAs = (TextView) settingsView.findViewById(R.id.playAsChoice);
+        TextView playAs = settingsView.findViewById(R.id.playAsChoice);
         playAs.setOnClickListener(v -> {
             TextView tv = (TextView) v;
             if (tv.getText().equals(getString(R.string.black))) {
@@ -128,7 +128,7 @@ public class MMAIActivity extends AppCompatActivity {
                 board.setMyColor((byte) 2);
             }
         });
-        TextView gameChoice = (TextView) settingsView.findViewById(R.id.gameChoice);
+        TextView gameChoice = settingsView.findViewById(R.id.gameChoice);
         gameChoice.setOnClickListener(v -> {
             TextView tv = (TextView) v;
             if (tv.getText().equals("Pente")) {
@@ -224,25 +224,24 @@ public class MMAIActivity extends AppCompatActivity {
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) findViewById(R.id.boardAdView)).setVisibility(View.GONE);
+            findViewById(R.id.boardAdView).setVisibility(View.GONE);
         }
 
-        Button button = (Button) findViewById(R.id.startButton);
+        Button button = findViewById(R.id.startButton);
         if (button != null) button.setOnClickListener(v -> {
             ((Button) v).setText(getString(R.string.restart_game));
             board.setDifficulty(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0) + 1);
             board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
             board.startGame();
         });
-        button = (Button) findViewById(R.id.backButton);
+        button = findViewById(R.id.backButton);
         if (button != null) button.setOnClickListener(v -> board.undoMove());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_mmai_settings:
-                    showAISettings();
+            if (menuItem.getItemId() == R.id.action_mmai_settings) {
+                showAISettings();
 
-                    return true;
+                return true;
             }
 
             return false;
@@ -255,15 +254,15 @@ public class MMAIActivity extends AppCompatActivity {
 
     private void showAISettings() {
         settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
-        Spinner spinner = (Spinner) settingsView.findViewById(R.id.difficultySpinner);
+        Spinner spinner = settingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0));
-        TextView playAs = (TextView) settingsView.findViewById(R.id.playAsChoice);
+        TextView playAs = settingsView.findViewById(R.id.playAsChoice);
         if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white").equals("white")) {
             playAs.setText(getString(R.string.white));
         } else {
             playAs.setText(getString(R.string.black));
         }
-        TextView game = (TextView) settingsView.findViewById(R.id.gameChoice);
+        TextView game = settingsView.findViewById(R.id.gameChoice);
         game.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente"));
         board.setAlpha(0.75f);
     }

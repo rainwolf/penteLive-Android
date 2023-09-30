@@ -27,14 +27,15 @@ public class LiveBoardView extends View {
     private float scaling = 1;
     private float translateX = 0, translateY = 0, stoneX, stoneY;
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE;
-    private Paint blackPaint = makePaint(blackColor), whitePaint = makePaint(whiteColor),
-            shadowPaint = makePaint(Color.BLACK);
+    private final Paint blackPaint = makePaint(blackColor);
+    private final Paint whitePaint = makePaint(whiteColor);
+    private final Paint shadowPaint = makePaint(Color.BLACK);
     private String me;
 
     private byte myColor = 2, stoneI, stoneJ;
     public int playedMove = -1, redDot = -1;
 
-    private float zoomedScale = 3;
+    private final float zoomedScale = 3;
     float offSetX = 0, offSetY = 0;
 
     private int gridSize = 19;
@@ -171,7 +172,7 @@ public class LiveBoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / gridSize, margin = step / 2;
+        float step = size / gridSize, margin = step / 2;
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);

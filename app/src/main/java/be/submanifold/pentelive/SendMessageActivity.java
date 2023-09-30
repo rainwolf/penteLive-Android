@@ -43,12 +43,12 @@ public class SendMessageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_message);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.new_message));
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-        final AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.recipient);
+        final AutoCompleteTextView actv = findViewById(R.id.recipient);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(SendMessageActivity.this)));
         actv.setAdapter(adapter);
 
@@ -58,13 +58,13 @@ public class SendMessageActivity extends AppCompatActivity {
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            ((Button) findViewById(R.id.sendButton)).setLayoutParams(params);
-            ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
+            findViewById(R.id.sendButton).setLayoutParams(params);
+            findViewById(R.id.adView).setVisibility(View.GONE);
         }
 
-        Button button = (Button) findViewById(R.id.sendButton);
+        Button button = findViewById(R.id.sendButton);
         if (button != null) button.setOnClickListener(v -> {
             if (actv.getText().toString().equals("")) {
                 Toast.makeText(SendMessageActivity.this, getString(R.string.enter_recipient),
@@ -86,14 +86,14 @@ public class SendMessageActivity extends AppCompatActivity {
                     // some code depending on keyboard visiblity status
 
                     if (isOpen) {
-                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
+                        findViewById(R.id.sendButton).setVisibility(View.GONE);
                         if (PentePlayer.mShowAds) {
 //                                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
                         }
                     } else {
-                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
+                        findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
                         if (PentePlayer.mShowAds) {
-                            ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+                            findViewById(R.id.adView).setVisibility(View.VISIBLE);
                         }
                     }
                 });
@@ -193,11 +193,7 @@ public class SendMessageActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
 //                System.out.println(output);
 
-                if (output.indexOf("Error: Player " + recipient + " not found.") > -1) {
-                    return false;
-                }
-
-                return true;
+                return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
 
             } catch (IOException e1) {
                 e1.printStackTrace();

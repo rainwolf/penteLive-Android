@@ -82,11 +82,11 @@ public class LiveGameRoomFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText() == getString(R.string.players)) {
-                    ((ExpandableListView) getView().findViewById(R.id.playersList)).setVisibility(View.VISIBLE);
-                    ((ExpandableListView) getView().findViewById(R.id.tablesList)).setVisibility(View.GONE);
+                    getView().findViewById(R.id.playersList).setVisibility(View.VISIBLE);
+                    getView().findViewById(R.id.tablesList).setVisibility(View.GONE);
                 } else {
-                    ((ExpandableListView) getView().findViewById(R.id.playersList)).setVisibility(View.GONE);
-                    ((ExpandableListView) getView().findViewById(R.id.tablesList)).setVisibility(View.VISIBLE);
+                    getView().findViewById(R.id.playersList).setVisibility(View.GONE);
+                    getView().findViewById(R.id.tablesList).setVisibility(View.VISIBLE);
                 }
             }
 
@@ -100,14 +100,14 @@ public class LiveGameRoomFragment extends Fragment {
         });
 
         activity = (LiveGameRoomActivity) getActivity();
-        ExpandableListView expandableList = (ExpandableListView) getView().findViewById(R.id.playersList);
+        ExpandableListView expandableList = getView().findViewById(R.id.playersList);
         playersListAdapter = new PlayersListAdapter(activity.tablesAndPlayers.players, roomName, 1);
         expandableList.setAdapter(playersListAdapter);
         playersListAdapter.setInflater(activity.getLayoutInflater());
         expandableList.setOnGroupClickListener((expandableListView, view14, i, l) -> true);
         expandableList.expandGroup(0);
 
-        expandableList = (ExpandableListView) getView().findViewById(R.id.tablesList);
+        expandableList = getView().findViewById(R.id.tablesList);
         tableListAdapter = new TableListAdapter(activity.tablesAndPlayers.tables, roomName, activity);
         expandableList.setAdapter(tableListAdapter);
         tableListAdapter.setInflater(activity.getLayoutInflater());
@@ -126,10 +126,10 @@ public class LiveGameRoomFragment extends Fragment {
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) getView().findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) getView().findViewById(R.id.adView)).setVisibility(View.GONE);
+            getView().findViewById(R.id.adView).setVisibility(View.GONE);
         }
 
-        mainRoomTextView = (TextView) getView().findViewById(R.id.mainRoomTextView);
+        mainRoomTextView = getView().findViewById(R.id.mainRoomTextView);
         mainRoomTextView.setMovementMethod(new ScrollingMovementMethod());
         mainRoomTextView.setMovementMethod(LinkMovementMethod.getInstance());
         super.onViewCreated(view, savedInstanceState);
@@ -175,7 +175,7 @@ public class LiveGameRoomFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement OnFragmentInteractionListener");
         }
     }

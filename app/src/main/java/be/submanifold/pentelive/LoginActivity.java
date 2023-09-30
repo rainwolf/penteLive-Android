@@ -86,19 +86,19 @@ public class LoginActivity extends AppCompatActivity
 
         // Set up the login form.
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar myToolbar = findViewById(R.id.toolbar);
         myToolbar.setTitle("penteLive");
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
 
-        ((Button) findViewById(R.id.registerButton)).setOnClickListener(v -> {
+        findViewById(R.id.registerButton).setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
             startActivity(intent);
         });
 
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = findViewById(R.id.email);
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
             if (id == R.id.login || id == EditorInfo.IME_NULL) {
                 attemptLogin();
@@ -107,13 +107,13 @@ public class LoginActivity extends AppCompatActivity
             return false;
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(view -> attemptLogin());
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        ((Button) findViewById(R.id.facebookButton)).setOnClickListener(v -> {
+        findViewById(R.id.facebookButton).setOnClickListener(v -> {
             Uri uri = Uri.parse("https://www.facebook.com/pente.org");
             try {
                 ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo("com.facebook.katana", 0);
@@ -127,17 +127,17 @@ public class LoginActivity extends AppCompatActivity
             startActivity(intent);
         });
 
-        ((Button) findViewById(R.id.rulesButton)).setOnClickListener(v -> {
+        findViewById(R.id.rulesButton).setOnClickListener(v -> {
             Uri uri = Uri.parse("https://www.pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
         });
-        ((Button) findViewById(R.id.privacyButton)).setOnClickListener(v -> {
+        findViewById(R.id.privacyButton).setOnClickListener(v -> {
             Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
         });
-        ((Button) findViewById(R.id.forgot_password_button)).setOnClickListener(v -> {
+        findViewById(R.id.forgot_password_button).setOnClickListener(v -> {
             Uri uri = Uri.parse("https://www.pente.org/gameServer/forgotpassword.jsp");
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
@@ -158,19 +158,19 @@ public class LoginActivity extends AppCompatActivity
 //            mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setText(storedPassword);
         }
-        ((Button) findViewById(R.id.inviteFriendsButton)).setOnClickListener(v -> {
+        findViewById(R.id.inviteFriendsButton).setOnClickListener(v -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.putExtra(Intent.EXTRA_SUBJECT, "Play Pente with me?");
             i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
             startActivity(Intent.createChooser(i, "Invite Friends"));
         });
-        ((Button) findViewById(R.id.getHelpButton)).setOnClickListener(v -> {
+        findViewById(R.id.getHelpButton).setOnClickListener(v -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.putExtra(Intent.EXTRA_SUBJECT, "Android Pente Live help for " + storedUserName);
             startActivity(Intent.createChooser(i, "Get Help"));
         });
 
-        ((Button) findViewById(R.id.moreSettingsButton)).setOnClickListener(v -> {
+        findViewById(R.id.moreSettingsButton).setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivity(intent);
         });
@@ -192,9 +192,9 @@ public class LoginActivity extends AppCompatActivity
         super.onResume();
         MyApplication.activityResumed(this);
         if (PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, false)) {
-            ((LinearLayout) findViewById(R.id.registerLayout)).setVisibility(View.GONE);
-            ((AutoCompleteTextView) findViewById(R.id.email)).setEnabled(false);
-            ((EditText) findViewById(R.id.password)).setEnabled(false);
+            findViewById(R.id.registerLayout).setVisibility(View.GONE);
+            findViewById(R.id.email).setEnabled(false);
+            findViewById(R.id.password).setEnabled(false);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getString(R.string.not_registered_yet));

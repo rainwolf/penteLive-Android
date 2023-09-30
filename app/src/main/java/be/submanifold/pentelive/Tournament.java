@@ -7,12 +7,12 @@ import android.os.Parcelable;
  * Created by waliedothman on 28/05/16.
  */
 public class Tournament implements Parcelable {
-    private String game;
-    private String name;
-    private String tournamentID;
-    private String round;
-    private String tournamentState;
-    private String date;
+    private final String game;
+    private final String name;
+    private final String tournamentID;
+    private final String round;
+    private final String tournamentState;
+    private final String date;
 
     public Tournament(String game, String name, String tournamentID, String round, String tournamentState, String date) {
         this.game = game;

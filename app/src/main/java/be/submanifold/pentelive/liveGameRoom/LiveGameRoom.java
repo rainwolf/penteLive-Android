@@ -12,8 +12,8 @@ import java.util.List;
  */
 
 public class LiveGameRoom implements Parcelable {
-    private String name;
-    private int port;
+    private final String name;
+    private final int port;
     private List<LivePlayer> players;
 
     public LiveGameRoom(String name, int port) {

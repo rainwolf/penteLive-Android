@@ -24,7 +24,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
     private LayoutInflater inflater;
     private Activity activity;
 
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     private int tbRatings = 0;
 

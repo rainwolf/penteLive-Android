@@ -8,7 +8,7 @@ import java.util.*;
 
 public class Ai {
 
-    public native long init(int atbl[], int asrc[], int size);
+    public native long init(int[] atbl, int[] asrc, int size);
 
     public native void privateDestroy(long ptr);
 
@@ -18,7 +18,7 @@ public class Ai {
 
     private native void stop(long ptr);
 
-    private native int move(long ptr, int moves[], int game, int level, int vct);
+    private native int move(long ptr, int[] moves, int game, int level, int vct);
 
     static {
         System.loadLibrary("Ai");
@@ -49,7 +49,7 @@ public class Ai {
 
 //	private List<AiListener> aiListeners = new ArrayList<AiListener>();
 
-    private MarksAIPlayer marksAi = new MarksAIPlayer();
+    private final MarksAIPlayer marksAi = new MarksAIPlayer();
 
 
     public Ai(int game, int level, int vct, int seat, int size) {
@@ -124,7 +124,7 @@ public class Ai {
     //	public int getMoveNoThreaded(final int moves[]) {
 //        return move(cPtr, moves, game, level, vct);
 //	}
-    public void getMove(final int moves[]) {
+    public void getMove(final int[] moves) {
 //	    new Throwable().printStackTrace();
         marksAi.clear();
         for (int m : moves) {
@@ -148,16 +148,16 @@ public class Ai {
         }
     }
 
-    private Thread thread;
-    private AIRunnable runnable;
+    private final Thread thread;
+    private final AIRunnable runnable;
 
     private class AIRunnable implements Runnable {
         private volatile boolean alive = true;
-        private Object lock = new Object();
+        private final Object lock = new Object();
 
-        private int moves[];
+        private int[] moves;
 
-        public void go(int moves[]) {
+        public void go(int[] moves) {
             this.moves = moves;
 
             synchronized (lock) {
@@ -227,7 +227,7 @@ public class Ai {
 //		}
     }
 
-    private void aiVisualizationCallBack(int bd[]) {
+    private void aiVisualizationCallBack(int[] bd) {
 //		for (AiListener aiListener : aiListeners) {
 //			aiListener.aiVisualizationCallBack(bd);
 //		}

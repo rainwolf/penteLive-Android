@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle(getString(R.string.home));
         setSupportActionBar(myToolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity {
             requestNewInterstitial();
         }
 
-        ExpandableListView expandableList = (ExpandableListView) findViewById(R.id.list);
+        ExpandableListView expandableList = findViewById(R.id.list);
         listAdapter = new DashboardListAdapter(this.player);
         expandableList.setAdapter(listAdapter);
         listAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
 
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(
                 () -> refreshPlayer()
         );
@@ -124,19 +124,16 @@ public class MainActivity extends AppCompatActivity {
                 String url = "google.com";
                 if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
                     url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    ;
-//                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                    //                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
                     url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    ;
-//                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                    //                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else {
                     url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
                             + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    ;
-//                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+                    //                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
                 }
@@ -160,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         v.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                     } else {
                         v.findViewById(R.id.acceptButton).setVisibility(View.VISIBLE);
-                        Button button = (Button) v.findViewById(R.id.acceptButton);
+                        Button button = v.findViewById(R.id.acceptButton);
                         button.setOnClickListener(v13 -> {
                             String setID;
                             String opponentName = "";
@@ -249,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                         v.findViewById(R.id.declineButton).setVisibility(View.GONE);
                     } else {
                         v.findViewById(R.id.declineButton).setVisibility(View.VISIBLE);
-                        Button button = (Button) v.findViewById(R.id.declineButton);
+                        Button button = v.findViewById(R.id.declineButton);
                         button.setOnClickListener(v12 -> player.respondInvitation(player.getInvitations().get(childPosition).getGameID(), false, listAdapter));
                     }
                 }
@@ -258,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                         v.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                     } else {
                         v.findViewById(R.id.cancelButton).setVisibility(View.VISIBLE);
-                        Button button = (Button) v.findViewById(R.id.cancelButton);
+                        Button button = v.findViewById(R.id.cancelButton);
                         button.setOnClickListener(v1 -> player.cancelInvitation(player.getSentInvitations().get(childPosition).getGameID(), listAdapter));
                     }
                 }
@@ -267,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     v.findViewById(R.id.dismissButton).setVisibility(View.VISIBLE);
                     viewWithOpenButtons = v;
-                    Button button = (Button) v.findViewById(R.id.dismissButton);
+                    Button button = v.findViewById(R.id.dismissButton);
                     button.setOnClickListener(view -> {
                         viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                         viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
@@ -347,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
 
                         View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
                         policyView.setBackgroundColor(Color.WHITE);
-                        ((Button) policyView.findViewById(R.id.subscribeButton)).setOnClickListener(view -> {
+                        policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
                             popupWindow.dismiss();
                             String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
                             Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
@@ -361,8 +358,8 @@ public class MainActivity extends AppCompatActivity {
                         popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                         ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
-                        popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
-                        ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+                        popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
+                        findViewById(R.id.list).setAlpha(0.25f);
                     }
                     return true;
                 case R.id.action_new_message:
@@ -382,8 +379,8 @@ public class MainActivity extends AppCompatActivity {
                     View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
                     popUpView.setBackgroundColor(Color.BLUE);
                     popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                    ExpandableListView ratingListView = (ExpandableListView) findViewById(R.id.ratingStatsListView);
-                    ratingListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                    ExpandableListView ratingListView = findViewById(R.id.ratingStatsListView);
+                    ratingListView = popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
                     RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
                     adapter.setInflater(inflater, MainActivity.this);
                     adapter.setTbRatings(player.getTbRatings());
@@ -407,8 +404,8 @@ public class MainActivity extends AppCompatActivity {
                     popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                     popupWindow.setOutsideTouchable(true);
                     popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                    popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
-                    ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+                    popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
+                    findViewById(R.id.list).setAlpha(0.25f);
 
                     return true;
                 case R.id.onlineUsers:
@@ -439,7 +436,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -582,9 +579,9 @@ public class MainActivity extends AppCompatActivity {
 
     private class LoadWhosOnlineTask extends AsyncTask<Void, Void, Boolean> {
 
-        private WhosOnlineListAdapter listAdapter;
+        private final WhosOnlineListAdapter listAdapter;
         String dashboardString;
-        private PentePlayer player;
+        private final PentePlayer player;
 
         LoadWhosOnlineTask(PentePlayer player, WhosOnlineListAdapter listAdapter) {
             this.listAdapter = listAdapter;
@@ -690,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
 //                System.out.println("totaaaaaaaal "+total);
-                ExpandableListView onlineUsersListView = (ExpandableListView) popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
+                ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
                 onlineUsersListView.setDividerHeight(0);
                 onlineUsersListView.setAdapter(listAdapter);
                 for (int i = 0; i < onlinePlayers.size(); i++) {
@@ -727,8 +724,8 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                 popupWindow.setOutsideTouchable(true);
                 popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                popupWindow.setOnDismissListener(() -> ((ExpandableListView) findViewById(R.id.list)).setAlpha(1.0f));
-                ((ExpandableListView) findViewById(R.id.list)).setAlpha(0.25f);
+                popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
+                findViewById(R.id.list).setAlpha(0.25f);
 
 //                listAdapter.updateList();
             }
@@ -747,7 +744,7 @@ public class MainActivity extends AppCompatActivity {
             View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
             counterTextPanel.setVisibility(View.GONE);
         } else {
-            TextView textView = (TextView) view.findViewById(R.id.BadgeCount);
+            TextView textView = view.findViewById(R.id.BadgeCount);
             textView.setText("" + count);
         }
         view.measure(
@@ -769,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
             View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
             counterTextPanel.setVisibility(View.GONE);
         } else {
-            TextView textView = (TextView) view.findViewById(R.id.BadgeCount);
+            TextView textView = view.findViewById(R.id.BadgeCount);
             textView.setText("" + count);
         }
         view.measure(

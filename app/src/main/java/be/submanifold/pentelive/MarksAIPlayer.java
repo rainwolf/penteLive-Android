@@ -10,7 +10,7 @@ public class MarksAIPlayer {
     private int level;
     private int seat;
     private int moveNum;
-    private List moves;
+    private final List moves;
     private int size = 19;
 
     private final int bsize = 912;
@@ -20,17 +20,23 @@ public class MarksAIPlayer {
 
     private int cp, tn;
     private int obfl, cob, crot, obsize, extnt;
-    private int p[] = new int[7], cc[][] = new int[18][7],
-            sx[] = new int[362], sy[] = new int[362];
+    private final int[] p = new int[7];
+    private final int[][] cc = new int[18][7];
+    private final int[] sx = new int[362];
+    private final int[] sy = new int[362];
 
-    private int dx[] = {-1, 0, 1, -1, 1, 0, -1, 1};
-    private int dy[] = {-1, -1, -1, 0, 1, 1, 1, 0};
-    private int rotx[] = {1, 1, 1, 1, -1, -1, -1, -1};
-    private int roty[] = {1, 1, -1, -1, -1, -1, 1, 1};
-    private int rotf[] = {0, 1, 0, 1, 0, 1, 0, 1};
+    private final int[] dx = {-1, 0, 1, -1, 1, 0, -1, 1};
+    private final int[] dy = {-1, -1, -1, 0, 1, 1, 1, 0};
+    private final int[] rotx = {1, 1, 1, 1, -1, -1, -1, -1};
+    private final int[] roty = {1, 1, -1, -1, -1, -1, 1, 1};
+    private final int[] rotf = {0, 1, 0, 1, 0, 1, 0, 1};
     private int xoff, yoff, rlct;
-    private int rlst[] = new int[800], rrot[] = new int[800], oscr[] = new int[openingBookSize], nom[] = new int[openingBookSize];
-    private int bd[][][] = new int[18][size][size], ciel[][] = new int[7][18];
+    private final int[] rlst = new int[800];
+    private final int[] rrot = new int[800];
+    private final int[] oscr = new int[openingBookSize];
+    private final int[] nom = new int[openingBookSize];
+    private final int[][][] bd = new int[18][size][size];
+    private final int[][] ciel = new int[7][18];
     // 18 levels of 19x19 board
     // each ply of the search is a level
     // 0=empty, 1=player 1 stone, 2=player 2;
@@ -38,7 +44,7 @@ public class MarksAIPlayer {
     // the computer will only consider moving to '-1'.
     private int bmove, bscr;
 
-    private int scores[], table[], obk[];
+    private int[] scores, table, obk;
 
 
     public MarksAIPlayer() {
@@ -134,7 +140,7 @@ public class MarksAIPlayer {
 
     public void addMove(int move) {
 
-        moves.add(new Integer(move));
+        moves.add(Integer.valueOf(move));
 
         sx[moveNum + 1] = move % size;
         sy[moveNum + 1] = move / size;
@@ -449,9 +455,9 @@ public class MarksAIPlayer {
         //System.out.println("end dmov()");
     }
 
-    private final int om2[] = {181, 182, 162, 163, 164, 165, 144, 145};
-    private final int op2[] = {25, 36, 77, 82, 93, 95, 97, 99};
-    private final int om3[] = {183, 184, 202, 221, 240, 260, 239, 238, 237, 256, 236, 235,
+    private final int[] om2 = {181, 182, 162, 163, 164, 165, 144, 145};
+    private final int[] op2 = {25, 36, 77, 82, 93, 95, 97, 99};
+    private final int[] om3 = {183, 184, 202, 221, 240, 260, 239, 238, 237, 256, 236, 235,
             234, 252, 215, 196, 177, 176, 158, 139, 120, 100,
             121, 122, 123, 104, 124, 125, 126, 108, 145, 164};
 

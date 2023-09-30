@@ -140,7 +140,7 @@ public class PrefUtils {
     public static Set<String> getPlayers(Context context) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         try {
-            return (HashSet<String>) sharedPrefs.getStringSet(PREFS_AUTOCOMPLETEPLAYERS_KEY, new HashSet<String>());
+            return sharedPrefs.getStringSet(PREFS_AUTOCOMPLETEPLAYERS_KEY, new HashSet<String>());
         } catch (Exception e) {
             e.printStackTrace();
             return new HashSet<String>();

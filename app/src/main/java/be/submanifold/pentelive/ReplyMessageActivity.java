@@ -53,7 +53,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_message);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         final Message message = getIntent().getParcelableExtra("message");
         recipient = message.getAuthor();
@@ -67,13 +67,13 @@ public class ReplyMessageActivity extends AppCompatActivity {
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ((Button) findViewById(R.id.sendButton)).getLayoutParams();
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            ((Button) findViewById(R.id.sendButton)).setLayoutParams(params);
-            ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
+            findViewById(R.id.sendButton).setLayoutParams(params);
+            findViewById(R.id.adView).setVisibility(View.GONE);
         }
 
-        Button button = (Button) findViewById(R.id.sendButton);
+        Button button = findViewById(R.id.sendButton);
         if (button != null) button.setOnClickListener(v -> {
             if (((EditText) findViewById(R.id.subject)).getText().toString().equals("")) {
                 Toast.makeText(ReplyMessageActivity.this, getString(R.string.enter_subject),
@@ -88,7 +88,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
             submitTask.execute((Void) null);
         });
 
-        final TextView messageTextView = ((TextView) findViewById(R.id.message));
+        final TextView messageTextView = findViewById(R.id.message);
 //        messageTextView.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -139,14 +139,14 @@ public class ReplyMessageActivity extends AppCompatActivity {
                     // some code depending on keyboard visiblity status
 
                     if (isOpen) {
-                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.GONE);
+                        findViewById(R.id.sendButton).setVisibility(View.GONE);
                         if (PentePlayer.mShowAds) {
 //                                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
                         }
                     } else {
-                        ((Button) findViewById(R.id.sendButton)).setVisibility(View.VISIBLE);
+                        findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
                         if (PentePlayer.mShowAds) {
-                            ((AdView) findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+                            findViewById(R.id.adView).setVisibility(View.VISIBLE);
                         }
                     }
                 });
@@ -301,11 +301,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
 //                System.out.println(output);
 
-                if (output.indexOf("Error: Player " + recipient + " not found.") > -1) {
-                    return false;
-                }
-
-                return true;
+                return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
 
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -341,7 +337,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
     private class LoadMessageTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String messageID;
+        private final String messageID;
         private String messageText = "";
 
         LoadMessageTask(String messageID) {
@@ -429,7 +425,6 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 String tmpStr1 = output.toString();
 
                 messageText = tmpStr1.substring(tmpStr1.indexOf("        <br>\n          ") + 23, tmpStr1.indexOf("          <br><br>"));
-                ;
 
                 return true;
 
@@ -453,7 +448,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
-                TextView messageView = ((TextView) findViewById(R.id.message));
+                TextView messageView = findViewById(R.id.message);
                 setTextViewHTML(messageView, filterMessage(messageText));
             }
         }
@@ -465,7 +460,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
     private class DeleteMessageTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String messageID;
+        private final String messageID;
 
         DeleteMessageTask(String messageID) {
             this.messageID = messageID;

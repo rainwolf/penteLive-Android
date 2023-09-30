@@ -5,5 +5,5 @@ package be.submanifold.pentelive.liveGameRoom;
  */
 
 public enum GoState {
-    PLAY, MARKSTONES, EVALUATESTONES;
+    PLAY, MARKSTONES, EVALUATESTONES
 }

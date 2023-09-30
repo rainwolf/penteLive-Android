@@ -24,13 +24,13 @@ import be.submanifold.pentelive.MyApplication;
  */
 
 public class LivePlayer {
-    private String name;
-    private Map<Integer, Integer> ratings = new HashMap<>();
+    private final String name;
+    private final Map<Integer, Integer> ratings = new HashMap<>();
     private boolean subscriber = false;
     private int crown = 0;
     private int color = 0;
 
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     public LivePlayer(String name, boolean subscriber, int crown, int color) {
         this.name = name;
@@ -48,7 +48,7 @@ public class LivePlayer {
     }
 
     public void addRating(int game, int rating) {
-        ratings.put(new Integer(game), new Integer(rating));
+        ratings.put(Integer.valueOf(game), Integer.valueOf(rating));
     }
 
     public int getRating(int game) {

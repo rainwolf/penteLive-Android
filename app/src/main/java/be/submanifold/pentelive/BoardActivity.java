@@ -57,7 +57,7 @@ public class BoardActivity extends AppCompatActivity {
 //    private int untilMove;
 
     private Game game;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
     private ResignTask resignTask;
     private CancelTask cancelTask;
@@ -144,7 +144,7 @@ public class BoardActivity extends AppCompatActivity {
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                     if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
-                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
+                        String[] options = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
                         builder.setItems(options, (dialog, which) -> {
                             switch (which) {
                                 case 0:
@@ -163,7 +163,7 @@ public class BoardActivity extends AppCompatActivity {
                         });
 
                     } else {
-                        String options[] = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                        String[] options = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
                         builder.setItems(options, (dialog, which) -> {
                             switch (which) {
                                 case 0:
@@ -337,7 +337,7 @@ public class BoardActivity extends AppCompatActivity {
     }
 
     //This is the handler that will manager to process the broadcast intent
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -496,11 +496,7 @@ public class BoardActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.go_territory);
-        if (!game.isGo()) {
-            item.setVisible(false);
-        } else {
-            item.setVisible(true);
-        }
+        item.setVisible(game.isGo());
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -514,7 +510,7 @@ public class BoardActivity extends AppCompatActivity {
 
     public class ResignTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String gid;
+        private final String gid;
 
         ResignTask(String gid) {
             this.gid = gid;
@@ -585,7 +581,7 @@ public class BoardActivity extends AppCompatActivity {
 
     public class CancelTask extends AsyncTask<Void, Void, Boolean> {
 
-        private String sid;
+        private final String sid;
 
         CancelTask(String sid) {
             this.sid = sid;

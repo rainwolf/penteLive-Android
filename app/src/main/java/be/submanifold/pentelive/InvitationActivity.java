@@ -52,7 +52,7 @@ public class InvitationActivity extends AppCompatActivity {
         if (getOpponent() != null) {
             ((AutoCompleteTextView) findViewById(R.id.opponent)).setText(getOpponent());
         }
-        ((AutoCompleteTextView) findViewById(R.id.opponent)).setOnFocusChangeListener((v, hasFocus) -> {
+        findViewById(R.id.opponent).setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -156,7 +156,7 @@ public class InvitationActivity extends AppCompatActivity {
             submitTask.execute((Void) null);
         });
 
-        AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.opponent);
+        AutoCompleteTextView actv = findViewById(R.id.opponent);
         ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(InvitationActivity.this)));
         actv.setAdapter(acAdapter);
 
@@ -175,15 +175,15 @@ public class InvitationActivity extends AppCompatActivity {
 
         ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
             if ((isChecked)) {
-                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.GONE);
-                ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.GONE);
-                ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.GONE);
-                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.GONE);
+                findViewById(R.id.playAsLabel).setVisibility(View.GONE);
+                findViewById(R.id.privateLabel).setVisibility(View.GONE);
+                findViewById(R.id.privateToggleButton).setVisibility(View.GONE);
+                findViewById(R.id.playAsToggleButton).setVisibility(View.GONE);
             } else {
-                ((TextView) findViewById(R.id.playAsLabel)).setVisibility(View.VISIBLE);
-                ((TextView) findViewById(R.id.privateLabel)).setVisibility(View.VISIBLE);
-                ((ToggleButton) findViewById(R.id.privateToggleButton)).setVisibility(View.VISIBLE);
-                ((ToggleButton) findViewById(R.id.playAsToggleButton)).setVisibility(View.VISIBLE);
+                findViewById(R.id.playAsLabel).setVisibility(View.VISIBLE);
+                findViewById(R.id.privateLabel).setVisibility(View.VISIBLE);
+                findViewById(R.id.privateToggleButton).setVisibility(View.VISIBLE);
+                findViewById(R.id.playAsToggleButton).setVisibility(View.VISIBLE);
             }
         });
     }

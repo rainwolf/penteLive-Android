@@ -39,7 +39,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
 
     PentePlayer playerData;
     private LayoutInflater inflater;
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     public KingOfTheHillListAdapter(PentePlayer player) {
         this.playerData = player;
@@ -153,12 +153,12 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
         ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
-        ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.VISIBLE);
-        ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingText).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
-        TextView nameTextView = ((TextView) convertView.findViewById(R.id.nameText));
-        TextView detailTextView = ((TextView) convertView.findViewById(R.id.detailText));
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView detailTextView = convertView.findViewById(R.id.detailText);
         if (groupPosition == 0) {
             if (childPosition == 0) {
                 if (kothSummary.getGameId() > 50) {
@@ -168,14 +168,14 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
                         nameTextView.setText(ctx.getString(R.string.join_hill));
                     }
                     detailTextView.setText(ctx.getString(R.string.hill_warning));
-                    ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
-                    ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+                    convertView.findViewById(R.id.ratingText).setVisibility(View.GONE);
+                    convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
                     return convertView;
                 } else {
                     nameTextView.setText(ctx.getString(R.string.live_hill_join_leave));
                     detailTextView.setText(ctx.getString(R.string.hill_warning));
-                    ((TextView) convertView.findViewById(R.id.ratingText)).setVisibility(View.GONE);
-                    ((TextView) convertView.findViewById(R.id.ratingColorText)).setVisibility(View.GONE);
+                    convertView.findViewById(R.id.ratingText).setVisibility(View.GONE);
+                    convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
                     return convertView;
                 }
             }
@@ -184,7 +184,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         int crown = 0, color = 0;
         KothPlayer player = null;
         player = hill.get(groupPosition - 1).get(childPosition);
-        ImageView imgVw = (ImageView) convertView.findViewById(R.id.imageView);
+        ImageView imgVw = convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
         imgVw.setAlpha(1f);
         if (player.getName().equals(PentePlayer.mPlayerName) && PentePlayer.avatars.get(player.getName()) == null) {
@@ -284,13 +284,13 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         notifyDataSetChanged();
 
         if (playerData.showAds()) {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.adView).setVisibility(View.VISIBLE);
             boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
             Bundle extras = new Bundle();
             extras.putString("npa", (personalizeAds ? "0" : "1"));
             ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
         } else {
-            ((AdView) activity.findViewById(R.id.adView)).setVisibility(View.GONE);
+            activity.findViewById(R.id.adView).setVisibility(View.GONE);
         }
 
     }

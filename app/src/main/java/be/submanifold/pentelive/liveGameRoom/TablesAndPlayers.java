@@ -20,7 +20,7 @@ public class TablesAndPlayers {
     public Map<String, LivePlayer> players = new HashMap<>();
     public Map<Integer, Table> tables = new HashMap<>();
     public String mainRoomText = "";
-    private Context ctx = MyApplication.getContext();
+    private final Context ctx = MyApplication.getContext();
 
     private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
 
@@ -43,7 +43,7 @@ public class TablesAndPlayers {
 
         int myCrown = 0, myKotHCrown = 0;
         for (Map<String, Object> singleGame : gameData) {
-            if ("N".equals((String) singleGame.get("computer"))) {
+            if ("N".equals(singleGame.get("computer"))) {
                 int game = (int) singleGame.get("game");
                 int rating = (int) ((double) singleGame.get("rating"));
                 player.addRating(game, rating);
@@ -97,7 +97,7 @@ public class TablesAndPlayers {
 
         int myCrown = 0, myKotHCrown = 0;
         for (Map<String, Object> singleGame : gameData) {
-            if (((String) singleGame.get("computer")).equals("N")) {
+            if (singleGame.get("computer").equals("N")) {
                 int game = (int) singleGame.get("game");
                 int rating = (int) ((double) singleGame.get("rating"));
                 player.addRating(game, rating);
@@ -140,7 +140,7 @@ public class TablesAndPlayers {
         int incrementalSeconds = (Integer) data.get("incrementalSeconds");
         boolean rated = (Boolean) data.get("rated");
         int game = (Integer) data.get("game");
-        boolean open = ((Integer) data.get("tableType")).equals(1);
+        boolean open = data.get("tableType").equals(1);
         int tableId = (Integer) data.get("table");
         Table table = tables.get(tableId);
         if (table == null) {
@@ -214,10 +214,7 @@ public class TablesAndPlayers {
                 tables.remove(tableId);
             }
         }
-        if (me.equals(player)) {
-            return true;
-        }
-        return false;
+        return me.equals(player);
     }
 
     public void updateGameState(int tableId, int state) {

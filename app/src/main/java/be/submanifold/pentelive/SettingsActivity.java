@@ -45,7 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle(getString(R.string.settings));
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
@@ -78,19 +78,19 @@ public class SettingsActivity extends AppCompatActivity {
             ChangeEmailPreferenceTask task = new ChangeEmailPreferenceTask(isChecked);
             task.execute((Void) null);
         });
-        ((Button) findViewById(R.id.preferencesButton)).setOnClickListener(v -> {
+        findViewById(R.id.preferencesButton).setOnClickListener(v -> {
             String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
         });
-        ((Button) findViewById(R.id.subscribeButton)).setOnClickListener(v -> {
+        findViewById(R.id.subscribeButton).setOnClickListener(v -> {
             String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
         });
-        ((Button) findViewById(R.id.colorButton)).setOnClickListener(v -> {
+        findViewById(R.id.colorButton).setOnClickListener(v -> {
             if (!PentePlayer.mSubscriber) {
                 return;
             }
@@ -113,7 +113,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .build()
                     .show();
         });
-        ((Button) findViewById(R.id.avatarButton)).setOnClickListener(v -> {
+        findViewById(R.id.avatarButton).setOnClickListener(v -> {
             if (!PentePlayer.mSubscriber) {
                 return;
             }
@@ -328,7 +328,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 br.close();
 
-                System.out.println(output.toString());
+                System.out.println(output);
 
 
             } catch (IOException e1) {

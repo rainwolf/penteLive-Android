@@ -41,8 +41,9 @@ public class BoardView extends View {
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80"),
             swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
-    private Paint blackPaint = makePaint(blackColor), shadowPaint = makePaint(Color.BLACK);
-    public byte abstractBoard[][];
+    private final Paint blackPaint = makePaint(blackColor);
+    private final Paint shadowPaint = makePaint(Color.BLACK);
+    public byte[][] abstractBoard;
 
     private float size;
     private float scaling = 1;
@@ -68,13 +69,14 @@ public class BoardView extends View {
     public boolean swap2Chosen = false;
 
     private boolean replayed = false;
-    private char coordinateLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
     private Game game;
 
     private TextView textView = null;
 
-    private String submitStr, passStr;
+    private final String submitStr;
+    private final String passStr;
 
     public Game getGame() {
         return game;
@@ -142,7 +144,7 @@ public class BoardView extends View {
             }
             if (scaling == 1) {
                 if (textView == null) {
-                    textView = ((TextView) parentLayout.findViewById(R.id.playerInfo));
+                    textView = parentLayout.findViewById(R.id.playerInfo);
                 }
                 String str = game.getBoardString();
                 int textHeight = textView.getLineCount() * textView.getLineHeight();
@@ -451,7 +453,7 @@ public class BoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = (float) size / gridSize, margin = step / 2;
+        float step = size / gridSize, margin = step / 2;
 //        canvas.drawPaint(pentePaint);
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
@@ -794,45 +796,29 @@ public class BoardView extends View {
 
     private boolean checkDPenteCapture() {
         if (dPenteMove2 - 3 == dPenteMove4 && dPenteMove2 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 - 2 && dPenteMove3 == dPenteMove2 - 1) ||
-                    (dPenteMove1 == dPenteMove2 - 1 && dPenteMove3 == dPenteMove2 - 2)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 - 2 && dPenteMove3 == dPenteMove2 - 1) ||
+                    (dPenteMove1 == dPenteMove2 - 1 && dPenteMove3 == dPenteMove2 - 2);
         } else if (dPenteMove2 + 3 == dPenteMove4 && dPenteMove4 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 + 2 && dPenteMove3 == dPenteMove2 + 1) ||
-                    (dPenteMove1 == dPenteMove2 + 1 && dPenteMove3 == dPenteMove2 + 2)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 + 2 && dPenteMove3 == dPenteMove2 + 1) ||
+                    (dPenteMove1 == dPenteMove2 + 1 && dPenteMove3 == dPenteMove2 + 2);
         } else if (dPenteMove2 - 57 == dPenteMove4) {
-            if ((dPenteMove1 == dPenteMove2 - 38 && dPenteMove3 == dPenteMove2 - 19) ||
-                    (dPenteMove1 == dPenteMove2 - 19 && dPenteMove3 == dPenteMove2 - 38)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 - 38 && dPenteMove3 == dPenteMove2 - 19) ||
+                    (dPenteMove1 == dPenteMove2 - 19 && dPenteMove3 == dPenteMove2 - 38);
         } else if (dPenteMove2 + 57 == dPenteMove4) {
-            if ((dPenteMove1 == dPenteMove2 + 38 && dPenteMove3 == dPenteMove2 + 19) ||
-                    (dPenteMove1 == dPenteMove2 + 19 && dPenteMove3 == dPenteMove2 + 38)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 + 38 && dPenteMove3 == dPenteMove2 + 19) ||
+                    (dPenteMove1 == dPenteMove2 + 19 && dPenteMove3 == dPenteMove2 + 38);
         } else if (dPenteMove2 - 60 == dPenteMove4 && dPenteMove2 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 - 40 && dPenteMove3 == dPenteMove2 - 20) ||
-                    (dPenteMove1 == dPenteMove2 - 20 && dPenteMove3 == dPenteMove2 - 40)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 - 40 && dPenteMove3 == dPenteMove2 - 20) ||
+                    (dPenteMove1 == dPenteMove2 - 20 && dPenteMove3 == dPenteMove2 - 40);
         } else if (dPenteMove2 + 60 == dPenteMove4 && dPenteMove4 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 + 40 && dPenteMove3 == dPenteMove2 + 20) ||
-                    (dPenteMove1 == dPenteMove2 + 20 && dPenteMove3 == dPenteMove2 + 40)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 + 40 && dPenteMove3 == dPenteMove2 + 20) ||
+                    (dPenteMove1 == dPenteMove2 + 20 && dPenteMove3 == dPenteMove2 + 40);
         } else if (dPenteMove2 - 54 == dPenteMove4 && dPenteMove4 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 - 36 && dPenteMove3 == dPenteMove2 - 18) ||
-                    (dPenteMove1 == dPenteMove2 - 18 && dPenteMove3 == dPenteMove2 - 36)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 - 36 && dPenteMove3 == dPenteMove2 - 18) ||
+                    (dPenteMove1 == dPenteMove2 - 18 && dPenteMove3 == dPenteMove2 - 36);
         } else if (dPenteMove2 + 54 == dPenteMove4 && dPenteMove2 % 19 > 2) {
-            if ((dPenteMove1 == dPenteMove2 + 36 && dPenteMove3 == dPenteMove2 + 18) ||
-                    (dPenteMove1 == dPenteMove2 + 18 && dPenteMove3 == dPenteMove2 + 36)) {
-                return true;
-            }
+            return (dPenteMove1 == dPenteMove2 + 36 && dPenteMove3 == dPenteMove2 + 18) ||
+                    (dPenteMove1 == dPenteMove2 + 18 && dPenteMove3 == dPenteMove2 + 36);
         }
         return false;
     }
