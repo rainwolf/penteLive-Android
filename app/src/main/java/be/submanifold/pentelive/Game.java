@@ -901,7 +901,10 @@ public class Game implements Parcelable {
 
 
     public boolean isSwap2() {
-        return this.mGameType.contains("Swap2");
+        if (this.mGameType == null) {
+            return false;
+        }
+        return this.mGameType.startsWith("Swap2");
     }
 
     public boolean rated() {
