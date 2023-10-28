@@ -37,7 +37,7 @@ public class LiveGameRoom implements Parcelable {
 
     public SpannableStringBuilder getRoomText(int height) {
         SpannableStringBuilder sb = new SpannableStringBuilder(name);
-        if (players.size() > 0) {
+        if (!players.isEmpty()) {
             SpannableStringBuilder sbPlayers = new SpannableStringBuilder("");
             for (LivePlayer player : players) {
                 if (sbPlayers.length() > 0) {

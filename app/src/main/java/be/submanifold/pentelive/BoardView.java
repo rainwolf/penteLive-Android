@@ -185,7 +185,7 @@ public class BoardView extends View {
         if (game != null && game.getMovesList() != null && game.isConnect6()) {
             int i = game.getMovesList().size();
             myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-        } else if (game != null && game.isDPente() && game.getMovesList().size() == 0) {
+        } else if (game != null && game.isDPente() && game.getMovesList().isEmpty()) {
             if (dPenteMove4 > -1) {
                 myColor = (byte) 2;
             } else if (dPenteMove3 > -1) {
@@ -198,7 +198,7 @@ public class BoardView extends View {
                 myColor = (byte) 1;
             }
         } else if (game != null && game.isSwap2()) {
-            if (game.getMovesList().size() == 0) {
+            if (game.getMovesList().isEmpty()) {
                 if (swap2Move3 > -1) {
                     myColor = (byte) 1;
                 } else if (swap2Move2 > -1) {
@@ -276,11 +276,11 @@ public class BoardView extends View {
                     replayed = true;
                 }
                 if (game != null) {
-                    if (game.isDPente() && game.getMovesList().size() == 0) {
+                    if (game.isDPente() && game.getMovesList().isEmpty()) {
                         dPenteMove4 = -1;
                     }
                     if (game.isSwap2()) {
-                        if (game.getMovesList().size() == 0) {
+                        if (game.getMovesList().isEmpty()) {
                             swap2Move3 = -1;
                         } else if (game.getMovesList().size() == 3) {
                             swap2Move2 = -1;
@@ -315,7 +315,7 @@ public class BoardView extends View {
                     playedMove == dPenteMove1 || playedMove == dPenteMove2 ||
                     playedMove == dPenteMove3 ||
                     playedMove == swap2Move1 ||
-                    (playedMove == swap2Move2 && game.getMovesList().size() == 0)) {
+                    (playedMove == swap2Move2 && game.getMovesList().isEmpty())) {
                 playedMove = -1;
             }
         } else {
@@ -325,7 +325,7 @@ public class BoardView extends View {
             if (game.isConnect6() && connect6Move1 == -1) {
                 connect6Move1 = playedMove;
             }
-            if (game.isDPente() && game.getMovesList().size() == 0) {
+            if (game.isDPente() && game.getMovesList().isEmpty()) {
                 if (dPenteMove1 == -1) {
                     dPenteMove1 = playedMove;
                 } else if (dPenteMove2 == -1 && playedMove != dPenteMove1) {
@@ -335,7 +335,7 @@ public class BoardView extends View {
                 } else if (playedMove != dPenteMove1 && playedMove != dPenteMove2 && playedMove != dPenteMove3) {
                     dPenteMove4 = playedMove;
                 }
-            } else if (game.isSwap2() && game.getMovesList().size() == 0) {
+            } else if (game.isSwap2() && game.getMovesList().isEmpty()) {
                 if (swap2Move1 == -1) {
                     swap2Move1 = playedMove;
                 } else if (swap2Move2 == -1 && playedMove != swap2Move1) {
@@ -380,7 +380,7 @@ public class BoardView extends View {
                             ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         }
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                } else if (game.isDPente() && game.getMovesList().isEmpty()) {
                     if (dPenteMove4 > -1) {
                         str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
                                 "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
@@ -403,7 +403,7 @@ public class BoardView extends View {
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
-                } else if (game.isSwap2() && game.getMovesList().size() == 0) {
+                } else if (game.isSwap2() && game.getMovesList().isEmpty()) {
                     if (swap2Move3 > -1) {
                         str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
                                 "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19)) +
@@ -576,7 +576,7 @@ public class BoardView extends View {
                 }
             }
             if (game.isSwap2()) {
-                if (game.getMovesList() != null && game.getMovesList().size() == 0) {
+                if (game.getMovesList() != null && game.getMovesList().isEmpty()) {
                     if (swap2Move2 > -1) {
                         byte movei = (byte) (swap2Move2 / 19);
                         byte movej = (byte) (swap2Move2 % 19);

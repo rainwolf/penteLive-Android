@@ -259,7 +259,7 @@ public class BoardActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
-                } else if (game.isDPente() && game.getMovesList().size() == 0) {
+                } else if (game.isDPente() && game.getMovesList().isEmpty()) {
                     if (board.dPenteMove1 == -1 || board.dPenteMove2 == -1 || board.dPenteMove3 == -1 || board.dPenteMove4 == -1 ||
                             board.dPenteMove1 == board.dPenteMove2 || board.dPenteMove1 == board.dPenteMove3 || board.dPenteMove1 == board.dPenteMove4
                             || board.dPenteMove3 == board.dPenteMove2 || board.dPenteMove4 == board.dPenteMove2 || board.dPenteMove3 == board.dPenteMove4) {
@@ -269,7 +269,7 @@ public class BoardActivity extends AppCompatActivity {
                     } else {
                         moves = "" + board.dPenteMove1 + "," + board.dPenteMove2 + "," + board.dPenteMove3 + "," + board.dPenteMove4;
                     }
-                } else if (game.isSwap2() && game.getMovesList().size() == 0) {
+                } else if (game.isSwap2() && game.getMovesList().isEmpty()) {
                     if (board.swap2Move1 == -1 || board.swap2Move2 == -1 || board.swap2Move3 == -1 ||
                             board.swap2Move1 == board.swap2Move2 || board.swap2Move1 == board.swap2Move3
                             || board.swap2Move3 == board.swap2Move2) {
@@ -358,7 +358,7 @@ public class BoardActivity extends AppCompatActivity {
         if (game.isConnect6() && board.connect6Move1 > -1) {
             board.connect6Move1 = -1;
             board.invalidate();
-        } else if (game.isDPente() && game.getMovesList().size() == 0) {
+        } else if (game.isDPente() && game.getMovesList().isEmpty()) {
             if (board.dPenteMove4 > -1) {
                 board.dPenteMove4 = -1;
                 str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +

@@ -221,7 +221,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
 
-            if (message != null && message.length() > 0) {
+            if (message != null && !message.isEmpty()) {
                 Toast.makeText(KingOfTheHillActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         }
@@ -327,14 +327,14 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 step.add(player);
             }
-            if (step.size() > 0) {
+            if (!step.isEmpty()) {
                 hill.add(0, step);
             }
 //            hill.add(0, step);
             idx += 1;
         }
         kothSummary.setMember(htmlString.contains(PentePlayer.mPlayerName));
-        while (hill.size() > 0 && hill.get(0).size() == 0) {
+        while (!hill.isEmpty() && hill.get(0).isEmpty()) {
             hill.remove(0);
         }
         listAdapter.setHill(hill);

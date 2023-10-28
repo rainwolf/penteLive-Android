@@ -90,7 +90,7 @@ public class DatabaseActivity extends AppCompatActivity {
         searchPrmtrsWindow = helpBuilder.create();
         searchPrmtrsWindow.setOnDismissListener(dialogInterface -> {
             board.setAlpha(1.0f);
-            if (board.getMovesList().size() == 0 || (board.getMovesList().size() > 0 && board.getMovesList().get(0) != 180)) {
+            if (board.getMovesList().isEmpty() || (!board.getMovesList().isEmpty() && board.getMovesList().get(0) != 180)) {
                 if (!board.getGame().contains("D-Pente") && !board.getGame().contains("DK-Pente")) {
                     board.resetState();
                 }
@@ -766,10 +766,10 @@ public class DatabaseActivity extends AppCompatActivity {
 //            System.out.println(searchResults);
             board.setSearchResults(searchResults);
             board.invalidate();
-            if (searchResults.size() == 0 && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
+            if (searchResults.isEmpty() && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
                 board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
             } else {
-                if (player1.length() > 0) {
+                if (!player1.isEmpty()) {
                     String[] pList = player1.replace(" ", "").split(",");
                     for (String name : pList) {
                         if (!name.contains("*")) {
@@ -777,7 +777,7 @@ public class DatabaseActivity extends AppCompatActivity {
                         }
                     }
                 }
-                if (player2.length() > 0) {
+                if (!player2.isEmpty()) {
                     String[] pList = player2.replace(" ", "").split(",");
                     for (String name : pList) {
                         if (!name.contains("*")) {

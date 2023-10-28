@@ -267,7 +267,7 @@ public class Table {
         } else if (game != 13 && game != 14) {
             return 1 + (moves.size() % 2);
         } else {
-            if (moves.size() == 0) {
+            if (moves.isEmpty()) {
                 return 1;
             }
             return 2 - (((moves.size() - 1) / 2) % 2);
@@ -315,7 +315,7 @@ public class Table {
             }
             return 1 + (moves.size() % 2);
         } else {
-            if (moves.size() == 0) {
+            if (moves.isEmpty()) {
                 return 1;
             }
             return 2 - (((moves.size() - 1) / 2) % 2);
@@ -587,7 +587,7 @@ public class Table {
     private synchronized void captureGroup(int groupID, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         List<Integer> group = groupsByID.get(groupID);
         int capturee = 0;
-        if (group.size() > 0) {
+        if (!group.isEmpty()) {
             capturee = getPosition(group.get(0));
         }
         for (int stone : group) {

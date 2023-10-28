@@ -108,7 +108,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(table.getGameColor());
         ((TextView) convertView.findViewById(R.id.gameNameText)).setText(table.getGameName());
         TextView seatsTextView = convertView.findViewById(R.id.seatsText);
-        if (table.getSeats().size() > 0) {
+        if (!table.getSeats().isEmpty()) {
             seatsTextView.setVisibility(View.VISIBLE);
             seatsTextView.setText(table.getSeatsText(seatsTextView.getLineHeight()));
         } else {

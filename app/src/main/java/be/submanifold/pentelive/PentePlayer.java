@@ -374,7 +374,7 @@ public class PentePlayer implements Parcelable {
         Message message;
         if (idx < dashLines.length && dashLines[idx].indexOf("Messages") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].length() != 0 && dashLines[idx].indexOf("Tournaments") != 0) {
+            while (idx < dashLines.length && !dashLines[idx].isEmpty() && dashLines[idx].indexOf("Tournaments") != 0) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 7) {
@@ -397,7 +397,7 @@ public class PentePlayer implements Parcelable {
         }
         if (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") == 0) {
             idx += 1;
-            while (idx < dashLines.length && dashLines[idx].length() != 0) {
+            while (idx < dashLines.length && !dashLines[idx].isEmpty()) {
                 dashLine = dashLines[idx].split(";");
                 idx += 1;
                 if (dashLine.length < 6) {

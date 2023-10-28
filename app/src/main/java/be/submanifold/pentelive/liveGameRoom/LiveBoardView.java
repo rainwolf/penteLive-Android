@@ -85,7 +85,7 @@ public class LiveBoardView extends View {
         size = getWidth();
         canvas.scale(scaling, scaling);
         canvas.translate(translateX, translateY);
-        if (table != null && table.getMoves().size() > 0) {
+        if (table != null && !table.getMoves().isEmpty()) {
             redDot = table.getMoves().get(table.getMoves().size() - 1);
         } else {
             redDot = -1;

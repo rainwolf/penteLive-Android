@@ -166,13 +166,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 break;
             case INVITATIONSGROUP:
                 title = invitationsStr + " (" + playerData.getInvitations().size() + ")";
-                if (playerData.getInvitations().size() > 0) {
+                if (!playerData.getInvitations().isEmpty()) {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
             case ACTIVEGAMESGROUP:
                 title = activeGamesStr + " (" + playerData.getActiveGames().size() + ")";
-                if (playerData.getActiveGames().size() > 0) {
+                if (!playerData.getActiveGames().isEmpty()) {
                     convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.orangeDash));
                 }
                 break;
@@ -300,7 +300,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             if (hill.isKing()) {
                 crown = 4;
             }
-            if (hill.getCurrentKing().length() == 0) {
+            if (hill.getCurrentKing().isEmpty()) {
                 detailText = ctx.getString(R.string.number_of_players, hill.getNumPlayers());
             } else {
                 detailText = ctx.getString(R.string.players_ruled_by, hill.getNumPlayers(), hill.getCurrentKing());
@@ -562,7 +562,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
 
         activity.invalidateOptionsMenu();
 
-        if (!asked2GetStarted && (playerData.getActiveGames().size() == 0) && (playerData.getNonActiveGames().size() == 0) && (playerData.getSentInvitations().size() == 0)) {
+        if (!asked2GetStarted && (playerData.getActiveGames().isEmpty()) && (playerData.getNonActiveGames().isEmpty()) && (playerData.getSentInvitations().isEmpty())) {
             asked2GetStarted = true;
             ((MainActivity) activity).ask2GetStarted();
         }

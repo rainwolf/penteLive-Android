@@ -352,24 +352,24 @@ public class Game implements Parcelable {
 
     public String getHideString() {
         Context ctx = MyApplication.getContext();
-        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length() > 0)) {
+        if ((canHide && hideStr.isEmpty()) || (canUnHide && !hideStr.isEmpty())) {
             return ctx.getString(R.string.hide_from_public);
         }
-        if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length() > 0)) {
+        if ((canUnHide && hideStr.isEmpty()) || (canHide && !hideStr.isEmpty())) {
             return ctx.getString(R.string.unhide_from_public);
         }
         return "";
     }
 
     public void changeHideString() {
-        if ((canHide && hideStr.length() == 0) || (canUnHide && hideStr.length() > 0)) {
-            if (hideStr.length() == 0) {
+        if ((canHide && hideStr.isEmpty()) || (canUnHide && !hideStr.isEmpty())) {
+            if (hideStr.isEmpty()) {
                 hideStr = "&hide=yes";
             } else {
                 hideStr = "";
             }
-        } else if ((canUnHide && hideStr.length() == 0) || (canHide && hideStr.length() > 0)) {
-            if (hideStr.length() == 0) {
+        } else if ((canUnHide && hideStr.isEmpty()) || (canHide && !hideStr.isEmpty())) {
+            if (hideStr.isEmpty()) {
                 hideStr = "&hide=no";
             } else {
                 hideStr = "";
@@ -2723,7 +2723,7 @@ public class Game implements Parcelable {
     private void captureGroup(int groupID, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         List<Integer> group = groupsByID.get(groupID);
 //        int capturer = 0;
-        if (group.size() > 0) {
+        if (!group.isEmpty()) {
 //            capturer = 3 - getPosition(group.get(0));
             int pos = getPosition(group.get(0));
             if (pos == 1) {

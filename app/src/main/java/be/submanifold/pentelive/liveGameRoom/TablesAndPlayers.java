@@ -210,7 +210,7 @@ public class TablesAndPlayers {
         Table table = tables.get(tableId);
         if (table != null) {
             table.exit(player);
-            if (table.getPlayers().size() == 0) {
+            if (table.getPlayers().isEmpty()) {
                 tables.remove(tableId);
             }
         }
