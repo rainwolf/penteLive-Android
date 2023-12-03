@@ -76,17 +76,6 @@
             android:id="@+id/capturesView" />
     </LinearLayout>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/dbAdView"
-        android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_height="wrap_content"
-        android:gravity="bottom|center"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3326997956703582/5053125837">
-    </com.google.android.gms.ads.AdView>
-
     <TextView
         android:layout_width="match_parent"
         android:id="@+id/playerInfo"
@@ -103,7 +92,6 @@
         android:textSize="16dp"
         android:layout_height="fill_parent"
         android:background="@drawable/border"
-        android:layout_above="@id/dbAdView"
         android:layout_below="@id/submitLayout"/>
 
 

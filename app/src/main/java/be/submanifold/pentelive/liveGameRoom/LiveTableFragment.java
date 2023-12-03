@@ -35,16 +35,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +86,6 @@ public class LiveTableFragment extends Fragment {
     EditText initialMinutesView, incrementalSecondsView;
     Spinner gameSpinner;
     AlertDialog tableSettingsWindow;
-
-    InterstitialAd mInterstitialAd;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -212,14 +200,6 @@ public class LiveTableFragment extends Fragment {
         board = getView().findViewById(R.id.boardView);
         board.setTable(table, me);
         board.setFragment(this);
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            getView().findViewById(R.id.adView).setVisibility(View.GONE);
-        }
         p1Name = getView().findViewById(R.id.p1Name);
         p2Name = getView().findViewById(R.id.p2Name);
         p1Timer = getView().findViewById(R.id.p1Timer);
@@ -278,10 +258,6 @@ public class LiveTableFragment extends Fragment {
             dlg.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         });
         updateTable();
-        if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
-            requestNewInterstitialAndShow();
-        }
-
     }
 
     @Override
@@ -1139,43 +1115,4 @@ public class LiveTableFragment extends Fragment {
             mListener.sendEvent("{\"dsgForceCancelResignTableEvent\":{\"action\":" + (cancel ? 1 : 2) + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
-
-    private void requestNewInterstitialAndShow() {
-        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-        Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds ? "0" : "1"));
-        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-
-        InterstitialAd.load(activity, "ca-app-pub-3326997956703582/8353630687", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                mInterstitialAd = null;
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                mInterstitialAd = null;
-                            }
-                        });
-                        mInterstitialAd.show(activity);
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        mInterstitialAd = null;
-                    }
-                });
-    }
-
 }

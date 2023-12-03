@@ -28,30 +28,18 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-
 import java.io.InputStream;
 
 
 public class MMAIActivity extends AppCompatActivity {
 
     private MMAIBoardView board;
-    private AdView mAdView;
     private PopupWindow settingsWindow;
     private View settingsView;
     public Animation rotation;
     public ImageView messageIcon;
 
     private ProgressBar progressBar;
-    InterstitialAd mInterstitialAd;
 
 //    private int untilMove;
 
@@ -218,15 +206,6 @@ public class MMAIActivity extends AppCompatActivity {
 //            }
 //        });
 
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            findViewById(R.id.boardAdView).setVisibility(View.GONE);
-        }
-
         Button button = findViewById(R.id.startButton);
         if (button != null) button.setOnClickListener(v -> {
             ((Button) v).setText(getString(R.string.restart_game));
@@ -246,9 +225,6 @@ public class MMAIActivity extends AppCompatActivity {
 
             return false;
         });
-        if (PentePlayer.mShowAds && !PentePlayer.mPlayerName.contains("guest")) {
-            requestNewInterstitialAndShow();
-        }
         board.post(() -> showAISettings());
     }
 
@@ -304,44 +280,5 @@ public class MMAIActivity extends AppCompatActivity {
     public void setGame(Game game) {
         this.game = game;
     }
-
-    private void requestNewInterstitialAndShow() {
-        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MMAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-        Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds ? "0" : "1"));
-        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-
-        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                mInterstitialAd = null;
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                mInterstitialAd = null;
-                            }
-                        });
-                        mInterstitialAd.show(MMAIActivity.this);
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        mInterstitialAd = null;
-                    }
-                });
-    }
-
 
 }

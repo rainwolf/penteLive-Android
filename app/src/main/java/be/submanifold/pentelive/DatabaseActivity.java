@@ -34,10 +34,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +55,6 @@ import static android.view.View.VISIBLE;
 public class DatabaseActivity extends AppCompatActivity {
 
     private DBBoardView board;
-    private AdView mAdView;
     private PopupWindow settingsWindow;
     private View settingsView, aiSettingsView;
     public Animation rotation;
@@ -119,16 +114,6 @@ public class DatabaseActivity extends AppCompatActivity {
             board.setGame(gameStr);
             board.setMovesList(extras.getIntegerArrayList("moves"));
         }
-
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle adextras = new Bundle();
-            adextras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.dbAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, adextras).build());
-        } else {
-            findViewById(R.id.dbAdView).setVisibility(View.GONE);
-        }
-
 
         toolbar.setTitle(getString(R.string.database));
         setSupportActionBar(toolbar);

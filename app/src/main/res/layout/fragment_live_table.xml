@@ -119,17 +119,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_alignWithParentIfMissing="true"
-            android:layout_height="wrap_content"
-            android:gravity="bottom|center"
-            ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3326997956703582/7970833848">
-        </com.google.android.gms.ads.AdView>
-
         <TextView
             android:id="@+id/tableTextView"
             android:layout_width="match_parent"
@@ -138,8 +127,7 @@
             android:paddingEnd="5dp"
             android:gravity="bottom"
             android:background="@drawable/border"
-            android:layout_below="@id/actionLayout"
-            android:layout_above="@id/adView"/>
+            android:layout_below="@id/actionLayout"/>
 
     </RelativeLayout>
 

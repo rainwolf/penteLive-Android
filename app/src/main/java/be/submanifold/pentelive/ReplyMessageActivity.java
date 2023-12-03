@@ -26,10 +26,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
@@ -61,17 +57,9 @@ public class ReplyMessageActivity extends AppCompatActivity {
         ((EditText) findViewById(R.id.subject)).setText(message.getSubject());
         setSupportActionBar(toolbar);
 
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(ReplyMessageActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
-            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            findViewById(R.id.sendButton).setLayoutParams(params);
-            findViewById(R.id.adView).setVisibility(View.GONE);
-        }
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        findViewById(R.id.sendButton).setLayoutParams(params);
 
         Button button = findViewById(R.id.sendButton);
         if (button != null) button.setOnClickListener(v -> {
@@ -145,9 +133,6 @@ public class ReplyMessageActivity extends AppCompatActivity {
                         }
                     } else {
                         findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-                        if (PentePlayer.mShowAds) {
-                            findViewById(R.id.adView).setVisibility(View.VISIBLE);
-                        }
                     }
                 });
 

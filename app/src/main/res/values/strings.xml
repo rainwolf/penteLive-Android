@@ -289,7 +289,7 @@
     <string name="double_pass_live">Your opponent has made a pass as well. Mark all the dead stones and finish with a pass.</string>
     <string name="reject_go_state">%1$s has rejected the dead stones, play continues.</string>
     <string name="privacy_policy">Privacy Policy</string>
-    <string name="gdpr_terms">This app uses device identifiers to personalise ads, delivered by Google\'s Adsense network. Please check our privacy policy for an overview of the data that is collected and what we do with it, you can find a link below. By proceeding to use this app, you consent to our privacy policy. You must be at least 16 years old to consent to this, otherwise consent from a parent or guardian is required.\nAds are non-personalized by default, once you sign up, you can this setting at any time in the future. This setting does not affect subscribers, as they don\'t get to see ads.</string>
+    <string name="gdpr_terms">Please check our privacy policy for an overview of the data that is collected and what we do with it, you can find a link below. By proceeding to use this app, you consent to our privacy policy. You must be at least 16 years old to consent to this, otherwise consent from a parent or guardian is required.</string>
     <string name="terms_conditions">Terms and conditions</string>
     <string name="allow_personalized_ads">Allow personalized ads</string>
 

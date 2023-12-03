@@ -34,10 +34,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -49,7 +45,6 @@ import java.nio.charset.StandardCharsets;
 public class BoardActivity extends AppCompatActivity {
 
     private BoardView board;
-    private AdView mAdView;
     private View messageView;
     private PopupWindow messageWindow;
     public Animation rotation;
@@ -430,14 +425,6 @@ public class BoardActivity extends AppCompatActivity {
         super.onResume();
         (BoardActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name_computer"));
         MyApplication.activityResumed(this);
-        if (PentePlayer.mShowAds == null || PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.boardAdView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            findViewById(R.id.boardAdView).setVisibility(View.GONE);
-        }
     }
 
     @Override

@@ -106,17 +106,6 @@
             android:id="@+id/swap2PassButton" />
     </LinearLayout>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/boardAdView"
-        android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_height="wrap_content"
-        android:gravity="bottom|center"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3326997956703582/5986542641">
-    </com.google.android.gms.ads.AdView>
-
     <TextView
         android:layout_width="match_parent"
         android:id="@+id/playerInfo"
@@ -131,8 +120,7 @@
         android:textSize="16dp"
         android:layout_height="fill_parent"
         android:background="@drawable/border"
-        android:layout_below="@id/submitLayout"
-        android:layout_above="@id/boardAdView"/>
+        android:layout_below="@id/submitLayout"/>
 
 
 

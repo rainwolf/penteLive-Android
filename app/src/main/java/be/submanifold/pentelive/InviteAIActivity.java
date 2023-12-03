@@ -18,14 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -36,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import javax.net.ssl.HttpsURLConnection;
 
 public class InviteAIActivity extends AppCompatActivity {
-    InterstitialAd mInterstitialAd;
 
 
     @Override
@@ -88,9 +79,6 @@ public class InviteAIActivity extends AppCompatActivity {
                 findViewById(R.id.playAsToggleButton).setVisibility(View.VISIBLE);
             }
         });
-        if (PentePlayer.mShowAds) {
-            requestNewInterstitialAndShow();
-        }
     }
 
     @Override
@@ -247,43 +235,5 @@ public class InviteAIActivity extends AppCompatActivity {
 //            mAuthTask = null;
 //            showProgress(false);
         }
-    }
-
-    private void requestNewInterstitialAndShow() {
-        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(InviteAIActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-        Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds ? "0" : "1"));
-        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-
-        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                mInterstitialAd = null;
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                mInterstitialAd = null;
-                            }
-                        });
-                        mInterstitialAd.show(InviteAIActivity.this);
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        mInterstitialAd = null;
-                    }
-                });
     }
 }

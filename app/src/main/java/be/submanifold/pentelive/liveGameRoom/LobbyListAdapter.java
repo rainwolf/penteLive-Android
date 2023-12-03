@@ -13,10 +13,6 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,16 +126,5 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
 
     public void updateList() {
         notifyDataSetChanged();
-
-        if (PentePlayer.mShowAds) {
-            activity.findViewById(R.id.adView).setVisibility(View.VISIBLE);
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            activity.findViewById(R.id.adView).setVisibility(View.GONE);
-        }
-        System.out.println("updateList");
     }
 }

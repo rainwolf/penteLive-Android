@@ -26,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/segments"
-            android:layout_above="@id/adView"
             android:orientation="vertical">
             <ExpandableListView
                 android:id="@+id/playersList"
@@ -51,16 +50,6 @@
                 android:layout_weight="1"
                 android:background="@drawable/border"/>
         </LinearLayout>
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_alignWithParentIfMissing="true"
-            android:layout_height="wrap_content"
-            android:gravity="bottom|center"
-            ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3326997956703582/9275247040">
-        </com.google.android.gms.ads.AdView>
 
     </RelativeLayout>
 

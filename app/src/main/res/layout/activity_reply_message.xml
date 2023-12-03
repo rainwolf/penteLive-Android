@@ -33,23 +33,11 @@
         android:maxLines="1"
         android:singleLine="true"/>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3326997956703582/9810333046">
-    </com.google.android.gms.ads.AdView>
-
     <Button
         android:id="@+id/sendButton"
         android:layout_width="match_parent"
         android:layout_alignWithParentIfMissing="true"
         android:layout_height="50dp"
-        android:layout_above="@id/adView"
         android:text="@string/send"
         />
 

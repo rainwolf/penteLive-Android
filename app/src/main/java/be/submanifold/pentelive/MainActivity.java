@@ -15,14 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
@@ -46,10 +38,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.kobakei.ratethisapp.RateThisApp;
 
 import java.io.BufferedReader;
@@ -68,18 +56,13 @@ public class MainActivity extends AppCompatActivity {
 
     private PentePlayer player;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private AdView mAdView;
     private DashboardListAdapter listAdapter;
     private View viewWithOpenButtons = null;
-    InterstitialAd mInterstitialAd;
     private PopupWindow popupWindow;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        MobileAds.initialize(this, initializationStatus -> {
-        });
 
         PrefUtils.saveBooleanToPrefs(MainActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, true);
 
@@ -89,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
         myToolbar.setTitle(getString(R.string.home));
         setSupportActionBar(myToolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
-
-        if (player.showAds()) {
-            requestNewInterstitial();
-        }
 
         ExpandableListView expandableList = findViewById(R.id.list);
         listAdapter = new DashboardListAdapter(this.player);
@@ -179,11 +158,6 @@ public class MainActivity extends AppCompatActivity {
                                             player.respondInvitation(finalsetID, true, listAdapter);
                                             PrefUtils.savePlayerToPrefs(MainActivity.this, finalOpponentName);
 
-                                            if (player.showAds()) {
-                                                if (mInterstitialAd != null) {
-                                                    mInterstitialAd.show(MainActivity.this);
-                                                }
-                                            }
                                             viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
@@ -228,11 +202,6 @@ public class MainActivity extends AppCompatActivity {
                             player.respondInvitation(setID, true, listAdapter);
                             PrefUtils.savePlayerToPrefs(MainActivity.this, opponentName);
 
-                            if (player.showAds()) {
-                                if (mInterstitialAd != null) {
-                                    mInterstitialAd.show(MainActivity.this);
-                                }
-                            }
                             viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                             viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                             viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
@@ -525,45 +494,6 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    private void requestNewInterstitial() {
-        boolean personalizeAds = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-        Bundle extras = new Bundle();
-        extras.putString("npa", (personalizeAds ? "0" : "1"));
-        AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-
-        InterstitialAd.load(this, "ca-app-pub-3326997956703582/8353630687", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                mInterstitialAd = null;
-                                requestNewInterstitial();
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                mInterstitialAd = null;
-                                requestNewInterstitial();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        mInterstitialAd = null;
-                    }
-                });
     }
 
     public void ask2GetStarted() {

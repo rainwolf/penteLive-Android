@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.core.view.MenuItemCompat;
@@ -31,9 +30,6 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -171,16 +167,6 @@ public class SocialActivity extends AppCompatActivity {
             task.execute();
             return true;
         });
-
-
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(SocialActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            findViewById(R.id.adView).setVisibility(View.GONE);
-        }
 
         gameStr = PrefUtils.getFromPrefs(SocialActivity.this, PrefUtils.PREFS_SOCIALGAME_KEY, "Turn-based Pente");
         gamesArray = Arrays.asList(getResources().getStringArray(R.array.all_game_types_array));

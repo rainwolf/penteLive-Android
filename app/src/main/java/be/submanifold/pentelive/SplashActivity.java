@@ -6,18 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-
 public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MobileAds.initialize(this, initializationStatus -> {
-        });
-//        MobileAds.initialize(this, "ca-app-pub-3326997956703582~7930084241");
     }
 
     @Override
@@ -25,11 +18,6 @@ public class SplashActivity extends AppCompatActivity {
         super.onResume();
         if (MyApplication.shouldQuit()) {
             MyApplication.setShouldQuit(false);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                finishAndRemoveTask();
-//            } else {
-//                finish();
-//            }
             finish();
         } else {
             boolean gdprAccepted = PrefUtils.getBooleanFromPrefs(SplashActivity.this, PrefUtils.PREFS_GDPR_KEY, false);

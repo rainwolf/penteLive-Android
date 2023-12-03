@@ -34,10 +34,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,7 +52,6 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     private PentePlayer player;
     private KingOfTheHill kothSummary;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private AdView mAdView;
     private KingOfTheHillListAdapter listAdapter;
     private PopupWindow popupWindow;
     private View challengeView;
@@ -418,15 +413,6 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
             loadHill(htmlString);
             listAdapter.updateList();
-            if (player.showAds()) {
-                findViewById(R.id.adView).setVisibility(View.VISIBLE);
-                boolean personalizeAds = PrefUtils.getBooleanFromPrefs(KingOfTheHillActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-                Bundle extras = new Bundle();
-                extras.putString("npa", (personalizeAds ? "0" : "1"));
-                ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-            } else {
-                findViewById(R.id.adView).setVisibility(View.GONE);
-            }
             for (int i = 0; i < listAdapter.getGroupCount(); ++i) {
                 expandableList.expandGroup(i);
             }

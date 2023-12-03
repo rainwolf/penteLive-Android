@@ -4,7 +4,7 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "be.submanifold.pentelive"
@@ -71,14 +71,12 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'com.google.firebase:firebase-core:21.1.1'
-    implementation 'com.google.firebase:firebase-ads:22.1.0'
-    implementation 'com.google.firebase:firebase-messaging:23.1.2'
+    implementation 'com.google.firebase:firebase-messaging:23.3.1'
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:1.0.1'
     implementation 'com.github.QuadFlask:colorpicker:0.0.13'
-    implementation 'com.google.android.gms:play-services-ads:22.1.0'
-    implementation 'com.google.android.gms:play-services-auth:20.5.0'
+//    implementation 'com.google.android.gms:play-services-auth:20.5.0'
     implementation 'com.google.android.gms:play-services-gcm:17.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.github.kobakei:Android-RateThisApp:1.2.0'

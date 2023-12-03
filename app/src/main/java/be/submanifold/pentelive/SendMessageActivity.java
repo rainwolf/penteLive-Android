@@ -18,12 +18,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -52,17 +47,9 @@ public class SendMessageActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(SendMessageActivity.this)));
         actv.setAdapter(adapter);
 
-        if (PentePlayer.mShowAds) {
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(SendMessageActivity.this, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
-            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            findViewById(R.id.sendButton).setLayoutParams(params);
-            findViewById(R.id.adView).setVisibility(View.GONE);
-        }
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        findViewById(R.id.sendButton).setLayoutParams(params);
 
         Button button = findViewById(R.id.sendButton);
         if (button != null) button.setOnClickListener(v -> {
@@ -92,9 +79,6 @@ public class SendMessageActivity extends AppCompatActivity {
                         }
                     } else {
                         findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-                        if (PentePlayer.mShowAds) {
-                            findViewById(R.id.adView).setVisibility(View.VISIBLE);
-                        }
                     }
                 });
     }

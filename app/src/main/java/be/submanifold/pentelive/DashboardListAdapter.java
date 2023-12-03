@@ -21,10 +21,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-
 /**
  * Created by waliedothman on 11/04/16.
  */
@@ -549,16 +545,6 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
 
     public void updateList() {
         notifyDataSetChanged();
-
-        if (playerData.showAds()) {
-            activity.findViewById(R.id.adView).setVisibility(View.VISIBLE);
-            boolean personalizeAds = PrefUtils.getBooleanFromPrefs(activity, PrefUtils.PREFS_PERSONALIZEDADS_KEY, false);
-            Bundle extras = new Bundle();
-            extras.putString("npa", (personalizeAds ? "0" : "1"));
-            ((AdView) activity.findViewById(R.id.adView)).loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
-        } else {
-            activity.findViewById(R.id.adView).setVisibility(View.GONE);
-        }
 
         activity.invalidateOptionsMenu();
 
