@@ -364,10 +364,14 @@ public class Table {
     public synchronized void updateTimer(boolean reset, int currentPlayer, int minutes, int seconds) {
         if (reset) {
             int timerMinutes = timer.get("initialMinutes");
+            int timerSeconds = 0;
+            if (timerMinutes == 0) {
+                timerSeconds = timer.get("incrementalSeconds");
+            }
             gameState.timers.get(1).put("minutes", timerMinutes);
             gameState.timers.get(2).put("minutes", timerMinutes);
-            gameState.timers.get(1).put("seconds", 0);
-            gameState.timers.get(2).put("seconds", 0);
+            gameState.timers.get(1).put("seconds", timerSeconds);
+            gameState.timers.get(2).put("seconds", timerSeconds);
         } else if (minutes > -1) {
             Map<String, Integer> timer = gameState.timers.get(currentPlayer);
             timer.put("seconds", seconds);
