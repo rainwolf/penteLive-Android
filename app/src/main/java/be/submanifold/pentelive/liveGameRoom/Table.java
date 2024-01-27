@@ -84,7 +84,7 @@ public class Table {
     }
 
     private List<Integer> moves = new ArrayList<>();
-    private Map<String, Integer> timer;
+    private Map<String, Long> timer;
     private Map<Integer, LivePlayer> seats = new HashMap<>();
     private GameState gameState = new GameState();
     private final Context ctx = MyApplication.getContext();
@@ -137,8 +137,8 @@ public class Table {
 
     public Table() {
         timer = new HashMap<>();
-        timer.put("initialMinutes", 0);
-        timer.put("incrementalSeconds", 0);
+        timer.put("initialMinutes", 0L);
+        timer.put("incrementalSeconds", 0L);
         this.groupsByPlayerAndID = new HashMap<Integer, Map<Integer, List<Integer>>>();
         this.groupsByPlayerAndID.put(1, new HashMap<Integer, List<Integer>>());
         this.groupsByPlayerAndID.put(2, new HashMap<Integer, List<Integer>>());
@@ -338,7 +338,7 @@ public class Table {
                 LivePlayer player2 = seats.get(2);
                 seats.put(1, player2);
                 seats.put(2, player1);
-                Map<String, Integer> timer1 = gameState.timers.get(1), timer2 = gameState.timers.get(2);
+                Map<String, Long> timer1 = gameState.timers.get(1), timer2 = gameState.timers.get(2);
                 gameState.timers.put(1, timer2);
                 gameState.timers.put(2, timer1);
             }
@@ -361,34 +361,30 @@ public class Table {
                 gameState.swap2State == Swap2State.NOCHOICE) && moves.size() == 5;
     }
 
-    public synchronized void updateTimer(boolean reset, int currentPlayer, int minutes, int seconds) {
+    public synchronized void updateTimer(boolean reset, int currentPlayer, long millis) {
         if (reset) {
-            int timerMinutes = timer.get("initialMinutes");
-            int timerSeconds = 0;
+            long timerMinutes = timer.get("initialMinutes");
+            long timerSeconds = 0;
             if (timerMinutes == 0) {
                 timerSeconds = timer.get("incrementalSeconds");
             }
-            gameState.timers.get(1).put("minutes", timerMinutes);
-            gameState.timers.get(2).put("minutes", timerMinutes);
-            gameState.timers.get(1).put("seconds", timerSeconds);
-            gameState.timers.get(2).put("seconds", timerSeconds);
-        } else if (minutes > -1) {
-            Map<String, Integer> timer = gameState.timers.get(currentPlayer);
-            timer.put("seconds", seconds);
-            timer.put("minutes", minutes);
+            millis = timerMinutes * 60 * 1000 + timerSeconds * 1000;
+            gameState.timers.get(1).put("millis", millis);
+            gameState.timers.get(2).put("millis", millis);
+            gameState.timers.get(1).remove("startTime");
+        } else if (millis > 0) {
+            Map<String, Long> timer = gameState.timers.get(currentPlayer);
+            timer.remove("startTime");
+            timer.put("millis", millis);
         } else {
-            Map<String, Integer> timer = gameState.timers.get(currentPlayer);
-            int timerMinutes = timer.get("minutes");
-            int timerSeconds = timer.get("seconds");
-            if (timerSeconds > 0) {
-                timerSeconds = timerSeconds - 1;
-                timer.put("seconds", timerSeconds);
-            } else if (timerMinutes > 0) {
-                timerSeconds = 59;
-                timerMinutes = timerMinutes - 1;
-                timer.put("seconds", timerSeconds);
-                timer.put("minutes", timerMinutes);
+            Map<String, Long> timer = gameState.timers.get(currentPlayer);
+            long currentTime = System.currentTimeMillis();
+            Long startTime = timer.get("startTime");
+            if (startTime == null) {
+                startTime = currentTime;
             }
+            long elapsedTime = currentTime - startTime;
+            timer.put("millis", elapsedTime);
         }
     }
 
@@ -411,7 +407,7 @@ public class Table {
         this.koMove = -1;
         gameState.goState = GoState.PLAY;
         hasPass = false;
-        updateTimer(true, 0, 0, 0);
+        updateTimer(true, 0, 0);
     }
 
     public void resetBoard() {
@@ -1128,11 +1124,11 @@ public class Table {
         this.moves = moves;
     }
 
-    public Map<String, Integer> getTimer() {
+    public Map<String, Long> getTimer() {
         return timer;
     }
 
-    public void setTimer(Map<String, Integer> timer) {
+    public void setTimer(Map<String, Long> timer) {
         this.timer = timer;
     }
 

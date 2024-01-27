@@ -66,7 +66,7 @@ public class LiveTableFragment extends Fragment {
             } finally {
                 // 100% guarantee that this always happens, even if
                 // your update method throws an exception
-                timerHandler.postDelayed(timerUpdater, 1000);
+                timerHandler.postDelayed(timerUpdater, 40);
             }
         }
     };
@@ -292,8 +292,8 @@ public class LiveTableFragment extends Fragment {
         } else {
             p2Name.setText(player.coloredNameString(p2Name.getLineHeight()));
         }
-        int initialMnts = table.getTimer().get("initialMinutes");
-        int incrementalScnds = table.getTimer().get("incrementalSeconds");
+        long initialMnts = table.getTimer().get("initialMinutes");
+        long incrementalScnds = table.getTimer().get("incrementalSeconds");
         String ratedStr = "";
         if (table.isRated()) {
             ratedStr = getString(R.string.rated);
@@ -306,12 +306,39 @@ public class LiveTableFragment extends Fragment {
         }
         settingsText.setText(timerStr + "\n" + ratedStr);
         synchronized (this) {
-            int minutes = table.getGameState().timers.get(1).get("minutes");
-            int seconds = table.getGameState().timers.get(1).get("seconds");
-            p1Timer.setText(minutes + ":" + seconds);
-            minutes = table.getGameState().timers.get(2).get("minutes");
-            seconds = table.getGameState().timers.get(2).get("seconds");
-            p2Timer.setText(minutes + ":" + seconds);
+            Map<String, Long> timer1, timer2;
+            timer1 = table.getGameState().timers.get(1);
+            timer2 = table.getGameState().timers.get(2);
+            long minutes = timer1.get("minutes");
+            long seconds = timer1.get("seconds");
+            long tenths = -1;
+            if (timer1.get("millis") != null) {
+                minutes = timer1.get("millis") / 1000 / 60;
+                seconds = timer1.get("millis") / 1000 % 60;
+                if (minutes == 0 && seconds < 12) {
+                    tenths = timer1.get("millis") / 100 % 10;
+                }
+            }
+            if (tenths > -1) {
+                p1Timer.setText(minutes + ":" + seconds + "." + tenths);
+            } else {
+                p1Timer.setText(minutes + ":" + seconds);
+            }
+            minutes = timer2.get("minutes");
+            seconds = timer2.get("seconds");
+            tenths = -1;
+            if (timer2.get("millis") != null) {
+                minutes = timer2.get("millis") / 1000 / 60;
+                seconds = timer2.get("millis") / 1000 % 60;
+                if (minutes == 0 && seconds < 12) {
+                    tenths = timer2.get("millis") / 100 % 10;
+                }
+            }
+            if (tenths > -1) {
+                p2Timer.setText(minutes + ":" + seconds + "." + tenths);
+            } else {
+                p2Timer.setText(minutes + ":" + seconds);
+            }
         }
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
 
@@ -588,12 +615,27 @@ public class LiveTableFragment extends Fragment {
     public void updateTimer() {
         synchronized (this) {
             int currentPlayer = table.currentPlayer();
-            table.updateTimer(false, currentPlayer, -1, -1);
-            Map<String, Integer> timer = table.getGameState().timers.get(currentPlayer);
-            if (currentPlayer == 1) {
-                p1Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
+            table.updateTimer(false, currentPlayer, -1);
+            Map<String, Long> timer = table.getGameState().timers.get(currentPlayer);
+            TextView screenTimer = p1Timer;
+            if (currentPlayer == 2) {
+                screenTimer = p2Timer;
+            }
+
+            long minutes = timer.get("minutes");
+            long seconds = timer.get("seconds");
+            long tenths = -1;
+            if (timer.get("millis") != null) {
+                minutes = timer.get("millis") / 1000 / 60;
+                seconds = timer.get("millis") / 1000 % 60;
+                if (minutes == 0 && seconds < 12) {
+                    tenths = timer.get("millis") / 100 % 10;
+                }
+            }
+            if (tenths > -1) {
+                screenTimer.setText(minutes + ":" + seconds + "." + tenths);
             } else {
-                p2Timer.setText(timer.get("minutes") + ":" + timer.get("seconds"));
+                screenTimer.setText(minutes + ":" + seconds);
             }
         }
     }
