@@ -28,7 +28,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class PentePlayer implements Parcelable {
 
-    public static Boolean development = true;
+    public static Boolean development = false;
 
     public static String mPlayerName = "";
     public static String mPassword = "";
