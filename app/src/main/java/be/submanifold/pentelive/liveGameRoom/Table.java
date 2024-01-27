@@ -153,6 +153,20 @@ public class Table {
         hasPass = false;
     }
 
+    public boolean shouldTimerRun() {
+        if (timed) {
+            if (moves.isEmpty()) {
+                String gameName = gameNames.get(game);
+                if (gameName.contains("D-") || gameName.contains("DK-") || gameName.contains("Go") || gameName.contains("Swap2")) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
     public void undoMove() {
         if (moves.size() > 1) {
             List<Integer> oldMoves = moves;
@@ -372,19 +386,30 @@ public class Table {
             gameState.timers.get(1).put("millis", millis);
             gameState.timers.get(2).put("millis", millis);
             gameState.timers.get(1).remove("startTime");
+            gameState.timers.get(2).remove("startTime");
         } else if (millis > 0) {
             Map<String, Long> timer = gameState.timers.get(currentPlayer);
             timer.remove("startTime");
             timer.put("millis", millis);
         } else {
+            if (!this.shouldTimerRun()) {
+                return;
+            }
             Map<String, Long> timer = gameState.timers.get(currentPlayer);
             long currentTime = System.currentTimeMillis();
             Long startTime = timer.get("startTime");
             if (startTime == null) {
                 startTime = currentTime;
+                timer.put("startTime", startTime);
+            }
+            Long startMillis = timer.get("startMillis");
+            millis = timer.get("millis");
+            if (startMillis == null) {
+                startMillis = millis;
+                timer.put("startMillis", startMillis);
             }
             long elapsedTime = currentTime - startTime;
-            timer.put("millis", elapsedTime);
+            timer.put("millis", startMillis - elapsedTime);
         }
     }
 

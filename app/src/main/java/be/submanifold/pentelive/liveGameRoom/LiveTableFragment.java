@@ -309,8 +309,8 @@ public class LiveTableFragment extends Fragment {
             Map<String, Long> timer1, timer2;
             timer1 = table.getGameState().timers.get(1);
             timer2 = table.getGameState().timers.get(2);
-            long minutes = timer1.get("minutes");
-            long seconds = timer1.get("seconds");
+            long minutes = initialMnts;
+            long seconds = incrementalScnds;
             long tenths = -1;
             if (timer1.get("millis") != null) {
                 minutes = timer1.get("millis") / 1000 / 60;
@@ -324,8 +324,8 @@ public class LiveTableFragment extends Fragment {
             } else {
                 p1Timer.setText(minutes + ":" + seconds);
             }
-            minutes = timer2.get("minutes");
-            seconds = timer2.get("seconds");
+            minutes = initialMnts;
+            seconds = incrementalScnds;
             tenths = -1;
             if (timer2.get("millis") != null) {
                 minutes = timer2.get("millis") / 1000 / 60;
@@ -622,8 +622,8 @@ public class LiveTableFragment extends Fragment {
                 screenTimer = p2Timer;
             }
 
-            long minutes = timer.get("minutes");
-            long seconds = timer.get("seconds");
+            long minutes = table.getTimer().get("initialMinutes");
+            long seconds = table.getTimer().get("incrementalSeconds");
             long tenths = -1;
             if (timer.get("millis") != null) {
                 minutes = timer.get("millis") / 1000 / 60;

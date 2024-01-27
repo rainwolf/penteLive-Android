@@ -136,8 +136,8 @@ public class TablesAndPlayers {
 
     public int changeTableState(Map<String, Object> data) {
         boolean timed = (Boolean) data.get("timed");
-        long initialMinutes = (Long) data.get("initialMinutes");
-        long incrementalSeconds = (Long) data.get("incrementalSeconds");
+        long initialMinutes = ((Number) data.get("initialMinutes")).longValue();
+        long incrementalSeconds = ((Number) data.get("incrementalSeconds")).longValue();
         boolean rated = (Boolean) data.get("rated");
         int game = (Integer) data.get("game");
         boolean open = data.get("tableType").equals(1);
@@ -226,7 +226,7 @@ public class TablesAndPlayers {
 
     public void updateTableTimer(Map<String, Object> data) {
         int tableId = (int) data.get("table");
-        long millis = (long) data.get("millis");
+        long millis = ((Number) data.get("millis")).longValue();
 
         String playerName = (String) data.get("player");
         Table table = tables.get(tableId);
