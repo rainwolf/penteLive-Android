@@ -147,7 +147,7 @@ public class RegisterActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/join";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/join";
+                    request = "https://10.0.2.2/join";
                 }
                 URL url = new URL(request);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();

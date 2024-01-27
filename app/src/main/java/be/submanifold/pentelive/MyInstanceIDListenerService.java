@@ -50,7 +50,7 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
                 PrefUtils.saveLongToPrefs(MyInstanceIDListenerService.this, PrefUtils.PREFS_TOKENLASTSENT_KEY, 0);
                 URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/notification?device=android&token=" + token);
+                    url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                 }
 //                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
 //                        + "&token=" + token);

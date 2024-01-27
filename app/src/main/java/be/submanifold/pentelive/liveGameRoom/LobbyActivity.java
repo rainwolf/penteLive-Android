@@ -178,7 +178,7 @@ public class LobbyActivity extends AppCompatActivity {
             try {
                 URL url;
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 } else {
                     url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }

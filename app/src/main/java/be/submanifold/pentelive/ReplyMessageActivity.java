@@ -243,7 +243,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/mymessages";
+                    request = "https://10.0.2.2/gameServer/mymessages";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -338,7 +338,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mymessages?command=view&mid=" + messageID
+                    url = new URL("https://10.0.2.2/gameServer/mymessages?command=view&mid=" + messageID
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -466,7 +466,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/mymessages";
+                    request = "https://10.0.2.2/gameServer/mymessages";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();

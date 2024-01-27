@@ -474,7 +474,7 @@ public class SettingsActivity extends AppCompatActivity {
                 URL url = new URL("https://www.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
                         (personalizeAds ? "Y" : "N"));
                 if (PentePlayer.development) {
-                    new URL("https://development.pente.org/gameServer/changeAdsPreference?personalizeAds=" +
+                    new URL("https://10.0.2.2/gameServer/changeAdsPreference?personalizeAds=" +
                             (personalizeAds ? "Y" : "N"));
                 }
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();

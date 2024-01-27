@@ -275,7 +275,7 @@ public class InvitationActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/newGame";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/newGame";
+                    request = "https://10.0.2.2/gameServer/tb/newGame";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();

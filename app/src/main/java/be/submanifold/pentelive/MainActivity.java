@@ -103,16 +103,16 @@ public class MainActivity extends AppCompatActivity {
                 String url = "google.com";
                 if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
                     url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    //                        url = "https://development.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                    //                        url = "https://10.0.2.2/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
                     url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    //                        url = "https://development.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
+                    //                        url = "https://10.0.2.2/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else {
                     url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
                             + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                    //                        url = "https://development.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+                    //                        url = "https://10.0.2.2/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
                 }
@@ -525,10 +525,10 @@ public class MainActivity extends AppCompatActivity {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
-//                url = new URL("https://development.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
+//                url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
 //                System.out.println("cookies: " +cookies);

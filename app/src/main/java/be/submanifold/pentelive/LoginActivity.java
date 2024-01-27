@@ -383,7 +383,7 @@ public class LoginActivity extends AppCompatActivity
 
                 URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 }
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
@@ -535,7 +535,7 @@ public class LoginActivity extends AppCompatActivity
                     try {
                         URL url = new URL("https://www.pente.org/gameServer/notification?device=android&token=" + token);
                         if (PentePlayer.development) {
-                            url = new URL("https://development.pente.org/gameServer/notification?device=android&token=" + token);
+                            url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                         }
 //                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword
 //                        + "&token=" + token);

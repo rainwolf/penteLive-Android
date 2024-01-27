@@ -357,7 +357,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/mobile/koth.jsp";
-//                request        = "https://development.pente.org/gameServer/mobile/koth.jsp";
+//                request        = "https://10.0.2.2/gameServer/mobile/koth.jsp";
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -448,7 +448,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/koth";
-//                request        = "https://development.pente.org/gameServer/koth";
+//                request        = "https://10.0.2.2/gameServer/koth";
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -540,7 +540,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/newGame";
-//                request        = "https://development.pente.org/gameServer/tb/newGame";
+//                request        = "https://10.0.2.2/gameServer/tb/newGame";
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

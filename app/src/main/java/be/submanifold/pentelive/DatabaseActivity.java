@@ -668,7 +668,7 @@ public class DatabaseActivity extends AppCompatActivity {
 //                System.out.println("format data: " + tmpStr);
                 URL url = new URL("https://www.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
+                    url = new URL("https://10.0.2.2/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
                 }
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(200000);

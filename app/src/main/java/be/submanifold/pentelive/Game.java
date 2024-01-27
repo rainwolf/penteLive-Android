@@ -395,7 +395,7 @@ public class Game implements Parcelable {
                 URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID
+                    url = new URL("https://10.0.2.2/gameServer/mobile/game.jsp?gid=" + mGameID
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -433,7 +433,7 @@ public class Game implements Parcelable {
                 if (mGameString.indexOf("moves=") == -1) {
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (PentePlayer.development) {
-                        url = new URL("https://development.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                        url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
                     connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
@@ -453,7 +453,7 @@ public class Game implements Parcelable {
 
                     url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID);
                     if (PentePlayer.development) {
-                        url = new URL("https://development.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID);
+                        url = new URL("https://10.0.2.2/gameServer/mobile/game.jsp?gid=" + mGameID);
                     }
                     connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
@@ -516,7 +516,7 @@ public class Game implements Parcelable {
                 URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://development.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
+                    url = new URL("https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -636,7 +636,7 @@ public class Game implements Parcelable {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/cancel";
+                    request = "https://10.0.2.2/gameServer/tb/cancel";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -725,7 +725,7 @@ public class Game implements Parcelable {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/game";
+                    request = "https://10.0.2.2/gameServer/tb/game";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -817,7 +817,7 @@ public class Game implements Parcelable {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/game";
+                    request = "https://10.0.2.2/gameServer/tb/game";
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();

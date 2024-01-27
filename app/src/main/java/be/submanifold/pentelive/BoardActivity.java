@@ -515,7 +515,7 @@ public class BoardActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/resign";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/resign";
+                    request = "https://10.0.2.2/gameServer/tb/resign";
                 }
                 URL url = new URL(request);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -584,7 +584,7 @@ public class BoardActivity extends AppCompatActivity {
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
-                    request = "https://development.pente.org/gameServer/tb/cancel";
+                    request = "https://10.0.2.2/gameServer/tb/cancel";
                 }
                 URL url = new URL(request);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();

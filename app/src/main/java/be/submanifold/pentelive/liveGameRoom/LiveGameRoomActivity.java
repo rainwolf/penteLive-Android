@@ -108,7 +108,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 try {
                     SocketFactory factory = SSLSocketFactory.getDefault();
                     if (PentePlayer.development) {
-                        socket = factory.createSocket("development.pente.org", port);
+                        socket = factory.createSocket("10.0.2.2", port);
                     } else {
                         socket = factory.createSocket("pente.org", port);
                     }
