@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:dist="http://schemas.android.com/apk/distribution"
-    android:versionCode="167"
-    android:versionName="2.9.2">
+    android:versionCode="173"
+    android:versionName="2.9.2f">
 
     <dist:module dist:instant="true" />
 
@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:networkSecurityConfig="@xml/network_security_configuration"
         tools:ignore="GoogleAppIndexingWarning"
         android:name=".MyApplication"
         android:allowBackup="true"

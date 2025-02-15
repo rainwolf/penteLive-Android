@@ -287,7 +287,6 @@ public class LoginActivity extends AppCompatActivity
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
@@ -366,6 +365,8 @@ public class LoginActivity extends AppCompatActivity
 
         private boolean wrongUP = false;
 
+        private String exception = "";
+
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
@@ -432,7 +433,8 @@ public class LoginActivity extends AppCompatActivity
                 }
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+//                e1.printStackTrace();
+                exception = e1.toString();
                 return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
@@ -482,14 +484,25 @@ public class LoginActivity extends AppCompatActivity
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
                 } else {
-                    Toast toast = Toast.makeText(LoginActivity.this, getString(R.string.error_connecting), Toast.LENGTH_LONG);
-                    toast.show();
+//                    Toast toast = Toast.makeText(LoginActivity.this, getString(R.string.error_connecting), Toast.LENGTH_LONG);
+//                    toast.show();
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     builder.setTitle(getString(R.string.connection_wrong));
                     builder.setPositiveButton(getString(R.string.play_ai), (dialogInterface, i) -> {
                         Intent intent = new Intent(getApplicationContext(), MMAIActivity.class);
                         startActivity(intent);
+                    });
+                    builder.setNeutralButton(getString(R.string.send_crash_report), (dialogInterface, i) -> {
+                        Intent sendcrash = new Intent(Intent.ACTION_SEND);
+                        sendcrash.setType("message/rfc822"); // This line is needed to open the email client
+                        sendcrash.putExtra(Intent.EXTRA_EMAIL, new String[]{"rainwolf@submanifold.be"}); // Add the recipient's email
+                        sendcrash.putExtra(Intent.EXTRA_SUBJECT, "Login Crash Report");
+                        sendcrash.putExtra(Intent.EXTRA_TEXT, exception);
+                        startActivity(Intent.createChooser(sendcrash, "Send crash report"));
+//                        Intent intent = new Intent(Intent.ACTION_SEND);
+//                        intent.setType("message/rfc822");
+//                        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"
                     });
                     builder.setNegativeButton(getString(R.string.dismiss), null);
 
