@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
         boolean loadAvatars = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false),
                 showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
         this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
-        (MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+        ContextCompat.registerReceiver((MainActivity.this), mMessageReceiver, new IntentFilter("unique_name"), ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     @Override

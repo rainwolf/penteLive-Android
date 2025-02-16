@@ -226,7 +226,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
-        (KingOfTheHillActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+        ContextCompat.registerReceiver((KingOfTheHillActivity.this), mMessageReceiver, new IntentFilter("unique_name"), ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     @Override

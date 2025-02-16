@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 
 import com.google.android.material.tabs.TabLayout;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -264,7 +265,7 @@ public class SocialActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
-        (SocialActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+        ContextCompat.registerReceiver((SocialActivity.this), mMessageReceiver, new IntentFilter("unique_name"), ContextCompat.RECEIVER_NOT_EXPORTED);
         LoadFollowersingTask loadfollowersingTask = new LoadFollowersingTask();
         loadfollowersingTask.execute();
     }

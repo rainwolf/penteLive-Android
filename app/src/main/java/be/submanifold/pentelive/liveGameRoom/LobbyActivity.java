@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -152,7 +153,7 @@ public class LobbyActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        (LobbyActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("unique_name"));
+        ContextCompat.registerReceiver((LobbyActivity.this), mMessageReceiver, new IntentFilter("unique_name"), ContextCompat.RECEIVER_NOT_EXPORTED);
         MyApplication.activityResumed(this);
     }
 
