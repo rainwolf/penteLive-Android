@@ -99,8 +99,6 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.liveroom_row_layout, null);
         }
-        convertView.setBackgroundColor(Color.WHITE);
-
         TextView nameTextView = convertView.findViewById(R.id.nameText);
 
         nameTextView.setText(rooms.get(childPosition).getRoomText(nameTextView.getLineHeight()));

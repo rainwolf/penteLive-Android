@@ -17,9 +17,6 @@ import android.view.View;
 import java.util.List;
 import java.util.Map;
 
-import be.submanifold.pentelive.MyApplication;
-import be.submanifold.pentelive.PrefUtils;
-
 public class LiveBoardView extends View {
     Table table;
     LiveTableFragment fragment;

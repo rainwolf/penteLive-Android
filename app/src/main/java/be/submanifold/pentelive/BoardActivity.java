@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,6 +27,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -46,7 +50,7 @@ public class BoardActivity extends AppCompatActivity {
 
     private BoardView board;
     private View messageView;
-    private PopupWindow messageWindow;
+    private AlertDialog messageWindow;
     public Animation rotation;
     public ImageView messageIcon;
 //    private int untilMove;
@@ -65,6 +69,7 @@ public class BoardActivity extends AppCompatActivity {
 
         messageView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.in_game_message, null, false);
         messageIcon = (ImageView) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
+        messageIcon.setImageTintList(Helpers.tintList(this));
         rotation = AnimationUtils.loadAnimation(BoardActivity.this, R.anim.rotation_animation);
         rotation.setRepeatCount(Animation.INFINITE);
 
@@ -453,13 +458,7 @@ public class BoardActivity extends AppCompatActivity {
             if (!game.isActive() || game.getUntilMove() < game.getMovesList().size()) {
                 messageView.findViewById(R.id.messageInput).setVisibility(View.GONE);
             }
-            messageWindow = new PopupWindow(messageView, size.x - 50, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-            messageWindow.setFocusable(true);
-            messageWindow.setOutsideTouchable(true);
-            messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(BoardActivity.this, R.drawable.border));
-//                        messageWindow.setAnimationStyle(R.anim.animation);
-            messageWindow.showAtLocation(board, Gravity.TOP, 0, 260);
-//                return true;
+            initializeMessageView();
         });
         menu.findItem(R.id.action_new_message).setActionView(messageIcon);
 
@@ -470,6 +469,14 @@ public class BoardActivity extends AppCompatActivity {
         } else {
             item.setIcon(R.drawable.ic_action_lock_open);
         }
+        ColorStateList tintList = Helpers.tintList(this);
+        item.setIconTintList(tintList);
+        item = menu.findItem(R.id.action_cancel_resign);
+        item.setIconTintList(tintList);
+        item = menu.findItem(R.id.go_territory);
+        item.setIconTintList(tintList);
+        item = menu.findItem(R.id.action_new_message);
+        item.setIconTintList(tintList);
 
 //        item = menu.findItem(R.id.go_territory);
 //        if (!game.isGo()) {
@@ -479,6 +486,18 @@ public class BoardActivity extends AppCompatActivity {
 //        }
         return true;
     }
+
+    private void initializeMessageView() {
+        if (messageWindow == null) {
+            AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
+//            helpBuilder.setTitle(getString(R.string.table_settings));
+            helpBuilder.setView(messageView);
+            messageWindow = helpBuilder.create();
+            messageWindow.setCanceledOnTouchOutside(true);
+        }
+        messageWindow.show();
+    }
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {

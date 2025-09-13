@@ -73,7 +73,6 @@
         android:layout_toRightOf="@id/playAsLabel"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/black"
         android:layout_below="@id/difficultyLabel"
         android:id="@+id/playAsChoice"
         android:layout_alignParentRight="true" />

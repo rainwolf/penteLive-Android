@@ -1,5 +1,7 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import static be.submanifold.pentelive.PentePlayer.development;
+
 import be.submanifold.pentelive.*;
 
 import android.content.DialogInterface;
@@ -131,7 +133,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 Socket socket = null;
                 try {
                     SocketFactory factory;
-                    if (PentePlayer.development) {
+                    if (development) {
                         final SSLContext sslContext = SSLContext.getInstance("SSL");
                         sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                         factory = sslContext.getSocketFactory();
@@ -234,7 +236,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                         Runnable uiRunnable = new Runnable() {
                             @Override
                             public void run() {
-                                System.out.println("jsonEvent: " + jsonEvent);
+                                if (development) {
+                                    System.out.println("jsonEvent: " + jsonEvent);
+                                }
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
                                     updateMainRoom();

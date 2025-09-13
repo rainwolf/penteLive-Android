@@ -2,12 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     tools:context="be.submanifold.pentelive.liveGameRoom.LiveTableFragment">
 
     <RelativeLayout
-        android:background="@android:color/white"
         android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -15,9 +14,8 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -125,8 +123,8 @@
             android:layout_height="match_parent"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
+            android:background="?attr/colorPrimary"
             android:gravity="bottom"
-            android:background="@drawable/border"
             android:layout_below="@id/actionLayout"/>
 
     </RelativeLayout>

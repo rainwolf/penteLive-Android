@@ -1,6 +1,6 @@
 package be.submanifold.pentelive;
 
-import android.content.DialogInterface;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,29 +10,27 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 
-import androidx.core.content.FileProvider;
-import androidx.appcompat.app.AlertDialog;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -40,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SettingsActivity extends AppCompatActivity {
+
+    ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +49,19 @@ public class SettingsActivity extends AppCompatActivity {
         myToolbar.setTitle(getString(R.string.settings));
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
+
+        // Registers a photo picker activity launcher in single-select mode.
+        pickMedia = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), photoURI -> {
+                // Callback is invoked after the user selects a media item or closes the
+                // photo picker.
+                if (photoURI != null) {
+                    System.out.println("PhotoPicker Selected URI: " + photoURI);
+                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                } else {
+                    System.out.println("PhotoPicker No media selected");
+                }
+            });
 
 
         ((ToggleButton) findViewById(R.id.avatarToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(SettingsActivity.this, PrefUtils.PREFS_LOADAVATARS_KEY, false));
@@ -117,41 +130,11 @@ public class SettingsActivity extends AppCompatActivity {
             if (!PentePlayer.mSubscriber) {
                 return;
             }
-            final CharSequence[] items = {getString(R.string.take_photo), getString(R.string.choose_from_library),
-                    getString(R.string.cancel)};
-            AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-            builder.setTitle(getString(R.string.change_avatar));
-            builder.setItems(items, (dialog, item) -> {
-                if (items[item].equals(getString(R.string.take_photo))) {
-                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                    // Ensure that there's a camera activity to handle the intent
-                    if (takePicture.resolveActivity(getPackageManager()) != null) {
-                        // Create the File where the photo should go
-                        File photoFile = null;
-                        try {
-                            photoFile = createImageFile();
-                        } catch (IOException ex) {
-                            System.out.println("oops");
-                        }
-                        // Continue only if the File was successfully created
-                        if (photoFile != null) {
-                            Uri photoURI = FileProvider.getUriForFile(SettingsActivity.this,
-                                    "be.submanifold.pentelive.fileprovider",
-                                    photoFile);
-                            takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                            startActivityForResult(takePicture, 0);
-                        }
-                    }
-                } else if (items[item].equals(getString(R.string.choose_from_library))) {
-                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(pickPhoto, 1);//one can be replaced with any action code
-                } else if (items[item].equals(getString(R.string.cancel))) {
-                    dialog.dismiss();
-                }
-            });
-            builder.show();
+            // Launch the photo picker and let the user choose only images.
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
         });
     }
 
@@ -171,26 +154,18 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
         if (resultCode != RESULT_OK) {
-//            System.out.println("result kitty fuck " + resultCode);
+            System.out.println("result kitty fuck " + resultCode);
             return;
         }
         Bitmap imageBitmap = null;
-        if (requestCode == 1) {
-            Uri selectedImage = imageReturnedIntent.getData();
-            try {
-                imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-//            Bundle extras = imageReturnedIntent.getExtras();
-//            imageBitmap = (Bitmap) extras.get("data");
+        Uri imageUri = imageReturnedIntent.getData();
+        try {
+            ContentResolver contentResolver = getContentResolver();
+            InputStream inputStream = contentResolver.openInputStream(imageUri);
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
-
             // Determine how much to scale down the image
             int scaleFactor = Math.min(photoW / 300, photoH / 300);
 
@@ -199,23 +174,20 @@ public class SettingsActivity extends AppCompatActivity {
             bmOptions.inSampleSize = scaleFactor;
             bmOptions.inPurgeable = true;
 
-            imageBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+            imageBitmap = BitmapFactory.decodeStream(inputStream, null, bmOptions);
+            inputStream.close(); // Close the input stream when done
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            // Handle case where the file is not found
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle other potential exceptions
         }
         if (imageBitmap == null) {
             return;
         }
-//        ((ImageView) findViewById(R.id.avatarView)).setImageBitmap(imageBitmap);
-//        if (resultCode != RESULT_OK) {
-//            System.out.println("result kitty fuck " + resultCode);
-//            return;
-//        }
-//        if (selectedImage == null) {
-//            System.out.println("kitty fuck");
-//            return;
-//        }
-//        try {
         Bitmap bitmap = imageBitmap;
-//        System.out.println("kitty image " + bitmap.getWidth() + " " + bitmap.getHeight());
+
         float maxSize = 300f;
         Bitmap newImg = scaleBitmap(bitmap, maxSize);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

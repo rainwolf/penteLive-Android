@@ -141,9 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
             try {
                 String urlParameters = "name=" + username + "&registerPassword=" + password + "&registerPasswordConfirm=" + password + "&registerEmail=" + email + "&agreePolicy=Y";
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/join";
                 if (PentePlayer.development) {

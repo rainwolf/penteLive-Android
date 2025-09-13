@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import be.submanifold.pentelive.Helpers;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.R;
 
@@ -99,6 +100,14 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.live_table_row, null);
         }
+        TextView gameNameTextView = convertView.findViewById(R.id.gameNameText);
+        TextView watchingTextView = convertView.findViewById(R.id.watchingText);
+        TextView settingsTextView = convertView.findViewById(R.id.settingsText);
+        int primaryColor = Helpers.getResourceColor(ctx, R.color.colorPrimary);
+        gameNameTextView.setTextColor(primaryColor);
+        watchingTextView.setTextColor(primaryColor);
+        settingsTextView.setTextColor(primaryColor);
+
         Table table = tablesArray.get(childPosition);
         if (table.isOpen()) {
             convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
@@ -106,7 +115,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
             convertView.findViewById(R.id.imageView).setVisibility(View.VISIBLE);
         }
         convertView.setBackgroundColor(table.getGameColor());
-        ((TextView) convertView.findViewById(R.id.gameNameText)).setText(table.getGameName());
+        gameNameTextView.setText(table.getGameName());
         TextView seatsTextView = convertView.findViewById(R.id.seatsText);
         if (!table.getSeats().isEmpty()) {
             seatsTextView.setVisibility(View.VISIBLE);
@@ -114,9 +123,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         } else {
             seatsTextView.setVisibility(View.GONE);
         }
-        TextView settingsTextView = convertView.findViewById(R.id.settingsText);
         settingsTextView.setText(table.getSettingsText());
-        TextView watchingTextView = convertView.findViewById(R.id.watchingText);
         watchingTextView.setText(table.getWatchingText(watchingTextView.getLineHeight()));
         return convertView;
     }

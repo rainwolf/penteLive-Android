@@ -4,12 +4,12 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "be.submanifold.pentelive"
-        minSdkVersion 19
-        targetSdkVersion 34
+        minSdkVersion 26
+        targetSdkVersion 35
         multiDexEnabled true
         ndk {
             moduleName "Ai"
@@ -27,7 +27,7 @@ android {
         // This is not necessary unless you have precompiled libraries in your project.
     }
 
-    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+    tasks.register('buildNative', Exec) {
         def ndkDir = properties.getProperty('ndk.dir')
         commandLine "$ndkDir/ndk-build",
                 '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
@@ -36,7 +36,7 @@ android {
                 'NDK_DEBUG=0'
     }
 
-    task cleanNative(type: Exec, description: 'Clean JNI object files') {
+    tasks.register('cleanNative', Exec) {
         def ndkDir = properties.getProperty('ndk.dir')
         commandLine "$ndkDir/ndk-build",
                 '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
@@ -45,7 +45,7 @@ android {
 
     clean.dependsOn 'cleanNative'
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         compileTask -> compileTask.dependsOn buildNative
     }
     bundle {
@@ -67,21 +67,22 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.activity:activity:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'com.google.firebase:firebase-core:21.1.1'
-    implementation 'com.google.firebase:firebase-messaging:23.4.0'
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:1.0.1'
+    implementation 'com.google.firebase:firebase-messaging:25.0.0'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0'
     implementation 'com.github.QuadFlask:colorpicker:0.0.13'
 //    implementation 'com.google.android.gms:play-services-auth:20.5.0'
 //    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.13.1'
     implementation 'com.github.kobakei:Android-RateThisApp:1.2.0'
     implementation 'com.android.support:multidex:1.0.3'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

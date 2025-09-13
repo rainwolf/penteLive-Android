@@ -97,7 +97,6 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.rating_stats_row, null);
         }
-        convertView.setBackgroundColor(Color.WHITE);
         RatingStat ratingStat = this.ratingStats.get(childPosition);
         int crown = ratingStat.getCrown();
 
@@ -112,7 +111,7 @@ public class RatingStatsListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.ratingText)).setText(ratingText);
         SpannableStringBuilder sb = new SpannableStringBuilder("\u25A0");
         int ratingInt = Integer.parseInt(ratingText);
-        ForegroundColorSpan ratingColor = new ForegroundColorSpan(Color.BLACK);
+        ForegroundColorSpan ratingColor;
         if (ratingInt >= 1900) {
             ratingColor = new ForegroundColorSpan(Color.RED);
         } else if (ratingInt >= 1700) {

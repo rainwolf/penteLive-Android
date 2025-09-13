@@ -4,6 +4,7 @@ package be.submanifold.pentelive;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,19 +57,13 @@ import static android.view.View.VISIBLE;
 public class DatabaseActivity extends AppCompatActivity {
 
     private DBBoardView board;
-    private PopupWindow settingsWindow;
     private View settingsView, aiSettingsView;
-    public Animation rotation;
-    public ImageView messageIcon;
 
     private String dbP1Rating = "0", dbP2Rating = "0";
     private ProgressBar progressBar;
     private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
-//        private Context ctx = MyApplication.getContext();
-//    private int untilMove;
 
-    //        private Game game;
-    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+//    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
     private DatePickerDialog afterDatePickerDialog, beforeDatePickerDialog;
 
@@ -268,7 +264,6 @@ public class DatabaseActivity extends AppCompatActivity {
             return false;
         });
         settingsView.findViewById(R.id.player1).setOnFocusChangeListener((v, hasFocus) -> {
-//                    System.out.println("kitty");
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -538,9 +533,10 @@ public class DatabaseActivity extends AppCompatActivity {
         ArrayAdapter<String> acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
         actv.setAdapter(acAdapter);
         actv = settingsView.findViewById(R.id.player2);
-        acAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
+        acAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(DatabaseActivity.this)));
         actv.setAdapter(acAdapter);
-//            board.setAlpha(0.75f);
+        searchPrmtrsWindow.setOnDismissListener(dialogInterface -> board.setAlpha(1.0f));
+        board.setAlpha(0.05f);
     }
 
     private void showAISettings() {
@@ -548,6 +544,8 @@ public class DatabaseActivity extends AppCompatActivity {
         Spinner spinner = aiSettingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIDIFFICULTY_KEY, 0));
         ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setChecked(PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, false));
+        aiSearchPrmtrsWindow.setOnDismissListener(dialogInterface -> board.setAlpha(1.0f));
+        board.setAlpha(0.05f);
     }
 
     private void startAI() {
@@ -583,6 +581,10 @@ public class DatabaseActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.db_menu, menu);
+
+        ColorStateList tintList = Helpers.tintList(this);
+        MenuItem menuItem = menu.findItem(R.id.action_db_settings);
+        menuItem.setIconTintList(tintList);
 
         return true;
     }

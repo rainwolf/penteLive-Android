@@ -104,8 +104,12 @@ public class RatingStat implements Parcelable {
             gameStr = "Go (9x9)";
         } else if (gameInt < 25) {
             gameStr = "Go (13x13)";
-        } else {
+        } else if (gameInt < 27) {
             gameStr = "O-Pente";
+        } else if (gameInt < 29) {
+            gameStr = "Swap2-Pente";
+        } else {
+            gameStr = "Swap2-Keryo";
         }
         if (this.gameId > 50) {
             this.game = "tb-" + gameStr;

@@ -121,7 +121,6 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.dismissButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.declineButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
-        convertView.setBackgroundColor(Color.WHITE);
 
         ((TextView) convertView.findViewById(R.id.nameText)).setText("");
         ((TextView) convertView.findViewById(R.id.detailText)).setText("");
@@ -143,7 +142,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             Bitmap avatar = null;
             avatar = PentePlayer.avatars.get(player.getName());
             if (avatar == null) {
-                imgVw.setAlpha(0.25f);
+                imgVw.setAlpha(0.05f);
                 imgVw.setImageResource(R.drawable.ic_action_android);
             } else {
                 imgVw.setImageBitmap(avatar);

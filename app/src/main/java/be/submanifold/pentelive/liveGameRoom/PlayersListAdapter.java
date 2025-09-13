@@ -107,7 +107,6 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.live_player_row, null);
         }
-        convertView.setBackgroundColor(Color.WHITE);
         LivePlayer player = playersArray.get(childPosition);
 
         ImageView imgVw = convertView.findViewById(R.id.imageView);
@@ -120,7 +119,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         if (avatar != null) {
             imgVw.setImageBitmap(avatar);
         } else if (PentePlayer.loadAvatars) {
-            imgVw.setAlpha(0.25f);
+            imgVw.setAlpha(0.05f);
             imgVw.setImageResource(R.drawable.ic_action_android);
         } else {
             imgVw.setVisibility(View.GONE);

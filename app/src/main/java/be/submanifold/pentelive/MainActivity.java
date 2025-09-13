@@ -4,9 +4,9 @@ import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -17,7 +17,6 @@ import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
@@ -312,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                         display.getSize(size);
 
                         View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
-                        policyView.setBackgroundColor(Color.WHITE);
+//                        policyView.setBackgroundColor(Color.WHITE);
                         policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
                             popupWindow.dismiss();
                             String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
@@ -323,12 +322,12 @@ public class MainActivity extends AppCompatActivity {
                         popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                         popupWindow.setFocusable(true);
                         popupWindow.setOutsideTouchable(true);
-                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+//                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                         popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                         ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                         popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
-                        findViewById(R.id.list).setAlpha(0.25f);
+                        findViewById(R.id.list).setAlpha(0.05f);
                     }
                     return true;
                 case R.id.action_new_message:
@@ -346,9 +345,9 @@ public class MainActivity extends AppCompatActivity {
 
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
-                    popUpView.setBackgroundColor(Color.BLUE);
+//                    popUpView.setBackgroundColor(Color.BLUE);
                     popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                    ExpandableListView ratingListView = findViewById(R.id.ratingStatsListView);
+                    ExpandableListView ratingListView;
                     ratingListView = popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
                     RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
                     adapter.setInflater(inflater, MainActivity.this);
@@ -370,11 +369,11 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     popupWindow.setFocusable(true);
-                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+//                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                     popupWindow.setOutsideTouchable(true);
                     popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                     popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
-                    findViewById(R.id.list).setAlpha(0.25f);
+                    findViewById(R.id.list).setAlpha(0.05f);
 
                     return true;
                 case R.id.onlineUsers:
@@ -451,15 +450,21 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.dashboard_menu, menu);
 
+        ColorStateList tintList = Helpers.tintList(this);
         int livePlayers = player.getLivePlayers();
         MenuItem menuItem = menu.findItem(R.id.action_new_invitation);
         menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.ic_play_arrow));
+        menuItem.setIconTintList(tintList);
         menuItem = menu.findItem(R.id.live_games);
         menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning));
+
+        menuItem = menu.findItem(R.id.action_show_stats);
+        menuItem.setIconTintList(tintList);
 
         int onlineFollowing = player.getOnlineFollowingers();
         menuItem = menu.findItem(R.id.action_more);
         menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.ic_action_more));
+        menuItem.setIconTintList(tintList);
         menuItem = menu.findItem(R.id.onlineUsers);
         menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.online_users));
 
@@ -611,12 +616,13 @@ public class MainActivity extends AppCompatActivity {
 
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
-                popUpView.setBackgroundColor(Color.BLUE);
+//                popUpView.setBackgroundColor(Color.BLUE);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
                 final float scale = getResources().getDisplayMetrics().density;
                 popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
 //                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
 //                System.out.println("totaaaaaaaal "+total);
+//                popupWindow.setBackgroundDrawable(Andr);
                 ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
                 onlineUsersListView.setDividerHeight(0);
                 onlineUsersListView.setAdapter(listAdapter);
@@ -651,11 +657,11 @@ public class MainActivity extends AppCompatActivity {
 //                }
 
                 popupWindow.setFocusable(true);
-                popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+//                popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                 popupWindow.setOutsideTouchable(true);
                 popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                 popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
-                findViewById(R.id.list).setAlpha(0.25f);
+                findViewById(R.id.list).setAlpha(0.05f);
 
 //                listAdapter.updateList();
             }

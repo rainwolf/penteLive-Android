@@ -121,8 +121,16 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.social_row, null);
         }
-        convertView.setBackgroundColor(Color.WHITE);
         LivePlayer player = playersArray.get(childPosition);
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView ratingTextView = convertView.findViewById(R.id.ratingText);
+        convertView.setBackground(null);
+        int primaryColor = Helpers.getResourceColor(ctx, R.color.colorPrimary);
+        nameTextView.setTextColor(primaryColor);
+        ratingTextView.setTextColor(primaryColor);
+
+        nameTextView.setText("");
+        ratingTextView.setText("");
 
         ImageView imgVw = convertView.findViewById(R.id.imageView);
         imgVw.setVisibility(View.VISIBLE);
@@ -132,12 +140,11 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         if (avatar != null) {
             imgVw.setImageBitmap(avatar);
         } else if (PentePlayer.loadAvatars) {
-            imgVw.setAlpha(0.25f);
+            imgVw.setAlpha(0.05f);
             imgVw.setImageResource(R.drawable.ic_action_android);
         } else {
             imgVw.setVisibility(View.GONE);
         }
-        TextView nameTextView = convertView.findViewById(R.id.nameText);
         SpannableStringBuilder sb = player.coloredNameString(nameTextView.getLineHeight());
         PentePlayer.markIfOnline(player.getName(), sb);
         nameTextView.setText(sb);

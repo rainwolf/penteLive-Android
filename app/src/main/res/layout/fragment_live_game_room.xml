@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/liveGameRoomFragment"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     tools:context="be.submanifold.pentelive.liveGameRoom.LiveGameRoomFragment">
 
     <RelativeLayout
@@ -47,8 +46,7 @@
                 android:paddingEnd="5dp"
                 android:gravity="bottom"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"/>
+                android:layout_weight="1"/>
         </LinearLayout>
 
     </RelativeLayout>

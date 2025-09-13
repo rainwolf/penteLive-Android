@@ -1,7 +1,9 @@
 package be.submanifold.pentelive;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 
@@ -83,7 +85,7 @@ public class MMAIActivity extends AppCompatActivity {
         settingsWindow = new PopupWindow(settingsView, size.x * 2 / 3, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         settingsWindow.setFocusable(true);
         settingsWindow.setOutsideTouchable(true);
-        settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(MMAIActivity.this, R.drawable.border));
+//        settingsWindow.setBackgroundDrawable(ContextCompat.getDrawable(MMAIActivity.this, R.drawable.border));
 //                        messageWindow.setAnimationStyle(R.anim.animation);
 
         Spinner spinner = settingsView.findViewById(R.id.difficultySpinner);
@@ -131,6 +133,7 @@ public class MMAIActivity extends AppCompatActivity {
                 board.setGame(1);
             }
         });
+        board.setAlpha(0.05f);
         settingsWindow.setOnDismissListener(() -> board.setAlpha(1.0f));
 
 
@@ -229,7 +232,7 @@ public class MMAIActivity extends AppCompatActivity {
     }
 
     private void showAISettings() {
-        settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
+        settingsWindow.showAtLocation(board, Gravity.TOP, 0, 400);
         Spinner spinner = settingsView.findViewById(R.id.difficultySpinner);
         spinner.setSelection(PrefUtils.getIntFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIDIFFICULTY_KEY, 0));
         TextView playAs = settingsView.findViewById(R.id.playAsChoice);
@@ -240,7 +243,7 @@ public class MMAIActivity extends AppCompatActivity {
         }
         TextView game = settingsView.findViewById(R.id.gameChoice);
         game.setText(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente"));
-        board.setAlpha(0.75f);
+        board.setAlpha(0.05f);
     }
 
     @Override
@@ -268,7 +271,10 @@ public class MMAIActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
+        ColorStateList tintList = Helpers.tintList(this);
         getMenuInflater().inflate(R.menu.mmaiboard_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_mmai_settings);
+        menuItem.setIconTintList(tintList);
 
         return true;
     }

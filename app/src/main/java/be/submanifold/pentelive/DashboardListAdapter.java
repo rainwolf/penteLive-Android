@@ -242,11 +242,18 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.cancelButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.ratingText).setVisibility(View.VISIBLE);
         convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
-        convertView.setBackgroundColor(Color.WHITE);
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView detailTextView = convertView.findViewById(R.id.detailText);
+        TextView ratingTextView = convertView.findViewById(R.id.ratingText);
+        convertView.setBackground(null);
+        int primaryColor = Helpers.getResourceColor(activity, R.color.colorPrimary);
+        nameTextView.setTextColor(primaryColor);
+        detailTextView.setTextColor(primaryColor);
+        ratingTextView.setTextColor(primaryColor);
 
-        ((TextView) convertView.findViewById(R.id.nameText)).setText("");
-        ((TextView) convertView.findViewById(R.id.detailText)).setText("");
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
+        nameTextView.setText("");
+        detailTextView.setText("");
+        ratingTextView.setText("");
         convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
@@ -324,7 +331,6 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         }
         if ((groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP) && game.getRatedNot().contains("Not ")) {
             String colorStr;
-            System.out.println("***************** " + game.getMyColor());
             if (game.getMyColor().indexOf("white") == 0) {
                 colorStr = ctx.getString(R.string.white);
             } else {
@@ -352,7 +358,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             } else if (avatar != null) {
                 imgVw.setImageBitmap(avatar);
             } else if (PentePlayer.loadAvatars && (groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP)) {
-                imgVw.setAlpha(0.25f);
+                imgVw.setAlpha(0.05f);
                 imgVw.setImageResource(R.drawable.ic_action_android);
             } else if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
                 if (game.getMyColor().indexOf("white") > -1) {
@@ -408,15 +414,12 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             } else if (game.getRatedNot().contains(", beginner")) {
                 convertView.setBackgroundColor(Color.rgb(242, 249, 222));
             }
-
         }
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
             if (game.getRatedNot().contains("Tournament")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
             }
         }
-        TextView nameTextView = convertView.findViewById(R.id.nameText);
-        TextView detailTextView = convertView.findViewById(R.id.detailText);
         Drawable crownIcon = null;
         switch (crown) {
             case 1:

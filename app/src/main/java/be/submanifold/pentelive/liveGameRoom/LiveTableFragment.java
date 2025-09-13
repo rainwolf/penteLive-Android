@@ -2,12 +2,15 @@ package be.submanifold.pentelive.liveGameRoom;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +21,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import be.submanifold.pentelive.Helpers;
 import be.submanifold.pentelive.InviteAIActivity;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
@@ -72,7 +77,6 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
-    int countDownSeconds = 60;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -80,7 +84,6 @@ public class LiveTableFragment extends Fragment {
     Button playButton;
     private String me = "";
     LiveGameRoomActivity activity;
-    Timer timer = new Timer();
     View settingsView = null;
     TextView timedChoice, ratedChoice, privateChoice;
     EditText initialMinutesView, incrementalSecondsView;
@@ -142,6 +145,15 @@ public class LiveTableFragment extends Fragment {
         Toolbar toolbar = getView().findViewById(R.id.toolbar);
 //        toolbar.setTitle(getString(R.string.home));
         toolbar.inflateMenu(R.menu.live_table_menu);
+        ColorStateList tintList = Helpers.tintList(getContext());
+        Menu menu = toolbar.getMenu();
+        MenuItem menuItem = menu.findItem(R.id.action_game);
+        menuItem.setIconTintList(tintList);
+        menuItem = menu.findItem(R.id.action_players);
+        menuItem.setIconTintList(tintList);
+        menuItem = menu.findItem(R.id.action_settings);
+        menuItem.setIconTintList(tintList);
+
         toolbar.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case R.id.action_players:
@@ -266,9 +278,7 @@ public class LiveTableFragment extends Fragment {
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
         getView().setOnKeyListener((v, keyCode, event) -> {
-            System.out.println("w000000000t");
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                System.out.println("whaaaaaaaaaat");
                 if (mListener != null) {
                     mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
                     return true;

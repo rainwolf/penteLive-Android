@@ -144,17 +144,22 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.dismissButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.declineButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
-        convertView.setBackgroundColor(Color.WHITE);
+        TextView nameTextView = convertView.findViewById(R.id.nameText);
+        TextView detailTextView = convertView.findViewById(R.id.detailText);
+        TextView ratingTextView = convertView.findViewById(R.id.ratingText);
+        convertView.setBackground(null);
+        int primaryColor = Helpers.getResourceColor(activity, R.color.colorPrimary);
+        nameTextView.setTextColor(primaryColor);
+        detailTextView.setTextColor(primaryColor);
+        ratingTextView.setTextColor(primaryColor);
 
-        ((TextView) convertView.findViewById(R.id.nameText)).setText("");
-        ((TextView) convertView.findViewById(R.id.detailText)).setText("");
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText("");
+        nameTextView.setText("");
+        detailTextView.setText("");
+        ratingTextView.setText("");
         convertView.findViewById(R.id.ratingText).setVisibility(View.VISIBLE);
         convertView.findViewById(R.id.ratingColorText).setVisibility(View.VISIBLE);
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText("");
         String mainText, ratingText = "", detailText = "";
-        TextView nameTextView = convertView.findViewById(R.id.nameText);
-        TextView detailTextView = convertView.findViewById(R.id.detailText);
         if (groupPosition == 0) {
             if (childPosition == 0) {
                 if (kothSummary.getGameId() > 50) {
@@ -189,7 +194,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
             Bitmap avatar = null;
             avatar = PentePlayer.avatars.get(player.getName());
             if (avatar == null) {
-                imgVw.setAlpha(0.25f);
+                imgVw.setAlpha(0.05f);
                 imgVw.setImageResource(R.drawable.ic_action_android);
             } else {
                 imgVw.setImageBitmap(avatar);
