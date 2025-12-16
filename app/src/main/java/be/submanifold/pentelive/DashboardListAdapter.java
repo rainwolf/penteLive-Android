@@ -230,6 +230,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    private void useDarkColor(TextView nameTextView, TextView detailTextView, TextView ratingTextView) {
+        int darkColor = Helpers.getResourceColor(activity, R.color.colorPrimaryDark);
+        nameTextView.setTextColor(darkColor);
+        detailTextView.setTextColor(darkColor);
+        ratingTextView.setTextColor(darkColor);
+    }
+
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
@@ -355,13 +362,14 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             if (groupPosition == MESSAGESGROUP && message.unread()) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
                 imgVw.setImageResource(R.drawable.unread);
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             } else if (avatar != null) {
                 imgVw.setImageBitmap(avatar);
             } else if (PentePlayer.loadAvatars && (groupPosition == INVITATIONSGROUP || groupPosition == SENTINVITATIONSGROUP || groupPosition == PUBLICINVITATIONSGROUP)) {
                 imgVw.setAlpha(0.05f);
                 imgVw.setImageResource(R.drawable.ic_action_android);
             } else if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
-                if (game.getMyColor().indexOf("white") > -1) {
+                if (game.getMyColor().contains("white")) {
                     imgVw.setImageResource(R.drawable.white_stone);
                 } else {
                     imgVw.setImageResource(R.drawable.black_stone);
@@ -377,11 +385,13 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             convertView.findViewById(R.id.ratingColorText).setVisibility(View.GONE);
             if (game.getRatedNot().contains("KotH")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
         if (groupPosition == INVITATIONSGROUP) {
             if (game.getRatedNot().contains("KotH")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
         SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
@@ -406,18 +416,22 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             if (hill.isKing()) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
         if (groupPosition == PUBLICINVITATIONSGROUP) {
             if (game.getRatedNot().contains("KotH")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             } else if (game.getRatedNot().contains(", beginner")) {
                 convertView.setBackgroundColor(Color.rgb(242, 249, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
         if (groupPosition == ACTIVEGAMESGROUP || groupPosition == NONACTIVEGAMESGROUP) {
             if (game.getRatedNot().contains("Tournament")) {
                 convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+                useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
         Drawable crownIcon = null;
