@@ -214,9 +214,11 @@ public class PentePlayer implements Parcelable {
             mSubscriber = "subscriber".equals(dashLine[3]);
 //            this.mSubscriber = false;
             this.livePlayers = Integer.parseInt(dashLine[4]);
+//            this.livePlayers = 5;
             dbAccess = "dbAccessGranted".equals(dashLine[5]);
             emailMe = "emailMe".equals(dashLine[6]);
             this.onlineFollowingers = Integer.parseInt(dashLine[7]);
+//            this.onlineFollowingers = 4;
 //            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
             personalizeAds = "personalizeAds".equals(dashLine[8]);
             PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);

@@ -453,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
         int livePlayers = player.getLivePlayers();
         MenuItem menuItem = menu.findItem(R.id.action_new_invitation);
         menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.ic_play_arrow));
-        menuItem.setIconTintList(tintList);
+//        menuItem.setIconTintList(tintList);
         menuItem = menu.findItem(R.id.live_games);
         menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning));
 
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
         int onlineFollowing = player.getOnlineFollowingers();
         menuItem = menu.findItem(R.id.action_more);
         menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.ic_action_more));
-        menuItem.setIconTintList(tintList);
+//        menuItem.setIconTintList(tintList);
         menuItem = menu.findItem(R.id.onlineUsers);
         menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.online_users));
 
