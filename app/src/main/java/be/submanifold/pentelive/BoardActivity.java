@@ -326,7 +326,7 @@ public class BoardActivity extends AppCompatActivity {
                 game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
 
                 if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
-                    game.setmGameString(null);
+                    game.setmGameJson(null);
                     game.parseGame(board);
                     ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
                 } else {
@@ -344,7 +344,7 @@ public class BoardActivity extends AppCompatActivity {
             // Extract data included in the Intent
             String message = intent.getStringExtra("gameID");
             if (game.getGameID().equals(message)) {
-                game.setmGameString(null);
+                game.setmGameJson(null);
                 game.parseGame(board);
             }
 //            System.out.println("gameID = " +message + ".");

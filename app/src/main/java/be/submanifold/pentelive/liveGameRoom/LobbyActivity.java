@@ -30,9 +30,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -179,9 +183,9 @@ public class LobbyActivity extends AppCompatActivity {
             try {
                 URL url;
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 } else {
-                    url = new URL("https://www.pente.org/gameServer/mobile/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://www.pente.org/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -203,13 +207,11 @@ public class LobbyActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
+                String line;
                 while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                    output.append(line);
                 }
                 br.close();
-
-//                System.out.println(output.toString());
 
                 dashboardString = output.toString();
 
@@ -228,33 +230,22 @@ public class LobbyActivity extends AppCompatActivity {
             if (success) {
                 final List<LiveGameRoom> rooms = new ArrayList<>();
 
-                String[] dashLines = dashboardString.split("\n");
-                String dashLine;
-                int idx = 0;
-                while (idx < dashLines.length) {
-                    dashLine = dashLines[idx];
-                    String[] splitLine = dashLine.split(":", 2);
-                    String[] serverLine = splitLine[0].split(" ", 2);
-                    if (serverLine.length > 1) {
-                        LiveGameRoom room = new LiveGameRoom(serverLine[1], Integer.parseInt(serverLine[0]));
-                        if (splitLine.length > 1) {
-                            String[] playersString = splitLine[1].split(";");
-                            for (String playerString : playersString) {
-                                String[] splitPlayer = playerString.split(",");
-                                if (splitPlayer.length < 4) {
-                                    continue;
-                                }
-                                LivePlayer player = new LivePlayer(splitPlayer[0], !"0".equals(splitPlayer[2]), Integer.parseInt(splitPlayer[3]), Integer.parseInt(splitPlayer[2]));
+                Type listType = new TypeToken<List<JsonModels.ServerEntry>>(){}.getType();
+                List<JsonModels.ServerEntry> servers = new Gson().fromJson(dashboardString, listType);
+                if (servers != null) {
+                    for (JsonModels.ServerEntry server : servers) {
+                        LiveGameRoom room = new LiveGameRoom(server.name, server.port);
+                        if (server.players != null) {
+                            for (JsonModels.OnlinePlayerEntry entry : server.players) {
+                                LivePlayer player = new LivePlayer(entry.name, entry.color != 0, entry.tourneyWinner, entry.color);
                                 room.addPlayer(player);
                             }
                         }
                         rooms.add(room);
                     }
-                    idx += 1;
                 }
                 listAdapter.setRooms(rooms);
                 listAdapter.updateList();
-                System.out.println(dashboardString);
             }
         }
 

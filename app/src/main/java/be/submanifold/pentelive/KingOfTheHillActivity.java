@@ -34,10 +34,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -295,40 +299,30 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         }
     }
 
-    private void loadHill(String htmlString) {
+    private void loadHill(String jsonString) {
         hill = new ArrayList<>();
-        List<KothPlayer> step;
-
-        String[] dashLines = htmlString.split("\n");
-        String dashLine;
-        int idx = 0;
-        while (idx < dashLines.length) {
-            dashLine = dashLines[idx];
-            String[] stepPlayers = dashLine.split(";");
-//            if (stepPlayers.length > 0) {
-//                step = new ArrayList<>();
-//            } else {
-//                continue;
-//            }
-            step = new ArrayList<>();
-            for (String stepPlayer : stepPlayers) {
-                String[] parsedPlayer = stepPlayer.split(",");
-                if (parsedPlayer.length < 6) {
-                    continue;
+        Type listType = new TypeToken<List<List<JsonModels.KothPlayerEntry>>>(){}.getType();
+        List<List<JsonModels.KothPlayerEntry>> steps = new Gson().fromJson(jsonString, listType);
+        boolean isMember = false;
+        if (steps != null) {
+            for (List<JsonModels.KothPlayerEntry> stepEntries : steps) {
+                List<KothPlayer> step = new ArrayList<>();
+                for (JsonModels.KothPlayerEntry entry : stepEntries) {
+                    KothPlayer player = new KothPlayer(entry.name, String.valueOf(entry.rating), entry.lastGame, entry.canChallenge, entry.tourneyWinner, entry.color);
+                    if (PentePlayer.loadAvatars && player.getColor() != 0) {
+                        this.player.addUserAvatar(player.getName());
+                    }
+                    if (entry.name != null && entry.name.equals(PentePlayer.mPlayerName)) {
+                        isMember = true;
+                    }
+                    step.add(player);
                 }
-                KothPlayer player = new KothPlayer(parsedPlayer[0], parsedPlayer[1], parsedPlayer[5], parsedPlayer[2].equals("yes"), Integer.parseInt(parsedPlayer[4]), Integer.parseInt(parsedPlayer[3]));
-                if (PentePlayer.loadAvatars && player.getColor() != 0) {
-                    this.player.addUserAvatar(player.getName());
+                if (!step.isEmpty()) {
+                    hill.add(0, step);
                 }
-                step.add(player);
             }
-            if (!step.isEmpty()) {
-                hill.add(0, step);
-            }
-//            hill.add(0, step);
-            idx += 1;
         }
-        kothSummary.setMember(htmlString.contains(PentePlayer.mPlayerName));
+        kothSummary.setMember(isMember);
         while (!hill.isEmpty() && hill.get(0).isEmpty()) {
             hill.remove(0);
         }
@@ -349,15 +343,14 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-//                String urlParameters  = "game=" + mGame + "&name=" + PentePlayer.mPlayerName;
-                String urlParameters = "game=" + mGame + "&name=" + PentePlayer.mPlayerName + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+                String request = "https://www.pente.org/gameServer/mobile/json/koth.jsp?game=" + mGame
+                        + "&name=" + PentePlayer.mPlayerName
+                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                if (PentePlayer.development) {
+                    request = "https://10.0.2.2/gameServer/mobile/json/koth.jsp?game=" + mGame
+                            + "&name=" + PentePlayer.mPlayerName
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 }
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/mobile/koth.jsp";
-//                request        = "https://10.0.2.2/gameServer/mobile/koth.jsp";
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -370,34 +363,19 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                         }
                     }
                     conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
                 }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                int responseCode = conn.getResponseCode();
+                if (responseCode != 200) {
                     return false;
                 }
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
+                String line;
                 while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
+                    output.append(line);
                 }
                 br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output.toString());
 
                 htmlString = output.toString();
 

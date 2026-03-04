@@ -17,6 +17,8 @@ import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -48,7 +50,7 @@ public class Game implements Parcelable {
     private String mPrivateGame;
     private int mNameColor;
     private int mCrown;
-    private String mGameString;
+    private JsonModels.GameResponse mGameJson;
     private boolean mActive;
     public boolean dPenteChoice;
 
@@ -110,7 +112,7 @@ public class Game implements Parcelable {
         if (crown != null) {
             this.mCrown = Integer.parseInt(crown);
         }
-        this.mGameString = null;
+        this.mGameJson = null;
         this.mActive = false;
         this.dPenteChoice = false;
 
@@ -180,8 +182,8 @@ public class Game implements Parcelable {
         this.mActive = active;
     }
 
-    public void setmGameString(String mGameString) {
-        this.mGameString = mGameString;
+    public void setmGameJson(JsonModels.GameResponse mGameJson) {
+        this.mGameJson = mGameJson;
     }
 
     public String getMovesString() {
@@ -209,7 +211,6 @@ public class Game implements Parcelable {
         mPrivateGame = in.readString();
         mNameColor = in.readInt();
         mCrown = in.readInt();
-        mGameString = in.readString();
         mMovesList = (ArrayList<Integer>) in.readSerializable();
         mActive = in.readByte() != 0;
         mLocalizedTime = in.readString();
@@ -237,7 +238,6 @@ public class Game implements Parcelable {
         dest.writeString(mPrivateGame);
         dest.writeInt(mNameColor);
         dest.writeInt(mCrown);
-        dest.writeString(mGameString);
         dest.writeSerializable((ArrayList<Integer>) mMovesList);
         dest.writeByte((byte) (mActive ? 1 : 0));
         dest.writeString(mLocalizedTime);
@@ -391,11 +391,10 @@ public class Game implements Parcelable {
         protected Boolean doInBackground(Void... params) {
 
             try {
-//                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID
+                URL url = new URL("https://www.pente.org/gameServer/mobile/json/game.jsp?gid=" + mGameID
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/game.jsp?gid=" + mGameID
+                    url = new URL("https://10.0.2.2/gameServer/mobile/json/game.jsp?gid=" + mGameID
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -409,7 +408,6 @@ public class Game implements Parcelable {
                         }
                     }
                     connection.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
                 }
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
@@ -419,41 +417,25 @@ public class Game implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output==========" + br);
-                String line = "";
+                String line;
                 while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                    output.append(line);
                 }
                 br.close();
 
-//                System.out.println(output);
+                JsonModels.GameResponse json = new Gson().fromJson(output.toString(), JsonModels.GameResponse.class);
 
-                mGameString = output.toString();
-
-                if (mGameString.indexOf("moves=") == -1) {
+                if (json == null || json.gameName == null) {
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (PentePlayer.development) {
                         url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     }
                     connection = (HttpsURLConnection) url.openConnection();
-                    responseCode = connection.getResponseCode();
-//
-//                    output = new StringBuilder();
-//                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output==========" + br);
-//                    line = "";
-//                    while((line = br.readLine()) != null ) {
-//                        output.append(line + System.getProperty("line.separator"));
-//                    }
-//                    br.close();
-//
-//                    output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                    System.out.println(output);
+                    connection.getResponseCode();
 
-
-                    url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid=" + mGameID);
+                    url = new URL("https://www.pente.org/gameServer/mobile/json/game.jsp?gid=" + mGameID);
                     if (PentePlayer.development) {
-                        url = new URL("https://10.0.2.2/gameServer/mobile/game.jsp?gid=" + mGameID);
+                        url = new URL("https://10.0.2.2/gameServer/mobile/json/game.jsp?gid=" + mGameID);
                     }
                     connection = (HttpsURLConnection) url.openConnection();
                     responseCode = connection.getResponseCode();
@@ -464,17 +446,15 @@ public class Game implements Parcelable {
 
                     output = new StringBuilder();
                     br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output==========" + br);
-                    line = "";
                     while ((line = br.readLine()) != null) {
-                        output.append(line + "\n");
+                        output.append(line);
                     }
                     br.close();
 
-//                    System.out.println(output);
-
-                    mGameString = output.toString();
+                    json = new Gson().fromJson(output.toString(), JsonModels.GameResponse.class);
                 }
+
+                mGameJson = json;
 
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -875,7 +855,7 @@ public class Game implements Parcelable {
                 if (accept) {
                     activity.finish();
                 } else {
-                    mGameString = null;
+                    mGameJson = null;
                     parseGame(activity.findViewById(R.id.boardView));
                 }
             }
@@ -936,141 +916,121 @@ public class Game implements Parcelable {
     }
 
     public void parseGame(BoardView boardView) {
-        if (mGameString == null) {
+        if (mGameJson == null) {
             RetrieveGame getGameTask = new RetrieveGame(getGameID(), boardView);
             getGameTask.execute((Void) null);
             return;
         }
-
-//        System.out.println(mGameString);
 
         boolean amIPlaying = false, undoRequested = false;
 
         String[] messageNums = null;
         String[] messagesArray = null;
 
-        canHide = mGameString.contains("can_hide=yes");
-        canUnHide = mGameString.contains("can_unhide=yes");
+        canHide = Boolean.TRUE.equals(mGameJson.canHide);
+        canUnHide = Boolean.TRUE.equals(mGameJson.canUnHide);
 
         go = false;
-        goMarkStones = false;
-        goEvaluateDeadStones = false;
+        goMarkStones = "MARK_DEAD_STONES".equals(mGameJson.goState);
+        goEvaluateDeadStones = "EVALUATE_DEAD_STONES".equals(mGameJson.goState);
 
-        String[] dashLines = mGameString.split("\n");
-        String dashLine;
-        int idx = 0;
         String p1Name = "", p2Name = "";
-        while (idx < dashLines.length) {
-            dashLine = dashLines[idx];
-            if (dashLine.indexOf("Go=MARK_DEAD_STONES") == 0) {
-                goMarkStones = true;
+        if (mGameJson.player1 != null && mGameJson.player1.name != null) {
+            p1Name = mGameJson.player1.name;
+            if (!p1Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
+                this.mOpponentName = p1Name;
+                this.mOpponentRating = String.valueOf(mGameJson.player1.rating);
+            } else {
+                amIPlaying = true;
             }
-            if (dashLine.indexOf("Go=EVALUATE_DEAD_STONES") == 0) {
-                goEvaluateDeadStones = true;
-            }
-            if (dashLine.indexOf("player1=") == 0) {
-                p1Name = dashLine.substring(8).split(",")[0];
-                if (!p1Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
-                    this.mOpponentName = p1Name;
-                    this.mOpponentRating = dashLine.substring(8).split(",")[1];
-                } else {
-                    amIPlaying = true;
-                }
-            }
-            if (dashLine.indexOf("current_player=") == 0) {
-                mActive = dashLine.equals("current_player=" + PentePlayer.mPlayerName.toLowerCase());
-                amIPlaying = mActive;
-            }
-            if (dashLine.contains("undo=requested")) {
-                undoRequested = true;
-            }
-            if (dashLine.indexOf("player2=") == 0) {
-                p2Name = dashLine.substring(8).split(",")[0];
-                if (!p2Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
-                    this.mOpponentName = p2Name;
-                    this.mOpponentRating = dashLine.substring(8).split(",")[1];
-                } else {
-                    amIPlaying = true;
-                }
-            }
-            if (dashLine.indexOf("sid=") == 0) {
-                this.mSetID = dashLine.substring(4);
-            }
-            if (dashLine.indexOf("gameName=") == 0) {
-                this.mGameType = dashLine.substring(9);
-                if (mGameType.equals("Go") || mGameType.equals("Speed Go") ||
-                        mGameType.equals("Go (9x9)") || mGameType.equals("Speed Go (9x9)") ||
-                        mGameType.equals("Go (13x13)") || mGameType.equals("Speed Go (13x13)")) {
-                    if (mGameType.contains("(9x9)")) {
-                        gridSize = 9;
-                    } else if (mGameType.contains("(13x13)")) {
-                        gridSize = 13;
-                    } else {
-                        gridSize = 19;
-                    }
-
-                    boardView.gridSize = gridSize;
-                    passMove = gridSize * gridSize;
-                    go = true;
-                }
-            }
-            if (dashLine.indexOf("moves=") == 0) {
-                String[] movesString = dashLine.substring(6).split(",");
-                this.mMovesList = new ArrayList<Integer>();
-                for (int i = 0; i < movesString.length; i++) {
-                    if ("".equals(movesString[i])) {
-                        continue;
-                    }
-                    this.mMovesList.add(Integer.parseInt(movesString[i]));
-                }
-            }
-            if (dashLine.contains("dPenteState=2")) {
-                this.dPenteChoice = true;
-                if (isSwap2()) {
-                    this.swap2Choice = true;
-                }
-            }
-            if (dashLine.indexOf("cancel=" + getOpponentName()) == 0) {
-                final Activity host = (Activity) boardView.getContext();
-                AlertDialog.Builder builder = new AlertDialog.Builder(host);
-                builder.setTitle(host.getString(R.string.cancellation_requested));
-
-                String msg = "";
-                if (!dashLine.substring(dashLine.indexOf(",") + 1).equals("")) {
-                    msg = "\n(" + dashLine.substring(dashLine.indexOf(",") + 1) + ")";
-                }
-                builder.setMessage(host.getString(R.string.requests_cancellation, getOpponentName()) + msg);
-                builder.setPositiveButton(host.getString(R.string.accept), (dialog, id) -> {
-                    ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "Yes", host);
-                    task.execute((Void) null);
-                });
-                builder.setNegativeButton(host.getString(R.string.decline), (dialog, id) -> {
-                    ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
-                    task.execute((Void) null);
-                });
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    builder.setOnDismissListener(arg0 -> host.finish());
-                }
-                builder.show();
-            }
-            if (dashLine.contains("messages=")) {
-                messagesArray = dashLine.substring(9).split(",");
-            }
-            if (dashLine.contains("rated=")) {
-                mRatedNot = dashLine.substring(6);
-            }
-            if (dashLine.contains("private=")) {
-                mPrivateGame = dashLine.substring(8);
-            }
-            if (dashLine.contains("messageNums=")) {
-                messageNums = dashLine.substring(12).split(",");
-            }
-            idx += 1;
         }
-        if (!p1Name.equals(PentePlayer.mPlayerName.toLowerCase()) && !p2Name.equals(PentePlayer.mPlayerName.toLowerCase())) {
+        if (mGameJson.currentPlayer != null) {
+            mActive = mGameJson.currentPlayer.equalsIgnoreCase(PentePlayer.mPlayerName);
+            amIPlaying = mActive;
+        }
+        undoRequested = Boolean.TRUE.equals(mGameJson.undoRequested);
+        if (mGameJson.player2 != null && mGameJson.player2.name != null) {
+            p2Name = mGameJson.player2.name;
+            if (!p2Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
+                this.mOpponentName = p2Name;
+                this.mOpponentRating = String.valueOf(mGameJson.player2.rating);
+            } else {
+                amIPlaying = true;
+            }
+        }
+        if (mGameJson.sid != null) {
+            this.mSetID = String.valueOf(mGameJson.sid);
+        }
+        if (mGameJson.gameName != null) {
+            this.mGameType = mGameJson.gameName;
+            if (mGameType.equals("Go") || mGameType.equals("Speed Go") ||
+                    mGameType.equals("Go (9x9)") || mGameType.equals("Speed Go (9x9)") ||
+                    mGameType.equals("Go (13x13)") || mGameType.equals("Speed Go (13x13)")) {
+                if (mGameType.contains("(9x9)")) {
+                    gridSize = 9;
+                } else if (mGameType.contains("(13x13)")) {
+                    gridSize = 13;
+                } else {
+                    gridSize = 19;
+                }
+                boardView.gridSize = gridSize;
+                passMove = gridSize * gridSize;
+                go = true;
+            }
+        }
+        if (mGameJson.moves != null && !mGameJson.moves.isEmpty()) {
+            String[] movesString = mGameJson.moves.split(",");
+            this.mMovesList = new ArrayList<Integer>();
+            for (String moveStr : movesString) {
+                if (!moveStr.isEmpty()) {
+                    this.mMovesList.add(Integer.parseInt(moveStr));
+                }
+            }
+        }
+        if ("2".equals(mGameJson.dPenteState)) {
+            this.dPenteChoice = true;
+            if (isSwap2()) {
+                this.swap2Choice = true;
+            }
+        }
+        if (mGameJson.cancel != null && getOpponentName().equals(mGameJson.cancel.name)) {
+            final Activity host = (Activity) boardView.getContext();
+            AlertDialog.Builder builder = new AlertDialog.Builder(host);
+            builder.setTitle(host.getString(R.string.cancellation_requested));
+            String msg = "";
+            if (mGameJson.cancel.message != null && !mGameJson.cancel.message.isEmpty()) {
+                msg = "\n(" + mGameJson.cancel.message + ")";
+            }
+            builder.setMessage(host.getString(R.string.requests_cancellation, getOpponentName()) + msg);
+            builder.setPositiveButton(host.getString(R.string.accept), (dialog, id) -> {
+                ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "Yes", host);
+                task.execute((Void) null);
+            });
+            builder.setNegativeButton(host.getString(R.string.decline), (dialog, id) -> {
+                ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
+                task.execute((Void) null);
+            });
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                builder.setOnDismissListener(arg0 -> host.finish());
+            }
+            builder.show();
+        }
+        if (mGameJson.messages != null && !mGameJson.messages.isEmpty()) {
+            messagesArray = mGameJson.messages.split(",");
+        }
+        if (mGameJson.rated != null) {
+            mRatedNot = mGameJson.rated;
+        }
+        if (mGameJson.privateGame != null) {
+            mPrivateGame = mGameJson.privateGame;
+        }
+        if (mGameJson.messageNums != null && !mGameJson.messageNums.isEmpty()) {
+            messageNums = mGameJson.messageNums.split(",");
+        }
+        if (!p1Name.equalsIgnoreCase(PentePlayer.mPlayerName) && !p2Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {
             this.mOpponentName = p1Name + " vs " + p2Name;
         }
-        if (!mGameString.contains("state=active")) {
+        if (!"active".equals(mGameJson.state)) {
             mActive = false;
             if (PentePlayer.mSubscriber) {
                 final BoardActivity host = (BoardActivity) boardView.getContext();

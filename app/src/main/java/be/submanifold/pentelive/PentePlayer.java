@@ -11,6 +11,8 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.webkit.CookieManager;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,240 +188,171 @@ public class PentePlayer implements Parcelable {
         PentePlayer.onlinePlayerNames = onlinePlayerNames;
     }
 
-    private void populatePlayer(String dashString) {
-        if (dashString == null) {
+    private void populateFromJson(JsonModels.IndexResponse json) {
+        if (json == null || json.player == null) {
             return;
         }
-//        if (dashString.indexOf("No Ads") > -1 && dashString.indexOf("No Ads") < 30) {
-//            this.mShowAds = false;
-//        }
-//        if (dashString.indexOf("tb GamesLimit") > -1 || dashString.indexOf("tb GamesLimit") > 30) {
-//            this.mSubscriber = false;
-//        } else {
-//            this.mSubscriber = true;
-//        }
 
-//        System.out.println(dashString);
-        String[] dashLines = dashString.split("\n");
-        String[] dashLine;
-        int idx = 0;
-        while (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) != 0) {
-            idx += 1;
-        }
-        if (idx < dashLines.length && dashLines[idx].indexOf(mPlayerName.toLowerCase()) == 0) {
-            dashLine = dashLines[idx].split(";", -1);
-            myColor = Integer.parseInt(dashLine[1]);
-            mShowAds = !"NoAds".equals(dashLine[2]);
-//            this.mShowAds = true;
-            mSubscriber = "subscriber".equals(dashLine[3]);
-//            this.mSubscriber = false;
-            this.livePlayers = Integer.parseInt(dashLine[4]);
-//            this.livePlayers = 5;
-            dbAccess = "dbAccessGranted".equals(dashLine[5]);
-            emailMe = "emailMe".equals(dashLine[6]);
-            this.onlineFollowingers = Integer.parseInt(dashLine[7]);
-//            this.onlineFollowingers = 4;
-//            System.out.println(myColor + "," + mShowAds + "," + mSubscriber);
-            personalizeAds = "personalizeAds".equals(dashLine[8]);
-            PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
-        }
-
+        myColor = json.player.color;
+        mShowAds = json.player.showAds;
         if (development) {
             mShowAds = true;
         }
+        mSubscriber = json.player.subscriber;
+        this.livePlayers = json.player.livePlayers;
+        dbAccess = json.player.dbAccess;
+        emailMe = json.player.emailMe;
+        this.onlineFollowingers = json.player.onlineFollowing;
+        personalizeAds = json.player.personalizeAds;
+        PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
 
-        while (idx < dashLines.length && !dashLines[idx].contains("King of the Hill")) {
-            idx += 1;
-        }
+        // King of the Hill
         List<KingOfTheHill> newKOTH = new ArrayList<>();
-//        this.mHills.clear();
         tbHills = 0;
-        KingOfTheHill hill;
-        if (idx < dashLines.length && dashLines[idx].indexOf("King of the Hill") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Rating Stats")) {
-                dashLine = dashLines[idx].split(";", -1);
-                idx += 1;
-                if (dashLine.length < 7) {
-                    continue;
-                }
-                hill = new KingOfTheHill(dashLine[0], dashLine[1], dashLine[4], dashLine[2].equals("1"), dashLine[3].equals("1"), dashLine[5].equals("1"), dashLine[6]);
+        if (json.kingOfTheHill != null) {
+            for (JsonModels.IndexResponse.KothEntry entry : json.kingOfTheHill) {
+                KingOfTheHill hill = new KingOfTheHill("", String.valueOf(entry.numPlayers),
+                        entry.kingName, entry.amIMember, entry.iAmKing, entry.canChallenge,
+                        String.valueOf(entry.gameId));
                 if (hill.getGameId() > 50) {
                     tbHills += 1;
                 }
                 newKOTH.add(hill);
             }
-            this.mHills = newKOTH;
         }
-        while (idx < dashLines.length && !dashLines[idx].contains("Rating Stats")) {
-            idx += 1;
-        }
+        this.mHills = newKOTH;
+
+        // Rating Stats
         this.mRatingStats.clear();
         tbRatings = 0;
-        RatingStat ratingStat;
-        if (idx < dashLines.length && dashLines[idx].indexOf("Rating Stats") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Invitations received")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 5) {
-                    continue;
-                }
-                ratingStat = new RatingStat(dashLine[0], dashLine[1], dashLine[4], dashLine[2], dashLine[3], dashLine[5]);
+        if (json.ratingStats != null) {
+            for (JsonModels.IndexResponse.RatingStatEntry entry : json.ratingStats) {
+                RatingStat ratingStat = new RatingStat(entry.gameName, String.valueOf(entry.rating),
+                        entry.lastGameDate, String.valueOf(entry.totalGames),
+                        String.valueOf(entry.tourneyWinner), String.valueOf(entry.gameId));
                 if (ratingStat.getGameId() > 50) {
                     tbRatings += 1;
                 }
                 this.mRatingStats.add(ratingStat);
             }
         }
-        Game game;
-        while (idx < dashLines.length && !dashLines[idx].contains("Invitations received")) {
-            idx += 1;
-        }
+
+        // Invitations received
         List<Game> newInvitations = new ArrayList<>();
-//        this.mInvitations.clear();
-        if (idx < dashLines.length && dashLines[idx].indexOf("Invitations received") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Invitations sent")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 9) {
-                    continue;
-                }
-                game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
-                        , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+        if (json.invitationsReceived != null) {
+            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsReceived) {
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
                 newInvitations.add(game);
             }
-            this.mInvitations = newInvitations;
         }
+        this.mInvitations = newInvitations;
+
+        // Invitations sent
         List<Game> newSentInvitations = new ArrayList<>();
-//        this.mSentInvitations.clear();
-        if (idx < dashLines.length && dashLines[idx].indexOf("Invitations sent") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Active Games - My Turn")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 9) {
-                    continue;
-                }
-                game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
-                        , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+        if (json.invitationsSent != null) {
+            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsSent) {
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
                 newSentInvitations.add(game);
             }
-            this.mSentInvitations = newSentInvitations;
         }
+        this.mSentInvitations = newSentInvitations;
+
+        // Active games - my turn
         List<Game> newActive = new ArrayList<>();
-//        this.mActiveGames.clear();
-        if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - My Turn") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Active Games - Opponents Turn")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 10) {
-                    continue;
-                }
-                game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
-                        , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
+        if (json.activeGamesMyTurn != null) {
+            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesMyTurn) {
+                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.timeLeft, entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
                 newActive.add(game);
             }
-            this.mActiveGames = newActive;
         }
+        this.mActiveGames = newActive;
+
+        // Active games - opponent's turn
         List<Game> newNonActive = new ArrayList<>();
-//        this.mNonActiveGames.clear();
-        if (idx < dashLines.length && dashLines[idx].indexOf("Active Games - Opponents Turn") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Open Invitation Games")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 10) {
-                    continue;
-                }
-                game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
-                        , dashLine[6], dashLine[7], null, dashLine[8], dashLine[9]);
+        if (json.activeGamesOpponentTurn != null) {
+            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesOpponentTurn) {
+                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.timeLeft, entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
                 newNonActive.add(game);
             }
-            this.mNonActiveGames = newNonActive;
         }
+        this.mNonActiveGames = newNonActive;
+
+        // Open invitation games
         List<Game> newPublic = new ArrayList<>();
-//        this.mPublicInvitations.clear();
-        if (idx < dashLines.length && dashLines[idx].indexOf("Open Invitation Games") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].contains("Messages")) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 9) {
-                    continue;
-                }
-                game = new Game(dashLine[0], null, dashLine[1], dashLine[2], dashLine[3], dashLine[4]
-                        , dashLine[5], dashLine[6], null, dashLine[7], dashLine[8]);
+        if (json.openInvitationGames != null) {
+            for (JsonModels.IndexResponse.OpenInvitationEntry entry : json.openInvitationGames) {
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.inviterName, String.valueOf(entry.inviterRating), entry.color,
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.inviterColor), String.valueOf(entry.inviterTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
                     addUserAvatar(game.getOpponentName());
                 }
                 newPublic.add(game);
             }
-            this.mPublicInvitations = newPublic;
         }
+        this.mPublicInvitations = newPublic;
+
+        // Messages
         List<Message> newMessages = new ArrayList<>();
-//        this.mMessages.clear();
-        Message message;
-        if (idx < dashLines.length && dashLines[idx].indexOf("Messages") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].isEmpty() && dashLines[idx].indexOf("Tournaments") != 0) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 7) {
-                    continue;
-                }
-                message = new Message(dashLine[0], dashLine[3], dashLine[2], dashLine[4], dashLine[1], dashLine[5], dashLine[6]);
+        if (json.messages != null) {
+            for (JsonModels.IndexResponse.MessageEntry entry : json.messages) {
+                // Message(messageID, author, subject, timeStamp, unread, nameColor, crown)
+                Message message = new Message(String.valueOf(entry.mid), entry.from, entry.subject,
+                        entry.date, entry.read ? "0" : "1",
+                        String.valueOf(entry.fromColor), String.valueOf(entry.fromTourneyWinner));
                 if (loadAvatars && message.getNameColor() != 0) {
                     addUserAvatar(message.getAuthor());
                 }
                 newMessages.add(message);
             }
-            this.mMessages = newMessages;
         }
+        this.mMessages = newMessages;
 
+        // Tournaments
         List<Tournament> newTournament = new ArrayList<>();
-//        this.mTournaments.clear();
-        Tournament tournament;
-        while (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") != 0) {
-            idx += 1;
-        }
-        if (idx < dashLines.length && dashLines[idx].indexOf("Tournaments") == 0) {
-            idx += 1;
-            while (idx < dashLines.length && !dashLines[idx].isEmpty()) {
-                dashLine = dashLines[idx].split(";");
-                idx += 1;
-                if (dashLine.length < 6) {
-                    continue;
-                }
-                tournament = new Tournament(dashLine[3], dashLine[0], dashLine[1], dashLine[2], dashLine[4], dashLine[5]);
+        if (json.tournaments != null) {
+            for (JsonModels.IndexResponse.TournamentEntry entry : json.tournaments) {
+                // Tournament(game, name, tournamentID, round, tournamentState, date)
+                Tournament tournament = new Tournament(entry.gameName, entry.name,
+                        String.valueOf(entry.eventId), String.valueOf(entry.numRounds),
+                        String.valueOf(entry.status), entry.date);
                 newTournament.add(tournament);
             }
-            this.mTournaments = newTournament;
         }
-        while (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") != 0) {
-            idx += 1;
+        this.mTournaments = newTournament;
+
+        // Online players
+        if (onlinePlayerNames == null) {
+            onlinePlayerNames = new HashMap<>();
         }
-        if (idx < dashLines.length && dashLines[idx].indexOf("OnlinePlayers:") == 0) {
-            dashLine = dashLines[idx].replace("OnlinePlayers:", "").split(";");
-            if (onlinePlayerNames == null) {
-                onlinePlayerNames = new HashMap<>();
-            }
-            onlinePlayerNames.clear();
-            for (String name : dashLine) {
+        onlinePlayerNames.clear();
+        if (json.onlinePlayers != null) {
+            for (String name : json.onlinePlayers) {
                 onlinePlayerNames.put(name, "");
             }
         }
@@ -731,16 +664,13 @@ public class PentePlayer implements Parcelable {
         protected Boolean doInBackground(Void... params) {
 
             try {
-//                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
-//                url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-//                System.out.println("cookies: " +cookies);
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -750,12 +680,9 @@ public class PentePlayer implements Parcelable {
                         }
                     }
                     connection.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
                 }
-//                connection.addRequestProperty("Cookie", "name2="+mUsername+"; password2="+mPassword+";");
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
-//                    System.out.println("response code for loadplayer was " + responseCode);
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (development) {
                         url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
@@ -766,9 +693,9 @@ public class PentePlayer implements Parcelable {
                         System.out.println("Logging back in failed");
                         return false;
                     } else {
-                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword);
+                        url = new URL("https://www.pente.org/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword);
                         if (development) {
-                            url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                            url = new URL("https://10.0.2.2/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                         }
                         connection = (HttpsURLConnection) url.openConnection();
                         responseCode = connection.getResponseCode();
@@ -781,19 +708,15 @@ public class PentePlayer implements Parcelable {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
                 String line = "";
                 while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                    output.append(line);
                 }
                 br.close();
 
-//                System.out.println(output);
-
-                String dashboardString = output.toString();
-                if (dashboardString.indexOf("Invalid name or password, please try again.") != -1) {
-                    return false;
-                } else if (!dashboardString.contains("Invitations sent")) {
+                Gson gson = new Gson();
+                JsonModels.IndexResponse json = gson.fromJson(output.toString(), JsonModels.IndexResponse.class);
+                if (json == null || json.player == null) {
                     url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                     if (development) {
                         url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
@@ -803,21 +726,31 @@ public class PentePlayer implements Parcelable {
                     if (responseCode != 200) {
                         System.out.println("Logging back in failed");
                         return false;
-                    } else {
-                        url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword);
-                        if (development) {
-                            url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                        }
-                        connection = (HttpsURLConnection) url.openConnection();
-                        responseCode = connection.getResponseCode();
-                        if (responseCode != 200) {
-                            System.out.println("Logging back in and retrieving game failed");
-                            return false;
-                        }
+                    }
+                    url = new URL("https://www.pente.org/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword);
+                    if (development) {
+                        url = new URL("https://10.0.2.2/gameServer/mobile/json/index.jsp?name=" + mUsername + "&password=" + mPassword + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    }
+                    connection = (HttpsURLConnection) url.openConnection();
+                    responseCode = connection.getResponseCode();
+                    if (responseCode != 200) {
+                        System.out.println("Logging back in and retrieving game failed");
+                        return false;
+                    }
+                    output = new StringBuilder();
+                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    line = "";
+                    while ((line = br.readLine()) != null) {
+                        output.append(line);
+                    }
+                    br.close();
+                    json = gson.fromJson(output.toString(), JsonModels.IndexResponse.class);
+                    if (json == null || json.player == null) {
+                        return false;
                     }
                 }
 
-                populatePlayer(dashboardString);
+                populateFromJson(json);
 
             } catch (IOException e1) {
                 e1.printStackTrace();

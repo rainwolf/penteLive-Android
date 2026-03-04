@@ -38,9 +38,13 @@ import android.widget.Toast;
 
 import com.kobakei.ratethisapp.RateThisApp;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -527,9 +531,9 @@ public class MainActivity extends AppCompatActivity {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                URL url = new URL("https://www.pente.org/gameServer/mobile/json/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    url = new URL("https://10.0.2.2/gameServer/mobile/json/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
 
 //                url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
@@ -555,14 +559,11 @@ public class MainActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
+                String line;
                 while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                    output.append(line);
                 }
                 br.close();
-
-//                System.out.println(output);
 
                 dashboardString = output.toString();
 
@@ -581,31 +582,25 @@ public class MainActivity extends AppCompatActivity {
             if (success) {
                 final Map<String, List<KothPlayer>> onlinePlayers = new HashMap<>();
                 int total = 0;
-                String[] dashLines = dashboardString.split("\n");
-                int idx = 0;
                 Map<String, String> onlinePlayerNames = new HashMap<>();
-                while (idx < dashLines.length) {
-                    String roomLine = dashLines[idx];
-                    String[] splitRoomLine = roomLine.split(":");
-                    if (splitRoomLine.length > 1) {
+                Type listType = new TypeToken<List<JsonModels.RoomEntry>>(){}.getType();
+                List<JsonModels.RoomEntry> rooms = new Gson().fromJson(dashboardString, listType);
+                if (rooms != null) {
+                    for (JsonModels.RoomEntry room : rooms) {
                         List<KothPlayer> playersList = new ArrayList<>();
-                        String roomName = splitRoomLine[0];
-                        String[] users = splitRoomLine[1].split(";");
-                        for (String dashLine : users) {
-                            String[] splitLine = dashLine.split(",");
-                            if (splitLine.length > 4) {
-                                KothPlayer player = new KothPlayer(splitLine[0], splitLine[1], splitLine[4], false, Integer.parseInt(splitLine[3]), Integer.parseInt(splitLine[2]));
-                                if (PentePlayer.loadAvatars && player.getColor() != 0) {
-                                    this.player.addUserAvatar(player.getName());
+                        if (room.players != null) {
+                            for (JsonModels.OnlinePlayerEntry entry : room.players) {
+                                KothPlayer kothPlayer = new KothPlayer(entry.name, String.valueOf(entry.rating), "", false, entry.tourneyWinner, entry.color);
+                                if (PentePlayer.loadAvatars && kothPlayer.getColor() != 0) {
+                                    this.player.addUserAvatar(kothPlayer.getName());
                                 }
-                                onlinePlayerNames.put(player.getName(), "");
+                                onlinePlayerNames.put(kothPlayer.getName(), "");
                                 total = total + 1;
-                                playersList.add(player);
+                                playersList.add(kothPlayer);
                             }
                         }
-                        onlinePlayers.put(roomName, playersList);
+                        onlinePlayers.put(room.name, playersList);
                     }
-                    idx += 1;
                 }
                 PentePlayer.setOnlinePlayerNames(onlinePlayerNames);
                 listAdapter.setOnlinePlayers(onlinePlayers);
