@@ -1,6 +1,8 @@
 package be.submanifold.pentelive;
 
 
+import static android.view.View.VISIBLE;
+
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,32 +11,24 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,12 +40,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.view.View.VISIBLE;
 
 
 public class DatabaseActivity extends AppCompatActivity {
@@ -589,13 +584,6 @@ public class DatabaseActivity extends AppCompatActivity {
         return true;
     }
 
-//        public Game getGame() {
-//            return game;
-//        }
-//        public void setGame(Game game) {
-//            this.game = game;
-//        }
-
 
     public class SearchTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -668,9 +656,9 @@ public class DatabaseActivity extends AppCompatActivity {
                     tmpStr = "";
                 }
 //                System.out.println("format data: " + tmpStr);
-                URL url = new URL("https://www.pente.org/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
+                URL url = new URL("https://www.pente.org/gameServer/mobileController/search?json=&format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobileController/search?format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
+                    url = new URL("https://10.0.2.2/gameServer/mobileController/search?json=&format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
                 }
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(200000);
@@ -689,8 +677,8 @@ public class DatabaseActivity extends AppCompatActivity {
                 }
                 br.close();
 
-//                System.out.println("search output: " + output.toString());
                 searchResult = output.toString();
+//                System.out.println("search output: " + searchResult);
 
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -702,77 +690,81 @@ public class DatabaseActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            String[] dashLines = searchResult.split("\n");
-            String dashLine;
-            String[] moves = null, occurrences = null;
-            int idx = 0;
-            while (idx < dashLines.length) {
-                dashLine = dashLines[idx];
-                if (dashLine.indexOf("moves=") == 0) {
-                    if (dashLine.length() > 6) {
-                        moves = dashLine.substring(6).split(",");
-                    }
-                }
-                if (dashLine.indexOf("occurrence=") == 0) {
-                    if (dashLine.length() > 11) {
-                        occurrences = dashLine.substring(11).split(";");
-                    }
-                    break;
-                }
-                idx += 1;
+            if (!success || searchResult == null) {
+                board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
+                progressBar.setVisibility(View.GONE);
+                return;
             }
-            Map<Integer, Integer> searchResults = new HashMap<>();
-            double max = 0, min = Double.MAX_VALUE;
-            if (occurrences != null && moves != null) {
-                for (int i = 0; i < occurrences.length; i++) {
-                    double dbl = Double.parseDouble(occurrences[i]);
-                    if (dbl > max) {
-                        max = dbl;
-                    }
-                    if (dbl < min) {
-                        min = dbl;
-                    }
+            try {
+                JSONObject json = new JSONObject(searchResult);
+
+                if (!json.getBoolean("access") || json.getBoolean("blocked")) {
+                    board.setSearchResults(null);
+                    board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
+                    progressBar.setVisibility(View.GONE);
+                    return;
                 }
-            }
-            if (max == min) {
-                max = 100.0;
-                min = 0.0;
-            }
-            if (moves != null) {
-                for (int i = 0; i < moves.length; i++) {
-                    double dblValue = (Double.parseDouble(occurrences[i]) - min) / (max - min);
-                    int color = 0;
+
+                JSONArray movesArray = json.getJSONArray("moves");
+                JSONArray occurrenceArray = json.getJSONArray("occurrence");
+
+                double max = 0, min = Double.MAX_VALUE;
+                double[] occValues = new double[occurrenceArray.length()];
+                for (int i = 0; i < occurrenceArray.length(); i++) {
+                    occValues[i] = Double.parseDouble(occurrenceArray.getString(i));
+                    if (occValues[i] > max) max = occValues[i];
+                    if (occValues[i] < min) min = occValues[i];
+                }
+                if (max == min) { max = 100.0; min = 0.0; }
+
+                Map<Integer, Integer> searchResults = new HashMap<>();
+                for (int i = 0; i < movesArray.length(); i++) {
+                    double dblValue = (occValues[i] - min) / (max - min);
+                    int color;
                     if (dblValue <= 0.5) {
                         color = Color.rgb(255, (int) (dblValue * 511), 0);
                     } else {
                         color = Color.rgb((int) ((1.0 - dblValue) * 511), 255, 0);
                     }
-                    searchResults.put(Integer.parseInt(moves[i]), color);
+                    searchResults.put(movesArray.getInt(i), color);
                 }
-            }
-//            System.out.println(searchResults);
-            board.setSearchResults(searchResults);
-            board.invalidate();
-            if (searchResults.isEmpty() && !searchResult.contains("https://www.pente.org/gameServer/viewLiveGame?mobile&g=")) {
+
+                board.setSearchResults(searchResults);
+                board.invalidate();
+
+                JSONArray games = json.getJSONArray("games");
+                if (searchResults.isEmpty() && games.length() == 0) {
+                    board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
+                } else {
+                    if (!player1.isEmpty()) {
+                        for (String name : player1.replace(" ", "").split(",")) {
+                            if (!name.contains("*")) PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        }
+                    }
+                    if (!player2.isEmpty()) {
+                        for (String name : player2.replace(" ", "").split(",")) {
+                            if (!name.contains("*")) PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                        }
+                    }
+                    StringBuilder html = new StringBuilder();
+                    for (int i = 0; i < games.length(); i++) {
+                        JSONObject game = games.getJSONObject(i);
+                        JSONObject p1 = game.getJSONObject("player1");
+                        JSONObject p2 = game.getJSONObject("player2");
+                        String viewUrl = game.getString("viewUrl");
+                        String date = game.getString("date");
+                        String p1Name = p1.getString("name");
+                        String p2Name = p2.getString("name");
+                        String winner = p1.getBoolean("winner") ? p1Name : p2Name;
+                        html.append("<br><br><a href=\"https://www.pente.org").append(viewUrl).append("\">")
+                                .append(p1Name).append(" vs ").append(p2Name).append("</a>")
+                                .append(" &bull; ").append(date)
+                                .append(" &bull; W: ").append(winner);
+                    }
+                    board.setTextViewHTML(findViewById(R.id.playerInfo), html.toString());
+                }
+            } catch (Exception e) {
                 board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
-            } else {
-                if (!player1.isEmpty()) {
-                    String[] pList = player1.replace(" ", "").split(",");
-                    for (String name : pList) {
-                        if (!name.contains("*")) {
-                            PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
-                        }
-                    }
-                }
-                if (!player2.isEmpty()) {
-                    String[] pList = player2.replace(" ", "").split(",");
-                    for (String name : pList) {
-                        if (!name.contains("*")) {
-                            PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
-                        }
-                    }
-                }
-                board.setTextViewHTML(findViewById(R.id.playerInfo), searchResult.replace("<tr bgcolor=\"#deecde\"><td>", "<tr bgcolor=\"#deecde\"><td><br><br>"));
             }
             progressBar.setVisibility(View.GONE);
         }
