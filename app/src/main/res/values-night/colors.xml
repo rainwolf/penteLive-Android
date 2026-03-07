@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="orange">#ffa500</color>
-    <color name="orangeDash">#FF8100</color>
-    <color name="green">#00ff00</color>
-    <color name="brown">#67240A</color>
-    <color name="britishracinggreen">#08341D</color>
-    <color name="text_shadow">#7F000000</color>
+    <color name="border_background">#1E1E1E</color>
 </resources>
