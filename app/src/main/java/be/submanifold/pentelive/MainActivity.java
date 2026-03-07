@@ -1,7 +1,5 @@
 package be.submanifold.pentelive;
 
-import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,15 +11,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.core.content.ContextCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,10 +25,16 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kobakei.ratethisapp.RateThisApp;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.kobakei.ratethisapp.RateThisApp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -583,7 +580,8 @@ public class MainActivity extends AppCompatActivity {
                 final Map<String, List<KothPlayer>> onlinePlayers = new HashMap<>();
                 int total = 0;
                 Map<String, String> onlinePlayerNames = new HashMap<>();
-                Type listType = new TypeToken<List<JsonModels.RoomEntry>>(){}.getType();
+                Type listType = new TypeToken<List<JsonModels.RoomEntry>>() {
+                }.getType();
                 List<JsonModels.RoomEntry> rooms = new Gson().fromJson(dashboardString, listType);
                 if (rooms != null) {
                     for (JsonModels.RoomEntry room : rooms) {

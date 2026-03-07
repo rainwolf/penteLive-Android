@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -136,16 +136,8 @@ public class PentePlayer implements Parcelable {
         return this.mTournaments;
     }
 
-    public Boolean showAds() {
-        return mShowAds;
-    }
-
     public Boolean isSubscriber() {
         return mSubscriber;
-    }
-
-    public void setSubscriber(Boolean subscriber) {
-        mSubscriber = subscriber;
     }
 
     public List<RatingStat> getRatingStats() {
@@ -156,24 +148,8 @@ public class PentePlayer implements Parcelable {
         return mHills;
     }
 
-    public int getMyColor() {
-        return myColor;
-    }
-
-    public void setMyColor(int color) {
-        myColor = color;
-    }
-
     public static Boolean hasDBAccess() {
         return dbAccess;
-    }
-
-    public boolean isEmailMe() {
-        return emailMe;
-    }
-
-    public void setEmailMe(boolean email) {
-        emailMe = email;
     }
 
     public static void markIfOnline(String name, SpannableStringBuilder attributedString) {
