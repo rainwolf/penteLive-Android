@@ -30,6 +30,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,9 +43,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -715,16 +715,19 @@ public class DatabaseActivity extends AppCompatActivity {
                     if (occValues[i] > max) max = occValues[i];
                     if (occValues[i] < min) min = occValues[i];
                 }
-                if (max == min) { max = 100.0; min = 0.0; }
+                if (max == min) {
+                    max = 100.0;
+                    min = 0.0;
+                }
 
                 Map<Integer, Integer> searchResults = new HashMap<>();
                 for (int i = 0; i < movesArray.length(); i++) {
                     double dblValue = (occValues[i] - min) / (max - min);
                     int color;
                     if (dblValue <= 0.5) {
-                        color = Color.rgb(255, (int) (dblValue * 511), 0);
+                        color = Color.rgb(255, (int) (dblValue * 511.0), 0);
                     } else {
-                        color = Color.rgb((int) ((1.0 - dblValue) * 511), 255, 0);
+                        color = Color.rgb((int) ((1.0 - dblValue) * 511.0), 255, 0);
                     }
                     searchResults.put(movesArray.getInt(i), color);
                 }
@@ -738,12 +741,14 @@ public class DatabaseActivity extends AppCompatActivity {
                 } else {
                     if (!player1.isEmpty()) {
                         for (String name : player1.replace(" ", "").split(",")) {
-                            if (!name.contains("*")) PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                            if (!name.contains("*"))
+                                PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
                         }
                     }
                     if (!player2.isEmpty()) {
                         for (String name : player2.replace(" ", "").split(",")) {
-                            if (!name.contains("*")) PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
+                            if (!name.contains("*"))
+                                PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
                         }
                     }
                     StringBuilder html = new StringBuilder();
