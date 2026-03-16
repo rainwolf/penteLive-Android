@@ -3,7 +3,6 @@ package be.submanifold.pentelive;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -316,7 +315,10 @@ public class Game implements Parcelable {
                     mLocalizedTime = ctx.getString(R.string.dayshours, day, hours);
                 }
             } else {
-                String days = mRemainingTime.substring(0, mRemainingTime.indexOf(" days"));
+                String days = mRemainingTime;
+                if (mRemainingTime.contains(" days")) {
+                    days = mRemainingTime.substring(0, mRemainingTime.indexOf(" days"));
+                }
                 if (days.equals("1")) {
                     mLocalizedTime = ctx.getString(R.string.daypermove, days);
                 } else {
@@ -2599,11 +2601,10 @@ public class Game implements Parcelable {
 //                }
 //            }
 //
-////        }
+
+    /// /        }
 //    }
 //
-
-
     private void makeCaptures(int move, Map<Integer, List<Integer>> groupsByID, Map<Integer, Integer> stoneGroupIDs) {
         int captures = 0;
         if (move % gridSize != 0) {

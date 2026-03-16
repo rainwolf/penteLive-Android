@@ -1,34 +1,27 @@
 package be.submanifold.pentelive.liveGameRoom;
 
-import be.submanifold.pentelive.*;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,6 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import be.submanifold.pentelive.JsonModels;
+import be.submanifold.pentelive.MyApplication;
+import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.R;
+import be.submanifold.pentelive.WebViewActivity;
 
 public class LobbyActivity extends AppCompatActivity {
 
@@ -214,6 +213,7 @@ public class LobbyActivity extends AppCompatActivity {
                 br.close();
 
                 dashboardString = output.toString();
+//                System.out.println(dashboardString);
 
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -230,7 +230,8 @@ public class LobbyActivity extends AppCompatActivity {
             if (success) {
                 final List<LiveGameRoom> rooms = new ArrayList<>();
 
-                Type listType = new TypeToken<List<JsonModels.ServerEntry>>(){}.getType();
+                Type listType = new TypeToken<List<JsonModels.ServerEntry>>() {
+                }.getType();
                 List<JsonModels.ServerEntry> servers = new Gson().fromJson(dashboardString, listType);
                 if (servers != null) {
                     for (JsonModels.ServerEntry server : servers) {

@@ -290,6 +290,7 @@ public class LiveTableFragment extends Fragment {
 
 
     public void updateTable() {
+        if (!isAdded()) return;
         LivePlayer player = table.getSeats().get(1);
         if (player == null) {
             p1Name.setText(getString(R.string.tap_to_sit));
@@ -372,6 +373,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void addText(String text) {
+        if (!isAdded()) return;
         String tableText = tableTextView.getText().toString();
         tableTextView.setText(tableText + text + "\n");
         tableTextView.setMovementMethod(new ScrollingMovementMethod());
@@ -393,6 +395,7 @@ public class LiveTableFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        timerHandler.removeCallbacks(timerUpdater);
     }
 
     /**
@@ -499,6 +502,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void rejectGoState() {
+        if (!isAdded()) return;
         table.rejectAndContinue();
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
@@ -552,6 +556,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void updateGameState(int state) {
+        if (!isAdded()) return;
         if (state == 2 && table.getGameState().state != State.PAUSED) {
             board.clearGoStructures();
         }
@@ -560,6 +565,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void gameStateChanged() {
+        if (!isAdded()) return;
         if (table.getGameState().state == State.STARTED) {
             board.invalidate();
             if (table.isTimed()) {
@@ -623,6 +629,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void updateTimer() {
+        if (!isAdded()) return;
         synchronized (this) {
             int currentPlayer = table.currentPlayer();
             table.updateTimer(false, currentPlayer, -1);
@@ -847,6 +854,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void cancelRequest(String player) {
+        if (!isAdded()) return;
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_cancellation, player));
         String[] options = {getString(R.string.accept), getString(R.string.decline)};
@@ -878,6 +886,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void undoRequested(String player) {
+        if (!isAdded()) return;
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.requests_undo, player));
         String[] options = {getString(R.string.accept), getString(R.string.decline)};
@@ -909,6 +918,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void showDPenteChoice() {
+        if (!isAdded()) return;
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.continue_as));
         String[] options = {getString(R.string.p1white), getString(R.string.p2black)};
@@ -940,6 +950,7 @@ public class LiveTableFragment extends Fragment {
         }
     }
     public void showSwap2Choice() {
+        if (!isAdded()) return;
         System.out.println("swap2choice show");
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.continue_as));
@@ -997,6 +1008,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void undoMove() {
+        if (!isAdded()) return;
         table.undoMove();
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
@@ -1135,6 +1147,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void waitingPlayerReturnTimeUp() {
+        if (!isAdded()) return;
         if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
