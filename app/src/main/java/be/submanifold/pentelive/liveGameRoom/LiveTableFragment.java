@@ -67,11 +67,11 @@ public class LiveTableFragment extends Fragment {
         @Override
         public void run() {
             try {
-                updateTimer(); //this function can change value of mInterval.
+                updateTimer();
             } finally {
-                // 100% guarantee that this always happens, even if
-                // your update method throws an exception
-                timerHandler.postDelayed(timerUpdater, 40);
+                if (isAdded()) {
+                    timerHandler.postDelayed(timerUpdater, 40);
+                }
             }
         }
     };
@@ -426,6 +426,7 @@ public class LiveTableFragment extends Fragment {
 
 
     public void addMove(int move) {
+        if (!isAdded()) return;
         table.addMove(move);
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
         if (table.isDPente() && table.getMoves().size() == 4 && table.getGameState().dPenteState == DPenteState.NOCHOICE) {
@@ -464,6 +465,7 @@ public class LiveTableFragment extends Fragment {
     }
 
     public void addMoves(List<Integer> moves) {
+        if (!isAdded()) return;
         table.addMoves(moves);
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
         if (table.isDPente() && table.getMoves().size() == 4 && table.getGameState().dPenteState == DPenteState.NOCHOICE) {
@@ -710,7 +712,7 @@ public class LiveTableFragment extends Fragment {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 return false;
             });
-            AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
+            AlertDialog.Builder helpBuilder = new AlertDialog.Builder(activity);
             helpBuilder.setTitle(getString(R.string.table_settings));
             helpBuilder.setView(settingsView);
             tableSettingsWindow = helpBuilder.create();
@@ -1033,7 +1035,7 @@ public class LiveTableFragment extends Fragment {
         ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
-        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(activity);
         helpBuilder.setView(view);
         AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
@@ -1054,7 +1056,7 @@ public class LiveTableFragment extends Fragment {
         ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
-        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(activity);
         helpBuilder.setView(view);
         final AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
@@ -1105,7 +1107,7 @@ public class LiveTableFragment extends Fragment {
         ExpandableListView listView = view.findViewById(R.id.onlineUsersListView);
         listView.setAdapter(listAdapter);
 
-        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder helpBuilder = new AlertDialog.Builder(activity);
         helpBuilder.setView(view);
         final AlertDialog tablePlayers = helpBuilder.create();
         tablePlayers.setCanceledOnTouchOutside(true);
