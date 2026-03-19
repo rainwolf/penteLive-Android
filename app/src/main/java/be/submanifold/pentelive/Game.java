@@ -980,9 +980,9 @@ public class Game implements Parcelable {
                 go = true;
             }
         }
+        this.mMovesList = new ArrayList<Integer>();
         if (mGameJson.moves != null && !mGameJson.moves.isEmpty()) {
             String[] movesString = mGameJson.moves.split(",");
-            this.mMovesList = new ArrayList<Integer>();
             for (String moveStr : movesString) {
                 if (!moveStr.isEmpty()) {
                     this.mMovesList.add(Integer.parseInt(moveStr));
