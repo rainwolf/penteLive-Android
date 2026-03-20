@@ -7,17 +7,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
@@ -28,13 +20,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import java.io.IOException;
-
+import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -452,7 +446,6 @@ public class LoginActivity extends AppCompatActivity
 
                             // Get new FCM registration token
                             String refreshedToken = task.getResult();
-                            System.out.println("New token: " + refreshedToken);
                             // TODO: Implement this method to send any registration to your app's servers.
                             if (refreshedToken != null) {
                                 SendTokenTask sendTokenTask = new SendTokenTask(refreshedToken);
@@ -515,8 +508,6 @@ public class LoginActivity extends AppCompatActivity
 
 
         SendTokenTask(String token) {
-            System.out.println("\n\n\n\nkitty SendTokenTask\n\n\n\n");
-
             this.token = token;
         }
 

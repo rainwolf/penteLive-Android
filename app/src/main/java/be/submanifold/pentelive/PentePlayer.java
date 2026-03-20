@@ -297,9 +297,8 @@ public class PentePlayer implements Parcelable {
         List<Message> newMessages = new ArrayList<>();
         if (json.messages != null) {
             for (JsonModels.IndexResponse.MessageEntry entry : json.messages) {
-                // Message(messageID, author, subject, timeStamp, unread, nameColor, crown)
                 Message message = new Message(String.valueOf(entry.mid), entry.from, entry.subject,
-                        entry.date, entry.read ? "0" : "1",
+                        entry.date, entry.read ? "read" : "unread",
                         String.valueOf(entry.fromColor), String.valueOf(entry.fromTourneyWinner));
                 if (loadAvatars && message.getNameColor() != 0) {
                     addUserAvatar(message.getAuthor());
