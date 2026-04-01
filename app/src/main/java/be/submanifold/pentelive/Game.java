@@ -948,7 +948,6 @@ public class Game implements Parcelable {
         }
         if (mGameJson.currentPlayer != null) {
             mActive = mGameJson.currentPlayer.equalsIgnoreCase(PentePlayer.mPlayerName);
-            amIPlaying = mActive;
         }
         undoRequested = Boolean.TRUE.equals(mGameJson.undoRequested);
         if (mGameJson.player2 != null && mGameJson.player2.name != null) {
