@@ -90,6 +90,14 @@ public class LiveTableFragment extends Fragment {
     Spinner gameSpinner;
     AlertDialog tableSettingsWindow;
 
+    public boolean isArenaTable = false;
+    private ArenaJoinRequestAdapter arenaAdapter;
+    private AlertDialog arenaRequestDialog;
+
+    public void setArena(boolean isArena) {
+        this.isArenaTable = isArena;
+    }
+
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -209,6 +217,16 @@ public class LiveTableFragment extends Fragment {
 
         activity = (LiveGameRoomActivity) getActivity();
         me = activity.getMe();
+        if (isArenaTable) {
+            arenaAdapter = new ArenaJoinRequestAdapter(
+                    activity.getLayoutInflater(),
+                    activity.tablesAndPlayers,
+                    activity::sendEvent,
+                    me, table.getId(), table.getGame());
+            if (table.getPlayers().size() <= 1) {
+                showArenaJoinRequest();
+            }
+        }
         board = getView().findViewById(R.id.boardView);
         board.setTable(table, me);
         board.setFragment(this);
@@ -735,6 +753,65 @@ public class LiveTableFragment extends Fragment {
         tableSettingsWindow.show();
     }
 
+    public void showArenaJoinRequest() {
+        if (!isArenaTable || arenaAdapter == null) return;
+        if (arenaRequestDialog != null && arenaRequestDialog.isShowing()) return;
+
+        androidx.recyclerview.widget.RecyclerView list =
+                new androidx.recyclerview.widget.RecyclerView(activity);
+        list.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(activity));
+        list.setAdapter(arenaAdapter);
+
+        // tap = accept
+        list.addOnItemTouchListener(new androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(androidx.recyclerview.widget.RecyclerView rv, android.view.MotionEvent e) {
+                View child = rv.findChildViewUnder(e.getX(), e.getY());
+                if (child != null && e.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    arenaAdapter.accept(rv.getChildAdapterPosition(child));
+                }
+                return false;
+            }
+        });
+
+        // swipe = reject
+        new androidx.recyclerview.widget.ItemTouchHelper(
+            new androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback(0,
+                androidx.recyclerview.widget.ItemTouchHelper.LEFT | androidx.recyclerview.widget.ItemTouchHelper.RIGHT) {
+                @Override
+                public boolean onMove(androidx.recyclerview.widget.RecyclerView rv,
+                                      androidx.recyclerview.widget.RecyclerView.ViewHolder vh,
+                                      androidx.recyclerview.widget.RecyclerView.ViewHolder t) { return false; }
+                @Override
+                public void onSwiped(androidx.recyclerview.widget.RecyclerView.ViewHolder vh, int dir) {
+                    arenaAdapter.reject(vh.getBindingAdapterPosition());
+                }
+            }).attachToRecyclerView(list);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(getString(R.string.arena_tap_to_accept));
+        builder.setView(list);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        arenaRequestDialog = builder.create();
+        arenaRequestDialog.show();
+    }
+
+    public void dismissArenaJoinRequest() {
+        if (arenaAdapter != null) arenaAdapter.reset();
+        if (arenaRequestDialog != null) {
+            arenaRequestDialog.dismiss();
+            arenaRequestDialog = null;
+        }
+    }
+
+    public void arenaTableRequestJoinEvent(String playerName) {
+        if (arenaAdapter == null) return;
+        if (arenaRequestDialog == null || !arenaRequestDialog.isShowing()) {
+            showArenaJoinRequest();
+        }
+        arenaAdapter.addPlayer(playerName);
+    }
+
     private void sendTableChange() {
         String timedStr = "false";
         if (timedChoice.getText().toString().equals(getString(R.string.yes))) {
@@ -1181,5 +1258,11 @@ public class LiveTableFragment extends Fragment {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgForceCancelResignTableEvent\":{\"action\":" + (cancel ? 1 : 2) + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        dismissArenaJoinRequest();
+        super.onDestroyView();
     }
 }
