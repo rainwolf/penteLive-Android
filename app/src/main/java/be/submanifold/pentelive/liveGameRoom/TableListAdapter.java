@@ -33,13 +33,29 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     private LayoutInflater inflater;
     private final LiveGameRoomActivity activity;
     private final Context ctx;
+    private final boolean isArena;
 
     public TableListAdapter(Map<Integer, Table> tables, String roomName, LiveGameRoomActivity activity) {
         this.tables = tables;
-        this.tablesArray = new ArrayList<>(tables.values());
-        ctx = MyApplication.getContext();
         this.roomName = roomName;
         this.activity = activity;
+        ctx = MyApplication.getContext();
+        this.isArena = roomName != null && roomName.toLowerCase().contains("arena");
+        this.tablesArray = buildTablesArray();
+    }
+
+    private List<Table> buildTablesArray() {
+        List<Table> all = new ArrayList<>(tables.values());
+        if (!isArena) {
+            return all;
+        }
+        List<Table> open = new ArrayList<>();
+        for (Table t : all) {
+            if (t.getPlayers().size() <= 1) {   // arena shows only open tables
+                open.add(t);
+            }
+        }
+        return open;
     }
 
     public void setInflater(LayoutInflater inflater) {
@@ -90,7 +106,13 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(ContextCompat.getColor(ctx, R.color.britishracinggreen));
         String title = roomName + " (" + tablesArray.size() + ")";
         ((TextView) convertView.findViewById(R.id.textView)).setText(title);
-        convertView.findViewById(R.id.newTableButton).setOnClickListener(view -> activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}"));
+        convertView.findViewById(R.id.newTableButton).setOnClickListener(view -> {
+            if (isArena) {
+                ArenaTableSetupDialog.show(activity, activity.getMe());
+            } else {
+                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":-1,\"time\":0}}");
+            }
+        });
         return convertView;
     }
 
@@ -145,7 +167,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     }
 
     public void updateList() {
-        this.tablesArray = new ArrayList<>(tables.values());
+        this.tablesArray = buildTablesArray();
         notifyDataSetChanged();
     }
 
