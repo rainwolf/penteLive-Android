@@ -353,8 +353,8 @@ public class PentePlayer implements Parcelable {
     }
 
     public void loadPlayer(DashboardListAdapter listAdapter, boolean loadAvatars, boolean showOnlyTB) {
-        showOnlyTB = showOnlyTB;
-        loadAvatars = loadAvatars;
+        PentePlayer.showOnlyTB = showOnlyTB;
+        PentePlayer.loadAvatars = loadAvatars;
         if (mPassword == null || mPlayerName == null) {
             return;
         }
@@ -597,7 +597,7 @@ public class PentePlayer implements Parcelable {
                 connection.connect();
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
-                    System.out.println("response code for LoadAvatarTask was " + responseCode);
+//                    System.out.println("response code for LoadAvatarTask was " + responseCode);
                     return false;
                 }
 
