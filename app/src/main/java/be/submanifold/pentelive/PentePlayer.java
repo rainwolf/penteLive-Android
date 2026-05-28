@@ -164,6 +164,13 @@ public class PentePlayer implements Parcelable {
         PentePlayer.onlinePlayerNames = onlinePlayerNames;
     }
 
+    // serverColor arrives as e.g. "white (p1)" or "black (p2)"
+    private static String parseStoneColor(String serverColor) {
+        if (serverColor != null && serverColor.startsWith("white")) return "white";
+        if (serverColor != null && serverColor.startsWith("black")) return "black";
+        return serverColor != null ? serverColor : "";
+    }
+
     private void populateFromJson(JsonModels.IndexResponse json) {
         if (json == null || json.player == null) {
             return;
@@ -218,7 +225,7 @@ public class PentePlayer implements Parcelable {
         if (json.invitationsReceived != null) {
             for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsReceived) {
                 Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
                         String.valueOf(entry.daysPerMove), entry.rated, null,
                         String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
@@ -234,7 +241,7 @@ public class PentePlayer implements Parcelable {
         if (json.invitationsSent != null) {
             for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsSent) {
                 Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
                         String.valueOf(entry.daysPerMove), entry.rated, null,
                         String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
@@ -250,7 +257,7 @@ public class PentePlayer implements Parcelable {
         if (json.activeGamesMyTurn != null) {
             for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesMyTurn) {
                 Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
                         entry.timeLeft, entry.rated, null,
                         String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
@@ -266,7 +273,7 @@ public class PentePlayer implements Parcelable {
         if (json.activeGamesOpponentTurn != null) {
             for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesOpponentTurn) {
                 Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), entry.color,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
                         entry.timeLeft, entry.rated, null,
                         String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
@@ -282,7 +289,7 @@ public class PentePlayer implements Parcelable {
         if (json.openInvitationGames != null) {
             for (JsonModels.IndexResponse.OpenInvitationEntry entry : json.openInvitationGames) {
                 Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.inviterName, String.valueOf(entry.inviterRating), entry.color,
+                        entry.inviterName, String.valueOf(entry.inviterRating), parseStoneColor(entry.color),
                         String.valueOf(entry.daysPerMove), entry.rated, null,
                         String.valueOf(entry.inviterColor), String.valueOf(entry.inviterTourneyWinner));
                 if (loadAvatars && game.getNameColor() != 0) {
