@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/arena_game" />
+    <Spinner android:id="@+id/arenaGameSpinner"
+        android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="12dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="@string/arena_rated" />
+        <TextView android:id="@+id/arenaRatedChoice"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/no" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/arenaPlayAsRow"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="12dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="@string/arena_play_as" />
+        <TextView android:id="@+id/arenaPlayAsChoice"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/arena_white" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="12dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="@string/arena_timed" />
+        <TextView android:id="@+id/arenaTimedChoice"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/no" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/arenaTimedFields"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:visibility="gone">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/arena_initial_minutes" android:layout_marginTop="12dp" />
+        <EditText android:id="@+id/arenaInitialMinutes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="number" android:text="5" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/arena_incremental_seconds" android:layout_marginTop="12dp" />
+        <EditText android:id="@+id/arenaIncrementalSeconds"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="number" android:text="0" />
+    </LinearLayout>
+</LinearLayout>
