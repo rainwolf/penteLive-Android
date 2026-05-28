@@ -301,4 +301,18 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="public_invitations_limit_message">Für jede öffentliche Einladung, die du postest, darfst du 2 öffentliche Einladungen akzeptieren. Um eine zu posten, lasse das Gegner-Feld frei.\n\nAbonnenten sind nirgends limitiert.</string>
     <string name="koth_limit">Nicht-Abonnenten können höchstens zwei "King-of-the-Hill"-Sets gleichzeitig spielen, das schließt gesendete und empfangene Einladungen mit ein. Du kannst erneut Einladungen posten, nachdem du ein Set beendet hast.\n Für Abonnenten gilt diese Einschränkung nicht.</string>
 
+    <string name="arena_create_table">Arena-Tisch erstellen</string>
+    <string name="arena_create_button">Tisch erstellen</string>
+    <string name="arena_reject">Ablehnen</string>
+    <string name="arena_tap_to_accept">Tippe auf Spieler zum Akzeptieren</string>
+    <string name="arena_play_as">Spielen als:</string>
+    <string name="arena_white">weiß</string>
+    <string name="arena_black">schwarz</string>
+    <string name="arena_game">Spiel:</string>
+    <string name="arena_rated">Gewertet:</string>
+    <string name="arena_timed">Mit Zeit:</string>
+    <string name="arena_initial_minutes">Startminuten:</string>
+    <string name="arena_incremental_seconds">Inkrementsekunden:</string>
+    <string name="arena_waiting">Warte auf Bestätigung des Gastgebers…</string>
+
 </resources>
