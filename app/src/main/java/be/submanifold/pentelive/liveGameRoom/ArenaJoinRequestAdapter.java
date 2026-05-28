@@ -76,9 +76,7 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
     }
 
     public void addPlayer(String name) {
-        if (!data.contains(name)) {
-            data.add(name);
-        }
+        data.add(name);
         joinedAt.put(name, System.currentTimeMillis());
         notifyDataSetChanged();
         if (!ticking) {

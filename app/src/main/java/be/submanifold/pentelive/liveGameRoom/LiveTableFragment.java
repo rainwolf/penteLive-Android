@@ -762,13 +762,21 @@ public class LiveTableFragment extends Fragment {
         list.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(activity));
         list.setAdapter(arenaAdapter);
 
-        // tap = accept
+        // tap = accept (single tap only, so scroll/fling end does not accept)
+        final android.view.GestureDetector tapDetector =
+                new android.view.GestureDetector(activity, new android.view.GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapUp(android.view.MotionEvent e) {
+                        return true;
+                    }
+                });
         list.addOnItemTouchListener(new androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(androidx.recyclerview.widget.RecyclerView rv, android.view.MotionEvent e) {
                 View child = rv.findChildViewUnder(e.getX(), e.getY());
-                if (child != null && e.getAction() == android.view.MotionEvent.ACTION_UP) {
+                if (child != null && tapDetector.onTouchEvent(e)) {
                     arenaAdapter.accept(rv.getChildAdapterPosition(child));
+                    return true;
                 }
                 return false;
             }
