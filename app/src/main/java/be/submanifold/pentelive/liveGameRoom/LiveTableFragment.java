@@ -161,6 +161,10 @@ public class LiveTableFragment extends Fragment {
         menuItem.setIconTintList(tintList);
         menuItem = menu.findItem(R.id.action_settings);
         menuItem.setIconTintList(tintList);
+        if (isArenaTable) {
+            menu.findItem(R.id.action_players).setVisible(false);
+            menu.findItem(R.id.action_settings).setVisible(false);
+        }
 
         toolbar.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -799,8 +803,11 @@ public class LiveTableFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(getString(R.string.arena_tap_to_accept));
         builder.setView(list);
-        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setNegativeButton(getString(R.string.arena_exit_table), (dialog, which) ->
+                activity.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}"));
         arenaRequestDialog = builder.create();
+        arenaRequestDialog.setCancelable(false);
+        arenaRequestDialog.setCanceledOnTouchOutside(false);
         arenaRequestDialog.show();
     }
 

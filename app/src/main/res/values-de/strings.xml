@@ -314,5 +314,6 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="arena_initial_minutes">Startminuten:</string>
     <string name="arena_incremental_seconds">Inkrementsekunden:</string>
     <string name="arena_waiting">Warte auf Bestätigung des Gastgebers…</string>
+    <string name="arena_exit_table">Tisch verlassen</string>
 
 </resources>

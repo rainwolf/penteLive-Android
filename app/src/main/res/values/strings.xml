@@ -544,4 +544,5 @@
     <string name="arena_initial_minutes">Initial minutes:</string>
     <string name="arena_incremental_seconds">Incremental seconds:</string>
     <string name="arena_waiting">Waiting for host to accept…</string>
+    <string name="arena_exit_table">Exit table</string>
 </resources>
