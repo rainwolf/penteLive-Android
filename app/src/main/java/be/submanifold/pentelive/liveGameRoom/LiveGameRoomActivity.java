@@ -55,7 +55,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 
-    private ClientSocketDSGEventHandler eventHandler;
+    private volatile ClientSocketDSGEventHandler eventHandler;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
     private final LiveGameRoomFragment roomFragment = null;
@@ -431,7 +431,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
     @Override
     public void sendEvent(String event) {
-        eventHandler.eventOccurred(event);
+        // Socket connects on a background thread; ignore sends issued before it is ready.
+        ClientSocketDSGEventHandler handler = eventHandler;
+        if (handler != null) {
+            handler.eventOccurred(event);
+        }
     }
 
 
