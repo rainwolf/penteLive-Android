@@ -49,6 +49,19 @@ public class LobbyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Unregistered (guest) players don't choose a room — send them straight to the
+        // hardcoded arena room (name + port match the iOS client).
+        String username = PrefUtils.getFromPrefs(this,
+                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+        if (username.startsWith("guest")) {
+            Intent intent = new Intent(this, LiveGameRoomActivity.class);
+            intent.putExtra("room", new LiveGameRoom("Arena", 15999));
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_lobby);
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -248,21 +261,6 @@ public class LobbyActivity extends AppCompatActivity {
                 }
                 listAdapter.setRooms(rooms);
                 listAdapter.updateList();
-
-                // Unregistered (guest) players go straight to the arena room.
-                String username = PrefUtils.getFromPrefs(LobbyActivity.this,
-                        PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
-                if (username.startsWith("guest")) {
-                    for (LiveGameRoom room : rooms) {
-                        if (room.getName() != null && room.getName().toLowerCase().contains("arena")) {
-                            Intent intent = new Intent(LobbyActivity.this, LiveGameRoomActivity.class);
-                            intent.putExtra("room", room);
-                            startActivity(intent);
-                            finish();
-                            break;
-                        }
-                    }
-                }
             }
         }
 
