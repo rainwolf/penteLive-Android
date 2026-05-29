@@ -15,9 +15,6 @@ import be.submanifold.pentelive.R;
 public class ArenaTableSetupDialog {
 
     public static void show(final LiveGameRoomActivity activity, final String me) {
-        if (me.startsWith("guest")) {
-            return; // guests cannot create arena tables
-        }
         View view = activity.getLayoutInflater().inflate(R.layout.arena_table_settings, null);
 
         final Spinner gameSpinner = view.findViewById(R.id.arenaGameSpinner);
@@ -35,6 +32,9 @@ public class ArenaTableSetupDialog {
         final EditText incrementalSeconds = view.findViewById(R.id.arenaIncrementalSeconds);
 
         ratedChoice.setOnClickListener(v -> {
+            if (me.startsWith("guest")) {
+                return; // guests can only create unrated tables
+            }
             boolean nowRated = ratedChoice.getText().toString().equals(activity.getString(R.string.no));
             ratedChoice.setText(activity.getString(nowRated ? R.string.yes : R.string.no));
             // play-as only matters for unrated games
