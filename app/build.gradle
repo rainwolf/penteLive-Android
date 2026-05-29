@@ -63,6 +63,13 @@ android {
             enableSplit false
         }
     }
+    packaging {
+        jniLibs {
+            // Store native libs uncompressed and 16 KB page-aligned in the APK so they
+            // load on 16 KB page-size devices (Android 15+).
+            useLegacyPackaging false
+        }
+    }
     namespace 'be.submanifold.pentelive'
 }
 

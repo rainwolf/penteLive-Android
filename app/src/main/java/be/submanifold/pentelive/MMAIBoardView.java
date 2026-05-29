@@ -9,10 +9,6 @@ import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -26,6 +22,9 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
