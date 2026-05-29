@@ -40,6 +40,7 @@ import javax.net.ssl.HttpsURLConnection;
 import be.submanifold.pentelive.JsonModels;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.WebViewActivity;
 
@@ -48,6 +49,19 @@ public class LobbyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Unregistered (guest) players don't choose a room — send them straight to the
+        // hardcoded arena room (name + port match the iOS client).
+        String username = PrefUtils.getFromPrefs(this,
+                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+        if (username.startsWith("guest")) {
+            Intent intent = new Intent(this, LiveGameRoomActivity.class);
+            intent.putExtra("room", new LiveGameRoom("Arena", 15999));
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_lobby);
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);

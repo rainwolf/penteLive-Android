@@ -55,13 +55,14 @@ import javax.net.ssl.X509TrustManager;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 
-    private ClientSocketDSGEventHandler eventHandler;
+    private volatile ClientSocketDSGEventHandler eventHandler;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
     private final LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
 
     private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    private boolean isArena = false;
 
     public String getMe() {
         return me;
@@ -97,6 +98,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_game_room);
         room = getIntent().getParcelableExtra("room");
+        isArena = room != null && room.getName() != null
+                && room.getName().toLowerCase().contains("arena");
 //        System.out.println(room.getName());
 
         self = this;
@@ -262,15 +265,35 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     int tableId = tablesAndPlayers.changeTableState((Map<String, Object>) jsonEvent.get("dsgChangeStateTableEvent"));
                                     updateMainRoom();
                                     updateTable(tableId);
+                                } else if (jsonEvent.get("dsgArenaRequestJoinTableEvent") != null) {
+                                    Map<String, Object> data =
+                                            (Map<String, Object>) jsonEvent.get("dsgArenaRequestJoinTableEvent");
+                                    String player = (String) data.get("player");
+                                    int tableId = (Integer) data.get("table");
+                                    LiveTableFragment fragment = (LiveTableFragment)
+                                            getSupportFragmentManager().findFragmentByTag("liveTable");
+                                    if (fragment != null && fragment.table != null
+                                            && fragment.table.getId() == tableId) {
+                                        fragment.arenaTableRequestJoinEvent(player);
+                                    }
                                 } else if (jsonEvent.get("dsgJoinTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgJoinTableEvent");
                                     String player = (String) data.get("player");
                                     int tableId = (Integer) data.get("table");
                                     Table table = tablesAndPlayers.tableJoin(tableId, player);
                                     updateMainRoom();
+                                    LiveTableFragment arenaTable = (LiveTableFragment)
+                                            getSupportFragmentManager().findFragmentByTag("liveTable");
+                                    if (arenaTable != null && arenaTable.isArenaTable
+                                            && arenaTable.table != null
+                                            && arenaTable.table.getId() == tableId
+                                            && arenaTable.table.getPlayers().size() >= 2) {
+                                        arenaTable.dismissArenaJoinRequest();
+                                    }
                                     if (table != null) {
                                         LiveTableFragment tableFragment = LiveTableFragment.newInstance("", "");
                                         tableFragment.setTable(table);
+                                        tableFragment.setArena(isArena);
                                         getSupportFragmentManager()
                                                 .beginTransaction()
                                                 .add(R.id.activity_live_game_room, tableFragment, "liveTable").addToBackStack("liveTable")
@@ -408,7 +431,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
     @Override
     public void sendEvent(String event) {
-        eventHandler.eventOccurred(event);
+        // Socket connects on a background thread; ignore sends issued before it is ready.
+        ClientSocketDSGEventHandler handler = eventHandler;
+        if (handler != null) {
+            handler.eventOccurred(event);
+        }
     }
 
 

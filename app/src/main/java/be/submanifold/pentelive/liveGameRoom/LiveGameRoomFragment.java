@@ -96,6 +96,12 @@ public class LiveGameRoomFragment extends Fragment {
         });
 
         activity = (LiveGameRoomActivity) getActivity();
+        boolean isArena = roomName != null && roomName.toLowerCase().contains("arena");
+        if (isArena) {
+            getView().findViewById(R.id.segments).setVisibility(View.GONE);
+            getView().findViewById(R.id.playersList).setVisibility(View.GONE);
+            getView().findViewById(R.id.tablesList).setVisibility(View.VISIBLE);
+        }
         ExpandableListView expandableList = getView().findViewById(R.id.playersList);
         playersListAdapter = new PlayersListAdapter(activity.tablesAndPlayers.players, roomName, 1);
         expandableList.setAdapter(playersListAdapter);
@@ -111,7 +117,13 @@ public class LiveGameRoomFragment extends Fragment {
         expandableList.expandGroup(0);
         expandableList.setOnChildClickListener((expandableListView, view12, i, i1, l) -> {
             int tableId = tableListAdapter.getTablesArray().get(i1).getId();
-            activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
+            if (roomName != null && roomName.toLowerCase().contains("arena")) {
+                activity.sendEvent(ArenaEvents.requestJoin(activity.getMe(), tableId));
+                android.widget.Toast.makeText(activity, getString(R.string.arena_waiting),
+                        android.widget.Toast.LENGTH_SHORT).show();
+            } else {
+                activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
+            }
             return true;
         });
 

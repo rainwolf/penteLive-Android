@@ -530,4 +530,19 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_gdpr">GDPRActivity</string>
+
+    <string name="arena_create_table">Create arena table</string>
+    <string name="arena_create_button">Create table</string>
+    <string name="arena_reject">Reject</string>
+    <string name="arena_tap_to_accept">Tap player to accept</string>
+    <string name="arena_play_as">Play as:</string>
+    <string name="arena_white">white</string>
+    <string name="arena_black">black</string>
+    <string name="arena_game">Game:</string>
+    <string name="arena_rated">Rated:</string>
+    <string name="arena_timed">Timed:</string>
+    <string name="arena_initial_minutes">Initial minutes:</string>
+    <string name="arena_incremental_seconds">Incremental seconds:</string>
+    <string name="arena_waiting">Waiting for host to accept…</string>
+    <string name="arena_exit_table">Exit table</string>
 </resources>

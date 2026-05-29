@@ -184,7 +184,7 @@ public class LoginActivity extends AppCompatActivity
             builder.setMessage(getString(R.string.account_needed));
             builder.setPositiveButton(getString(R.string.play_live_as_guest), (dialogInterface, i) -> {
                 Intent intent = new Intent(getApplicationContext(), LiveGameRoomActivity.class);
-                intent.putExtra("room", new LiveGameRoom("Main Room", 16000));
+                intent.putExtra("room", new LiveGameRoom("Arena", 15999));
                 startActivity(intent);
             });
             builder.setNeutralButton(getString(R.string.play_ai), (dialogInterface, i) -> {
