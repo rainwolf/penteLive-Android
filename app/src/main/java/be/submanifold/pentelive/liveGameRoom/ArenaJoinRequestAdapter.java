@@ -124,8 +124,11 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
         String name = data.get(position);
         LivePlayer player = tablesAndPlayers.players.get(name);
         if (player != null) {
+            int rating = player.getRating(gameId);
             holder.name.setText(player.coloredNameString(holder.name.getLineHeight()));
-            holder.rating.setText(player.coloredRatingSquare(player.getRating(gameId)));
+            android.text.SpannableStringBuilder ratingText = player.coloredRatingSquare(rating);
+            ratingText.append(" ").append(String.valueOf(rating));
+            holder.rating.setText(ratingText);
         } else {
             holder.name.setText(name);
             holder.rating.setText("");
