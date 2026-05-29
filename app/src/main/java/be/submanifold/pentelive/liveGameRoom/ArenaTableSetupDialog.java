@@ -52,11 +52,9 @@ public class ArenaTableSetupDialog {
             timedFields.setVisibility(nowTimed ? View.VISIBLE : View.GONE);
         });
 
-        // Guests default to a timed table.
-        if (me.startsWith("guest")) {
-            timedChoice.setText(activity.getString(R.string.yes));
-            timedFields.setVisibility(View.VISIBLE);
-        }
+        // Default to a timed table.
+        timedChoice.setText(activity.getString(R.string.yes));
+        timedFields.setVisibility(View.VISIBLE);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.arena_create_table));
