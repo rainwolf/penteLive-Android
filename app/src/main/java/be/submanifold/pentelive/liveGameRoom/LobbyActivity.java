@@ -40,6 +40,7 @@ import javax.net.ssl.HttpsURLConnection;
 import be.submanifold.pentelive.JsonModels;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.WebViewActivity;
 
@@ -247,6 +248,21 @@ public class LobbyActivity extends AppCompatActivity {
                 }
                 listAdapter.setRooms(rooms);
                 listAdapter.updateList();
+
+                // Unregistered (guest) players go straight to the arena room.
+                String username = PrefUtils.getFromPrefs(LobbyActivity.this,
+                        PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+                if (username.startsWith("guest")) {
+                    for (LiveGameRoom room : rooms) {
+                        if (room.getName() != null && room.getName().toLowerCase().contains("arena")) {
+                            Intent intent = new Intent(LobbyActivity.this, LiveGameRoomActivity.class);
+                            intent.putExtra("room", room);
+                            startActivity(intent);
+                            finish();
+                            break;
+                        }
+                    }
+                }
             }
         }
 
