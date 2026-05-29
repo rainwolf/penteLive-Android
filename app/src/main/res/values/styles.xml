@@ -3,12 +3,9 @@
 <!--     Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="statusBarScrim">@android:color/background_dark</item>
-        <item name="android:textViewStyle">@style/AppTheme.TextView</item>
+        <!-- Inflate TextViews as OutlineTextView so dark-mode text gets a black outline. -->
+        <item name="viewInflaterClass">be.submanifold.pentelive.OutlineViewInflater</item>
     </style>
-
-    <!-- Default TextView style. The night variant (res/values-night/styles.xml) adds a
-         black halo so white dark-mode text stays legible on any background. -->
-    <style name="AppTheme.TextView" parent="Widget.AppCompat.TextView" />
 
     <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
