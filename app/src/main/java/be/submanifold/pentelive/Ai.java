@@ -1,7 +1,6 @@
 package be.submanifold.pentelive;
 
 import java.io.InputStream;
-import java.util.*;
 
 //import org.pente.gameServer.core.AlphaNumericGridCoordinates;
 //import org.pente.gameServer.core.GridCoordinates;
@@ -176,6 +175,8 @@ public class Ai {
 
                     int newMove = move(cPtr, moves, game, level, vct);
 //	    			int newMove = marksAi.getMove();
+                    // sleep for 0.x seconds
+                    Thread.sleep(180);
                     if (board != null) {
                         board.processAImove(newMove);
                     }
