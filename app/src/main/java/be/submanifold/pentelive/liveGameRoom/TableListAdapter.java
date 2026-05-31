@@ -45,17 +45,20 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     }
 
     private List<Table> buildTablesArray() {
-        List<Table> all = new ArrayList<>(tables.values());
-        if (!isArena) {
-            return all;
-        }
-        List<Table> open = new ArrayList<>();
-        for (Table t : all) {
-            if (t.getPlayers().size() <= 1) {   // arena shows only open tables
-                open.add(t);
+        // Guest users should not see rated tables.
+        boolean isGuest = activity.getMe() != null
+                && activity.getMe().toLowerCase().startsWith("guest");
+        List<Table> filtered = new ArrayList<>();
+        for (Table t : tables.values()) {
+            if (isGuest && t.isRated()) {
+                continue;
             }
+            if (isArena && t.getPlayers().size() > 1) {   // arena shows only open tables
+                continue;
+            }
+            filtered.add(t);
         }
-        return open;
+        return filtered;
     }
 
     public void setInflater(LayoutInflater inflater) {
