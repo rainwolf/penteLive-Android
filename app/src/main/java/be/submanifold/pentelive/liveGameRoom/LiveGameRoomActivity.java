@@ -245,7 +245,12 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
                                     updateMainRoom();
-                                    playSound(NEW_PLAYER_SOUND);
+                                    // In an arena room, don't play the new-player sound when other players
+                                    // join the room. It plays instead when you receive a join request and
+                                    // when a player joins your arena table.
+                                    if (!isArena) {
+                                        playSound(NEW_PLAYER_SOUND);
+                                    }
                                 } else if (jsonEvent.get("dsgJoinMainRoomErrorEvent") != null) {
                                     (new BootMeTask()).execute((Void) null);
                                 } else if (jsonEvent.get("dsgLoginEvent") != null) {
@@ -274,6 +279,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                             getSupportFragmentManager().findFragmentByTag("liveTable");
                                     if (fragment != null && fragment.table != null
                                             && fragment.table.getId() == tableId) {
+                                        // Play the new-player sound when you receive a join request for your arena table.
+                                        playSound(NEW_PLAYER_SOUND);
                                         fragment.arenaTableRequestJoinEvent(player);
                                     }
                                 } else if (jsonEvent.get("dsgJoinTableEvent") != null) {
@@ -288,6 +295,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                             && arenaTable.table != null
                                             && arenaTable.table.getId() == tableId
                                             && arenaTable.table.getPlayers().size() >= 2) {
+                                        // Play the new-player sound when a player joins your arena table.
+                                        playSound(NEW_PLAYER_SOUND);
                                         arenaTable.dismissArenaJoinRequest();
                                     }
                                     if (table != null) {
