@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.style.CharacterStyle;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 
@@ -47,20 +49,25 @@ public class OutlineTextView extends AppCompatTextView {
     }
 
     /**
-     * A ForegroundColorSpan (e.g. a user's chosen username color) overrides the base
-     * text color, so the base color alone isn't enough to decide. If any span recolors
-     * the text to something non-white, skip the outline — it looks bad on colored text.
+     * The base text color alone isn't enough to decide: a ForegroundColorSpan (e.g. a
+     * user's chosen username color) overrides it, and a ClickableSpan/URLSpan (a link)
+     * is drawn in the theme's link color. If any such span recolors the text to
+     * something non-white, skip the outline — it looks bad on colored text and links.
      */
-    private boolean hasNonWhiteColorSpan() {
+    private boolean hasNonWhiteSpan() {
         CharSequence text = getText();
         if (!(text instanceof Spanned)) {
             return false;
         }
         Spanned spanned = (Spanned) text;
-        ForegroundColorSpan[] spans =
-                spanned.getSpans(0, spanned.length(), ForegroundColorSpan.class);
-        for (ForegroundColorSpan span : spans) {
-            if (!isNearWhite(span.getForegroundColor())) {
+        CharacterStyle[] spans =
+                spanned.getSpans(0, spanned.length(), CharacterStyle.class);
+        for (CharacterStyle span : spans) {
+            if (span instanceof ClickableSpan) {
+                return true;
+            }
+            if (span instanceof ForegroundColorSpan
+                    && !isNearWhite(((ForegroundColorSpan) span).getForegroundColor())) {
                 return true;
             }
         }
@@ -72,7 +79,7 @@ public class OutlineTextView extends AppCompatTextView {
         Layout layout = getLayout();
         int fillColor = getCurrentTextColor();
         if (!isNightMode() || layout == null
-                || !isNearWhite(fillColor) || hasNonWhiteColorSpan()) {
+                || !isNearWhite(fillColor) || hasNonWhiteSpan()) {
             super.onDraw(canvas);
             return;
         }
