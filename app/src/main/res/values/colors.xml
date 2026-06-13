@@ -10,4 +10,5 @@
     <color name="britishracinggreen">#08341D</color>
     <color name="text_shadow">#7F000000</color>
     <color name="border_background">#FFFFFF</color>
+    <color name="online_row_background">#DEECDE</color>
 </resources>

@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     popupWindow.setFocusable(true);
-//                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
+                    popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
                     popupWindow.setOutsideTouchable(true);
                     popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                     popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
@@ -573,6 +573,7 @@ public class MainActivity extends AppCompatActivity {
         View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
         final float scale = getResources().getDisplayMetrics().density;
         popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
+        popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
         ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
         onlineUsersListView.setDividerHeight(0);
         onlineUsersListView.setAdapter(listAdapter);
