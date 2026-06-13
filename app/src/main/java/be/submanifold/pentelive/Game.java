@@ -3083,6 +3083,12 @@ public class Game implements Parcelable {
             abstractBoard[i][j] = 0;
         }
         getTerritories();
+        // Refresh the cached snapshot BoardView reads via getState(): processDeadStone
+        // mutates abstractBoard in place, so without this the board re-renders stale and
+        // the dead-stone toggle shows no visual feedback (PR #7 review, Finding 1).
+        this.state = new BoardState(this.abstractBoard, whiteCaptures, blackCaptures,
+                gridSize, this.state != null ? this.state.lastMove : -1,
+                null, false, false, this.state != null ? this.state.koMove : -1);
     }
 
 }
