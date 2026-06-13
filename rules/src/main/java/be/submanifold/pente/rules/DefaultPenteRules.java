@@ -57,7 +57,60 @@ public final class DefaultPenteRules implements PenteRules {
 
     @Override
     public boolean isWin(BoardState s, int color, int lastMove) {
-        return false;   // implemented in Task 5
+        // Capture win: whiteCaptures counts white stones lost → black (2) wins;
+        // blackCaptures counts black stones lost → white (1) wins.
+        // Matches Game.java:1248-1259 (legacy uses == 10).
+        if (color == 2 && s.whiteCaptures == 10) return true;
+        if (color == 1 && s.blackCaptures == 10) return true;
+        return fiveInARow(s.board, s.gridSize, color, lastMove);
+    }
+
+    /**
+     * True when {@code color} has five or more consecutive stones through {@code lastMove}
+     * in any of the four directions (horizontal, vertical, both diagonals).
+     *
+     * <p>Verbatim port of legacy {@code Game.detectPente}. The walk condition uses
+     * {@code r > 0 && r < gridSize && c > 0 && c < gridSize} — matching the legacy
+     * {@code i > 0 && i < 19 && j > 0 && j < 19} applied to BOTH coordinates in every
+     * direction. Known quirks preserved intentionally:
+     * <ul>
+     *   <li>A five on <b>row 0</b> is NOT detected (horizontal walk: {@code r > 0} is false
+     *       when row == 0, so the loop never runs).</li>
+     *   <li>A five on <b>column 0</b> is NOT detected (vertical walk: {@code c > 0} is false
+     *       when col == 0).</li>
+     *   <li>Fives on row/col 18 ARE detected ({@code r < gridSize} and {@code c < gridSize}
+     *       are both true at index 18).</li>
+     * </ul>
+     * Bug-fixes must be separate, deliberate commits.
+     */
+    private static boolean fiveInARow(byte[][] board, int n, int color, int lastMove) {
+        if (lastMove < 0) return false;
+        int row = lastMove / n;
+        int col = lastMove % n;
+        if (row < 0 || row >= n || col < 0 || col >= n) return false;
+        if (board[row][col] != (byte) color) return false;
+
+        int[][] dirs = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
+        for (int[] d : dirs) {
+            int count = 1;
+            // scan in positive direction — legacy condition: i > 0 && i < 19 && j > 0 && j < 19
+            int r = row + d[0], c = col + d[1];
+            while (r > 0 && r < n && c > 0 && c < n && board[r][c] == (byte) color) {
+                count++;
+                r += d[0];
+                c += d[1];
+            }
+            // scan in negative direction — same condition
+            r = row - d[0];
+            c = col - d[1];
+            while (r > 0 && r < n && c > 0 && c < n && board[r][c] == (byte) color) {
+                count++;
+                r -= d[0];
+                c -= d[1];
+            }
+            if (count >= 5) return true;
+        }
+        return false;
     }
 
     // ── Capture detectors ─────────────────────────────────────────────────────
