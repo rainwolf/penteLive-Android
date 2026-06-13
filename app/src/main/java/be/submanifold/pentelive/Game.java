@@ -60,8 +60,8 @@ public class Game implements Parcelable {
     private boolean mActive;
     public boolean dPenteChoice;
 
-    public int whiteCaptures;
-    public int blackCaptures;
+    private int whiteCaptures;
+    private int blackCaptures;
 
     private boolean canHide, canUnHide;
 
@@ -94,7 +94,7 @@ public class Game implements Parcelable {
     private BoardState state;
 
 
-    public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    private byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -289,6 +289,13 @@ public class Game implements Parcelable {
      * fields; populated by both the delegated (engine) and legacy replay paths.
      */
     public BoardState getState() {
+        if (state == null) {
+            // Before any replay, mirror the inline-initialised empty board so the
+            // first onDraw() sees a 19x19 zero position — the invariant the old
+            // BoardView relied on when it aliased game.abstractBoard in setGame().
+            state = new BoardState(abstractBoard, whiteCaptures, blackCaptures,
+                    gridSize, -1, null, false, false, -1);
+        }
         return state;
     }
 
@@ -1268,7 +1275,7 @@ public class Game implements Parcelable {
         }
 
         this.untilMove = this.mMovesList.size();
-        replayGameUntilMove(abstractBoard, boardView);
+        replayGameUntilMove(boardView);
 
         if (boardView != null) {
             boardView.invalidate();
@@ -1309,7 +1316,7 @@ public class Game implements Parcelable {
 
     private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
-    public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
+    public void replayGameUntilMove(BoardView boardView) {
         if (mMovesList == null) {
             return;
         }

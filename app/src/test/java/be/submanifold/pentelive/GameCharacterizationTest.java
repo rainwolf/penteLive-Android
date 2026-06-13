@@ -219,18 +219,33 @@ public class GameCharacterizationTest {
      * 19 lines of space-separated cell values followed by the capture counts.
      * Cell values: 0 = empty, 1 = White, 2 = Black, −1 = restricted.
      */
-    private static String serialise(Game game) {
+    private static String serialise(Game game) throws Exception {
+        byte[][] board = readBoard(game);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 19; i++) {
             for (int j = 0; j < 19; j++) {
                 if (j > 0) sb.append(' ');
-                sb.append(game.abstractBoard[i][j]);
+                sb.append(board[i][j]);
             }
             sb.append('\n');
         }
-        sb.append("whiteCaptures=").append(game.whiteCaptures).append('\n');
-        sb.append("blackCaptures=").append(game.blackCaptures).append('\n');
+        sb.append("whiteCaptures=").append(readInt(game, "whiteCaptures")).append('\n');
+        sb.append("blackCaptures=").append(readInt(game, "blackCaptures")).append('\n');
         return sb.toString();
+    }
+
+    /** Reflectively reads a now-private int field (capture counts) from {@link Game}. */
+    private static int readInt(Game game, String field) throws Exception {
+        Field f = Game.class.getDeclaredField(field);
+        f.setAccessible(true);
+        return f.getInt(game);
+    }
+
+    /** Reflectively reads the now-private {@code abstractBoard} field from {@link Game}. */
+    private static byte[][] readBoard(Game game) throws Exception {
+        Field f = Game.class.getDeclaredField("abstractBoard");
+        f.setAccessible(true);
+        return (byte[][]) f.get(game);
     }
 
     /**
@@ -260,7 +275,7 @@ public class GameCharacterizationTest {
         return new String(Files.readAllBytes(file));
     }
 
-    private static void assertMatchesGolden(String name, Game game) throws IOException {
+    private static void assertMatchesGolden(String name, Game game) throws Exception {
         String actual = serialise(game);
         String expected = readGolden(name);
         assertEquals("Golden mismatch for '" + name + "'", expected, actual);

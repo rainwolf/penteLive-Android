@@ -128,16 +128,20 @@ public class PenteRulesEquivalenceTest {
 
     private static void assertEquivalent(Variant variant, String worker,
                                          int gameIdx, List<Integer> moves,
-                                         Game legacy, BoardState newState) {
+                                         Game legacy, BoardState newState) throws Exception {
+        // Capture counts / board are now-private on Game — read reflectively.
+        int legacyWhite = readInt(legacy, "whiteCaptures");
+        int legacyBlack = readInt(legacy, "blackCaptures");
+        byte[][] legacyBoard = readBoard(legacy);
         // 1. Capture counts
-        if (legacy.whiteCaptures != newState.whiteCaptures
-                || legacy.blackCaptures != newState.blackCaptures) {
+        if (legacyWhite != newState.whiteCaptures
+                || legacyBlack != newState.blackCaptures) {
             fail(String.format(
                     "DIVERGENCE [%s / %s] game #%d:%n"
                             + "  captures — legacy: white=%d black=%d  |  new: white=%d black=%d%n"
                             + "  moves = %s",
                     variant, worker, gameIdx,
-                    legacy.whiteCaptures, legacy.blackCaptures,
+                    legacyWhite, legacyBlack,
                     newState.whiteCaptures, newState.blackCaptures,
                     moves));
         }
@@ -145,7 +149,7 @@ public class PenteRulesEquivalenceTest {
         // 2. Board — cell for cell
         for (int i = 0; i < 19; i++) {
             for (int j = 0; j < 19; j++) {
-                int legacyCell = legacy.abstractBoard[i][j];
+                int legacyCell = legacyBoard[i][j];
                 int newCell    = newState.cell(i, j);
                 if (legacyCell != newCell) {
                     fail(String.format(
@@ -202,6 +206,20 @@ public class PenteRulesEquivalenceTest {
         Method m = Game.class.getDeclaredMethod(methodName, int.class);
         m.setAccessible(true);
         m.invoke(game, until);
+    }
+
+    /** Reflectively reads a now-private int field (capture counts) from {@link Game}. */
+    private static int readInt(Game game, String field) throws Exception {
+        Field f = Game.class.getDeclaredField(field);
+        f.setAccessible(true);
+        return f.getInt(game);
+    }
+
+    /** Reflectively reads the now-private {@code abstractBoard} field from {@link Game}. */
+    private static byte[][] readBoard(Game game) throws Exception {
+        Field f = Game.class.getDeclaredField("abstractBoard");
+        f.setAccessible(true);
+        return (byte[][]) f.get(game);
     }
 
     /**

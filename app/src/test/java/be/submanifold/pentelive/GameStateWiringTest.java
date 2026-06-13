@@ -49,11 +49,12 @@ public class GameStateWiringTest {
         BoardState s = g.getState();
         assertNotNull("getState() must be populated after a delegated replay", s);
 
-        // getState() mirrors the public fields exactly.
-        assertEquals(g.whiteCaptures, s.whiteCaptures);
-        assertEquals(g.blackCaptures, s.blackCaptures);
+        // getState() mirrors the (now-private) fields exactly.
+        assertEquals(readInt(g, "whiteCaptures"), s.whiteCaptures);
+        assertEquals(readInt(g, "blackCaptures"), s.blackCaptures);
+        byte[][] board = readBoard(g);
         for (int i = 0; i < 19; i++) {
-            assertArrayEquals("row " + i, g.abstractBoard[i], s.board[i]);
+            assertArrayEquals("row " + i, board[i], s.board[i]);
         }
 
         // The delegated path genuinely used the engine: its result matches a
@@ -105,14 +106,29 @@ public class GameStateWiringTest {
 
     // ─── helpers ─────────────────────────────────────────────────────────────
 
-    private static void assertStateMirrorsFields(Game g) {
+    private static void assertStateMirrorsFields(Game g) throws Exception {
         BoardState s = g.getState();
         assertNotNull("getState() must be populated after a legacy replay", s);
-        assertEquals(g.whiteCaptures, s.whiteCaptures);
-        assertEquals(g.blackCaptures, s.blackCaptures);
+        assertEquals(readInt(g, "whiteCaptures"), s.whiteCaptures);
+        assertEquals(readInt(g, "blackCaptures"), s.blackCaptures);
+        byte[][] board = readBoard(g);
         for (int i = 0; i < 19; i++) {
-            assertArrayEquals("row " + i, g.abstractBoard[i], s.board[i]);
+            assertArrayEquals("row " + i, board[i], s.board[i]);
         }
+    }
+
+    /** Reflectively reads a now-private int field (capture counts) from {@link Game}. */
+    private static int readInt(Game g, String field) throws Exception {
+        Field f = Game.class.getDeclaredField(field);
+        f.setAccessible(true);
+        return f.getInt(g);
+    }
+
+    /** Reflectively reads the now-private {@code abstractBoard} field from {@link Game}. */
+    private static byte[][] readBoard(Game g) throws Exception {
+        Field f = Game.class.getDeclaredField("abstractBoard");
+        f.setAccessible(true);
+        return (byte[][]) f.get(g);
     }
 
     private static Game makeGame(String gameType) {
