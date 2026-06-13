@@ -933,24 +933,18 @@ public class Game implements Parcelable {
     }
 
     public boolean isConnect6() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return getGameType().contains("Connect6");
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isConnect6();
     }
 
     public boolean isGomoku() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return getGameType().contains("Gomoku");
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isGomoku();
     }
 
     public boolean isDPente() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return (getGameType().contains("D-Pente") || getGameType().contains("DK-Pente"));
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isDPente();
     }
 
     public void parseGame(BoardView boardView) {
