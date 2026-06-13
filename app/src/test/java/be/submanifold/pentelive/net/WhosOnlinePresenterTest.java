@@ -66,4 +66,17 @@ public class WhosOnlinePresenterTest {
         assertNull(view.rendered);
         assertEquals(Result.Reason.NETWORK, view.errorShown);
     }
+
+    @Test
+    public void showsAuthExpiredErrorAndDoesNotRender() {
+        FakePenteApi api = new FakePenteApi();
+        api.nextFailure = Result.Reason.AUTH_EXPIRED;
+        RecordingView view = new RecordingView();
+        WhosOnlinePresenter presenter = new WhosOnlinePresenter(view);
+
+        presenter.onResult(api.whosOnline());
+
+        assertNull(view.rendered);
+        assertEquals(Result.Reason.AUTH_EXPIRED, view.errorShown);
+    }
 }

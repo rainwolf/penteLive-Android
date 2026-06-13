@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
@@ -18,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.PopupWindow;
@@ -32,23 +30,25 @@ import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.kobakei.ratethisapp.RateThisApp;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
+import be.submanifold.pentelive.net.BaseUrlProvider;
+import be.submanifold.pentelive.net.OkHttpPenteApi;
+import be.submanifold.pentelive.net.PenteApi;
+import be.submanifold.pentelive.net.PenteApiClient;
+import be.submanifold.pentelive.net.Result;
+import be.submanifold.pentelive.net.Session;
+import be.submanifold.pentelive.net.SharedPrefsSession;
+import be.submanifold.pentelive.net.StaticBaseUrlProvider;
+import be.submanifold.pentelive.net.WhosOnline;
+import be.submanifold.pentelive.net.WhosOnlinePresenter;
+import be.submanifold.pentelive.net.WhosOnlineView;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     private DashboardListAdapter listAdapter;
     private View viewWithOpenButtons = null;
     private PopupWindow popupWindow;
+    private PenteApi api;
+    private PenteApiClient client;
+    private PenteApiClient.Cancelable whosOnlineCancelable;
 
 
     @Override
@@ -71,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         myToolbar.setTitle(getString(R.string.home));
         setSupportActionBar(myToolbar);
         this.player = getIntent().getParcelableExtra("pentePlayer");
+
+        Session session = new SharedPrefsSession(getApplicationContext());
+        BaseUrlProvider baseUrl = new StaticBaseUrlProvider(PentePlayer.development);
+        this.api = new OkHttpPenteApi(session, baseUrl);
+        this.client = new PenteApiClient();
 
         ExpandableListView expandableList = findViewById(R.id.list);
         listAdapter = new DashboardListAdapter(this.player);
@@ -380,8 +388,19 @@ public class MainActivity extends AppCompatActivity {
                     WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
                     onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
 
-                    LoadWhosOnlineTask loadWhosOnlineTask = new LoadWhosOnlineTask(player, onlineListAdapter);
-                    loadWhosOnlineTask.execute((Void) null);
+                    WhosOnlinePresenter whosOnlinePresenter = new WhosOnlinePresenter(new WhosOnlineView() {
+                        @Override
+                        public void renderWhosOnline(WhosOnline data) {
+                            showWhosOnlinePopup(onlineListAdapter, data.rooms);
+                        }
+
+                        @Override
+                        public void showError(Result.Reason reason) {
+                            Toast.makeText(MainActivity.this, getString(R.string.error_connecting), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    if (whosOnlineCancelable != null) { whosOnlineCancelable.cancel(); }
+                    whosOnlineCancelable = client.enqueue(() -> api.whosOnline(), whosOnlinePresenter::onResult);
 
                     return true;
                 case R.id.live_games:
@@ -435,6 +454,14 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         MyApplication.activityPaused();
         (MainActivity.this).unregisterReceiver(mMessageReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (whosOnlineCancelable != null) {
+            whosOnlineCancelable.cancel();
+        }
     }
 
     private void refreshPlayer() {
@@ -512,156 +539,71 @@ public class MainActivity extends AppCompatActivity {
         snackbar.show();
     }
 
-    private class LoadWhosOnlineTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final WhosOnlineListAdapter listAdapter;
-        String dashboardString;
-        private final PentePlayer player;
-
-        LoadWhosOnlineTask(PentePlayer player, WhosOnlineListAdapter listAdapter) {
-            this.listAdapter = listAdapter;
-            this.player = player;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            try {
-//                URL url = new URL("https://www.pente.org/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                URL url = new URL("https://www.pente.org/gameServer/mobile/json/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/json/whosonlineandlive.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                }
-
-//                url = new URL("https://10.0.2.2/gameServer/mobile/index.jsp?name="+mUsername+"&password="+mPassword);
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-//                System.out.println("cookies: " +cookies);
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
+    private void showWhosOnlinePopup(WhosOnlineListAdapter listAdapter, List<JsonModels.RoomEntry> rooms) {
+        final Map<String, List<KothPlayer>> onlinePlayers = new HashMap<>();
+        int total = 0;
+        Map<String, String> onlinePlayerNames = new HashMap<>();
+        if (rooms != null) {
+            for (JsonModels.RoomEntry room : rooms) {
+                List<KothPlayer> playersList = new ArrayList<>();
+                if (room.players != null) {
+                    for (JsonModels.OnlinePlayerEntry entry : room.players) {
+                        KothPlayer kothPlayer = new KothPlayer(entry.name, String.valueOf(entry.rating), "", false, entry.tourneyWinner, entry.color);
+                        if (PentePlayer.loadAvatars && kothPlayer.getColor() != 0) {
+                            this.player.addUserAvatar(kothPlayer.getName());
                         }
+                        onlinePlayerNames.put(kothPlayer.getName(), "");
+                        total = total + 1;
+                        playersList.add(kothPlayer);
                     }
-                    connection.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
                 }
-//                connection.addRequestProperty("Cookie", "name2="+mUsername+"; password2="+mPassword+";");
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    return false;
-                }
+                onlinePlayers.put(room.name, playersList);
+            }
+        }
+        PentePlayer.setOnlinePlayerNames(onlinePlayerNames);
+        listAdapter.setOnlinePlayers(onlinePlayers);
+        Point size = new Point();
+        Display display = getWindowManager().getDefaultDisplay();
+        display.getSize(size);
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    output.append(line);
-                }
-                br.close();
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
+        final float scale = getResources().getDisplayMetrics().density;
+        popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
+        ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
+        onlineUsersListView.setDividerHeight(0);
+        onlineUsersListView.setAdapter(listAdapter);
+        for (int i = 0; i < onlinePlayers.size(); i++) {
+            onlineUsersListView.expandGroup(i);
+        }
+        onlineUsersListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+            return true; // This way the expander cannot be collapsed
+        });
+        onlineUsersListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
+            if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
+                String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                intent.putExtra("url", url);
+                startActivity(intent);
 
-                dashboardString = output.toString();
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
                 return false;
             }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-
-            if (success) {
-                final Map<String, List<KothPlayer>> onlinePlayers = new HashMap<>();
-                int total = 0;
-                Map<String, String> onlinePlayerNames = new HashMap<>();
-                Type listType = new TypeToken<List<JsonModels.RoomEntry>>() {
-                }.getType();
-                List<JsonModels.RoomEntry> rooms = new Gson().fromJson(dashboardString, listType);
-                if (rooms != null) {
-                    for (JsonModels.RoomEntry room : rooms) {
-                        List<KothPlayer> playersList = new ArrayList<>();
-                        if (room.players != null) {
-                            for (JsonModels.OnlinePlayerEntry entry : room.players) {
-                                KothPlayer kothPlayer = new KothPlayer(entry.name, String.valueOf(entry.rating), "", false, entry.tourneyWinner, entry.color);
-                                if (PentePlayer.loadAvatars && kothPlayer.getColor() != 0) {
-                                    this.player.addUserAvatar(kothPlayer.getName());
-                                }
-                                onlinePlayerNames.put(kothPlayer.getName(), "");
-                                total = total + 1;
-                                playersList.add(kothPlayer);
-                            }
-                        }
-                        onlinePlayers.put(room.name, playersList);
-                    }
-                }
-                PentePlayer.setOnlinePlayerNames(onlinePlayerNames);
-                listAdapter.setOnlinePlayers(onlinePlayers);
-                Point size = new Point();
-                Display display = getWindowManager().getDefaultDisplay();
-                display.getSize(size);
-
-                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
-//                popUpView.setBackgroundColor(Color.BLUE);
-//                popupWindow = new PopupWindow(popUpView, size.x*4/5, ViewGroup.LayoutParams.WRAP_CONTENT, true );
-                final float scale = getResources().getDisplayMetrics().density;
-                popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
-//                popupWindow = new PopupWindow(popUpView, size.x*4/5, (int) ((30+(onlinePlayers.size())*44)*scale), true );
-//                System.out.println("totaaaaaaaal "+total);
-//                popupWindow.setBackgroundDrawable(Andr);
-                ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
-                onlineUsersListView.setDividerHeight(0);
-                onlineUsersListView.setAdapter(listAdapter);
-                for (int i = 0; i < onlinePlayers.size(); i++) {
-                    onlineUsersListView.expandGroup(i);
-                }
-                onlineUsersListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
-                    return true; // This way the expander cannot be collapsed
-                });
-                onlineUsersListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-                    KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
-                    if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
-                        String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                        Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                        intent.putExtra("url", url);
-                        startActivity(intent);
-
-                        return false;
-                    }
-                    if (player.getPlayerName().equals(onlinePlayer.getName())) {
-                        return false;
-                    }
-                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                    intent.putExtra("opponent", onlinePlayer.getName());
-                    startActivity(intent);
-
-                    return true;
-                });
-
-//                if (totalHeight > size.y*4/5) {
-//                    popupWindow.setHeight(size.y*4/5);
-//                }
-
-                popupWindow.setFocusable(true);
-//                popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
-                popupWindow.setOutsideTouchable(true);
-                popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
-                findViewById(R.id.list).setAlpha(0.05f);
-
-//                listAdapter.updateList();
+            if (player.getPlayerName().equals(onlinePlayer.getName())) {
+                return false;
             }
-        }
+            Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+            intent.putExtra("opponent", onlinePlayer.getName());
+            startActivity(intent);
 
-        @Override
-        protected void onCancelled() {
-        }
+            return true;
+        });
+
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
+        popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
+        findViewById(R.id.list).setAlpha(0.05f);
     }
 
     private Drawable buildCounterDrawable(int count, int backgroundImageId) {
