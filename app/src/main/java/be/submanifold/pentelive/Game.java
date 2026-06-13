@@ -27,11 +27,18 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import be.submanifold.pente.rules.BoardState;
+import be.submanifold.pente.rules.DefaultPenteRules;
+import be.submanifold.pente.rules.PenteRules;
+import be.submanifold.pente.rules.Variant;
+import be.submanifold.pente.rules.Variants;
 
 
 /**
@@ -53,8 +60,8 @@ public class Game implements Parcelable {
     private boolean mActive;
     public boolean dPenteChoice;
 
-    public int whiteCaptures;
-    public int blackCaptures;
+    private int whiteCaptures;
+    private int blackCaptures;
 
     private boolean canHide, canUnHide;
 
@@ -73,8 +80,21 @@ public class Game implements Parcelable {
 
     public boolean swap2Choice = false;
 
+    /**
+     * Variants proven bit-identical to the legacy replay workers by
+     * {@code PenteRulesEquivalenceTest} (500 random games each). Only these —
+     * and only when {@link #rated()} is false — are delegated to {@link #rules}.
+     * Every other variant / any rated game keeps the legacy replay path.
+     */
+    private static final EnumSet<Variant> ALLOWLIST = EnumSet.of(
+            Variant.PENTE, Variant.KERYO_PENTE, Variant.POOF_PENTE,
+            Variant.O_PENTE, Variant.GOMOKU, Variant.CONNECT6);
 
-    public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    private final PenteRules rules = new DefaultPenteRules();
+    private BoardState state;
+
+
+    private byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -261,6 +281,22 @@ public class Game implements Parcelable {
 
     public int getUntilMove() {
         return untilMove;
+    }
+
+    /**
+     * The board position computed by the most recent replay. Mirrors the public
+     * {@code abstractBoard} / {@code whiteCaptures} / {@code blackCaptures}
+     * fields; populated by both the delegated (engine) and legacy replay paths.
+     */
+    public BoardState getState() {
+        if (state == null) {
+            // Before any replay, mirror the inline-initialised empty board so the
+            // first onDraw() sees a 19x19 zero position — the invariant the old
+            // BoardView relied on when it aliased game.abstractBoard in setGame().
+            state = new BoardState(abstractBoard, whiteCaptures, blackCaptures,
+                    gridSize, -1, null, false, false, -1);
+        }
+        return state;
     }
 
     public void setUntilMove(int untilMove) {
@@ -897,24 +933,18 @@ public class Game implements Parcelable {
     }
 
     public boolean isConnect6() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return getGameType().contains("Connect6");
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isConnect6();
     }
 
     public boolean isGomoku() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return getGameType().contains("Gomoku");
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isGomoku();
     }
 
     public boolean isDPente() {
-        if (getGameType() == null) {
-            return false;
-        }
-        return (getGameType().contains("D-Pente") || getGameType().contains("DK-Pente"));
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isDPente();
     }
 
     public void parseGame(BoardView boardView) {
@@ -1239,7 +1269,7 @@ public class Game implements Parcelable {
         }
 
         this.untilMove = this.mMovesList.size();
-        replayGameUntilMove(abstractBoard, boardView);
+        replayGameUntilMove(boardView);
 
         if (boardView != null) {
             boardView.invalidate();
@@ -1280,50 +1310,58 @@ public class Game implements Parcelable {
 
     private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
-    public void replayGameUntilMove(byte[][] abstractBoard, BoardView boardView) {
+    public void replayGameUntilMove(BoardView boardView) {
         if (mMovesList == null) {
             return;
         }
+        // For allowlisted, non-rated variants the board is recomputed by the
+        // PenteRules engine (proven bit-identical) instead of the legacy worker;
+        // every other variant / any rated game still runs its legacy worker.
+        // Background-colour selection is unchanged either way.
+        final Variant v = Variants.fromGameType(getGameType());
+        final boolean delegable = v != null && !rated() && ALLOWLIST.contains(v);
         if (getGameType().equals("Gomoku") || getGameType().equals("Speed Gomoku")) {
             boardView.setBackgroundColor(boardView.gomokuColor);
-            replayGomokuGame(untilMove);
+            if (!delegable) replayGomokuGame(untilMove);
         } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
-            replayPenteGame(untilMove);
+            if (!delegable) replayPenteGame(untilMove);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
             boardView.setBackgroundColor(boardView.boatPenteColor);
-            replayPenteGame(untilMove);
+            if (!delegable) replayPenteGame(untilMove);
         } else if (getGameType().equals("Keryo-Pente") || getGameType().equals("Speed Keryo-Pente")) {
             boardView.setBackgroundColor(boardView.keryoPenteColor);
-            replayKeryoPenteGame(untilMove);
+            if (!delegable) replayKeryoPenteGame(untilMove);
         } else if (getGameType().equals("Connect6") || getGameType().equals("Speed Connect6")) {
             boardView.setBackgroundColor(boardView.connect6Color);
-            replayConnect6Game(untilMove);
+            if (!delegable) replayConnect6Game(untilMove);
         } else if (getGameType().equals("G-Pente") || getGameType().equals("Speed G-Pente")) {
             boardView.setBackgroundColor(boardView.gPenteColor);
-            replayGPenteGame(untilMove);
+            if (!delegable) replayGPenteGame(untilMove);
         } else if (getGameType().equals("Poof-Pente") || getGameType().equals("Speed Poof-Pente")) {
             boardView.setBackgroundColor(boardView.poofPenteColor);
-            replayPoofPenteGame(untilMove);
+            if (!delegable) replayPoofPenteGame(untilMove);
         } else if (getGameType().equals("D-Pente") || getGameType().equals("Speed D-Pente")) {
             boardView.setBackgroundColor(boardView.dPenteColor);
-            replayPenteGame(untilMove);
+            if (!delegable) replayPenteGame(untilMove);
         } else if (getGameType().equals("DK-Pente") || getGameType().equals("Speed DK-Pente")) {
             boardView.setBackgroundColor(boardView.dkeryoColor);
-            replayKeryoPenteGame(untilMove);
+            if (!delegable) replayKeryoPenteGame(untilMove);
         } else if (isGo()) {
             boardView.setBackgroundColor(boardView.goColor);
-            replayGoGame(untilMove);
+            if (!delegable) replayGoGame(untilMove);
         } else if (getGameType().contains("O-Pente")) {
             boardView.setBackgroundColor(boardView.oPenteColor);
-            replayOPenteGame(untilMove);
+            if (!delegable) replayOPenteGame(untilMove);
         } else if (getGameType().contains("Swap2-Pente")) {
             boardView.setBackgroundColor(boardView.swap2PenteColor);
-            replayPenteGame(untilMove);
+            if (!delegable) replayPenteGame(untilMove);
         } else if (getGameType().contains("Swap2-Keryo")) {
             boardView.setBackgroundColor(boardView.swap2KeryoColor);
-            replayKeryoPenteGame(untilMove);
+            if (!delegable) replayKeryoPenteGame(untilMove);
         }
+
+        finishBoardState(untilMove, v, delegable);
 
         movesString = "";
         if (isConnect6()) {
@@ -1375,6 +1413,55 @@ public class Game implements Parcelable {
         }
     }
 
+    /**
+     * Finalises {@link #abstractBoard}, {@link #whiteCaptures},
+     * {@link #blackCaptures} and {@link #state} for {@code moves[0..until)}.
+     *
+     * <p>Headless (no {@code BoardView} / rendering) so it can be exercised in
+     * plain JVM unit tests. {@link #replayGameUntilMove} calls this after running
+     * the per-variant background-colour selection and (for non-delegable games)
+     * the legacy replay worker.
+     *
+     * <ul>
+     *   <li><b>delegable</b> — recompute the board via the {@link PenteRules}
+     *       engine and mirror the result into the public fields. The engine output
+     *       is bit-identical to the legacy worker for these variants, so this is
+     *       observationally equivalent. The legacy worker is NOT run for the board
+     *       in this case (the caller gates it off), so the one side effect that
+     *       lived at the tail of {@code replayPenteGame(int)} — deactivating a
+     *       finished local game vs the computer — is reproduced here verbatim.</li>
+     *   <li><b>legacy</b> — the worker has already updated the public fields; we
+     *       merely snapshot them into {@code state}.</li>
+     * </ul>
+     */
+    private void finishBoardState(int until, Variant v, boolean delegable) {
+        if (delegable) {
+            BoardState s = rules.replay(getMovesList(), v, until);
+            this.state = s;
+            this.whiteCaptures = s.whiteCaptures;
+            this.blackCaptures = s.blackCaptures;
+            for (int i = 0; i < gridSize; i++) {
+                for (int j = 0; j < gridSize; j++) {
+                    this.abstractBoard[i][j] = s.board[i][j];
+                }
+            }
+            // Verbatim reproduction of the side effect at the tail of
+            // replayPenteGame(int): only the non-speed "Pente" worker ran it,
+            // and only against a "computer" opponent.
+            if (v == Variant.PENTE && mOpponentName.equals("computer") && mGameType.equals("Pente")) {
+                if (whiteCaptures == 10 || blackCaptures == 10
+                        || detectPente((byte) (2 - (mMovesList.size() % 2)), mMovesList.get(mMovesList.size() - 1))) {
+                    mActive = false;
+                }
+            }
+        } else {
+            int lastMove = (until > 0 && until <= mMovesList.size())
+                    ? mMovesList.get(until - 1) : -1;
+            this.state = new BoardState(this.abstractBoard, whiteCaptures, blackCaptures,
+                    gridSize, lastMove, null, false, false, -1);
+        }
+    }
+
     public void replayGame(byte moveI, byte moveJ, BoardView boardView, byte moveG, byte moveH) {
         if (mMovesList == null) {
             return;
@@ -1414,6 +1501,12 @@ public class Game implements Parcelable {
             boardView.setBackgroundColor(boardView.swap2KeryoColor);
             replayKeryoGame(moveI, moveJ, moveG, moveH);
         }
+
+        // Keep getState() current. This incremental path keeps its unchanged
+        // legacy board logic (no engine delegation); we just snapshot the fields
+        // the worker produced. lastMove is the just-placed live move.
+        this.state = new BoardState(this.abstractBoard, whiteCaptures, blackCaptures,
+                gridSize, moveI * gridSize + moveJ, null, false, false, -1);
 
         if (boardView != null) {
             boardView.invalidate();
