@@ -93,3 +93,21 @@ architecture glossary. Keep these names consistent across code, reviews, and des
   the JSON endpoints. Base URL to `BuildConfig`/flavors is a follow-up behind `BaseUrlProvider`.
 - **Open integration point**: OkHttp `CookieJar` owns the session, so in-app `WebView`s need a
   one-way sync of the session cookie into `webkit.CookieManager`.
+
+## Known legacy quirks preserved (candidates for a deliberate, separate fix)
+
+The PenteRules extraction is behavior-preserving — it reproduces the old `Game` logic exactly,
+bugs included, so fixes can be made later as isolated, reviewable changes rather than smuggled
+into a refactor. Two quirks were found and deliberately preserved:
+
+- **`detectPente` misses edge-0 wins** (`Game.java:2227`+): the five-in-a-row walk guards
+  `i > 0 && i < 19 && j > 0 && j < 19` on *both* coordinates in every direction, so a horizontal
+  five lying on **row 0** or a vertical five on **column 0** is never detected (rows/cols 18 *are*
+  detected — asymmetric). Only affects computer-opponent Pente win declaration (server is
+  authoritative for human games). Preserved in `DefaultPenteRules.isWin`; `WinDetectionTest`
+  documents it (`...NotDetectedLegacyQuirk`).
+- **`detectKeryoPoof` had a latent `AIOOBE`** (`Game.java` ~2118): a branch guarded `j+2<n` while
+  accessing `[i][j+3]`. This one WAS corrected to `j+3<n` in `DefaultPenteRules` because the
+  pattern needs an off-board stone at the boundary, so the fix is provably behavior-preserving on
+  every valid board (it only removes a crash) — unlike the edge-0 quirk, which would change real
+  outcomes and so was left intact.
