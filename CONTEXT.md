@@ -111,3 +111,20 @@ into a refactor. Two quirks were found and deliberately preserved:
   pattern needs an off-board stone at the boundary, so the fix is provably behavior-preserving on
   every valid board (it only removes a crash) — unlike the edge-0 quirk, which would change real
   outcomes and so was left intact.
+- **`Game.isSwap2()` misses "Speed Swap2" games** (`startsWith("Swap2")`): Speed Swap2-Pente /
+  Swap2-Keryo are not recognized as Swap2. `Variants` classifies them correctly (`contains("Swap2-")`),
+  so `Game.isSwap2()` was deliberately NOT rerouted through `Variants` (it would change behavior);
+  `VariantPredicateEquivalenceTest` pins the divergence. Candidate for a deliberate fix.
+- **`G_PENTE` is excluded from engine delegation**: `replayGPenteGame` applies a move-2 cross-restriction
+  (`-1` cells) the engine doesn't model; differential testing (`PenteRulesEquivalenceTest`) found it,
+  so G-Pente keeps the legacy replay path.
+
+## PenteRules wiring status (delivered)
+
+The engine is built, tested, and wired in for the **proven-equivalent, non-rated** variants only —
+**PENTE, KERYO_PENTE, POOF_PENTE, O_PENTE, GOMOKU, CONNECT6** (`Game` delegates to `PenteRules.replay`
+behind an allowlist + `!rated()` gate, verified bit-identical over 500 random games/variant). All other
+variants (G-Pente, Swap2, D-Pente, Go, and any rated game) retain the legacy replay path. The legacy
+`replay*/detect*` methods are therefore NOT deleted yet — that awaits broader characterization
+(Go/Swap2/rated) or dedicated `GoRules`/swap support. `Game`'s board/capture fields are now private,
+exposed via `getState()`; views pull the immutable `BoardState` (aliasing trap closed).
