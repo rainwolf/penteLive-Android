@@ -462,6 +462,9 @@ public class MainActivity extends AppCompatActivity {
         if (whosOnlineCancelable != null) {
             whosOnlineCancelable.cancel();
         }
+        if (client != null) {
+            client.shutdown();
+        }
     }
 
     private void refreshPlayer() {

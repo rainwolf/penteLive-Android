@@ -38,6 +38,10 @@ public final class PenteApiClient {
         this.main = main;
     }
 
+    public void shutdown() {
+        worker.shutdown();
+    }
+
     public <T> Cancelable enqueue(final Callable<Result<T>> call, final Cb<T> cb) {
         final Task<T> task = new Task<>(call, cb);
         worker.execute(task);
