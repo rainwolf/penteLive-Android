@@ -43,7 +43,6 @@ public class BoardView extends View {
             swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint shadowPaint = makePaint(Color.BLACK);
-    public byte[][] abstractBoard;
 
     private float size;
     private float scaling = 1;
@@ -84,7 +83,6 @@ public class BoardView extends View {
 
     public void setGame(Game game) {
         this.game = game;
-        abstractBoard = game.abstractBoard;
 //        this.game.parseGame(this);
     }
 
@@ -140,7 +138,7 @@ public class BoardView extends View {
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
             if (!game.isConnect6() && !game.isGomoku()) {
-                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures);
+                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.getState().blackCaptures + " - \u25EF x " + game.getState().whiteCaptures);
             }
             if (scaling == 1) {
                 if (textView == null) {
@@ -308,10 +306,10 @@ public class BoardView extends View {
         playedMove = gridSize * stoneI + stoneJ;
         if (game.isActive()) {
             if (game.isGoMarkStones()) {
-                if (!(abstractBoard[stoneI][stoneJ] != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
+                if (!(game.getState().cell(stoneI, stoneJ) != 0 || game.getGoDeadStonesByPlayer().get(1).contains(playedMove) || game.getGoDeadStonesByPlayer().get(2).contains(playedMove))) {
                     playedMove = -1;
                 }
-            } else if (abstractBoard[stoneI][stoneJ] != 0 || playedMove == game.koMove ||
+            } else if (game.getState().cell(stoneI, stoneJ) != 0 || playedMove == game.koMove ||
                     playedMove == dPenteMove1 || playedMove == dPenteMove2 ||
                     playedMove == dPenteMove3 ||
                     playedMove == swap2Move1 ||
@@ -351,7 +349,7 @@ public class BoardView extends View {
                 }
             }
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            if (!game.isGoMarkStones() && (playedMove == -1 || abstractBoard[stoneI][stoneJ] != 0)) {
+            if (!game.isGoMarkStones() && (playedMove == -1 || game.getState().cell(stoneI, stoneJ) != 0)) {
                 if (game.isGo()) {
                     ((Button) parentLayout.findViewById(R.id.submitButton)).setText(passStr);
                 } else {
@@ -488,9 +486,10 @@ public class BoardView extends View {
             canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
             canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
         }
+        byte[][] board = game.getState().board;
         for (byte i = 0; i < gridSize; i++) {
             for (byte j = 0; j < gridSize; j++) {
-                drawStone(canvas, i, j, abstractBoard[i][j]);
+                drawStone(canvas, i, j, board[i][j]);
             }
         }
         drawRedDot(canvas);
@@ -772,17 +771,17 @@ public class BoardView extends View {
     }
 
     private SpannableStringBuilder getCapturesString() {
-//        String str = "\u2B24 x " + game.blackCaptures + " - \u25EF x " + game.whiteCaptures;
+//        String str = "\u2B24 x " + game.getState().blackCaptures + " - \u25EF x " + game.getState().whiteCaptures;
         SpannableStringBuilder sb = new SpannableStringBuilder("\u2B24");
         float size = 1.5f;
         sb.setSpan(new RelativeSizeSpan(size), 0, 1, 0);
 //        Drawable icon = null;
 //        icon = ContextCompat.getDrawable(boardActivity, R.drawable.black_nobg);
 //        sb.setSpan(icon, 0, 1, 0);
-        sb.append(" x " + game.blackCaptures + " -  \u25EF");
+        sb.append(" x " + game.getState().blackCaptures + " -  \u25EF");
 //        icon = ContextCompat.getDrawable(boardActivity, R.drawable.white_nobg);
         sb.setSpan(new RelativeSizeSpan(size), sb.length() - 1, sb.length(), 0);
-        sb.append(" x " + game.whiteCaptures);
+        sb.append(" x " + game.getState().whiteCaptures);
         return sb;
     }
 

@@ -389,11 +389,11 @@ public class BoardActivity extends AppCompatActivity {
             } else {
                 game.setUntilMove(game.getUntilMove() - 1);
             }
-            game.replayGameUntilMove(board.abstractBoard, board);
+            game.replayGameUntilMove(board);
             board.setReplayed(false);
         }
         ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
-//                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
+//                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.getState().blackCaptures + "\n\u25EF x " + game.getState().whiteCaptures);
         board.playedMove = -1;
 
         if (game.messages != null && game.messages.get(game.getUntilMove()) != null) {
@@ -413,9 +413,9 @@ public class BoardActivity extends AppCompatActivity {
             } else {
                 game.setUntilMove(game.getUntilMove() + 1);
             }
-            game.replayGameUntilMove(board.abstractBoard, board);
+            game.replayGameUntilMove(board);
             board.setReplayed(false);
-//                    ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.blackCaptures + "\n\u25EF x " + game.whiteCaptures);
+//                    ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.getState().blackCaptures + "\n\u25EF x " + game.getState().whiteCaptures);
         }
         if (game.messages.get(game.getUntilMove()) != null) {
             messageIcon.startAnimation(rotation);

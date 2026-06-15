@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import be.submanifold.pente.rules.Variant;
+import be.submanifold.pente.rules.Variants;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.R;
 
@@ -183,7 +185,8 @@ public class Table {
     }
 
     public boolean isGo() {
-        return game > 18 && game < 25;
+        Variant v = Variants.fromGameId(game);
+        return v != null && v.isGo();
     }
 
     public void addMove(int move) {
@@ -264,11 +267,13 @@ public class Table {
     }
 
     public boolean isDPente() {
-        return (game == 7 || game == 8 || game == 17 || game == 18);
+        Variant v = Variants.fromGameId(game);
+        return v != null && v.isDPente();
     }
 
     public boolean isSwap2() {
-        return (game == 27 || game == 28 || game == 29 || game == 30);
+        Variant v = Variants.fromGameId(game);
+        return v != null && v.isSwap2();
     }
 
     public int currentColor() {
@@ -1701,7 +1706,7 @@ public class Table {
             }
         }
         if (((i - 2) > -1) && ((j - 2) > -1) && ((i + 2) < 19) && ((j + 2) < 19)) { // up right
-            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i + 1][j - 1] == myColor) {
+            if (abstractBoard[i + 1][j - 1] == myColor && abstractBoard[i - 1][j + 1] == myColor) {
                 if ((abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
                     abstractBoard[i + 1][j - 1] = 0;
                     abstractBoard[i - 1][j + 1] = 0;

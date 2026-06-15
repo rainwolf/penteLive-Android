@@ -207,7 +207,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(sb);
 
         if (player.isCanBeChallenged()) {
-            convertView.setBackgroundColor(Color.rgb(222, 236, 222));
+            convertView.setBackgroundColor(convertView.getContext().getColor(R.color.online_row_background));
         }
         return convertView;
     }

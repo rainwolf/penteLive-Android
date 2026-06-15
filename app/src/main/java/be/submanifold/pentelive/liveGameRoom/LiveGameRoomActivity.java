@@ -2,19 +2,11 @@ package be.submanifold.pentelive.liveGameRoom;
 
 import static be.submanifold.pentelive.PentePlayer.development;
 
-import be.submanifold.pentelive.*;
-
-import android.content.DialogInterface;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -22,6 +14,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,6 +48,11 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import be.submanifold.pentelive.MyApplication;
+import be.submanifold.pentelive.PentePlayer;
+import be.submanifold.pentelive.PrefUtils;
+import be.submanifold.pentelive.R;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 

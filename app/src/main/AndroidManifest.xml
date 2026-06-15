@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:dist="http://schemas.android.com/apk/distribution"
-    android:versionCode="195"
-    android:versionName="2.10.1">
+    android:versionCode="200"
+    android:versionName="2.10.7">
 
     <dist:module dist:instant="true" />
 
