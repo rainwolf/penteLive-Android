@@ -346,31 +346,33 @@ public class LiveTableFragment extends Fragment {
             long seconds = incrementalScnds;
             long tenths = -1;
             if (timer1.get("millis") != null) {
-                minutes = timer1.get("millis") / 1000 / 60;
-                seconds = timer1.get("millis") / 1000 % 60;
+                long millis1 = Math.max(0, timer1.get("millis"));
+                minutes = millis1 / 1000 / 60;
+                seconds = millis1 / 1000 % 60;
                 if (minutes == 0 && seconds < 12) {
-                    tenths = timer1.get("millis") / 100 % 10;
+                    tenths = millis1 / 100 % 10;
                 }
             }
             if (tenths > -1) {
-                p1Timer.setText(minutes + ":" + seconds + "." + tenths);
+                p1Timer.setText(String.format(java.util.Locale.US, "%d:%02d.%d", minutes, seconds, tenths));
             } else {
-                p1Timer.setText(minutes + ":" + seconds);
+                p1Timer.setText(String.format(java.util.Locale.US, "%d:%02d", minutes, seconds));
             }
             minutes = initialMnts;
             seconds = incrementalScnds;
             tenths = -1;
             if (timer2.get("millis") != null) {
-                minutes = timer2.get("millis") / 1000 / 60;
-                seconds = timer2.get("millis") / 1000 % 60;
+                long millis2 = Math.max(0, timer2.get("millis"));
+                minutes = millis2 / 1000 / 60;
+                seconds = millis2 / 1000 % 60;
                 if (minutes == 0 && seconds < 12) {
-                    tenths = timer2.get("millis") / 100 % 10;
+                    tenths = millis2 / 100 % 10;
                 }
             }
             if (tenths > -1) {
-                p2Timer.setText(minutes + ":" + seconds + "." + tenths);
+                p2Timer.setText(String.format(java.util.Locale.US, "%d:%02d.%d", minutes, seconds, tenths));
             } else {
-                p2Timer.setText(minutes + ":" + seconds);
+                p2Timer.setText(String.format(java.util.Locale.US, "%d:%02d", minutes, seconds));
             }
         }
         capturesTextView.setText(table.getCapturesText(capturesTextView.getLineHeight()));
@@ -667,16 +669,17 @@ public class LiveTableFragment extends Fragment {
             long seconds = table.getTimer().get("incrementalSeconds");
             long tenths = -1;
             if (timer.get("millis") != null) {
-                minutes = timer.get("millis") / 1000 / 60;
-                seconds = timer.get("millis") / 1000 % 60;
+                long millisVal = Math.max(0, timer.get("millis"));
+                minutes = millisVal / 1000 / 60;
+                seconds = millisVal / 1000 % 60;
                 if (minutes == 0 && seconds < 12) {
-                    tenths = timer.get("millis") / 100 % 10;
+                    tenths = millisVal / 100 % 10;
                 }
             }
             if (tenths > -1) {
-                screenTimer.setText(minutes + ":" + seconds + "." + tenths);
+                screenTimer.setText(String.format(java.util.Locale.US, "%d:%02d.%d", minutes, seconds, tenths));
             } else {
-                screenTimer.setText(minutes + ":" + seconds);
+                screenTimer.setText(String.format(java.util.Locale.US, "%d:%02d", minutes, seconds));
             }
         }
     }

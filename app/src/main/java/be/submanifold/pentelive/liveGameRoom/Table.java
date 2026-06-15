@@ -392,9 +392,12 @@ public class Table {
             gameState.timers.get(2).put("millis", millis);
             gameState.timers.get(1).remove("startTime");
             gameState.timers.get(2).remove("startTime");
+            gameState.timers.get(1).remove("startMillis");
+            gameState.timers.get(2).remove("startMillis");
         } else if (millis > 0) {
             Map<String, Long> timer = gameState.timers.get(currentPlayer);
             timer.remove("startTime");
+            timer.remove("startMillis");
             timer.put("millis", millis);
         } else {
             if (!this.shouldTimerRun()) {
