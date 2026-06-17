@@ -391,7 +391,7 @@ public class BoardView extends View {
         } else {
             playedMove = -1;
         }
-        if (renjuBoxRadius > 0 && playedMove != -1 &&
+        if (game.isRenju() && renjuBoxRadius > 0 && playedMove != -1 &&
                 (Math.abs(stoneI - 7) > renjuBoxRadius || Math.abs(stoneJ - 7) > renjuBoxRadius)) {
             playedMove = -1;
         }
