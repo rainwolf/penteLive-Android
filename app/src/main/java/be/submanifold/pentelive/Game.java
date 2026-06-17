@@ -80,6 +80,10 @@ public class Game implements Parcelable {
 
     public boolean swap2Choice = false;
 
+    public String renjuPhase = null;
+    public int[] renjuOffers = null;
+    public Integer renjuSwaps = null;
+
     /**
      * Variants proven bit-identical to the legacy replay workers by
      * {@code PenteRulesEquivalenceTest} (500 random games each). Only these —
@@ -1023,6 +1027,10 @@ public class Game implements Parcelable {
                 go = true;
             }
         }
+        if (isRenju()) {
+            this.gridSize = 15;
+            boardView.gridSize = 15;
+        }
         this.mMovesList = new ArrayList<Integer>();
         if (mGameJson.moves != null && !mGameJson.moves.isEmpty()) {
             String[] movesString = mGameJson.moves.split(",");
@@ -1036,6 +1044,17 @@ public class Game implements Parcelable {
             this.dPenteChoice = true;
             if (isSwap2()) {
                 this.swap2Choice = true;
+            }
+        }
+        if (mGameJson.renjuPhase != null) {
+            this.renjuPhase = mGameJson.renjuPhase;
+            this.renjuSwaps = mGameJson.renjuSwaps;
+            if (mGameJson.renjuOffers != null && !mGameJson.renjuOffers.isEmpty()) {
+                String[] parts = mGameJson.renjuOffers.split(",");
+                this.renjuOffers = new int[parts.length];
+                for (int i = 0; i < parts.length; i++) {
+                    this.renjuOffers[i] = Integer.parseInt(parts[i].trim());
+                }
             }
         }
         if (mGameJson.cancel != null && getOpponentName().equals(mGameJson.cancel.name)) {
@@ -1337,6 +1356,9 @@ public class Game implements Parcelable {
         if (getGameType().equals("Gomoku") || getGameType().equals("Speed Gomoku")) {
             boardView.setBackgroundColor(boardView.gomokuColor);
             if (!delegable) replayGomokuGame(untilMove);
+        } else if (getGameType().contains("Renju")) {
+            boardView.setBackgroundColor(boardView.renjuColor);
+            if (!delegable) replayRenjuGame(untilMove);
         } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             if (!delegable) replayPenteGame(untilMove);
@@ -1481,7 +1503,10 @@ public class Game implements Parcelable {
             return;
         }
 
-        if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
+        if (getGameType().contains("Renju")) {
+            boardView.setBackgroundColor(boardView.renjuColor);
+            replayRenjuGame(mMovesList.size());
+        } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
