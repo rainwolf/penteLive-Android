@@ -1548,6 +1548,15 @@ public class Game implements Parcelable {
         }
     }
 
+    private void replayRenjuGame(int until) {
+        resetAbstractBoard();
+        for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
+            byte color = (byte) (2 - (i % 2)); // black-first: i=0 -> 2 (black)
+            int move = mMovesList.get(i), moveI = move / gridSize, moveJ = move % gridSize;
+            abstractBoard[moveI][moveJ] = color;
+        }
+    }
+
     private void replayPenteGame(int until) {
         resetAbstractBoard();
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
