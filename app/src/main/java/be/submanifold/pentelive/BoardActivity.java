@@ -132,6 +132,9 @@ public class BoardActivity extends AppCompatActivity {
                     // only UI: no instructional toast — the green box overlay shows the legal area.
                     board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
                 }
+                // Re-draw so styleRenjuSubmit renders the initial greyed/disabled submit
+                // ("submit 0/10" for offer collection, or "submit" for single placement).
+                board.invalidate();
                 return;
             }
             if (game.isSwap2()) {
@@ -281,37 +284,20 @@ public class BoardActivity extends AppCompatActivity {
                 String moves = "";
                 String renjuAction = null;
                 if (game.isRenju() && board.renjuOfferMode) {
-                    // move-4 decline OR post-take-over BRANCH: place 1 (Branch A) or 10
-                    // (Branch B) candidate stones, submitted as a single `move`. The branch
-                    // is inferred server-side from the stone count.
+                    // move-4 decline OR post-take-over BRANCH: a single Branch-A stone (n==1, in the
+                    // 9x9 centre) or a full Branch-B set of ten offers (n==10), submitted as one
+                    // `move`; the server infers the branch from the count. Submit is gated ENABLED
+                    // only at a complete, valid count (BoardView.styleRenjuSubmit), so the old
+                    // count/box/offer-set validation toasts are unreachable and removed.
                     java.util.List<Integer> picks = board.renjuPicks;
                     int n = (picks == null) ? 0 : picks.size();
-                    int gs = game.getGridSize();
-                    int c = gs / 2;
-                    if (n == 1) {
-                        int m = picks.get(0);
-                        if (Math.abs(m % gs - c) > 4 || Math.abs(m / gs - c) > 4) {
-                            // Branch A: the single (continue) stone must be in the 9x9 center.
-                            Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        moves = "" + m;
-                        renjuAction = "move";
-                    } else if (n == 10) {
-                        int[] arr = new int[picks.size()];
-                        for (int k = 0; k < picks.size(); k++) arr[k] = picks.get(k);
-                        if (!be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
-                            Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        StringBuilder sb = new StringBuilder();
-                        for (int k = 0; k < picks.size(); k++) { if (k > 0) sb.append(','); sb.append(picks.get(k)); }
-                        moves = sb.toString();
-                        renjuAction = "move";
-                    } else {
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_place_1_or_10), Toast.LENGTH_LONG).show();
-                        return;
+                    if (n != 1 && n != 10) {
+                        return; // guarded: submit is disabled until a valid count
                     }
+                    StringBuilder sb = new StringBuilder();
+                    for (int k = 0; k < picks.size(); k++) { if (k > 0) sb.append(','); sb.append(picks.get(k)); }
+                    moves = sb.toString();
+                    renjuAction = "move";
                 } else if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
                     // windows 1-3: decline the swap and place your own next stone (one request).
                     if (board.playedMove == -1) {
@@ -329,11 +315,11 @@ public class BoardActivity extends AppCompatActivity {
                     }
                     moves = "" + board.playedMove; // plain move, renjuAction stays null
                 } else if (game.isRenju() && "SELECTION".equals(game.renjuPhase)) {
-                    // atomic 2-stone select: chosen offered black 5th + a white 6th.
+                    // atomic 2-stone select: chosen offered black 5th + a white 6th. Submit is
+                    // enabled only once both are chosen, so the old "select two" toast is removed.
                     java.util.List<Integer> sel = board.renjuSelection;
                     if (sel == null || sel.size() != 2) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_select_two), Toast.LENGTH_LONG).show();
-                        return;
+                        return; // guarded: submit is disabled until both stones are chosen
                     }
                     moves = sel.get(0) + "," + sel.get(1);
                     renjuAction = "select";

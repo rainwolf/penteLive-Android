@@ -224,6 +224,13 @@ public class BoardView extends View {
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
             }
+            // Renju opening: drive the submit button as the greyed-until-valid feedback surface
+            // for every active non-decision phase (offer collection, SELECTION, single placement).
+            // The SWAP/BRANCH decision block above returns early while the choice buttons are up,
+            // so reaching here implies a non-decision phase — styling here never greys a decision.
+            if (game.isRenju() && game.isActive()) {
+                styleRenjuSubmit();
+            }
             if (!game.isActive()) {
                 return;
             }
@@ -598,6 +605,85 @@ public class BoardView extends View {
                 }
             }
         }
+    }
+
+    // Renju opening: drive the submit button as a greyed-until-valid feedback surface, matching
+    // iOS. Called from onDraw for every active non-decision renju phase (the SWAP/BRANCH decision
+    // block returns earlier while the choice buttons are up, so we never grey those). Submit stays
+    // VISIBLE but disabled (alpha 0.5) until the current input is a complete, valid move, then
+    // enabled (alpha 1); its text reflects exactly what will be submitted.
+    private void styleRenjuSubmit() {
+        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+        Button submit = parentLayout.findViewById(R.id.submitButton);
+        if (submit == null) {
+            return;
+        }
+        if (renjuOfferMode) {
+            // move-4 decline / post-take-over BRANCH: collect 1 (Branch A) or 10 (Branch B) stones,
+            // submitted as one `move`; the server infers the branch from the count. Branch A is a
+            // single centre stone, so it is enabled at n==1 (otherwise it would be unsubmittable on
+            // Android, which unlike iOS has no separate Branch-A/B buttons).
+            int n = (renjuPicks == null) ? 0 : renjuPicks.size();
+            int c = gridSize / 2;
+            if (n == 1) {
+                int m = renjuPicks.get(0);
+                boolean inBox = Math.abs(m % gridSize - c) <= 4 && Math.abs(m / gridSize - c) <= 4;
+                if (inBox) {
+                    setSubmitEnabled(submit, true);
+                    submit.setText(submitStr + ": " + renjuCoord(m));
+                    return;
+                }
+            } else if (n == 10) {
+                int[] arr = new int[n];
+                for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
+                if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
+                    setSubmitEnabled(submit, true);
+                    submit.setText(submitStr + " 10/10");
+                    return;
+                }
+            }
+            // still building toward ten (or an as-yet-incomplete count): greyed running count.
+            setSubmitEnabled(submit, false);
+            submit.setText(submitStr + " " + n + "/10");
+            return;
+        }
+        if ("SELECTION".equals(game.renjuPhase)) {
+            // 2-tap: black 5th then white 6th. Enabled only once both are chosen.
+            int n = (renjuSelection == null) ? 0 : renjuSelection.size();
+            if (n >= 2) {
+                setSubmitEnabled(submit, true);
+                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-" + renjuCoord(renjuSelection.get(1)));
+            } else if (n == 1) {
+                setSubmitEnabled(submit, false);
+                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-");
+            } else {
+                setSubmitEnabled(submit, false);
+                submit.setText(submitStr);
+            }
+            return;
+        }
+        // single-stone placement (SWAP windows 1-3 decline+place, MOVE): greyed until a legal stone
+        // is placed (playedMove is clamped to the legal box in onTouchEvent), then enabled.
+        if (playedMove > -1) {
+            setSubmitEnabled(submit, true);
+            submit.setText(submitStr + ": " + renjuCoord(playedMove));
+        } else {
+            setSubmitEnabled(submit, false);
+            submit.setText(submitStr);
+        }
+    }
+
+    // Greyed-submit idiom, introduced for the Renju opening only: dim + disable, or restore + enable.
+    private void setSubmitEnabled(Button submit, boolean enabled) {
+        submit.setEnabled(enabled);
+        submit.setAlpha(enabled ? 1f : 0.5f);
+    }
+
+    // Move index -> board coordinate (e.g. "H8"). Column letter from coordinateLetters (which skips
+    // 'I') indexed by move % gridSize; row = gridSize - move/gridSize. Matches the move-list
+    // formatter in Game.getBoardString (column = move % gridSize, row = gridSize - move/gridSize).
+    private String renjuCoord(int move) {
+        return "" + coordinateLetters[move % gridSize] + (gridSize - (move / gridSize));
     }
 
     private void drawBoard(Canvas canvas) {
