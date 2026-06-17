@@ -141,6 +141,9 @@ public class JsonModels {
         public CancelInfo cancel;
         public String dPenteState;
         public Boolean swap2pass;
+        public String renjuPhase;
+        public String renjuOffers;
+        public Integer renjuSwaps;
 
         public static class PlayerRef {
             public String name;
