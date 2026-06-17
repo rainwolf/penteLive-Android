@@ -361,6 +361,7 @@ public class BoardView extends View {
                 }
             }
             playedMove = -1; // not a single placement
+            renjuCandidates = renjuPicks; // alias now so the first pick renders this frame (no one-frame lag)
             invalidate();
             return true; // consume; skip normal placement
         }
