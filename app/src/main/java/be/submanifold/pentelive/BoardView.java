@@ -53,6 +53,7 @@ public class BoardView extends View {
     public int gridSize = 19;
     public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
     public java.util.List<Integer> renjuCandidates = null; // move indices to render as translucent black (value 4)
+    public java.util.List<Integer> renjuPicks = null; // in-progress OFFERS multi-select (whole board)
 
     public int redDot = -1;
 
@@ -179,7 +180,7 @@ public class BoardView extends View {
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
                 return;
             }
-            if (game.isRenju() && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
+            if (game.isRenju() && game.isActive() && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
@@ -187,13 +188,29 @@ public class BoardView extends View {
                 ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
                 return;
             }
-            if (game.isRenju() && "BRANCH".equals(game.renjuPhase) && !renjuChosen) {
+            if (game.isRenju() && game.isActive() && "BRANCH".equals(game.renjuPhase) && !renjuChosen) {
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
                 ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_branch_continue));
                 ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_branch_offer));
                 return;
+            }
+            if (game.isRenju() && game.isActive() && "OFFERS".equals(game.renjuPhase)) {
+                renjuBoxRadius = 0;
+                renjuCandidates = renjuPicks;
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
+            }
+            if (game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
+                renjuBoxRadius = 0;
+                if (game.renjuOffers != null) {
+                    java.util.List<Integer> offers = new java.util.ArrayList<>();
+                    for (int o : game.renjuOffers) offers.add(o);
+                    renjuCandidates = offers;
+                }
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
             }
             if (!game.isActive()) {
                 return;
@@ -323,6 +340,37 @@ public class BoardView extends View {
                 translateX = 0;
                 translateY = 0;
                 break;
+        }
+
+        if (game != null && game.isRenju() && game.isActive() && "OFFERS".equals(game.renjuPhase)) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int m = gridSize * stoneI + stoneJ;
+                if (renjuPicks == null) renjuPicks = new java.util.ArrayList<>();
+                if (game.getState().cell(stoneI, stoneJ) != 0) {
+                    // occupied: ignore
+                } else if (renjuPicks.contains(m)) {
+                    renjuPicks.remove((Integer) m); // tap again to deselect
+                } else {
+                    int[] accepted = new int[renjuPicks.size()];
+                    for (int k = 0; k < renjuPicks.size(); k++) accepted[k] = renjuPicks.get(k);
+                    if (be.submanifold.pente.rules.RenjuSymmetry.isSymmetricDup(m, accepted)) {
+                        // symmetric duplicate: reject (ignore)
+                    } else if (renjuPicks.size() < 10) {
+                        renjuPicks.add(m);
+                    }
+                }
+            }
+            playedMove = -1; // not a single placement
+            invalidate();
+            return true; // consume; skip normal placement
+        }
+        if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
+            int m = gridSize * stoneI + stoneJ;
+            boolean isOffer = false;
+            if (game.renjuOffers != null) for (int o : game.renjuOffers) if (o == m) { isOffer = true; break; }
+            playedMove = isOffer ? m : -1;
+            invalidate();
+            return true; // consume; skip normal placement
         }
 
         String str;

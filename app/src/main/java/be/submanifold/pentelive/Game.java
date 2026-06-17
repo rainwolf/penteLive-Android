@@ -1071,6 +1071,12 @@ public class Game implements Parcelable {
                 this.swap2Choice = true;
             }
         }
+        this.renjuPhase = null;
+        this.renjuOffers = null;
+        this.renjuSwaps = null;
+        boardView.renjuChosen = false;
+        boardView.renjuPicks = null;
+        boardView.renjuCandidates = null;
         if (mGameJson.renjuPhase != null) {
             this.renjuPhase = mGameJson.renjuPhase;
             this.renjuSwaps = mGameJson.renjuSwaps;

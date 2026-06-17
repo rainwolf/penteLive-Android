@@ -300,6 +300,29 @@ public class BoardActivity extends AppCompatActivity {
                         return;
                     }
                     moves = "" + board.playedMove; // plain move, renjuAction stays null
+                } else if (game.isRenju() && "OFFERS".equals(game.renjuPhase)) {
+                    java.util.List<Integer> picks = board.renjuPicks;
+                    if (picks == null || picks.size() != 10) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    int[] arr = new int[picks.size()];
+                    for (int k = 0; k < picks.size(); k++) arr[k] = picks.get(k);
+                    if (!be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    for (int k = 0; k < picks.size(); k++) { if (k > 0) sb.append(','); sb.append(picks.get(k)); }
+                    moves = sb.toString();
+                    renjuAction = "offer";
+                } else if (game.isRenju() && "SELECTION".equals(game.renjuPhase)) {
+                    if (board.playedMove == -1) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.renju_pick_one), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    moves = "" + board.playedMove;
+                    renjuAction = "select";
                 } else if (game.isConnect6()) {
                     if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
                         moves = "" + board.connect6Move1 + "," + board.playedMove;
