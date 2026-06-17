@@ -92,6 +92,12 @@ public class BoardActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.playAsWhiteButton);
         if (button != null) button.setOnClickListener(v -> {
+            if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                board.renjuChosen = true;
+                game.submitMove("1", msg(), "swap");
+                finish();
+                return;
+            }
             if (game.isSwap2()) {
                 game.submitMove("0", ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
                 finish();
@@ -106,6 +112,21 @@ public class BoardActivity extends AppCompatActivity {
         });
         button = findViewById(R.id.playAsBlackButton);
         if (button != null) button.setOnClickListener(v -> {
+            if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                board.renjuChosen = true;
+                int window = game.getMovesList().size();
+                if (window >= 4) {
+                    game.submitMove("0", msg(), "swap"); // move-4 decline: no stone
+                    finish();
+                } else {
+                    // windows 1-3: reveal board to place the bundled stone in the central box
+                    findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
+                    board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
+                    Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
             if (game.isSwap2()) {
                 findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
                 findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
@@ -131,38 +152,6 @@ public class BoardActivity extends AppCompatActivity {
                 }
             }
         });
-        if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
-            findViewById(R.id.dPenteLayout).setVisibility(View.VISIBLE);
-            findViewById(R.id.submitLayout).setVisibility(View.INVISIBLE);
-            View swapPass = findViewById(R.id.swap2PassButton);
-            if (swapPass != null) swapPass.setVisibility(View.GONE);
-            Button takeOver = findViewById(R.id.playAsWhiteButton);
-            if (takeOver != null) {
-                takeOver.setText(R.string.renju_swap_take_over);
-                takeOver.setOnClickListener(v -> {
-                    game.submitMove("1", msg(), "swap");
-                    finish();
-                });
-            }
-            Button dontSwap = findViewById(R.id.playAsBlackButton);
-            if (dontSwap != null) {
-                dontSwap.setText(R.string.renju_dont_swap);
-                dontSwap.setOnClickListener(v -> {
-                    int window = game.getMovesList().size();
-                    if (window >= 4) {
-                        game.submitMove("0", msg(), "swap"); // move-4 decline: no stone
-                        finish();
-                    } else {
-                        // windows 1-3: reveal board to place the bundled stone in the central box
-                        findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
-                        board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        }
-
         button = findViewById(R.id.backButton);
         if (button != null) button.setOnClickListener(v -> goBack());
         button = findViewById(R.id.forwardButton);

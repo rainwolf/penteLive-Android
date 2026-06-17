@@ -68,6 +68,7 @@ public class BoardView extends View {
     public int swap2Move3 = -1;
     public boolean swap2WillPass = false;
     public boolean swap2Chosen = false;
+    public boolean renjuChosen = false; // true once the SWAP prompt has been answered (don't re-show)
 
     private boolean replayed = false;
     private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
@@ -172,6 +173,14 @@ public class BoardView extends View {
                     parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
                 }
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
+                return;
+            }
+            if (game.isRenju() && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
+                ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_swap_take_over));
+                ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
                 return;
             }
             if (!game.isActive()) {
