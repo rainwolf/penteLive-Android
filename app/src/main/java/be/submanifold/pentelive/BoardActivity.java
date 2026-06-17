@@ -121,15 +121,16 @@ public class BoardActivity extends AppCompatActivity {
                 findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
                 if (window >= 4) {
                     // move-4 decline: place 1 (Branch A, 9x9) or up to 10 (Branch B) candidate
-                    // stones; the branch is inferred server-side from the stone count.
+                    // stones; the branch is inferred server-side from the stone count. Buttons-
+                    // only UI: no instructional toast — the translucent candidates render as the
+                    // user taps, and submit-time validation guides an invalid 1-or-10 count.
                     board.renjuOfferMode = true;
                     board.renjuBoxRadius = 0;
                     if (board.renjuPicks != null) board.renjuPicks.clear();
-                    Toast.makeText(BoardActivity.this, getString(R.string.renju_place_1_or_10), Toast.LENGTH_LONG).show();
                 } else {
-                    // windows 1-3: place the single bundled stone in the central box
+                    // windows 1-3: place the single bundled stone in the central box. Buttons-
+                    // only UI: no instructional toast — the green box overlay shows the legal area.
                     board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
-                    Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
                 }
                 return;
             }

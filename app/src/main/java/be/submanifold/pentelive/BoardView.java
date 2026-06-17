@@ -186,6 +186,11 @@ public class BoardView extends View {
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
+                // Decision phase: buttons only — drop the descriptive "play as" label so the
+                // two choice buttons fill the row (GONE, not INVISIBLE, leaves no gap). The
+                // board-lock (padlock) lives in the top toolbar (R.id.action_lock), so this
+                // bottom button row is already clear of it; no repositioning needed.
+                parentLayout.findViewById(R.id.playAsLabel).setVisibility(GONE);
                 ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_swap_take_over));
                 ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
                 return;
@@ -203,10 +208,19 @@ public class BoardView extends View {
             }
             if (game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
                 renjuBoxRadius = 0;
-                java.util.List<Integer> cands = new java.util.ArrayList<>();
-                if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
-                if (renjuSelection != null) for (int s : renjuSelection) if (!cands.contains(s)) cands.add(s);
-                renjuCandidates = cands;
+                if (renjuSelection == null || renjuSelection.isEmpty()) {
+                    // black-5th pick: lock the board to the 10 offers (mask every other empty
+                    // cell -1 so only an offer can show a stone) and draw the offers as the
+                    // existing translucent dead-stone candidates. Idempotent per frame.
+                    applyRenjuSelectionMask();
+                    java.util.List<Integer> cands = new java.util.ArrayList<>();
+                    if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
+                    renjuCandidates = cands;
+                } else {
+                    // 5th chosen (mask already cleared on the pick): drop the 9 other candidates;
+                    // the chosen 5th (and the white 6th) render as live stones from the snapshot.
+                    renjuCandidates = null;
+                }
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
             }
@@ -371,12 +385,22 @@ public class BoardView extends View {
                 boolean isOffer = false;
                 if (game.renjuOffers != null) for (int o : game.renjuOffers) if (o == m) { isOffer = true; break; }
                 if (renjuSelection.size() >= 2) {
-                    renjuSelection.clear(); // a third tap resets the pair
-                }
-                if (renjuSelection.isEmpty()) {
-                    if (isOffer) renjuSelection.add(m); // 1st tap must be an offered move
+                    // third tap resets the pair: undo the provisional 5th/6th stones; the next
+                    // onDraw re-masks to the offers and re-shows them for a fresh black-5th pick.
+                    for (int p : renjuSelection) game.getState().board[p / gridSize][p % gridSize] = 0;
+                    renjuSelection.clear();
+                } else if (renjuSelection.isEmpty()) {
+                    if (isOffer) {
+                        // black 5th: unmask the board (so the 6th may land on ANY empty cell) and
+                        // render the chosen offer as a live black stone (2 = black in BoardState).
+                        clearRenjuSelectionMask();
+                        renjuSelection.add(m);
+                        game.getState().board[stoneI][stoneJ] = 2;
+                    }
                 } else if (game.getState().cell(stoneI, stoneJ) == 0 && m != renjuSelection.get(0)) {
-                    renjuSelection.add(m); // 2nd tap: empty & distinct from the chosen 5th
+                    // white 6th: empty & distinct from the 5th; render as a live white stone.
+                    renjuSelection.add(m);
+                    game.getState().board[stoneI][stoneJ] = 1;
                 }
             }
             playedMove = -1; // not a single placement
@@ -536,6 +560,45 @@ public class BoardView extends View {
         return true;
     }
 
+
+    // SELECTION: lock the board to the 10 offered cells (black 5th). Mark every EMPTY non-offer
+    // cell as -1 ("forbidden" in BoardState's cell encoding; drawStone renders nothing for <1),
+    // the same -1 masking idiom used elsewhere in the app (Table/DBBoardView). The 10 offers stay
+    // 0 and are drawn as translucent candidates via renjuCandidates. No-op when there are no
+    // offers, so we never lock the whole board. Writes only the rendered snapshot
+    // (game.getState().board), not the engine's abstractBoard, and is rebuilt on the next replay.
+    private void applyRenjuSelectionMask() {
+        if (game == null || game.renjuOffers == null || game.renjuOffers.length == 0) {
+            return;
+        }
+        java.util.Set<Integer> offers = new java.util.HashSet<>();
+        for (int o : game.renjuOffers) offers.add(o);
+        byte[][] b = game.getState().board;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (b[i][j] == 0 && !offers.contains(gridSize * i + j)) {
+                    b[i][j] = -1;
+                }
+            }
+        }
+    }
+
+    // Restore every masked (-1) cell to empty (0). The engine never writes -1 into the main
+    // snapshot, so the only -1 marks come from applyRenjuSelectionMask — clearing them all is
+    // safe. Called once the black 5th is picked so the white 6th may land on ANY empty cell.
+    private void clearRenjuSelectionMask() {
+        if (game == null) {
+            return;
+        }
+        byte[][] b = game.getState().board;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (b[i][j] == -1) {
+                    b[i][j] = 0;
+                }
+            }
+        }
+    }
 
     private void drawBoard(Canvas canvas) {
         float step = size / gridSize, margin = step / 2;

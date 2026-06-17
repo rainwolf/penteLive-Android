@@ -1079,6 +1079,8 @@ public class Game implements Parcelable {
         boardView.renjuCandidates = null;
         boardView.renjuBoxRadius = 0;
         boardView.renjuOfferMode = false;
+        boardView.renjuSelection = null; // drop any in-progress SELECTION pair; the freshly
+        // rebuilt board snapshot also clears the -1 SELECTION mask so it can't leak to a new phase/game.
         if (mGameJson.renjuPhase != null) {
             this.renjuPhase = mGameJson.renjuPhase;
             this.renjuSwaps = mGameJson.renjuSwaps;
