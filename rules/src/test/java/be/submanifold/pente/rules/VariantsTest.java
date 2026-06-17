@@ -124,6 +124,16 @@ public class VariantsTest {
     }
 
     @Test
+    public void renjuVariantIsRegistered() {
+        assertEquals(15, Variants.gridSize(Variant.RENJU));
+        assertEquals(CaptureRule.NONE, Variants.captureRule(Variant.RENJU));
+        assertEquals(1, Variants.stonesPerTurn(Variant.RENJU));
+        assertTrue(Variant.RENJU.isRenju());
+        assertFalse(Variant.PENTE.isRenju());
+        assertFalse(Variant.GOMOKU.isRenju());
+    }
+
+    @Test
     public void unknownInputsReturnNull() {
         assertNull(Variants.fromGameType("Chess"));
         assertNull(Variants.fromGameType(null));
