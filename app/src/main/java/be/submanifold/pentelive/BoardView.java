@@ -51,6 +51,7 @@ public class BoardView extends View {
     private byte myColor, stoneI, stoneJ;
     public int playedMove = -1;
     public int gridSize = 19;
+    public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
 
     public int redDot = -1;
 
@@ -318,6 +319,10 @@ public class BoardView extends View {
                 playedMove = -1;
             }
         } else {
+            playedMove = -1;
+        }
+        if (renjuBoxRadius > 0 && playedMove != -1 &&
+                (Math.abs(stoneI - 7) > renjuBoxRadius || Math.abs(stoneJ - 7) > renjuBoxRadius)) {
             playedMove = -1;
         }
         if (scaling == 1) {

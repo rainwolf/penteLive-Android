@@ -8,6 +8,9 @@
     <string name="no_momve_played_yet">No move played yet.</string>
     <string name="submit">submit</string>
     <string name="place_stone_submit">Place a stone and submit.</string>
+    <string name="renju_swap_take_over">Swap (take over)</string>
+    <string name="renju_dont_swap">Don\'t swap</string>
+    <string name="renju_place_in_box">Place your stone near the center and submit.</string>
     <string name="place_2_stones_submit">Place 2 stones and submit.</string>
     <string name="resign">resign</string>
     <string name="request_cancel">request set cancellation</string>
