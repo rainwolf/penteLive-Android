@@ -224,6 +224,22 @@ public class OkHttpPenteApiTest {
         assertEquals(Boolean.TRUE, result.value);
     }
 
+    /** The 4-arg submitMove overload appends renjuAction as a query parameter. */
+    @Test
+    public void submitMoveAppendsRenjuAction() throws Exception {
+        server.setDispatcher(new Dispatcher() {
+            @Override public MockResponse dispatch(RecordedRequest req) {
+                return new MockResponse().setResponseCode(200).setBody("ok");
+            }
+        });
+        api.submitMove("999", "0,113", "", "swap");
+        RecordedRequest req = server.takeRequest(5, TimeUnit.SECONDS);
+        HttpUrl u = req.getRequestUrl();
+        assertEquals("move", u.queryParameter("command"));
+        assertEquals("0,113", u.queryParameter("moves"));
+        assertEquals("swap", u.queryParameter("renjuAction"));
+    }
+
     /** An expiry that survives the single re-auth maps to AUTH_EXPIRED (retry is capped at one). */
     @Test
     public void authExpiryThatSurvivesReauth_mapsToAuthExpired() {
