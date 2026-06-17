@@ -947,6 +947,20 @@ public class Game implements Parcelable {
         return v != null && v.isDPente();
     }
 
+    public boolean isRenju() {
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isRenju();
+    }
+
+    /** Pure board-size resolver by server gameName (no Android deps). */
+    public static int gridSizeForGameType(String gameType) {
+        if (gameType == null) return 19;
+        if (gameType.contains("Renju")) return 15;
+        if (gameType.contains("(9x9)")) return 9;
+        if (gameType.contains("(13x13)")) return 13;
+        return 19;
+    }
+
     public void parseGame(BoardView boardView) {
         if (mGameJson == null) {
             RetrieveGame getGameTask = new RetrieveGame(getGameID(), boardView);
