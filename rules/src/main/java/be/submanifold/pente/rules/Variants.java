@@ -76,6 +76,9 @@ public final class Variants {
         if (gameType.contains("Go")) {
             return Variant.GO_19;
         }
+        if (gameType.contains("Renju")) {
+            return Variant.RENJU;
+        }
         return null;
     }
 
@@ -85,6 +88,7 @@ public final class Variants {
      * even inputs). Returns null for unknown ids.
      */
     public static Variant fromGameId(int gameId) {
+        if (gameId == 81) return Variant.RENJU; // TB Renju: no canonical enum id
         int canonical = (gameId % 2 == 0) ? gameId - 1 : gameId;
         return BY_CANONICAL_ID.get(canonical);
     }
