@@ -362,7 +362,7 @@ public class BoardView extends View {
                     replayed = true;
                 }
                 if (game.isConnect6() && connect6Move1 > -1) {
-                    str = submitStr + ": " + coordinateLetters[connect6Move1 % 19] + "" + (19 - (connect6Move1 / 19)) +
+                    str = submitStr + ": " + coordinateLetters[connect6Move1 % gridSize] + "" + (gridSize - (connect6Move1 / gridSize)) +
                             "-...";
                     ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                 }
@@ -370,62 +370,62 @@ public class BoardView extends View {
                 if (game.isConnect6()) {
                     if (connect6Move1 > -1) {
                         if (playedMove > -1 && playedMove != connect6Move1) {
-                            str = submitStr + ": " + coordinateLetters[connect6Move1 % 19] + "" + (19 - (connect6Move1 / 19)) +
-                                    "-" + coordinateLetters[stoneJ] + "" + (19 - stoneI);
+                            str = submitStr + ": " + coordinateLetters[connect6Move1 % gridSize] + "" + (gridSize - (connect6Move1 / gridSize)) +
+                                    "-" + coordinateLetters[stoneJ] + "" + (gridSize - stoneI);
                             ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         } else {
-                            str = submitStr + ": " + coordinateLetters[stoneJ] + "" + (19 - stoneI) +
+                            str = submitStr + ": " + coordinateLetters[stoneJ] + "" + (gridSize - stoneI) +
                                     "-...";
                             ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         }
                     }
                 } else if (game.isDPente() && game.getMovesList().isEmpty()) {
                     if (dPenteMove4 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
-                                "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
-                                "-" + coordinateLetters[dPenteMove4 % 19] + "" + (19 - (dPenteMove4 / 19));
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove3 % gridSize] + "" + (gridSize - (dPenteMove3 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove4 % gridSize] + "" + (gridSize - (dPenteMove4 / gridSize));
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (dPenteMove3 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
-                                "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove3 % gridSize] + "" + (gridSize - (dPenteMove3 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (dPenteMove2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
                 } else if (game.isSwap2() && game.getMovesList().isEmpty()) {
                     if (swap2Move3 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19)) +
-                                "-" + coordinateLetters[swap2Move3 % 19] + "" + (19 - (swap2Move3 / 19));
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move3 % gridSize] + "" + (gridSize - (swap2Move3 / gridSize));
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (swap2Move2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
                 } else if (game.isSwap2() && game.getMovesList().size() == 3 && swap2WillPass) {
                     if (swap2Move2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19));
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize));
                         byte swap2Move1i = (byte) (swap2Move1 / 19), swap2Move1j = (byte) (swap2Move1 % 19);
                         game.replayGame(stoneI, stoneJ, this, swap2Move1i, swap2Move1j);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
                                 "-...";
                         game.replayGame(stoneI, stoneJ, this, (byte) 255, (byte) 255);
                     }
@@ -480,6 +480,14 @@ public class BoardView extends View {
                 canvas.drawCircle(size / 2, size - (margin + 3 * step), radius, linePaint);
                 canvas.drawCircle(size - (margin + 3 * step), size / 2, radius, linePaint);
             }
+        } else if (game != null && game.isRenju()) {
+            linePaint.setStyle(Paint.Style.FILL);
+            float r = margin / 2;
+            canvas.drawCircle(margin + 3 * step, margin + 3 * step, r, linePaint);
+            canvas.drawCircle(size - (margin + 3 * step), margin + 3 * step, r, linePaint);
+            canvas.drawCircle(margin + 3 * step, size - (margin + 3 * step), r, linePaint);
+            canvas.drawCircle(size - (margin + 3 * step), size - (margin + 3 * step), r, linePaint);
+            canvas.drawCircle(size / 2, size / 2, r, linePaint);
         } else {
             canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
             canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
