@@ -52,6 +52,7 @@ public class BoardView extends View {
     public int playedMove = -1;
     public int gridSize = 19;
     public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
+    public java.util.List<Integer> renjuCandidates = null; // move indices to render as translucent black (value 4)
 
     public int redDot = -1;
 
@@ -509,10 +510,33 @@ public class BoardView extends View {
             canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
             canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
         }
+        // Renju central-box highlight: shade the legal (2r+1)x(2r+1) cells under the stones.
+        if (game != null && game.isRenju() && renjuBoxRadius > 0) {
+            Paint boxPaint = new Paint();
+            boxPaint.setColor(Color.parseColor("#3300FF00")); // translucent green
+            boxPaint.setStyle(Paint.Style.FILL);
+            int lo = 7 - renjuBoxRadius, hi = 7 + renjuBoxRadius;
+            // Cell center = margin + index*step (margin = step/2); box spans half a step beyond lo/hi.
+            float left = margin + (lo - 0.5f) * step;
+            float top = margin + (lo - 0.5f) * step;
+            float right = margin + (hi + 0.5f) * step;
+            float bottom = margin + (hi + 0.5f) * step;
+            canvas.drawRect(left, top, right, bottom, boxPaint);
+        }
         byte[][] board = game.getState().board;
         for (byte i = 0; i < gridSize; i++) {
             for (byte j = 0; j < gridSize; j++) {
                 drawStone(canvas, i, j, board[i][j]);
+            }
+        }
+        // Renju candidate moves: translucent black preview stones drawn on top of the board.
+        if (game != null && game.isRenju() && renjuCandidates != null) {
+            for (int m : renjuCandidates) {
+                int ci = m / gridSize, cj = m % gridSize; // ci = row, cj = col
+                // Mirror the stone-draw mapping: x uses col, y uses row, center = margin + index*step.
+                float cx = margin + cj * step;
+                float cy = margin + ci * step;
+                drawStone(canvas, cx, cy, (byte) 4); // translucent black
             }
         }
         drawRedDot(canvas);
