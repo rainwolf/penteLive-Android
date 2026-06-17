@@ -520,14 +520,20 @@ public class Game implements Parcelable {
 
         private final String move;
         private String message;
+        private final String renjuAction;
 
         SubmitMoveTask(String move, String message) {
+            this(move, message, null);
+        }
+
+        SubmitMoveTask(String move, String message, String renjuAction) {
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 this.message = "";
             }
             this.move = move;
+            this.renjuAction = renjuAction;
         }
 
         @Override
@@ -535,11 +541,14 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction));
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    String devUrl = "https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
+                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    if (renjuAction != null && !renjuAction.isEmpty()) {
+                        devUrl += "&renjuAction=" + renjuAction;
+                    }
+                    url = new URL(devUrl);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -916,8 +925,24 @@ public class Game implements Parcelable {
 //        this.mMovesList = mMovesList;
 //    }
 
+    /** Pure builder for the TB move URL. renjuAction omitted when null/empty. */
+    public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
+                                            String message, String renjuAction) {
+        String url = "https://www.pente.org/gameServer/tb/game?command=move" + hideStr
+                + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message
+                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+        if (renjuAction != null && !renjuAction.isEmpty()) {
+            url += "&renjuAction=" + renjuAction;
+        }
+        return url;
+    }
+
     public void submitMove(String move, String message) {
-        SubmitMoveTask submitTask = new SubmitMoveTask(move, message);
+        submitMove(move, message, null);
+    }
+
+    public void submitMove(String move, String message, String renjuAction) {
+        SubmitMoveTask submitTask = new SubmitMoveTask(move, message, renjuAction);
         submitTask.execute((Void) null);
     }
 

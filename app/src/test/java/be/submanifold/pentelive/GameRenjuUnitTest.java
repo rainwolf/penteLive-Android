@@ -30,4 +30,20 @@ public class GameRenjuUnitTest {
         assertEquals(19, Game.gridSizeForGameType("Pente"));
         assertEquals(19, Game.gridSizeForGameType("Go"));
     }
+
+    @Test
+    public void buildSubmitMoveUrlOmitsRenjuActionWhenNull() {
+        String url = Game.buildSubmitMoveUrl("", "999", "130", "hi", null);
+        assertTrue(url.contains("command=move"));
+        assertTrue(url.contains("gid=999"));
+        assertTrue(url.contains("moves=130"));
+        assertFalse(url.contains("renjuAction"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlAppendsRenjuAction() {
+        String url = Game.buildSubmitMoveUrl("", "999", "0,113", "", "swap");
+        assertTrue(url.contains("moves=0,113"));
+        assertTrue(url.contains("renjuAction=swap"));
+    }
 }
