@@ -40,7 +40,8 @@ public class BoardView extends View {
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80"),
-            swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
+            swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878"),
+            renjuColor = Color.parseColor("#D98880");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint shadowPaint = makePaint(Color.BLACK);
 
