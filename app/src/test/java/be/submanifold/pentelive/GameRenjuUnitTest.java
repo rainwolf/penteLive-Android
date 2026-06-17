@@ -52,4 +52,21 @@ public class GameRenjuUnitTest {
         assertTrue(move.contains("moves=130"));
         assertTrue(move.contains("renjuAction=move"));
     }
+
+    @Test
+    public void buildSubmitMoveUrlCarriesTenStoneOfferAsMove() {
+        // Branch B: 10 candidate stones submitted as one CSV `move`.
+        String csv = "129,130,131,132,133,144,145,146,147,148";
+        String url = Game.buildSubmitMoveUrl("", "999", csv, "", "move");
+        assertTrue(url.contains("moves=" + csv));
+        assertTrue(url.contains("renjuAction=move"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlCarriesTwoStoneSelect() {
+        // SELECTION: chosen offered black 5th + a white 6th, atomic 2-stone `select`.
+        String url = Game.buildSubmitMoveUrl("", "999", "130,200", "", "select");
+        assertTrue(url.contains("moves=130,200"));
+        assertTrue(url.contains("renjuAction=select"));
+    }
 }

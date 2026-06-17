@@ -11,10 +11,7 @@
     <string name="renju_swap_take_over">Swap (take over)</string>
     <string name="renju_dont_swap">Don\'t swap</string>
     <string name="renju_place_in_box">Place your stone near the center and submit.</string>
-    <string name="renju_branch_continue">Continue (place 5th move)</string>
-    <string name="renju_branch_offer">Offer 10</string>
     <string name="renju_need_10_offers">Pick exactly 10 non-symmetric offers.</string>
-    <string name="renju_pick_one">Tap one of the offered moves.</string>
     <string name="renju_place_1_or_10">Place 1 stone to continue (Branch A), or 10 to offer (Branch B), then submit.</string>
     <string name="renju_select_two">Tap the offered black 5th move, then tap an empty point for your white 6th.</string>
     <string name="place_2_stones_submit">Place 2 stones and submit.</string>

@@ -1078,9 +1078,17 @@ public class Game implements Parcelable {
         boardView.renjuPicks = null;
         boardView.renjuCandidates = null;
         boardView.renjuBoxRadius = 0;
+        boardView.renjuOfferMode = false;
         if (mGameJson.renjuPhase != null) {
             this.renjuPhase = mGameJson.renjuPhase;
             this.renjuSwaps = mGameJson.renjuSwaps;
+            // Post-take-over BRANCH: present the place-1-or-10 affordance (same as the
+            // move-4 decline). Set here in the data-refresh path so it tracks the freshly
+            // parsed phase and is never revived from onDraw after a submit. The move-4
+            // decline still sets this flag in its own event handler (SWAP, window >= 4).
+            if ("BRANCH".equals(this.renjuPhase)) {
+                boardView.renjuOfferMode = true;
+            }
             if (mGameJson.renjuOffers != null && !mGameJson.renjuOffers.isEmpty()) {
                 String[] parts = mGameJson.renjuOffers.split(",");
                 this.renjuOffers = new int[parts.length];

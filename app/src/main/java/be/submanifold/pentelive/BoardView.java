@@ -190,11 +190,11 @@ public class BoardView extends View {
                 ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
                 return;
             }
-            if (game.isRenju() && game.isActive() && "BRANCH".equals(game.renjuPhase)) {
-                // Post-take-over: present the same place-1-or-10 affordance as the move-4
-                // decline, then submit a single `move` (branch inferred from the stone count).
-                renjuOfferMode = true;
-            }
+            // NB: renjuOfferMode for the post-take-over BRANCH phase is set in the
+            // data-refresh path (Game.parseGame), not here. Writing it from onDraw would
+            // revive the offer UI on every invalidate() — e.g. the STAYWITHGAME post-submit
+            // re-parse, where the phase still reads "BRANCH" until the server responds,
+            // opening a double-submit window. onDraw only READS the flag.
             if (game.isRenju() && game.isActive() && renjuOfferMode) {
                 renjuBoxRadius = 0;
                 renjuCandidates = renjuPicks;
