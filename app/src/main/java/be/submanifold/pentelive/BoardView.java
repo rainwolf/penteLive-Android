@@ -138,6 +138,9 @@ public class BoardView extends View {
         canvas.scale(scaling, scaling);
         canvas.translate(translateX, translateY);
         drawBoard(canvas);
+        if (game != null && game.isRenju() && "MOVE".equals(game.renjuPhase)) {
+            renjuBoxRadius = 4;
+        }
         if (game != null) {
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
@@ -182,6 +185,14 @@ public class BoardView extends View {
                 parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
                 ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_swap_take_over));
                 ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
+                return;
+            }
+            if (game.isRenju() && "BRANCH".equals(game.renjuPhase) && !renjuChosen) {
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.swap2PassButton).setVisibility(GONE);
+                ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_branch_continue));
+                ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_branch_offer));
                 return;
             }
             if (!game.isActive()) {

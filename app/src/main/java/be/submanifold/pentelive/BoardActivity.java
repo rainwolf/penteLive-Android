@@ -98,6 +98,12 @@ public class BoardActivity extends AppCompatActivity {
                 finish();
                 return;
             }
+            if (game.isRenju() && "BRANCH".equals(game.renjuPhase)) {
+                board.renjuChosen = true;
+                game.submitMove("1", msg(), "branch");
+                finish();
+                return;
+            }
             if (game.isSwap2()) {
                 game.submitMove("0", ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString());
                 finish();
@@ -125,6 +131,12 @@ public class BoardActivity extends AppCompatActivity {
                     board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
                     Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
                 }
+                return;
+            }
+            if (game.isRenju() && "BRANCH".equals(game.renjuPhase)) {
+                board.renjuChosen = true;
+                game.submitMove("2", msg(), "branch");
+                finish();
                 return;
             }
             if (game.isSwap2()) {
@@ -281,6 +293,13 @@ public class BoardActivity extends AppCompatActivity {
                     }
                     moves = "0," + board.playedMove;
                     renjuAction = "swap";
+                } else if (game.isRenju() && "MOVE".equals(game.renjuPhase)) {
+                    if (board.playedMove == -1) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    moves = "" + board.playedMove; // plain move, renjuAction stays null
                 } else if (game.isConnect6()) {
                     if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
                         moves = "" + board.connect6Move1 + "," + board.playedMove;
