@@ -93,14 +93,9 @@ public class BoardActivity extends AppCompatActivity {
         Button button = findViewById(R.id.playAsWhiteButton);
         if (button != null) button.setOnClickListener(v -> {
             if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                // take over the opponent's side: no stone (server ignores the payload).
                 board.renjuChosen = true;
                 game.submitMove("1", msg(), "swap");
-                finish();
-                return;
-            }
-            if (game.isRenju() && "BRANCH".equals(game.renjuPhase)) {
-                board.renjuChosen = true;
-                game.submitMove("1", msg(), "branch");
                 finish();
                 return;
             }
@@ -121,22 +116,21 @@ public class BoardActivity extends AppCompatActivity {
             if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
                 board.renjuChosen = true;
                 int window = game.getMovesList().size();
+                // reveal the board and submit the placement as a single `move` request
+                findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
                 if (window >= 4) {
-                    game.submitMove("0", msg(), "swap"); // move-4 decline: no stone
-                    finish();
+                    // move-4 decline: place 1 (Branch A, 9x9) or up to 10 (Branch B) candidate
+                    // stones; the branch is inferred server-side from the stone count.
+                    board.renjuOfferMode = true;
+                    board.renjuBoxRadius = 0;
+                    if (board.renjuPicks != null) board.renjuPicks.clear();
+                    Toast.makeText(BoardActivity.this, getString(R.string.renju_place_1_or_10), Toast.LENGTH_LONG).show();
                 } else {
-                    // windows 1-3: reveal board to place the bundled stone in the central box
-                    findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
+                    // windows 1-3: place the single bundled stone in the central box
                     board.renjuBoxRadius = window; // 1/2/3 -> 3x3/5x5/7x7
                     Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
                 }
-                return;
-            }
-            if (game.isRenju() && "BRANCH".equals(game.renjuPhase)) {
-                board.renjuChosen = true;
-                game.submitMove("2", msg(), "branch");
-                finish();
                 return;
             }
             if (game.isSwap2()) {
@@ -285,14 +279,47 @@ public class BoardActivity extends AppCompatActivity {
                 }
                 String moves = "";
                 String renjuAction = null;
-                if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                if (game.isRenju() && board.renjuOfferMode) {
+                    // move-4 decline OR post-take-over BRANCH: place 1 (Branch A) or 10
+                    // (Branch B) candidate stones, submitted as a single `move`. The branch
+                    // is inferred server-side from the stone count.
+                    java.util.List<Integer> picks = board.renjuPicks;
+                    int n = (picks == null) ? 0 : picks.size();
+                    int gs = game.getGridSize();
+                    int c = gs / 2;
+                    if (n == 1) {
+                        int m = picks.get(0);
+                        if (Math.abs(m % gs - c) > 4 || Math.abs(m / gs - c) > 4) {
+                            // Branch A: the single (continue) stone must be in the 9x9 center.
+                            Toast.makeText(BoardActivity.this, getString(R.string.renju_place_in_box), Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        moves = "" + m;
+                        renjuAction = "move";
+                    } else if (n == 10) {
+                        int[] arr = new int[picks.size()];
+                        for (int k = 0; k < picks.size(); k++) arr[k] = picks.get(k);
+                        if (!be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
+                            Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        StringBuilder sb = new StringBuilder();
+                        for (int k = 0; k < picks.size(); k++) { if (k > 0) sb.append(','); sb.append(picks.get(k)); }
+                        moves = sb.toString();
+                        renjuAction = "move";
+                    } else {
+                        Toast.makeText(BoardActivity.this, getString(R.string.renju_place_1_or_10), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                } else if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                    // windows 1-3: decline the swap and place your own next stone (one request).
                     if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
                         return;
                     }
-                    moves = "0," + board.playedMove;
-                    renjuAction = "swap";
+                    moves = "" + board.playedMove;
+                    renjuAction = "move";
                 } else if (game.isRenju() && "MOVE".equals(game.renjuPhase)) {
                     if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
@@ -300,28 +327,14 @@ public class BoardActivity extends AppCompatActivity {
                         return;
                     }
                     moves = "" + board.playedMove; // plain move, renjuAction stays null
-                } else if (game.isRenju() && "OFFERS".equals(game.renjuPhase)) {
-                    java.util.List<Integer> picks = board.renjuPicks;
-                    if (picks == null || picks.size() != 10) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    int[] arr = new int[picks.size()];
-                    for (int k = 0; k < picks.size(); k++) arr[k] = picks.get(k);
-                    if (!be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_need_10_offers), Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    StringBuilder sb = new StringBuilder();
-                    for (int k = 0; k < picks.size(); k++) { if (k > 0) sb.append(','); sb.append(picks.get(k)); }
-                    moves = sb.toString();
-                    renjuAction = "offer";
                 } else if (game.isRenju() && "SELECTION".equals(game.renjuPhase)) {
-                    if (board.playedMove == -1) {
-                        Toast.makeText(BoardActivity.this, getString(R.string.renju_pick_one), Toast.LENGTH_LONG).show();
+                    // atomic 2-stone select: chosen offered black 5th + a white 6th.
+                    java.util.List<Integer> sel = board.renjuSelection;
+                    if (sel == null || sel.size() != 2) {
+                        Toast.makeText(BoardActivity.this, getString(R.string.renju_select_two), Toast.LENGTH_LONG).show();
                         return;
                     }
-                    moves = "" + board.playedMove;
+                    moves = sel.get(0) + "," + sel.get(1);
                     renjuAction = "select";
                 } else if (game.isConnect6()) {
                     if (board.connect6Move1 > -1 && board.playedMove > -1 && board.connect6Move1 != board.playedMove) {
@@ -396,6 +409,9 @@ public class BoardActivity extends AppCompatActivity {
                 }
 
                 board.renjuBoxRadius = 0;
+                board.renjuOfferMode = false;
+                board.renjuPicks = null;
+                board.renjuSelection = null;
                 game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString(), renjuAction);
 
                 if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {

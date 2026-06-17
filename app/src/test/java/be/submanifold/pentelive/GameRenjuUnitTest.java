@@ -42,8 +42,14 @@ public class GameRenjuUnitTest {
 
     @Test
     public void buildSubmitMoveUrlAppendsRenjuAction() {
-        String url = Game.buildSubmitMoveUrl("", "999", "0,113", "", "swap");
-        assertTrue(url.contains("moves=0,113"));
-        assertTrue(url.contains("renjuAction=swap"));
+        // take-over: swap carries no appended stone (server ignores the payload).
+        String swap = Game.buildSubmitMoveUrl("", "999", "1", "", "swap");
+        assertTrue(swap.contains("moves=1"));
+        assertTrue(swap.contains("renjuAction=swap"));
+
+        // decline + place: a single stone is sent via the `move` action.
+        String move = Game.buildSubmitMoveUrl("", "999", "130", "", "move");
+        assertTrue(move.contains("moves=130"));
+        assertTrue(move.contains("renjuAction=move"));
     }
 }
