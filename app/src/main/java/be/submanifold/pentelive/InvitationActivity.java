@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -123,6 +124,12 @@ public class InvitationActivity extends AppCompatActivity {
                 case 13:
                     gameType = "77";
                     break;
+                case 14:
+                    gameType = "79"; // Swap2-Keryo (TB_SWAP2KERYO) — position had no case before
+                    break;
+                case 15:
+                    gameType = "81"; // Renju (TB_RENJU)
+                    break;
             }
             String timeout = ((Spinner) findViewById(R.id.timeoutSpinner)).getSelectedItem().toString();
             String rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked() ? "Y" : "N";
@@ -175,17 +182,43 @@ public class InvitationActivity extends AppCompatActivity {
 
         ((ToggleButton) findViewById(R.id.ratedToggleButton)).setOnCheckedChangeListener((buttonView, isChecked) -> {
             if ((isChecked)) {
-                findViewById(R.id.playAsLabel).setVisibility(View.GONE);
                 findViewById(R.id.privateLabel).setVisibility(View.GONE);
                 findViewById(R.id.privateToggleButton).setVisibility(View.GONE);
-                findViewById(R.id.playAsToggleButton).setVisibility(View.GONE);
             } else {
-                findViewById(R.id.playAsLabel).setVisibility(View.VISIBLE);
                 findViewById(R.id.privateLabel).setVisibility(View.VISIBLE);
                 findViewById(R.id.privateToggleButton).setVisibility(View.VISIBLE);
-                findViewById(R.id.playAsToggleButton).setVisibility(View.VISIBLE);
+            }
+            updatePlayAsVisibility();
+        });
+
+        ((Spinner) findViewById(R.id.gameTypeSpinner)).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updatePlayAsVisibility();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        updatePlayAsVisibility();
+    }
+
+    // Color choice (playAs) is offered for unrated games always, and for rated games only when
+    // the selected game lets the server honor a chosen color (NewGameServlet): Go (pos 9=TB_GO/69,
+    // 10=TB_GO9/71, 11=TB_GO13/73) and Renju (pos 15=TB_RENJU/81). Private stays rated-only.
+    private void updatePlayAsVisibility() {
+        boolean rated = ((ToggleButton) findViewById(R.id.ratedToggleButton)).isChecked();
+        int position = ((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition();
+        boolean allowColorChoice = !rated
+                || position == 9   // TB_GO (69)
+                || position == 10  // TB_GO9 (71)
+                || position == 11  // TB_GO13 (73)
+                || position == 15; // TB_RENJU (81)
+        int visibility = allowColorChoice ? View.VISIBLE : View.GONE;
+        findViewById(R.id.playAsLabel).setVisibility(visibility);
+        findViewById(R.id.playAsToggleButton).setVisibility(visibility);
     }
 
     @Override

@@ -120,13 +120,11 @@ public class BoardActivity extends AppCompatActivity {
                 findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
                 findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
                 if (window >= 4) {
-                    // move-4 decline: place 1 (Branch A, 9x9) or up to 10 (Branch B) candidate
-                    // stones; the branch is inferred server-side from the stone count. Buttons-
-                    // only UI: no instructional toast — the translucent candidates render as the
-                    // user taps, and submit-time validation guides an invalid 1-or-10 count.
-                    board.renjuOfferMode = true;
-                    board.renjuBoxRadius = 0;
-                    if (board.renjuPicks != null) board.renjuPicks.clear();
+                    // move-4 "Don't swap" = Branch A: place your single 5th stone in the central
+                    // 9x9 box (radius 4), sent as one `move`. Branch B (offer ten) is the separate
+                    // "Place 10" button (swap2PassButton), not this decline path.
+                    board.renjuBoxRadius = 4;
+                    board.renjuOfferMode = false;
                 } else {
                     // windows 1-3: place the single bundled stone in the central box. Buttons-
                     // only UI: no instructional toast — the green box overlay shows the legal area.
@@ -151,6 +149,18 @@ public class BoardActivity extends AppCompatActivity {
 
         button = findViewById(R.id.swap2PassButton);
         if (button != null) button.setOnClickListener(v -> {
+            if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
+                // move-4 "Place 10" = Branch B: decline the swap and offer ten 5th-move
+                // candidates, submitted as one `move` once the tenth is placed.
+                board.renjuChosen = true;
+                findViewById(R.id.dPenteLayout).setVisibility(View.INVISIBLE);
+                findViewById(R.id.submitLayout).setVisibility(View.VISIBLE);
+                board.renjuOfferMode = true;
+                board.renjuBoxRadius = 0;
+                if (board.renjuPicks != null) board.renjuPicks.clear();
+                board.invalidate();
+                return;
+            }
             if (game.isSwap2()) {
                 if (game.swap2Choice) {
                     Toast.makeText(BoardActivity.this, getString(R.string.place_2_stones_submit),
@@ -299,7 +309,8 @@ public class BoardActivity extends AppCompatActivity {
                     moves = sb.toString();
                     renjuAction = "move";
                 } else if (game.isRenju() && "SWAP".equals(game.renjuPhase)) {
-                    // windows 1-3: decline the swap and place your own next stone (one request).
+                    // decline + place a single stone in one `move`: windows 1-3 (next stone) and
+                    // move-4 "Don't swap" (Branch A, your 5th stone constrained to the 9x9).
                     if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();

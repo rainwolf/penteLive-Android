@@ -426,7 +426,9 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 }
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/koth";
-//                request        = "https://10.0.2.2/gameServer/koth";
+                if (PentePlayer.development) {
+                    request = "https://10.0.2.2/gameServer/koth";
+                }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

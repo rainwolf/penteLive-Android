@@ -440,8 +440,7 @@ public class Game implements Parcelable {
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie(
-                        PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -545,15 +544,14 @@ public class Game implements Parcelable {
                 URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction));
                 if (PentePlayer.development) {
                     String devUrl = "https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                            + PentePlayer.writeCreds();
                     if (renjuAction != null && !renjuAction.isEmpty()) {
                         devUrl += "&renjuAction=" + renjuAction;
                     }
                     url = new URL(devUrl);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie(
-                        PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -661,7 +659,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -673,7 +671,7 @@ public class Game implements Parcelable {
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie(PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -750,7 +748,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -762,7 +760,7 @@ public class Game implements Parcelable {
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie(PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -842,7 +840,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -854,7 +852,7 @@ public class Game implements Parcelable {
                 }
                 URL url = new URL(request);
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie(PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -932,7 +930,7 @@ public class Game implements Parcelable {
                                             String message, String renjuAction) {
         String url = "https://www.pente.org/gameServer/tb/game?command=move" + hideStr
                 + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message
-                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                + PentePlayer.writeCreds();
         if (renjuAction != null && !renjuAction.isEmpty()) {
             url += "&renjuAction=" + renjuAction;
         }
