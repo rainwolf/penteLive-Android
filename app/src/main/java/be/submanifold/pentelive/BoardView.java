@@ -282,6 +282,11 @@ public class BoardView extends View {
             } else {
                 myColor = (byte) (2 - game.getMovesList().size() % 2);
             }
+        } else if (game != null && game.isRenju() && game.getMovesList() != null) {
+            // Renju is black-first: a stone's color is fixed by its move number (odd = black = 2,
+            // even = white = 1), independent of any opening swaps. Same formula Go already uses;
+            // the generic fallback below would wrongly make move 1 white.
+            myColor = (byte) (2 - game.getMovesList().size() % 2);
         } else if (game != null && game.getMovesList() != null) {
             myColor = (byte) (game.getMovesList().size() % 2 + 1);
         } else {
@@ -290,6 +295,13 @@ public class BoardView extends View {
         if (scaling == 2 && playedMove != -1) {
             drawZoomedLine(canvas, stoneX, stoneY);
             drawZoomedStone(canvas, stoneX, stoneY, myColor);
+        } else if (game != null && game.isRenju() && playedMove != -1) {
+            // Renju single-stone placement: on touch release (scaling == 1) the zoomed preview
+            // is gone, so render the played stone (non-zoomed) at its grid cell in myColor.
+            // Mirror the committed-stone draw mapping: drawStone(canvas, row, col, color).
+            byte movei = (byte) (playedMove / gridSize);
+            byte movej = (byte) (playedMove % gridSize);
+            drawStone(canvas, movei, movej, myColor);
         }
 //        else {
 //            drawStone(canvas, stoneX, stoneY, myColor);
