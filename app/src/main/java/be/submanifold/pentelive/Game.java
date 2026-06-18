@@ -440,7 +440,8 @@ public class Game implements Parcelable {
                             + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie(
+                        PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
@@ -551,7 +552,8 @@ public class Game implements Parcelable {
                     url = new URL(devUrl);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
+                String cookies = CookieManager.getInstance().getCookie(
+                        PentePlayer.development ? "https://10.0.2.2/" : "https://www.pente.org/");
                 if (cookies != null) {
                     String[] splitCookie = cookies.split(";");
                     String cookieStr = "";
