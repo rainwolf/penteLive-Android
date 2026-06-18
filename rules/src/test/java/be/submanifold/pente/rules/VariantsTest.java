@@ -124,6 +124,25 @@ public class VariantsTest {
     }
 
     @Test
+    public void renjuVariantIsRegistered() {
+        assertEquals(15, Variants.gridSize(Variant.RENJU));
+        assertEquals(CaptureRule.NONE, Variants.captureRule(Variant.RENJU));
+        assertEquals(1, Variants.stonesPerTurn(Variant.RENJU));
+        assertTrue(Variant.RENJU.isRenju());
+        assertFalse(Variant.PENTE.isRenju());
+        assertFalse(Variant.GOMOKU.isRenju());
+    }
+
+    @Test
+    public void renjuResolvesByIdAndName() {
+        assertEquals(Variant.RENJU, Variants.fromGameId(31)); // Renju
+        assertEquals(Variant.RENJU, Variants.fromGameId(32)); // Speed Renju (canonical 31)
+        assertEquals(Variant.RENJU, Variants.fromGameId(81)); // TB Renju
+        assertEquals(Variant.RENJU, Variants.fromGameType("Renju"));
+        assertEquals(Variant.RENJU, Variants.fromGameType("Speed Renju"));
+    }
+
+    @Test
     public void unknownInputsReturnNull() {
         assertNull(Variants.fromGameType("Chess"));
         assertNull(Variants.fromGameType(null));

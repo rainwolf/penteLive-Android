@@ -1,0 +1,72 @@
+package be.submanifold.pentelive;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+public class GameRenjuUnitTest {
+
+    private static Game makeGame(String gameType) {
+        return new Game("id", "sid", gameType, "opponent", "1500",
+                "white", "5", "Not Rated", "false", "1", "0");
+    }
+
+    @Test
+    public void isRenjuTrueForRenjuTypes() {
+        assertTrue(makeGame("Renju").isRenju());
+        assertTrue(makeGame("Speed Renju").isRenju());
+        assertFalse(makeGame("Gomoku").isRenju());
+        assertFalse(makeGame("Pente").isRenju());
+    }
+
+    @Test
+    public void gridSizeForGameTypeIsFifteenForRenju() {
+        assertEquals(15, Game.gridSizeForGameType("Renju"));
+        assertEquals(15, Game.gridSizeForGameType("Speed Renju"));
+        assertEquals(9, Game.gridSizeForGameType("Go (9x9)"));
+        assertEquals(13, Game.gridSizeForGameType("Go (13x13)"));
+        assertEquals(19, Game.gridSizeForGameType("Pente"));
+        assertEquals(19, Game.gridSizeForGameType("Go"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlOmitsRenjuActionWhenNull() {
+        String url = Game.buildSubmitMoveUrl("", "999", "130", "hi", null);
+        assertTrue(url.contains("command=move"));
+        assertTrue(url.contains("gid=999"));
+        assertTrue(url.contains("moves=130"));
+        assertFalse(url.contains("renjuAction"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlAppendsRenjuAction() {
+        // take-over: swap carries no appended stone (server ignores the payload).
+        String swap = Game.buildSubmitMoveUrl("", "999", "1", "", "swap");
+        assertTrue(swap.contains("moves=1"));
+        assertTrue(swap.contains("renjuAction=swap"));
+
+        // decline + place: a single stone is sent via the `move` action.
+        String move = Game.buildSubmitMoveUrl("", "999", "130", "", "move");
+        assertTrue(move.contains("moves=130"));
+        assertTrue(move.contains("renjuAction=move"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlCarriesTenStoneOfferAsMove() {
+        // Branch B: 10 candidate stones submitted as one CSV `move`.
+        String csv = "129,130,131,132,133,144,145,146,147,148";
+        String url = Game.buildSubmitMoveUrl("", "999", csv, "", "move");
+        assertTrue(url.contains("moves=" + csv));
+        assertTrue(url.contains("renjuAction=move"));
+    }
+
+    @Test
+    public void buildSubmitMoveUrlCarriesTwoStoneSelect() {
+        // SELECTION: chosen offered black 5th + a white 6th, atomic 2-stone `select`.
+        String url = Game.buildSubmitMoveUrl("", "999", "130,200", "", "select");
+        assertTrue(url.contains("moves=130,200"));
+        assertTrue(url.contains("renjuAction=select"));
+    }
+}

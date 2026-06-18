@@ -2,6 +2,7 @@ package be.submanifold.pentelive.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -51,5 +52,25 @@ public class JsonTest {
         assertEquals("alice", back.name);
         assertEquals(1, back.color);
         assertTrue(back.subscriber);
+    }
+
+    @Test
+    public void parsesRenjuFieldsFromGameResponse() {
+        String json = "{\"gid\":\"12345\",\"gameName\":\"Renju\",\"moves\":\"112,113,114,115\","
+            + "\"renjuPhase\":\"SELECTION\",\"renjuOffers\":\"113,114,115,116,128,129,130,131,144,145\","
+            + "\"renjuSwaps\":5}";
+        JsonModels.GameResponse r = Json.GSON.fromJson(json, JsonModels.GameResponse.class);
+        assertEquals("SELECTION", r.renjuPhase);
+        assertEquals("113,114,115,116,128,129,130,131,144,145", r.renjuOffers);
+        assertEquals(Integer.valueOf(5), r.renjuSwaps);
+    }
+
+    @Test
+    public void renjuFieldsDefaultNullWhenAbsent() {
+        JsonModels.GameResponse r =
+            Json.GSON.fromJson("{\"gameName\":\"Pente\"}", JsonModels.GameResponse.class);
+        assertNull(r.renjuPhase);
+        assertNull(r.renjuOffers);
+        assertNull(r.renjuSwaps);
     }
 }

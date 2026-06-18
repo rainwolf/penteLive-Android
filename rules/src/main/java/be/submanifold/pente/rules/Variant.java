@@ -26,7 +26,8 @@ public enum Variant {
     // TODO(rules): GoRules seam — Go is classified + sized only; no rule engine in v1.
     GO_9(21, 9, CaptureRule.NONE, 1),
     GO_13(23, 13, CaptureRule.NONE, 1),
-    GO_19(19, 19, CaptureRule.NONE, 1); // gameId 19 coincidentally equals the 19x19 board size
+    GO_19(19, 19, CaptureRule.NONE, 1), // gameId 19 coincidentally equals the 19x19 board size
+    RENJU(31, 15, CaptureRule.NONE, 1);
 
     /** Descriptor fields are package-private; external code must go through {@link Variants}. */
     final int canonicalGameId;
@@ -59,5 +60,9 @@ public enum Variant {
 
     public boolean isGo() {
         return this == GO_9 || this == GO_13 || this == GO_19;
+    }
+
+    public boolean isRenju() {
+        return this == RENJU;
     }
 }

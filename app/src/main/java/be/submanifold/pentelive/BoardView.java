@@ -40,7 +40,8 @@ public class BoardView extends View {
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             goColor = Color.parseColor("#FAC832"), oPenteColor = Color.parseColor("#52be80"),
-            swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878");
+            swap2PenteColor = Color.parseColor("#E5AA70"), swap2KeryoColor = Color.parseColor("#50C878"),
+            renjuColor = Color.parseColor("#D98880");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint shadowPaint = makePaint(Color.BLACK);
 
@@ -50,6 +51,11 @@ public class BoardView extends View {
     private byte myColor, stoneI, stoneJ;
     public int playedMove = -1;
     public int gridSize = 19;
+    public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
+    public java.util.List<Integer> renjuCandidates = null; // move indices to render as translucent black (value 4)
+    public java.util.List<Integer> renjuPicks = null; // in-progress OFFERS multi-select (whole board)
+    public boolean renjuOfferMode = false; // collecting 1 (Branch A) or up to 10 (Branch B) candidate stones -> single `move`
+    public java.util.List<Integer> renjuSelection = null; // SELECTION 2-tap: [offered black 5th, white 6th]
 
     public int redDot = -1;
 
@@ -66,6 +72,7 @@ public class BoardView extends View {
     public int swap2Move3 = -1;
     public boolean swap2WillPass = false;
     public boolean swap2Chosen = false;
+    public boolean renjuChosen = false; // true once the SWAP prompt has been answered (don't re-show)
 
     private boolean replayed = false;
     private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
@@ -133,11 +140,28 @@ public class BoardView extends View {
         size = getWidth();
         canvas.scale(scaling, scaling);
         canvas.translate(translateX, translateY);
+        // drawBoard() renders renjuCandidates, so the SELECTION offers (and the board mask) must be
+        // set up BEFORE it — otherwise they lag one frame and only appear after the first touch.
+        // (The offer-mode path avoids this by aliasing renjuCandidates in onTouchEvent.) The block
+        // further below re-runs this idempotently and handles the post-draw layout chrome.
+        if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
+            if (renjuSelection == null || renjuSelection.isEmpty()) {
+                applyRenjuSelectionMask();
+                java.util.List<Integer> cands = new java.util.ArrayList<>();
+                if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
+                renjuCandidates = cands;
+            } else {
+                renjuCandidates = null;
+            }
+        }
         drawBoard(canvas);
+        if (game != null && game.isRenju() && "MOVE".equals(game.renjuPhase)) {
+            renjuBoxRadius = 4;
+        }
         if (game != null) {
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
-            if (!game.isConnect6() && !game.isGomoku()) {
+            if (!game.isConnect6() && !game.isGomoku() && !game.isRenju()) {
                 ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + game.getState().blackCaptures + " - \u25EF x " + game.getState().whiteCaptures);
             }
             if (scaling == 1) {
@@ -171,6 +195,71 @@ public class BoardView extends View {
                 }
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
                 return;
+            }
+            if (game.isRenju() && game.isActive() && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
+                // Board locked during the decision (see onTouchEvent): keep it un-zoomed and free
+                // of any leftover tracking stone, so tapping a choice button never reveals a stray
+                // stone left over from a pre-tap board touch.
+                playedMove = -1;
+                scaling = 1;
+                translateX = 0;
+                translateY = 0;
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(VISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(INVISIBLE);
+                // Decision phase: buttons only — drop the descriptive "play as" label so the
+                // choice buttons fill the row (GONE, not INVISIBLE, leaves no gap). The
+                // board-lock (padlock) lives in the top toolbar (R.id.action_lock), so this
+                // bottom button row is already clear of it; no repositioning needed.
+                parentLayout.findViewById(R.id.playAsLabel).setVisibility(GONE);
+                ((Button) parentLayout.findViewById(R.id.playAsWhiteButton)).setText(getContext().getString(R.string.renju_swap_take_over));
+                ((Button) parentLayout.findViewById(R.id.playAsBlackButton)).setText(getContext().getString(R.string.renju_dont_swap));
+                // Move 4 (4 stones placed): declining forks into Branch A (place your single
+                // 5th stone) vs Branch B (offer ten), so show the third button "Place 10".
+                // Windows 1-3 have no fork -> only swap / don't-swap.
+                Button renjuPlaceTen = parentLayout.findViewById(R.id.swap2PassButton);
+                if (game.getMovesList().size() >= 4) {
+                    renjuPlaceTen.setVisibility(VISIBLE);
+                    renjuPlaceTen.setText(getContext().getString(R.string.renju_place_ten));
+                } else {
+                    renjuPlaceTen.setVisibility(GONE);
+                }
+                return;
+            }
+            // NB: renjuOfferMode for the post-take-over BRANCH phase is set in the
+            // data-refresh path (Game.parseGame), not here. Writing it from onDraw would
+            // revive the offer UI on every invalidate() — e.g. the STAYWITHGAME post-submit
+            // re-parse, where the phase still reads "BRANCH" until the server responds,
+            // opening a double-submit window. onDraw only READS the flag.
+            if (game.isRenju() && game.isActive() && renjuOfferMode) {
+                renjuBoxRadius = 0;
+                renjuCandidates = renjuPicks;
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
+            }
+            if (game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
+                renjuBoxRadius = 0;
+                if (renjuSelection == null || renjuSelection.isEmpty()) {
+                    // black-5th pick: lock the board to the 10 offers (mask every other empty
+                    // cell -1 so only an offer can show a stone) and draw the offers as the
+                    // existing translucent dead-stone candidates. Idempotent per frame.
+                    applyRenjuSelectionMask();
+                    java.util.List<Integer> cands = new java.util.ArrayList<>();
+                    if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
+                    renjuCandidates = cands;
+                } else {
+                    // 5th chosen (mask already cleared on the pick): drop the 9 other candidates;
+                    // the chosen 5th (and the white 6th) render as live stones from the snapshot.
+                    renjuCandidates = null;
+                }
+                parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
+                parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
+            }
+            // Renju opening: drive the submit button as the greyed-until-valid feedback surface
+            // for every active non-decision phase (offer collection, SELECTION, single placement).
+            // The SWAP/BRANCH decision block above returns early while the choice buttons are up,
+            // so reaching here implies a non-decision phase — styling here never greys a decision.
+            if (game.isRenju() && game.isActive()) {
+                styleRenjuSubmit();
             }
             if (!game.isActive()) {
                 return;
@@ -223,14 +312,31 @@ public class BoardView extends View {
             } else {
                 myColor = (byte) (2 - game.getMovesList().size() % 2);
             }
+        } else if (game != null && game.isRenju() && game.getMovesList() != null) {
+            // Renju is black-first: a stone's color is fixed by its move number (odd = black = 2,
+            // even = white = 1), independent of any opening swaps. Same formula Go already uses;
+            // the generic fallback below would wrongly make move 1 white.
+            myColor = (byte) (2 - game.getMovesList().size() % 2);
         } else if (game != null && game.getMovesList() != null) {
             myColor = (byte) (game.getMovesList().size() % 2 + 1);
         } else {
             myColor = 1;
         }
+        // Renju SELECTION tracking-stone color: the offered 5th move is black (2), the placed
+        // 6th is white (1). (myColor above resolves to black at this stage by move parity.)
+        if (game != null && game.isRenju() && "SELECTION".equals(game.renjuPhase)) {
+            myColor = (renjuSelection == null || renjuSelection.isEmpty()) ? (byte) 2 : (byte) 1;
+        }
         if (scaling == 2 && playedMove != -1) {
             drawZoomedLine(canvas, stoneX, stoneY);
             drawZoomedStone(canvas, stoneX, stoneY, myColor);
+        } else if (game != null && game.isRenju() && playedMove != -1) {
+            // Renju single-stone placement: on touch release (scaling == 1) the zoomed preview
+            // is gone, so render the played stone (non-zoomed) at its grid cell in myColor.
+            // Mirror the committed-stone draw mapping: drawStone(canvas, row, col, color).
+            byte movei = (byte) (playedMove / gridSize);
+            byte movej = (byte) (playedMove % gridSize);
+            drawStone(canvas, movei, movej, myColor);
         }
 //        else {
 //            drawStone(canvas, stoneX, stoneY, myColor);
@@ -241,6 +347,14 @@ public class BoardView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int index = event.getActionIndex();
+
+        // Renju swap decision: the board is locked while the Swap / No swap / Place 10 buttons
+        // are up — choose via the buttons only. Ignore all board touches (no zoom, no tracking
+        // stone) until a button sets renjuChosen, so nothing carries over into placement.
+        if (game != null && game.isRenju() && game.isActive()
+                && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
+            return false;
+        }
 
         float x, y;
         x = event.getX();
@@ -302,6 +416,76 @@ public class BoardView extends View {
                 break;
         }
 
+        if (game != null && game.isRenju() && game.isActive() && renjuOfferMode) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int m = gridSize * stoneI + stoneJ;
+                if (renjuPicks == null) renjuPicks = new java.util.ArrayList<>();
+                if (game.getState().cell(stoneI, stoneJ) != 0) {
+                    // occupied: ignore
+                } else if (renjuPicks.contains(m)) {
+                    renjuPicks.remove((Integer) m); // tap again to deselect
+                } else {
+                    int[] accepted = new int[renjuPicks.size()];
+                    for (int k = 0; k < renjuPicks.size(); k++) accepted[k] = renjuPicks.get(k);
+                    if (renjuPicks.size() >= 1 && be.submanifold.pente.rules.RenjuSymmetry.isSymmetricDup(m, accepted)) {
+                        // symmetric duplicate: reject (ignore)
+                    } else if (renjuPicks.size() < 10) {
+                        renjuPicks.add(m);
+                    }
+                }
+                playedMove = -1; // committed to picks on release: clear the tracking stone
+            } else {
+                // DOWN/MOVE: show a tracking stone at the finger cell (the zoom is already active)
+                // so the user sees where the offer will land; commit to renjuPicks only on release.
+                // Hide it over an occupied cell, matching single-stone placement.
+                playedMove = (game.getState().cell(stoneI, stoneJ) != 0) ? -1 : (gridSize * stoneI + stoneJ);
+            }
+            renjuCandidates = renjuPicks; // alias now so the first pick renders this frame (no one-frame lag)
+            invalidate();
+            return true; // consume; skip normal placement
+        }
+        if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
+            // Two taps: 1st = the offered black 5th move; 2nd = an empty, distinct white 6th.
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int m = gridSize * stoneI + stoneJ;
+                if (renjuSelection == null) renjuSelection = new java.util.ArrayList<>();
+                boolean isOffer = false;
+                if (game.renjuOffers != null) for (int o : game.renjuOffers) if (o == m) { isOffer = true; break; }
+                if (renjuSelection.isEmpty()) {
+                    if (isOffer) {
+                        // black 5th: unmask the board (so the 6th may land on ANY empty cell) and
+                        // render the chosen offer as a live black stone (2 = black in BoardState).
+                        clearRenjuSelectionMask();
+                        renjuSelection.add(m);
+                        game.getState().board[stoneI][stoneJ] = 2;
+                    }
+                } else if (game.getState().cell(stoneI, stoneJ) == 0 && m != renjuSelection.get(0)) {
+                    // white 6th: empty & distinct from the 5th; render as a live white stone.
+                    renjuSelection.add(m);
+                    game.getState().board[stoneI][stoneJ] = 1;
+                }
+                playedMove = -1; // committed on release: clear the tracking stone
+            } else {
+                // On the DOWN that begins re-placing a completed pair, lift the placed white 6th
+                // (drop back to the "place 6th" state) so the stale stone doesn't linger on the
+                // zoomed board while the new position is tracked. Releasing on its old cell
+                // re-places it there; releasing elsewhere moves it; an invalid release leaves it
+                // in hand (size 1) to be tapped down again.
+                if (event.getAction() == MotionEvent.ACTION_DOWN
+                        && renjuSelection != null && renjuSelection.size() >= 2) {
+                    int six = renjuSelection.remove(renjuSelection.size() - 1);
+                    game.getState().board[six / gridSize][six % gridSize] = 0;
+                }
+                // DOWN/MOVE: show a tracking stone at the finger cell so the user sees where the
+                // pick/placement will land (black for the 5th over a masked offer, white for the
+                // 6th — see the SELECTION myColor override in onDraw). Commit only on release.
+                playedMove = (game.getState().cell(stoneI, stoneJ) != 0) ? -1 : (gridSize * stoneI + stoneJ);
+            }
+            renjuBoxRadius = 0;
+            invalidate();
+            return true; // consume; skip normal placement
+        }
+
         String str;
         playedMove = gridSize * stoneI + stoneJ;
         if (game.isActive()) {
@@ -317,6 +501,10 @@ public class BoardView extends View {
                 playedMove = -1;
             }
         } else {
+            playedMove = -1;
+        }
+        if (game.isRenju() && renjuBoxRadius > 0 && playedMove != -1 &&
+                (Math.abs(stoneI - 7) > renjuBoxRadius || Math.abs(stoneJ - 7) > renjuBoxRadius)) {
             playedMove = -1;
         }
         if (scaling == 1) {
@@ -361,7 +549,7 @@ public class BoardView extends View {
                     replayed = true;
                 }
                 if (game.isConnect6() && connect6Move1 > -1) {
-                    str = submitStr + ": " + coordinateLetters[connect6Move1 % 19] + "" + (19 - (connect6Move1 / 19)) +
+                    str = submitStr + ": " + coordinateLetters[connect6Move1 % gridSize] + "" + (gridSize - (connect6Move1 / gridSize)) +
                             "-...";
                     ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                 }
@@ -369,62 +557,62 @@ public class BoardView extends View {
                 if (game.isConnect6()) {
                     if (connect6Move1 > -1) {
                         if (playedMove > -1 && playedMove != connect6Move1) {
-                            str = submitStr + ": " + coordinateLetters[connect6Move1 % 19] + "" + (19 - (connect6Move1 / 19)) +
-                                    "-" + coordinateLetters[stoneJ] + "" + (19 - stoneI);
+                            str = submitStr + ": " + coordinateLetters[connect6Move1 % gridSize] + "" + (gridSize - (connect6Move1 / gridSize)) +
+                                    "-" + coordinateLetters[stoneJ] + "" + (gridSize - stoneI);
                             ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         } else {
-                            str = submitStr + ": " + coordinateLetters[stoneJ] + "" + (19 - stoneI) +
+                            str = submitStr + ": " + coordinateLetters[stoneJ] + "" + (gridSize - stoneI) +
                                     "-...";
                             ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                         }
                     }
                 } else if (game.isDPente() && game.getMovesList().isEmpty()) {
                     if (dPenteMove4 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
-                                "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
-                                "-" + coordinateLetters[dPenteMove4 % 19] + "" + (19 - (dPenteMove4 / 19));
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove3 % gridSize] + "" + (gridSize - (dPenteMove3 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove4 % gridSize] + "" + (gridSize - (dPenteMove4 / gridSize));
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (dPenteMove3 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
-                                "-" + coordinateLetters[dPenteMove3 % 19] + "" + (19 - (dPenteMove3 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove3 % gridSize] + "" + (gridSize - (dPenteMove3 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (dPenteMove2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
-                                "-" + coordinateLetters[dPenteMove2 % 19] + "" + (19 - (dPenteMove2 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
+                                "-" + coordinateLetters[dPenteMove2 % gridSize] + "" + (gridSize - (dPenteMove2 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % 19] + "" + (19 - (dPenteMove1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[dPenteMove1 % gridSize] + "" + (gridSize - (dPenteMove1 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
                 } else if (game.isSwap2() && game.getMovesList().isEmpty()) {
                     if (swap2Move3 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19)) +
-                                "-" + coordinateLetters[swap2Move3 % 19] + "" + (19 - (swap2Move3 / 19));
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move3 % gridSize] + "" + (gridSize - (swap2Move3 / gridSize));
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else if (swap2Move2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
                                 "-...";
                         ((Button) parentLayout.findViewById(R.id.submitButton)).setText(str);
                     }
                 } else if (game.isSwap2() && game.getMovesList().size() == 3 && swap2WillPass) {
                     if (swap2Move2 > -1) {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
-                                "-" + coordinateLetters[swap2Move2 % 19] + "" + (19 - (swap2Move2 / 19));
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
+                                "-" + coordinateLetters[swap2Move2 % gridSize] + "" + (gridSize - (swap2Move2 / gridSize));
                         byte swap2Move1i = (byte) (swap2Move1 / 19), swap2Move1j = (byte) (swap2Move1 % 19);
                         game.replayGame(stoneI, stoneJ, this, swap2Move1i, swap2Move1j);
                     } else {
-                        str = submitStr + ": " + coordinateLetters[swap2Move1 % 19] + "" + (19 - (swap2Move1 / 19)) +
+                        str = submitStr + ": " + coordinateLetters[swap2Move1 % gridSize] + "" + (gridSize - (swap2Move1 / gridSize)) +
                                 "-...";
                         game.replayGame(stoneI, stoneJ, this, (byte) 255, (byte) 255);
                     }
@@ -449,6 +637,124 @@ public class BoardView extends View {
         return true;
     }
 
+
+    // SELECTION: lock the board to the 10 offered cells (black 5th). Mark every EMPTY non-offer
+    // cell as -1 ("forbidden" in BoardState's cell encoding; drawStone renders nothing for <1),
+    // the same -1 masking idiom used elsewhere in the app (Table/DBBoardView). The 10 offers stay
+    // 0 and are drawn as translucent candidates via renjuCandidates. No-op when there are no
+    // offers, so we never lock the whole board. Writes only the rendered snapshot
+    // (game.getState().board), not the engine's abstractBoard, and is rebuilt on the next replay.
+    private void applyRenjuSelectionMask() {
+        if (game == null || game.renjuOffers == null || game.renjuOffers.length == 0) {
+            return;
+        }
+        java.util.Set<Integer> offers = new java.util.HashSet<>();
+        for (int o : game.renjuOffers) offers.add(o);
+        byte[][] b = game.getState().board;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (b[i][j] == 0 && !offers.contains(gridSize * i + j)) {
+                    b[i][j] = -1;
+                }
+            }
+        }
+    }
+
+    // Restore every masked (-1) cell to empty (0). The engine never writes -1 into the main
+    // snapshot, so the only -1 marks come from applyRenjuSelectionMask — clearing them all is
+    // safe. Called once the black 5th is picked so the white 6th may land on ANY empty cell.
+    private void clearRenjuSelectionMask() {
+        if (game == null) {
+            return;
+        }
+        byte[][] b = game.getState().board;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (b[i][j] == -1) {
+                    b[i][j] = 0;
+                }
+            }
+        }
+    }
+
+    // Renju opening: drive the submit button as a greyed-until-valid feedback surface, matching
+    // iOS. Called from onDraw for every active non-decision renju phase (the SWAP/BRANCH decision
+    // block returns earlier while the choice buttons are up, so we never grey those). Submit stays
+    // VISIBLE but disabled (alpha 0.5) until the current input is a complete, valid move, then
+    // enabled (alpha 1); its text reflects exactly what will be submitted.
+    private void styleRenjuSubmit() {
+        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
+        Button submit = parentLayout.findViewById(R.id.submitButton);
+        if (submit == null) {
+            return;
+        }
+        if (renjuOfferMode) {
+            // Offer collection. Move-4 "Place 10" (renjuPhase == SWAP) is Branch B only, so it
+            // is enabled solely at the full ten. The post-take-over BRANCH phase has no separate
+            // Branch-A/B buttons, so there a single in-box stone (n==1) is also submittable as
+            // Branch A. Either way it goes out as one `move`; the server infers the branch.
+            int n = (renjuPicks == null) ? 0 : renjuPicks.size();
+            int c = gridSize / 2;
+            if (n == 1 && !"SWAP".equals(game.renjuPhase)) {
+                int m = renjuPicks.get(0);
+                boolean inBox = Math.abs(m % gridSize - c) <= 4 && Math.abs(m / gridSize - c) <= 4;
+                if (inBox) {
+                    setSubmitEnabled(submit, true);
+                    submit.setText(submitStr + ": " + renjuCoord(m));
+                    return;
+                }
+            } else if (n == 10) {
+                int[] arr = new int[n];
+                for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
+                if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
+                    setSubmitEnabled(submit, true);
+                    submit.setText(submitStr + " 10/10");
+                    return;
+                }
+            }
+            // still building toward ten (or an as-yet-incomplete count): greyed running count.
+            setSubmitEnabled(submit, false);
+            submit.setText(submitStr + " " + n + "/10");
+            return;
+        }
+        if ("SELECTION".equals(game.renjuPhase)) {
+            // 2-tap: black 5th then white 6th. Enabled only once both are chosen.
+            int n = (renjuSelection == null) ? 0 : renjuSelection.size();
+            if (n >= 2) {
+                setSubmitEnabled(submit, true);
+                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-" + renjuCoord(renjuSelection.get(1)));
+            } else if (n == 1) {
+                setSubmitEnabled(submit, false);
+                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-");
+            } else {
+                setSubmitEnabled(submit, false);
+                submit.setText(submitStr);
+            }
+            return;
+        }
+        // single-stone placement (SWAP windows 1-3 decline+place, MOVE): greyed until a legal stone
+        // is placed (playedMove is clamped to the legal box in onTouchEvent), then enabled.
+        if (playedMove > -1) {
+            setSubmitEnabled(submit, true);
+            submit.setText(submitStr + ": " + renjuCoord(playedMove));
+        } else {
+            setSubmitEnabled(submit, false);
+            submit.setText(submitStr);
+        }
+    }
+
+    // Greyed-submit idiom, introduced for the Renju opening only: dim + disable, or restore + enable.
+    private void setSubmitEnabled(Button submit, boolean enabled) {
+        submit.setEnabled(enabled);
+        submit.setAlpha(enabled ? 1f : 0.5f);
+    }
+
+    // Move index -> board coordinate (e.g. "H8"). Column letter from coordinateLetters (which skips
+    // 'I') indexed by move % gridSize; row = gridSize - move/gridSize. Matches the move-list
+    // formatter in Game.getBoardString (column = move % gridSize, row = gridSize - move/gridSize).
+    private String renjuCoord(int move) {
+        return "" + coordinateLetters[move % gridSize] + (gridSize - (move / gridSize));
+    }
 
     private void drawBoard(Canvas canvas) {
         float step = size / gridSize, margin = step / 2;
@@ -479,6 +785,14 @@ public class BoardView extends View {
                 canvas.drawCircle(size / 2, size - (margin + 3 * step), radius, linePaint);
                 canvas.drawCircle(size - (margin + 3 * step), size / 2, radius, linePaint);
             }
+        } else if (game != null && game.isRenju()) {
+            linePaint.setStyle(Paint.Style.FILL);
+            float r = margin / 2;
+            canvas.drawCircle(margin + 3 * step, margin + 3 * step, r, linePaint);
+            canvas.drawCircle(size - (margin + 3 * step), margin + 3 * step, r, linePaint);
+            canvas.drawCircle(margin + 3 * step, size - (margin + 3 * step), r, linePaint);
+            canvas.drawCircle(size - (margin + 3 * step), size - (margin + 3 * step), r, linePaint);
+            canvas.drawCircle(size / 2, size / 2, r, linePaint);
         } else {
             canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
             canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
@@ -486,10 +800,23 @@ public class BoardView extends View {
             canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
             canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
         }
+        // Renju opening placement stays constrained to the central (2r+1)x(2r+1) box
+        // (enforced in onTouchEvent), but the box is intentionally not drawn — no visual
+        // helper square during opening moves.
         byte[][] board = game.getState().board;
         for (byte i = 0; i < gridSize; i++) {
             for (byte j = 0; j < gridSize; j++) {
                 drawStone(canvas, i, j, board[i][j]);
+            }
+        }
+        // Renju candidate moves: translucent black preview stones drawn on top of the board.
+        if (game != null && game.isRenju() && renjuCandidates != null) {
+            for (int m : renjuCandidates) {
+                int ci = m / gridSize, cj = m % gridSize; // ci = row, cj = col
+                // Mirror the stone-draw mapping: x uses col, y uses row, center = margin + index*step.
+                float cx = margin + cj * step;
+                float cy = margin + ci * step;
+                drawStone(canvas, cx, cy, (byte) 4); // translucent black
             }
         }
         drawRedDot(canvas);

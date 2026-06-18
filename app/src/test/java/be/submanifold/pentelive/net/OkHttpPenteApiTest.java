@@ -224,6 +224,39 @@ public class OkHttpPenteApiTest {
         assertEquals(Boolean.TRUE, result.value);
     }
 
+    /**
+     * The 4-arg submitMove overload appends renjuAction as a query parameter, for each of
+     * the three TB Renju wire actions: swap (take-over, no stone), move (1 or 10 stones)
+     * and the atomic 2-stone select.
+     */
+    @Test
+    public void submitMoveAppendsRenjuAction() throws Exception {
+        server.setDispatcher(new Dispatcher() {
+            @Override public MockResponse dispatch(RecordedRequest req) {
+                return new MockResponse().setResponseCode(200).setBody("ok");
+            }
+        });
+
+        // take-over: swap with no appended stone.
+        api.submitMove("999", "1", "", "swap");
+        HttpUrl swap = server.takeRequest(5, TimeUnit.SECONDS).getRequestUrl();
+        assertEquals("move", swap.queryParameter("command"));
+        assertEquals("1", swap.queryParameter("moves"));
+        assertEquals("swap", swap.queryParameter("renjuAction"));
+
+        // Branch B: ten 5th-move offers carried atomically via the `move` action.
+        api.submitMove("999", "113,114,115,116,128,129,130,131,144,145", "", "move");
+        HttpUrl tenMove = server.takeRequest(5, TimeUnit.SECONDS).getRequestUrl();
+        assertEquals("113,114,115,116,128,129,130,131,144,145", tenMove.queryParameter("moves"));
+        assertEquals("move", tenMove.queryParameter("renjuAction"));
+
+        // atomic 2-stone select: chosen black 5th + white 6th.
+        api.submitMove("999", "130,200", "", "select");
+        HttpUrl sel = server.takeRequest(5, TimeUnit.SECONDS).getRequestUrl();
+        assertEquals("130,200", sel.queryParameter("moves"));
+        assertEquals("select", sel.queryParameter("renjuAction"));
+    }
+
     /** An expiry that survives the single re-auth maps to AUTH_EXPIRED (retry is capped at one). */
     @Test
     public void authExpiryThatSurvivesReauth_mapsToAuthExpired() {

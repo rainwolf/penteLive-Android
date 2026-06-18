@@ -34,6 +34,14 @@ public class PentePlayer implements Parcelable {
 
     public static String mPlayerName = "";
     public static String mPassword = "";
+
+    /**
+     * Credential query-string for authenticated TB write requests (move, invitation reply, cancel, undo).
+     */
+    public static String writeCreds() {
+        return "&name2=" + mPlayerName + "&password2=" + mPassword;
+    }
+
     public static Boolean mShowAds = true;
     public static Boolean mSubscriber = false;
     public static Boolean dbAccess = false;
@@ -777,21 +785,21 @@ public class PentePlayer implements Parcelable {
                 if (this.accept) {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID);
                     url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                            + writeCreds());
                 } else {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID);
                     url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                            + writeCreds());
                 }
                 if (development) {
                     if (this.accept) {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID);
                         url = new URL("https://10.0.2.2/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Accept&sid=" + mSetID
-                                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                                + writeCreds());
                     } else {
 //                    url = new URL("https://www.pente.org/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID);
                         url = new URL("https://10.0.2.2/gameServer/tb/replyInvitation?mobile=&inviteeMessage=&command=Decline&sid=" + mSetID
-                                + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                                + writeCreds());
                     }
                 }
 
@@ -863,10 +871,10 @@ public class PentePlayer implements Parcelable {
                 URL url;
 //                url = new URL("https://www.pente.org/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID);
                 url = new URL("https://www.pente.org/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                        + writeCreds());
                 if (development) {
                     url = new URL("https://10.0.2.2/gameServer/tb/cancelInvitation?mobile=&command=Cancel&sid=" + mSetID
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                            + writeCreds());
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");

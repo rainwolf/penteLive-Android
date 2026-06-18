@@ -80,6 +80,10 @@ public class Game implements Parcelable {
 
     public boolean swap2Choice = false;
 
+    public String renjuPhase = null;
+    public int[] renjuOffers = null;
+    public Integer renjuSwaps = null;
+
     /**
      * Variants proven bit-identical to the legacy replay workers by
      * {@code PenteRulesEquivalenceTest} (500 random games each). Only these —
@@ -516,14 +520,20 @@ public class Game implements Parcelable {
 
         private final String move;
         private String message;
+        private final String renjuAction;
 
         SubmitMoveTask(String move, String message) {
+            this(move, message, null);
+        }
+
+        SubmitMoveTask(String move, String message, String renjuAction) {
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 this.message = "";
             }
             this.move = move;
+            this.renjuAction = renjuAction;
         }
 
         @Override
@@ -531,11 +541,14 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction));
                 if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
+                    String devUrl = "https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
+                            + PentePlayer.writeCreds();
+                    if (renjuAction != null && !renjuAction.isEmpty()) {
+                        devUrl += "&renjuAction=" + renjuAction;
+                    }
+                    url = new URL(devUrl);
                 }
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
@@ -646,7 +659,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -735,7 +748,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -827,7 +840,7 @@ public class Game implements Parcelable {
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
                 String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
                     postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -912,8 +925,24 @@ public class Game implements Parcelable {
 //        this.mMovesList = mMovesList;
 //    }
 
+    /** Pure builder for the TB move URL. renjuAction omitted when null/empty. */
+    public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
+                                            String message, String renjuAction) {
+        String url = "https://www.pente.org/gameServer/tb/game?command=move" + hideStr
+                + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message
+                + PentePlayer.writeCreds();
+        if (renjuAction != null && !renjuAction.isEmpty()) {
+            url += "&renjuAction=" + renjuAction;
+        }
+        return url;
+    }
+
     public void submitMove(String move, String message) {
-        SubmitMoveTask submitTask = new SubmitMoveTask(move, message);
+        submitMove(move, message, null);
+    }
+
+    public void submitMove(String move, String message, String renjuAction) {
+        SubmitMoveTask submitTask = new SubmitMoveTask(move, message, renjuAction);
         submitTask.execute((Void) null);
     }
 
@@ -945,6 +974,20 @@ public class Game implements Parcelable {
     public boolean isDPente() {
         Variant v = Variants.fromGameType(getGameType());
         return v != null && v.isDPente();
+    }
+
+    public boolean isRenju() {
+        Variant v = Variants.fromGameType(getGameType());
+        return v != null && v.isRenju();
+    }
+
+    /** Pure board-size resolver by server gameName (no Android deps). */
+    public static int gridSizeForGameType(String gameType) {
+        if (gameType == null) return 19;
+        if (gameType.contains("Renju")) return 15;
+        if (gameType.contains("(9x9)")) return 9;
+        if (gameType.contains("(13x13)")) return 13;
+        return 19;
     }
 
     public void parseGame(BoardView boardView) {
@@ -1009,6 +1052,10 @@ public class Game implements Parcelable {
                 go = true;
             }
         }
+        if (isRenju()) {
+            this.gridSize = 15;
+            boardView.gridSize = 15;
+        }
         this.mMovesList = new ArrayList<Integer>();
         if (mGameJson.moves != null && !mGameJson.moves.isEmpty()) {
             String[] movesString = mGameJson.moves.split(",");
@@ -1022,6 +1069,34 @@ public class Game implements Parcelable {
             this.dPenteChoice = true;
             if (isSwap2()) {
                 this.swap2Choice = true;
+            }
+        }
+        this.renjuPhase = null;
+        this.renjuOffers = null;
+        this.renjuSwaps = null;
+        boardView.renjuChosen = false;
+        boardView.renjuPicks = null;
+        boardView.renjuCandidates = null;
+        boardView.renjuBoxRadius = 0;
+        boardView.renjuOfferMode = false;
+        boardView.renjuSelection = null; // drop any in-progress SELECTION pair; the freshly
+        // rebuilt board snapshot also clears the -1 SELECTION mask so it can't leak to a new phase/game.
+        if (mGameJson.renjuPhase != null) {
+            this.renjuPhase = mGameJson.renjuPhase;
+            this.renjuSwaps = mGameJson.renjuSwaps;
+            // Post-take-over BRANCH: present the place-1-or-10 affordance (same as the
+            // move-4 decline). Set here in the data-refresh path so it tracks the freshly
+            // parsed phase and is never revived from onDraw after a submit. The move-4
+            // decline still sets this flag in its own event handler (SWAP, window >= 4).
+            if ("BRANCH".equals(this.renjuPhase)) {
+                boardView.renjuOfferMode = true;
+            }
+            if (mGameJson.renjuOffers != null && !mGameJson.renjuOffers.isEmpty()) {
+                String[] parts = mGameJson.renjuOffers.split(",");
+                this.renjuOffers = new int[parts.length];
+                for (int i = 0; i < parts.length; i++) {
+                    this.renjuOffers[i] = Integer.parseInt(parts[i].trim());
+                }
             }
         }
         if (mGameJson.cancel != null && getOpponentName().equals(mGameJson.cancel.name)) {
@@ -1323,6 +1398,9 @@ public class Game implements Parcelable {
         if (getGameType().equals("Gomoku") || getGameType().equals("Speed Gomoku")) {
             boardView.setBackgroundColor(boardView.gomokuColor);
             if (!delegable) replayGomokuGame(untilMove);
+        } else if (getGameType().contains("Renju")) {
+            boardView.setBackgroundColor(boardView.renjuColor);
+            if (!delegable) replayRenjuGame(untilMove);
         } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             if (!delegable) replayPenteGame(untilMove);
@@ -1467,7 +1545,10 @@ public class Game implements Parcelable {
             return;
         }
 
-        if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
+        if (getGameType().contains("Renju")) {
+            boardView.setBackgroundColor(boardView.renjuColor);
+            replayRenjuGame(mMovesList.size());
+        } else if (getGameType().equals("Pente") || getGameType().equals("Speed Pente")) {
             boardView.setBackgroundColor(boardView.penteColor);
             replayPenteGame(moveI, moveJ, (byte) 255, (byte) 255);
         } else if (getGameType().equals("Boat-Pente") || getGameType().equals("Speed Boat-Pente")) {
@@ -1530,6 +1611,15 @@ public class Game implements Parcelable {
         for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
             byte color = (byte) (1 + (i % 2));
             int move = mMovesList.get(i), moveI = move / 19, moveJ = move % 19;
+            abstractBoard[moveI][moveJ] = color;
+        }
+    }
+
+    private void replayRenjuGame(int until) {
+        resetAbstractBoard();
+        for (int i = 0; i < Math.min(mMovesList.size(), until); i++) {
+            byte color = (byte) (2 - (i % 2)); // black-first: i=0 -> 2 (black)
+            int move = mMovesList.get(i), moveI = move / gridSize, moveJ = move % gridSize;
             abstractBoard[moveI][moveJ] = color;
         }
     }

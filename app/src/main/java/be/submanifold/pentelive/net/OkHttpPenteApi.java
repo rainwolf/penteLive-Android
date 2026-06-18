@@ -161,7 +161,11 @@ public final class OkHttpPenteApi implements PenteApi {
 
     @Override
     public Result<Void> submitMove(String gid, String moves, String message) {
-        HttpUrl url = base()
+        return submitMove(gid, moves, message, null);
+    }
+
+    public Result<Void> submitMove(String gid, String moves, String message, String renjuAction) {
+        HttpUrl.Builder b = base()
                 .addPathSegments("gameServer/tb/game")
                 .addQueryParameter("command", "move")
                 .addQueryParameter("mobile", "")
@@ -169,9 +173,11 @@ public final class OkHttpPenteApi implements PenteApi {
                 .addQueryParameter("moves", moves)
                 .addQueryParameter("message", message)
                 .addQueryParameter("name2", session.name())
-                .addQueryParameter("password2", session.password())
-                .build();
-        Request request = get(url);
+                .addQueryParameter("password2", session.password());
+        if (renjuAction != null && !renjuAction.isEmpty()) {
+            b.addQueryParameter("renjuAction", renjuAction);
+        }
+        Request request = get(b.build());
         return withReauth(() -> attemptVoid(request));
     }
 
