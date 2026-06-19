@@ -14,8 +14,12 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import be.submanifold.pente.rules.RenjuLiveState;
+import be.submanifold.pente.rules.RenjuSymmetry;
 
 public class LiveBoardView extends View {
     Table table;
@@ -37,12 +41,74 @@ public class LiveBoardView extends View {
 
     private int gridSize = 19;
 
+    // ----- Renju (Taraguchi-10) opening interaction -----
+    public static final int RENJU_IDLE = 0;
+    public static final int RENJU_PLACE = 1;       // arm a single box-constrained decline / Branch-A stone
+    public static final int RENJU_OFFER = 2;       // collect up to 10 symmetry-distinct picks
+    public static final int RENJU_SELECTION = 3;   // accept one tap on a rendered offer
+    public static final int RENJU_PENDING = 4;     // inert until the next server echo
+    private int renjuMode = RENJU_IDLE;
+    private final List<Integer> renjuPicks = new ArrayList<>();
+    private int[] renjuOffers = new int[0];
+    private static final int RENJU_BG = Color.parseColor("#D98880");
+
+    /** Enter PLACE mode: arm a single box-constrained decline / Branch-A stone. */
+    public void beginRenjuPlace() {
+        renjuMode = RENJU_PLACE;
+        renjuPicks.clear();
+        renjuOffers = new int[0];
+        invalidate();
+    }
+
+    /** Enter OFFER mode: collect up to 10 symmetry-distinct picks (the 10th auto-sends). */
+    public void beginRenjuOffer() {
+        renjuMode = RENJU_OFFER;
+        renjuPicks.clear();
+        renjuOffers = new int[0];
+        invalidate();
+    }
+
+    /** Enter SELECTION mode: render the ten offers and accept one tap. */
+    public void beginRenjuSelection(int[] offers) {
+        renjuMode = RENJU_SELECTION;
+        renjuPicks.clear();
+        renjuOffers = (offers != null) ? offers : new int[0];
+        invalidate();
+    }
+
+    /** Return to IDLE. */
+    public void clearRenjuArming() {
+        renjuMode = RENJU_IDLE;
+        renjuPicks.clear();
+        renjuOffers = new int[0];
+        invalidate();
+    }
+
+    /** Enter PENDING mode: the board is inert until the next server echo. */
+    public void markRenjuPending() {
+        renjuMode = RENJU_PENDING;
+        renjuPicks.clear();
+        renjuOffers = new int[0];
+        invalidate();
+    }
+
+    /** True when mode != IDLE (PLACE/OFFER/SELECTION/PENDING). */
+    public boolean isRenjuArmed() {
+        return renjuMode != RENJU_IDLE;
+    }
+
     public int getGridSize() {
         return gridSize;
     }
 
     public void setGridSize(int gridSize) {
-        this.gridSize = gridSize;
+        // Renju is always 15x15; ignore the table's (19-based) default so a later
+        // refresh from the fragment cannot override the renju grid back to 19.
+        if (table != null && table.isRenju()) {
+            this.gridSize = 15;
+        } else {
+            this.gridSize = gridSize;
+        }
     }
 
     private Map<Integer, List<Integer>> goDeadStonesByPlayer, goTerritoryByPlayer;
@@ -73,6 +139,9 @@ public class LiveBoardView extends View {
     public void setTable(Table table, String me) {
         this.me = me;
         this.table = table;
+        if (table != null && table.isRenju()) {
+            this.gridSize = 15;
+        }
     }
 
 
@@ -115,6 +184,16 @@ public class LiveBoardView extends View {
             invalidate();
             return false;
         }
+        // Renju: while the board is inert (PENDING, or an unanswered SWAP/BRANCH dialog) the
+        // board owns nothing — consume the touch without zooming or placing.
+        if (table != null && table.isRenju() && isRenjuBoardInert()) {
+            playedMove = -1;
+            scaling = 1;
+            translateX = 0;
+            translateY = 0;
+            invalidate();
+            return true;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 offSetX = x;
@@ -140,7 +219,11 @@ public class LiveBoardView extends View {
         stoneJ = (byte) (gridSize * stoneX / size);
         stoneY = offSetY + 2 * (y - offSetY) / zoomedScale;
         stoneI = (byte) (gridSize * stoneY / size);
-        if (table != null) {
+        if (table != null && table.isRenju()) {
+            handleRenjuActiveTouch(event);
+            invalidate();
+            return true;
+        } else if (table != null) {
             boolean filled = table.abstractBoard[stoneI][stoneJ] != 0;
             if (table.isGo()) {
                 if ((filled && table.getGameState().goState == GoState.MARKSTONES) || (!filled && table.getGameState().goState == GoState.PLAY)) {
@@ -159,6 +242,130 @@ public class LiveBoardView extends View {
 
         invalidate();
         return true;
+    }
+
+    /** True when a renju touch must be swallowed (PENDING, or an open SWAP/BRANCH decision dialog). */
+    private boolean isRenjuBoardInert() {
+        if (renjuMode == RENJU_PENDING) {
+            return true;
+        }
+        if (renjuMode == RENJU_IDLE) {
+            int n = table.getMoves().size();
+            RenjuLiveState.Phase phase = table.getGameState().renjuState.phase(n);
+            return phase == RenjuLiveState.Phase.SWAP || phase == RenjuLiveState.Phase.BRANCH;
+        }
+        return false;
+    }
+
+    /**
+     * Active-mode renju touch FSM (PLACE / OFFER / SELECTION / IDLE-MOVE). stoneI/stoneJ are already
+     * resolved. Sets {@code playedMove} for the in-drag preview and, on ACTION_UP, performs the move.
+     */
+    private void handleRenjuActiveTouch(MotionEvent event) {
+        RenjuLiveState rs = table.getGameState().renjuState;
+        int n = table.getMoves().size();
+        int r = rs.boxRadius(n);
+        int move = gridSize * stoneI + stoneJ;                 // 15-based (col = m%15, row = m/15)
+        boolean empty = table.abstractBoard[stoneI][stoneJ] == 0;
+        boolean inBox = (r == 0) || (Math.abs(stoneI - 7) <= r && Math.abs(stoneJ - 7) <= r);
+        boolean up = event.getAction() == MotionEvent.ACTION_UP;
+        playedMove = -1;
+        switch (renjuMode) {
+            case RENJU_PLACE:
+                if (empty && inBox) {
+                    playedMove = move;
+                    if (up) {
+                        sendRenjuSwapEvent(false, move);
+                        markRenjuPending();
+                    }
+                }
+                break;
+            case RENJU_OFFER:
+                if (renjuPicks.contains(move)) {
+                    if (up) {
+                        renjuPicks.remove((Integer) move);   // re-tap deselects
+                    }
+                } else if (empty && !RenjuSymmetry.isSymmetricDup(move, renjuPicksArray(), renjuBoardSnapshot())) {
+                    playedMove = move;                        // preview the candidate
+                    if (up) {
+                        if (renjuPicks.size() >= 9) {
+                            int[] ten = new int[renjuPicks.size() + 1];
+                            for (int k = 0; k < renjuPicks.size(); k++) ten[k] = renjuPicks.get(k);
+                            ten[renjuPicks.size()] = move;
+                            sendRenjuOffer10Event(ten);
+                            markRenjuPending();               // the 10th auto-sends
+                        } else {
+                            renjuPicks.add(move);
+                        }
+                    }
+                }
+                break;
+            case RENJU_SELECTION:
+                boolean isOffer = false;
+                for (int o : renjuOffers) {
+                    if (o == move) {
+                        isOffer = true;
+                        break;
+                    }
+                }
+                if (isOffer) {
+                    playedMove = move;
+                    if (up) {
+                        sendRenjuSelect1Event(move);
+                        markRenjuPending();
+                    }
+                }
+                break;
+            case RENJU_IDLE:
+            default:
+                // phase MOVE or COMPLETE: an ordinary stone (box-gated for safety).
+                if (empty && inBox) {
+                    playedMove = move;
+                    if (up) {
+                        fragment.getListener().sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + move + ",\"moves\":[" + move + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+                    }
+                }
+                break;
+        }
+    }
+
+    private int[] renjuPicksArray() {
+        int[] a = new int[renjuPicks.size()];
+        for (int k = 0; k < renjuPicks.size(); k++) {
+            a[k] = renjuPicks.get(k);
+        }
+        return a;
+    }
+
+    /** byte[225] snapshot of the renju board (index 15*i+j; 0=empty, 2=black, 1=white). */
+    private byte[] renjuBoardSnapshot() {
+        byte[] b = new byte[225];
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                byte v = table.abstractBoard[i][j];
+                b[15 * i + j] = (v > 0) ? v : 0;
+            }
+        }
+        return b;
+    }
+
+    // Renju outbound events: built inline (mirrors LiveTableFragment's private senders) and dispatched
+    // through the same listener the ordinary dsgMoveTableEvent uses.
+    private void sendRenjuSwapEvent(boolean swap, int move) {
+        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchiSwapTableEvent\":{\"swap\":" + swap + ",\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+    }
+
+    private void sendRenjuOffer10Event(int[] moves) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < moves.length; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(moves[i]);
+        }
+        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchiOffer10TableEvent\":{\"moves\":[" + sb + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+    }
+
+    private void sendRenjuSelect1Event(int move) {
+        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
     }
 
     public void clearGoStructures() {
@@ -196,6 +403,16 @@ public class LiveBoardView extends View {
                 canvas.drawCircle(size / 2, size - (margin + 3 * step), radius, linePaint);
                 canvas.drawCircle(size - (margin + 3 * step), size / 2, radius, linePaint);
             }
+        } else if (table != null && table.isRenju()) {
+            // 9 star points at {3,7,11}^2 (indices {48,52,56,108,112,116,168,172,176}).
+            linePaint.setStyle(Paint.Style.FILL);
+            float dot = margin / 2;
+            int[] pts = {3, 7, 11};
+            for (int pi : pts) {
+                for (int pj : pts) {
+                    canvas.drawCircle(margin + pj * step, margin + pi * step, dot, linePaint);
+                }
+            }
         } else {
             canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
             canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
@@ -209,7 +426,19 @@ public class LiveBoardView extends View {
                     drawStone(canvas, i, j, table.abstractBoard[i][j]);
                 }
             }
-            setBackgroundColor(table.getGameColor());
+            setBackgroundColor(table.isRenju() ? RENJU_BG : table.getGameColor());
+            // Translucent black candidates: in-progress offer picks, or the ten offers to select from.
+            if (table.isRenju()) {
+                if (renjuMode == RENJU_OFFER) {
+                    for (int m : renjuPicks) {
+                        drawStone(canvas, (byte) (m / gridSize), (byte) (m % gridSize), (byte) 4);
+                    }
+                } else if (renjuMode == RENJU_SELECTION) {
+                    for (int m : renjuOffers) {
+                        drawStone(canvas, (byte) (m / gridSize), (byte) (m % gridSize), (byte) 4);
+                    }
+                }
+            }
         }
         if (goDeadStonesByPlayer != null) {
             for (int move : goDeadStonesByPlayer.get(1)) {

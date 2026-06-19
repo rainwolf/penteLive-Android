@@ -209,8 +209,10 @@ public class Table {
         }
         byte color = (byte) currentColor();
         moves.add(move);
-        int move_i = move / 19;
-        int move_j = move % 19;
+        // Renju moves are 15-based (index = row*15 + col); every other variant is 19-based.
+        int width = isRenju() ? 15 : 19;
+        int move_i = move / width;
+        int move_j = move % width;
         abstractBoard[move_i][move_j] = color;
         if (game != 5 && game != 6 && game != 13 && game != 14 && !isRenju()) {
             if (game == 11 || game == 12 || game == 25 || game == 26) {
@@ -948,7 +950,7 @@ public class Table {
 
 
     public boolean gameHasCaptures() {
-        return (game != 5 && game != 6 && game != 13 && game != 14);
+        return (game != 5 && game != 6 && game != 13 && game != 14 && !isRenju());
     }
 
     public int getGameColor() {
