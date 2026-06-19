@@ -302,10 +302,6 @@ public class Table {
         return v != null && v.isRenju();
     }
 
-    public int renjuNumMoves() {
-        return getMoves().size();
-    }
-
     public void advanceRenjuAfterMove(boolean isRejoin) {
         if (isRenju()) {
             gameState.renjuState.advanceAfterMove(getMoves().size(), isRejoin);

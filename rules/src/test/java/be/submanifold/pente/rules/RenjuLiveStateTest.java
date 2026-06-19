@@ -137,4 +137,13 @@ public class RenjuLiveStateTest {
         r.awaitingSwap = true;
         assertTrue(r.showSwap(1)); assertTrue(r.showDeclinePlace(1)); assertFalse(r.showOffer10(1));
     }
+
+    // A swap window must not open before move 1 (guards openingPlayer(0) against an invalid seat).
+    @Test public void no_window_or_invalid_seat_at_zero_moves() {
+        RenjuLiveState r = new RenjuLiveState();
+        r.advanceAfterMove(0, true);
+        assertFalse(r.awaitingSwap);
+        assertEquals(RenjuLiveState.Phase.MOVE, r.phase(0));
+        assertEquals(1, r.openingPlayer(0)); // black to play move 1
+    }
 }

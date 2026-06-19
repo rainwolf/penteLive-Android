@@ -49,14 +49,16 @@ public class LiveBoardView extends View {
     public static final int RENJU_PENDING = 4;     // inert until the next server echo
     private int renjuMode = RENJU_IDLE;
     private final List<Integer> renjuPicks = new ArrayList<>();
-    private int[] renjuOffers = new int[0];
-    private static final int RENJU_BG = Color.parseColor("#D98880");
+    // Cached for the OFFER-mode symmetry check: the placed board doesn't change while the offerer
+    // collects picks, so compute the snapshot + D4 stabilizer once per OFFER session rather than
+    // on every touch-move event.
+    private byte[] renjuSnapshotCache;
+    private int[] renjuStabilizerCache;
 
     /** Enter PLACE mode: arm a single box-constrained decline / Branch-A stone. */
     public void beginRenjuPlace() {
         renjuMode = RENJU_PLACE;
         renjuPicks.clear();
-        renjuOffers = new int[0];
         invalidate();
     }
 
@@ -64,15 +66,14 @@ public class LiveBoardView extends View {
     public void beginRenjuOffer() {
         renjuMode = RENJU_OFFER;
         renjuPicks.clear();
-        renjuOffers = new int[0];
+        refreshRenjuOfferCache();
         invalidate();
     }
 
-    /** Enter SELECTION mode: render the ten offers and accept one tap. */
-    public void beginRenjuSelection(int[] offers) {
+    /** Enter SELECTION mode: render the ten offers (read from renjuState.offered) and accept one tap. */
+    public void beginRenjuSelection() {
         renjuMode = RENJU_SELECTION;
         renjuPicks.clear();
-        renjuOffers = (offers != null) ? offers : new int[0];
         invalidate();
     }
 
@@ -80,7 +81,6 @@ public class LiveBoardView extends View {
     public void clearRenjuArming() {
         renjuMode = RENJU_IDLE;
         renjuPicks.clear();
-        renjuOffers = new int[0];
         invalidate();
     }
 
@@ -88,8 +88,13 @@ public class LiveBoardView extends View {
     public void markRenjuPending() {
         renjuMode = RENJU_PENDING;
         renjuPicks.clear();
-        renjuOffers = new int[0];
         invalidate();
+    }
+
+    /** Recompute the OFFER-mode board snapshot and its symmetry stabilizer (placed board only). */
+    private void refreshRenjuOfferCache() {
+        renjuSnapshotCache = renjuBoardSnapshot();
+        renjuStabilizerCache = RenjuSymmetry.stabilizer(renjuSnapshotCache);
     }
 
     /** True when mode != IDLE (PLACE/OFFER/SELECTION/PENDING). */
@@ -290,7 +295,9 @@ public class LiveBoardView extends View {
                     if (up) {
                         renjuPicks.remove((Integer) move);   // re-tap deselects
                     }
-                } else if (empty && !RenjuSymmetry.isSymmetricDup(move, renjuPicksArray(), renjuBoardSnapshot())) {
+                } else if (empty && !RenjuSymmetry.isOfferDup(move, renjuPicksArray(),
+                        renjuStabilizerCache != null ? renjuStabilizerCache
+                                : RenjuSymmetry.stabilizer(renjuBoardSnapshot()))) {
                     playedMove = move;                        // preview the candidate
                     if (up) {
                         if (renjuPicks.size() >= 9) {
@@ -307,7 +314,7 @@ public class LiveBoardView extends View {
                 break;
             case RENJU_SELECTION:
                 boolean isOffer = false;
-                for (int o : renjuOffers) {
+                for (int o : rs.offered) {       // authoritative offered set (single source of truth)
                     if (o == move) {
                         isOffer = true;
                         break;
@@ -323,8 +330,9 @@ public class LiveBoardView extends View {
                 break;
             case RENJU_IDLE:
             default:
-                // phase MOVE or COMPLETE: an ordinary stone (box-gated for safety).
-                if (empty && inBox) {
+                // phase MOVE or COMPLETE: an ordinary stone (box-gated for safety). Move 1 (n==0)
+                // is the auto-sent centre — never placed by a board tap — so ignore taps at n==0.
+                if (n > 0 && empty && inBox) {
                     playedMove = move;
                     if (up) {
                         fragment.getListener().sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + move + ",\"moves\":[" + move + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
@@ -347,8 +355,7 @@ public class LiveBoardView extends View {
         byte[] b = new byte[225];
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
-                byte v = table.abstractBoard[i][j];
-                b[15 * i + j] = (v > 0) ? v : 0;
+                b[15 * i + j] = table.abstractBoard[i][j];
             }
         }
         return b;
@@ -412,7 +419,7 @@ public class LiveBoardView extends View {
                     drawStone(canvas, i, j, table.abstractBoard[i][j]);
                 }
             }
-            setBackgroundColor(table.isRenju() ? RENJU_BG : table.getGameColor());
+            setBackgroundColor(table.getGameColor());   // Table.getGameColor() returns #D98880 for renju
             // Translucent black candidates: in-progress offer picks (offerer, while collecting),
             // or the ten offered fifth moves during the SELECTION phase. The offered set is drawn
             // from the authoritative renjuState.offered so BOTH players see it (the offerer's local

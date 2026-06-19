@@ -31,7 +31,10 @@ public final class RenjuLiveState {
         if (!isRejoin) swapTaken = false; // a fresh incremental move opens a new window
         boolean windowResolved = swapTaken
                 || (numMoves == 4 && (branchChosen || tenOffer || selected != null));
-        boolean windowOpens = !windowResolved && (numMoves <= 4 || (numMoves == 5 && !tenOffer));
+        // A window follows a placed stone: never open one before move 1 (numMoves==0), which would
+        // make openingPlayer(0) compute a negative remainder and return an invalid seat.
+        boolean windowOpens = !windowResolved
+                && ((numMoves >= 1 && numMoves <= 4) || (numMoves == 5 && !tenOffer));
         awaitingSwap = windowOpens;
         complete = !windowOpens && numMoves >= 5;
     }

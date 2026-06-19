@@ -493,12 +493,7 @@ public class LiveTableFragment extends Fragment {
                 }
             }
         }
-        // Renju (Taraguchi) opening: raise the swap/branch choice when it now falls to me.
-        // table.addMove(...) above already ran advanceRenjuAfterMove; the board's PLACE/OFFER/
-        // SELECTION/PENDING arming (isRenjuArmed) suppresses a re-raise until the next echo.
-        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
-            showRenjuChoice();
-        }
+        maybeRaiseRenjuChoice();
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
             playButton.setText(R.string.pass);
@@ -538,12 +533,7 @@ public class LiveTableFragment extends Fragment {
                 }
             }
         }
-        // Renju (Taraguchi) opening: raise the swap/branch choice when it now falls to me.
-        // table.addMove(...) above already ran advanceRenjuAfterMove; the board's PLACE/OFFER/
-        // SELECTION/PENDING arming (isRenjuArmed) suppresses a re-raise until the next echo.
-        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
-            showRenjuChoice();
-        }
+        maybeRaiseRenjuChoice();
         // Rejoin-only: the re-sent offer10 echo arrives BEFORE this bulk move list, so SELECTION
         // was never armed (phase was MOVE while moves was still empty). Arm it now from the
         // replayed state. addMove (incremental live play) doesn't reach this, so no double-arm.
@@ -551,7 +541,7 @@ public class LiveTableFragment extends Fragment {
         int rn = table.getMoves().size();
         if (table.isRenju() && rs.phase(rn) == RenjuLiveState.Phase.SELECTION
                 && table.isMyTurn(me) && !board.isRenjuArmed()) {
-            board.beginRenjuSelection(rs.offered);
+            board.beginRenjuSelection();
         }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
@@ -1169,6 +1159,17 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
+    /**
+     * Raise the renju swap/branch choice dialog when the decision now falls to me. The caller has
+     * already run advanceRenjuAfterMove; the board's PLACE/OFFER/SELECTION/PENDING arming
+     * (isRenjuArmed) suppresses a re-raise until the next server echo.
+     */
+    private void maybeRaiseRenjuChoice() {
+        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            showRenjuChoice();
+        }
+    }
+
     /** Renju move 1 is the centre (index 112 on a 15x15 board); sent as a normal move by black. */
     void sendRenjuFirstMove() {
         if (mListener != null) {
@@ -1245,7 +1246,7 @@ public class LiveTableFragment extends Fragment {
             final RenjuLiveState rs = table.getGameState().renjuState;
             final int n = table.getMoves().size();
             if (rs.phase(n) == RenjuLiveState.Phase.SELECTION && table.isMyTurn(me)) {
-                board.beginRenjuSelection(rs.offered);
+                board.beginRenjuSelection();
                 Toast.makeText(activity, getString(R.string.renju_select_prompt), Toast.LENGTH_SHORT).show();
             } else if (table.renjuChoiceNow() && table.isMyTurn(me)) {
                 showRenjuChoice();
