@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import be.submanifold.pente.rules.RenjuLiveState;
+
 public class GameState {
     public State state = State.NOTSTARTED;
     public DPenteState dPenteState = DPenteState.NOCHOICE;
     public Swap2State swap2State = Swap2State.NOCHOICE;
     public GoState goState = GoState.PLAY;
+    public RenjuLiveState renjuState = new RenjuLiveState();
     public Map<Integer, Map<String, Long>> timers = new ConcurrentHashMap<>();
 
     public GameState() {

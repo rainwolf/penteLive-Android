@@ -83,6 +83,8 @@ public class Table {
         gameNames.put(26, "Speed O-Pente");
         gameNames.put(28, "Speed Swap2-Pente");
         gameNames.put(30, "Speed Swap2-Keryo");
+        gameNames.put(31, "Renju");
+        gameNames.put(32, "Speed Renju");
     }
 
     private List<Integer> moves = new ArrayList<>();
@@ -101,6 +103,9 @@ public class Table {
 
     private int gridSize = 19, passMove = gridSize * gridSize;
     private boolean hasPass = false;
+    // True while addMoves(List) is bulk-replaying (rejoin); suppresses the per-move
+    // incremental renju advance so the single isRejoin=true advance at the end wins.
+    private boolean bulkAddingMoves = false;
 
     public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -179,9 +184,13 @@ public class Table {
 
     public void addMoves(List<Integer> moveList) {
         resetBoard();
+        bulkAddingMoves = true;
         for (int move : moveList) {
             addMove(move);
         }
+        bulkAddingMoves = false;
+        // Bulk/rejoin: advance once after the full replay (preserves any rejoin signal).
+        advanceRenjuAfterMove(true);
     }
 
     public boolean isGo() {
@@ -264,6 +273,10 @@ public class Table {
                 }
             }
         }
+        // Incremental (live) renju advance; skipped during bulk replay (see addMoves).
+        if (!bulkAddingMoves) {
+            advanceRenjuAfterMove(false);
+        }
     }
 
     public boolean isDPente() {
@@ -276,6 +289,26 @@ public class Table {
         return v != null && v.isSwap2();
     }
 
+    public boolean isRenju() {
+        Variant v = Variants.fromGameId(game);
+        return v != null && v.isRenju();
+    }
+
+    public int renjuNumMoves() {
+        return getMoves().size();
+    }
+
+    public void advanceRenjuAfterMove(boolean isRejoin) {
+        if (isRenju()) {
+            gameState.renjuState.advanceAfterMove(getMoves().size(), isRejoin);
+        }
+    }
+
+    public boolean renjuChoiceNow() {
+        return isRenju() && (gameState.renjuState.isSwapChoice(getMoves().size())
+                || gameState.renjuState.isBranchChoice(getMoves().size()));
+    }
+
     public int currentColor() {
         if (isGo()) {
             if (getGameState().goState == GoState.PLAY) {
@@ -283,6 +316,9 @@ public class Table {
             } else {
                 return 3;
             }
+        } else if (isRenju()) {
+            // Renju is black-first: move 0 -> 2 (black), move 1 -> 1 (white).
+            return 2 - (moves.size() % 2);
         } else if (game != 13 && game != 14) {
             return 1 + (moves.size() % 2);
         } else {
@@ -310,6 +346,15 @@ public class Table {
             }
             return cp;
         } else if (game != 13 && game != 14) {
+            if (isRenju()) {
+                // openingPlayer returns the seat to move during the opening
+                // (1=black/seat1, 2=white/seat2), or 0 once the opening is complete.
+                int op = gameState.renjuState.openingPlayer(moves.size());
+                if (op != 0) {
+                    return op;
+                }
+                // op == 0: opening complete -> fall through to normal parity below.
+            }
             if (isDPente()) {
                 if (moves.size() < 4) {
                     return 1;
