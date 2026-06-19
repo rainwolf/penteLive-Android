@@ -363,6 +363,50 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 } else if (jsonEvent.get("dsgSwapSeatsTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSwapSeatsTableEvent");
                                     swapSeats(data);
+                                } else if (jsonEvent.get("dsgRenjuTaraguchiSwapTableEvent") != null) {
+                                    // Renju Taraguchi-10 SWAP decision echo. Runs on the UI thread (this
+                                    // dispatch chain is posted to the UI thread before dispatch), so we
+                                    // mutate renjuState and refresh the dialog/board directly.
+                                    Map<String, Object> p = (Map<String, Object>) jsonEvent.get("dsgRenjuTaraguchiSwapTableEvent");
+                                    int tbl = ((Number) p.get("table")).intValue();
+                                    boolean swap = Boolean.TRUE.equals(p.get("swap"));
+                                    Table t = tablesAndPlayers.tables.get(tbl);
+                                    if (t != null && t.isRenju()) {
+                                        t.getGameState().renjuState.applySwap(swap, t.getMoves().size());
+                                        LiveTableFragment fragment = (LiveTableFragment)
+                                                getSupportFragmentManager().findFragmentByTag("liveTable");
+                                        if (fragment != null) {
+                                            fragment.onRenjuDecisionEcho(tbl); // dismiss/refresh dialog + board + arm SELECTION (self-wraps in runOnUiThread)
+                                        }
+                                    }
+                                } else if (jsonEvent.get("dsgRenjuTaraguchiOffer10TableEvent") != null) {
+                                    // Renju Taraguchi-10 OFFER-10 decision echo (Branch B 10-stone offer).
+                                    Map<String, Object> p = (Map<String, Object>) jsonEvent.get("dsgRenjuTaraguchiOffer10TableEvent");
+                                    int tbl = ((Number) p.get("table")).intValue();
+                                    int[] moves = toIntArray((List<?>) p.get("moves"));
+                                    Table t = tablesAndPlayers.tables.get(tbl);
+                                    if (t != null && t.isRenju()) {
+                                        t.getGameState().renjuState.applyOffer10(moves);
+                                        LiveTableFragment fragment = (LiveTableFragment)
+                                                getSupportFragmentManager().findFragmentByTag("liveTable");
+                                        if (fragment != null) {
+                                            fragment.onRenjuDecisionEcho(tbl);
+                                        }
+                                    }
+                                } else if (jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent") != null) {
+                                    // Renju Taraguchi-10 SELECT-1 decision echo (pick one of the 10 offered).
+                                    Map<String, Object> p = (Map<String, Object>) jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent");
+                                    int tbl = ((Number) p.get("table")).intValue();
+                                    int move = ((Number) p.get("move")).intValue();
+                                    Table t = tablesAndPlayers.tables.get(tbl);
+                                    if (t != null && t.isRenju()) {
+                                        t.getGameState().renjuState.applySelect1(move);
+                                        LiveTableFragment fragment = (LiveTableFragment)
+                                                getSupportFragmentManager().findFragmentByTag("liveTable");
+                                        if (fragment != null) {
+                                            fragment.onRenjuDecisionEcho(tbl);
+                                        }
+                                    }
                                 } else if (jsonEvent.get("dsgSwap2PassTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSwap2PassTableEvent");
                                     swap2Pass(data);
@@ -499,6 +543,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 fragment.addMove(move);
                 playSound(NEW_MOVE_SOUND);
             } else {
+                // Bulk move replay (rejoin / initial state). For Renju Taraguchi-10 this routes to
+                // Table.advanceRenjuAfterMove(true) (Task C1). The server sends the renju decision
+                // signal (silent dsgSwapSeatsTableEvent / re-sent dsgRenjuTaraguchiOffer10TableEvent /
+                // dsgRenjuTaraguchi10Select1TableEvent) BEFORE this bulk move list, so renjuState is
+                // already in the correct pre-state when the bulk replay runs with isRejoin=true.
                 fragment.addMoves(moves);
             }
         } else {
@@ -575,6 +624,18 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         Table table = tablesAndPlayers.tables.get(tableId);
         if (table != null) {
             table.swapSeats(swapped, silent);
+            // Renju Taraguchi-10: a swapSeats event also resolves the renju opening window.
+            // This covers BOTH a live take-over (non-silent) AND the silent rejoin marker;
+            // either way the renju SWAP window must be marked resolved (awaitingSwap=false,
+            // swapTaken=true) before the bulk move replay runs advanceRenjuAfterMove(true).
+            if (table.isRenju()) {
+                table.getGameState().renjuState.applySwapSeats();
+                LiveTableFragment fragment = (LiveTableFragment)
+                        getSupportFragmentManager().findFragmentByTag("liveTable");
+                if (fragment != null) {
+                    fragment.onRenjuDecisionEcho(tableId);
+                }
+            }
         }
         if (swapped && !silent) {
             updateTable(tableId);
@@ -715,6 +776,18 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             map.put(key, value);
         }
         return map;
+    }
+
+    // Converts a JSON-decoded list (org.json yields Number/Integer/Long elements) to an int[].
+    private int[] toIntArray(List<?> list) {
+        if (list == null) {
+            return new int[0];
+        }
+        int[] arr = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            arr[i] = ((Number) list.get(i)).intValue();
+        }
+        return arr;
     }
 
     private List<Object> toList(JSONArray array) throws JSONException {
