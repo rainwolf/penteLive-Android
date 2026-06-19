@@ -93,7 +93,17 @@ public class RenjuLiveStateTest {
         RenjuLiveState r = new RenjuLiveState();
         r.applyRejoinSignal(RenjuLiveState.RejoinKind.SILENT_SWAP, 4); // a window resolved before join
         r.advanceAfterMove(4, true); // bulk replay of 4 moves, isRejoin
-        assertNotEquals(RenjuLiveState.Phase.SWAP, r.phase(4)); // no spurious swap modal
+        assertEquals(RenjuLiveState.Phase.BRANCH, r.phase(4)); // SILENT_SWAP at n==4 yields BRANCH, no spurious swap modal
+    }
+
+    // ---- reset() clears a fully resolved/completed state (rematch on a reused table) ----
+    @Test public void reset_clears_completed_state() {
+        RenjuLiveState r = new RenjuLiveState();
+        r.complete = true; r.branchChosen = true; r.tenOffer = true; r.selected = 5; r.offered = new int[]{1,2};
+        r.reset();
+        assertEquals(RenjuLiveState.Phase.MOVE, r.phase(0));
+        assertFalse(r.complete); assertFalse(r.branchChosen); assertFalse(r.tenOffer);
+        assertNull(r.selected); assertEquals(0, r.offered.length);
     }
 
     // ---- SELECT1 rejoin: applySelect1 must set Branch-B flags ----

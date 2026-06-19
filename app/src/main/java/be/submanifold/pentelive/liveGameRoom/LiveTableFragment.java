@@ -528,6 +528,15 @@ public class LiveTableFragment extends Fragment {
         if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
             showRenjuChoice();
         }
+        // Rejoin-only: the re-sent offer10 echo arrives BEFORE this bulk move list, so SELECTION
+        // was never armed (phase was MOVE while moves was still empty). Arm it now from the
+        // replayed state. addMove (incremental live play) doesn't reach this, so no double-arm.
+        RenjuLiveState rs = table.getGameState().renjuState;
+        int rn = table.getMoves().size();
+        if (table.isRenju() && rs.phase(rn) == RenjuLiveState.Phase.SELECTION
+                && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            board.beginRenjuSelection(rs.offered);
+        }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
             playButton.setText(R.string.pass);
@@ -1229,6 +1238,17 @@ public class LiveTableFragment extends Fragment {
                 showRenjuChoice();
             }
         });
+    }
+
+    /**
+     * Called by the activity when the server rejects a renju decision/move (dsgMoveTableErrorEvent,
+     * sent only to the sender). The local state is unchanged by a rejected send, so recovery is the
+     * same clear-arming + re-raise that onRenjuDecisionEcho already performs: drop the board's
+     * RENJU_PENDING arming, then restore the user's pending decision (SELECTION or the swap/branch
+     * dialog) from the unchanged state.
+     */
+    public void onRenjuMoveError(int tableId) {
+        onRenjuDecisionEcho(tableId);
     }
 
     private String csv(int[] a) {

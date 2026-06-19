@@ -477,6 +477,7 @@ public class Table {
         resetAbstractBoard();
         gameState.dPenteState = DPenteState.NOCHOICE;
         gameState.swap2State = Swap2State.NOCHOICE;
+        gameState.renjuState.reset();
         moves = new ArrayList<>();
         whiteCaptures = 0;
         blackCaptures = 0;

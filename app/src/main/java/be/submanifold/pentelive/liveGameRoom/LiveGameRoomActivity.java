@@ -450,6 +450,20 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                         Toast.makeText(LiveGameRoomActivity.this, getString(R.string.were_booted),
                                                 Toast.LENGTH_LONG).show();
                                     }
+                                } else if (jsonEvent.get("dsgMoveTableErrorEvent") != null) {
+                                    // The server rejects a renju decision/move and echoes the error only to
+                                    // the sender. Nothing else clears the board's RENJU_PENDING state, so for
+                                    // renju tables ask the fragment to recover (state is unchanged on reject).
+                                    Map<String, Object> p = (Map<String, Object>) jsonEvent.get("dsgMoveTableErrorEvent");
+                                    int tbl = ((Number) p.get("table")).intValue();
+                                    Table t = tablesAndPlayers.tables.get(tbl);
+                                    if (t != null && t.isRenju()) {
+                                        LiveTableFragment fragment = (LiveTableFragment)
+                                                getSupportFragmentManager().findFragmentByTag("liveTable");
+                                        if (fragment != null) {
+                                            fragment.onRenjuMoveError(tbl);
+                                        }
+                                    }
                                 } else if (jsonEvent.get("dsgSystemMessageTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSystemMessageTableEvent");
                                     int tableId = (int) data.get("table");
