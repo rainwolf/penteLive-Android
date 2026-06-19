@@ -347,6 +347,7 @@
         <item>O-Pente</item>
         <item>Swap2-Pente</item>
         <item>Swap2-Keryo</item>
+        <item>Renju</item>
     </string-array>
     <string-array name="turn_based_game_types_array">
         <item>Pente</item>
