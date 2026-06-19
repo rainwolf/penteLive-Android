@@ -39,6 +39,7 @@ public class Table {
     private final int oPenteColor = Color.parseColor("#52BE80");
     private final int swap2Color = Color.parseColor("#E5AA70");
     private final int swap2KeryoColor = Color.parseColor("#50C878");
+    private final int renjuColor = Color.parseColor("#D98880");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -955,6 +956,9 @@ public class Table {
     }
 
     public int getGameColor() {
+        if (isRenju()) {
+            return renjuColor;
+        }
         if (game < 3) {
             return penteColor;
         } else if (game < 5) {
