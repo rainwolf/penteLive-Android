@@ -538,10 +538,10 @@ git commit -m "feat(renju): live Table/GameState integration (state, colour, tur
 - Consumes: `table.gameState.renjuState`, `Table.advanceRenjuAfterMove`, the fragment's UI hooks (Task E1: `fragment.onRenjuSwap/onRenjuOffer10/onRenjuSelect1` or direct dialog refresh).
 - Produces: inbound handling that mutates `renjuState` then refreshes board + (re)raises/hides the choice dialog.
 
-- [ ] **Step 1: Add three dispatch branches** in `eventOccurred` (mirror the `dsgSwapSeatsTableEvent` branch). The wire keys are `renjuSwap`, `renjuOffer10`, `renjuSelect1` (the React `cmd`/Android wire key — confirmed `messages.js`). Each reads `table` (int), then:
+- [ ] **Step 1: Add three dispatch branches** in `eventOccurred` (mirror the `dsgSwapSeatsTableEvent` branch). **The wire keys are the FULL wrapper field names** — `dsgRenjuTaraguchiSwapTableEvent`, `dsgRenjuTaraguchiOffer10TableEvent`, `dsgRenjuTaraguchi10Select1TableEvent` — exactly like the existing `dsgMoveTableEvent`/`dsgSwapSeatsTableEvent` keys (NOT the short React `cmd` labels `renjuSwap`/etc., which are JS-side only — confirmed by doc 02 §1.4 and doc 01 §16). Each reads `table` (int), then:
 ```java
-else if (jsonEvent.get("renjuSwap") != null) {
-    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("renjuSwap");
+else if (jsonEvent.get("dsgRenjuTaraguchiSwapTableEvent") != null) {
+    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("dsgRenjuTaraguchiSwapTableEvent");
     int tbl = ((Number) p.get("table")).intValue();
     boolean swap = Boolean.TRUE.equals(p.get("swap"));
     Table t = tableFor(tbl);
@@ -551,8 +551,8 @@ else if (jsonEvent.get("renjuSwap") != null) {
         runOnUiThread(() -> fragment.onRenjuDecisionEcho(tbl)); // refresh board+dialog
     }
 }
-else if (jsonEvent.get("renjuOffer10") != null) {
-    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("renjuOffer10");
+else if (jsonEvent.get("dsgRenjuTaraguchiOffer10TableEvent") != null) {
+    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("dsgRenjuTaraguchiOffer10TableEvent");
     int tbl = ((Number) p.get("table")).intValue();
     int[] moves = toIntArray((List<Object>) p.get("moves"));
     Table t = tableFor(tbl);
@@ -561,8 +561,8 @@ else if (jsonEvent.get("renjuOffer10") != null) {
         runOnUiThread(() -> fragment.onRenjuDecisionEcho(tbl));
     }
 }
-else if (jsonEvent.get("renjuSelect1") != null) {
-    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("renjuSelect1");
+else if (jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent") != null) {
+    Map<String,Object> p = (Map<String,Object>) jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent");
     int tbl = ((Number) p.get("table")).intValue();
     int move = ((Number) p.get("move")).intValue();
     Table t = tableFor(tbl);
@@ -595,12 +595,13 @@ git commit -m "feat(renju): inbound live event dispatch (swap/offer10/select1) +
 
 **Interfaces:**
 - Produces (on `LiveTableFragment`):
+  Wire keys are the FULL wrapper field names (match the inbound keys / existing `dsgMoveTableEvent`):
   - `void sendRenjuSwap(boolean swap, int move)` →
-    `sendEvent("{\"renjuSwap\":{\"swap\":"+swap+",\"move\":"+move+",\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
+    `sendEvent("{\"dsgRenjuTaraguchiSwapTableEvent\":{\"swap\":"+swap+",\"move\":"+move+",\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
   - `void sendRenjuOffer10(int[] moves)` →
-    `sendEvent("{\"renjuOffer10\":{\"moves\":["+csv(moves)+"],\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
+    `sendEvent("{\"dsgRenjuTaraguchiOffer10TableEvent\":{\"moves\":["+csv(moves)+"],\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
   - `void sendRenjuSelect1(int move)` →
-    `sendEvent("{\"renjuSelect1\":{\"move\":"+move+",\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
+    `sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":"+move+",\"player\":\""+me+"\",\"table\":"+id+",\"time\":0}}")`
   - private `String csv(int[] a)` — comma-joined.
 - Note: ordinary stones (decline+place move, Branch-A move 5, Branch-B white move 6) are sent on the **existing** `dsgMoveTableEvent` path (the board's normal send) — NOT here. Take-over uses `sendRenjuSwap(true, -1)`. Window-5 bare decline uses `sendRenjuSwap(false, -1)`. Decline+place at windows 1–4: send `sendRenjuSwap(false, <m>)` (the server bundles the stone and re-broadcasts it as a normal move).
 
