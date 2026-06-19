@@ -252,7 +252,7 @@ public class LiveBoardView extends View {
         if (renjuMode == RENJU_IDLE) {
             int n = table.getMoves().size();
             RenjuLiveState.Phase phase = table.getGameState().renjuState.phase(n);
-            return phase == RenjuLiveState.Phase.SWAP || phase == RenjuLiveState.Phase.BRANCH;
+            return phase == RenjuLiveState.Phase.SWAP || phase == RenjuLiveState.Phase.BRANCH || phase == RenjuLiveState.Phase.SELECTION;
         }
         return false;
     }
@@ -275,7 +275,7 @@ public class LiveBoardView extends View {
                 if (empty && inBox) {
                     playedMove = move;
                     if (up) {
-                        sendRenjuSwapEvent(false, move);
+                        fragment.sendRenjuSwap(false, move);
                         markRenjuPending();
                     }
                 }
@@ -292,7 +292,7 @@ public class LiveBoardView extends View {
                             int[] ten = new int[renjuPicks.size() + 1];
                             for (int k = 0; k < renjuPicks.size(); k++) ten[k] = renjuPicks.get(k);
                             ten[renjuPicks.size()] = move;
-                            sendRenjuOffer10Event(ten);
+                            fragment.sendRenjuOffer10(ten);
                             markRenjuPending();               // the 10th auto-sends
                         } else {
                             renjuPicks.add(move);
@@ -311,7 +311,7 @@ public class LiveBoardView extends View {
                 if (isOffer) {
                     playedMove = move;
                     if (up) {
-                        sendRenjuSelect1Event(move);
+                        fragment.sendRenjuSelect1(move);
                         markRenjuPending();
                     }
                 }
@@ -347,25 +347,6 @@ public class LiveBoardView extends View {
             }
         }
         return b;
-    }
-
-    // Renju outbound events: built inline (mirrors LiveTableFragment's private senders) and dispatched
-    // through the same listener the ordinary dsgMoveTableEvent uses.
-    private void sendRenjuSwapEvent(boolean swap, int move) {
-        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchiSwapTableEvent\":{\"swap\":" + swap + ",\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
-    }
-
-    private void sendRenjuOffer10Event(int[] moves) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < moves.length; i++) {
-            if (i > 0) sb.append(',');
-            sb.append(moves[i]);
-        }
-        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchiOffer10TableEvent\":{\"moves\":[" + sb + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
-    }
-
-    private void sendRenjuSelect1Event(int move) {
-        fragment.getListener().sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
     }
 
     public void clearGoStructures() {

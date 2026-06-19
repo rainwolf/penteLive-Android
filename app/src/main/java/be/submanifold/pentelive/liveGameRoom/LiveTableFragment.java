@@ -1100,19 +1100,19 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
-    private void sendRenjuSwap(boolean swap, int move) {
+    void sendRenjuSwap(boolean swap, int move) {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgRenjuTaraguchiSwapTableEvent\":{\"swap\":" + (swap ? "true" : "false") + ",\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
-    private void sendRenjuOffer10(int[] moves) {
+    void sendRenjuOffer10(int[] moves) {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgRenjuTaraguchiOffer10TableEvent\":{\"moves\":[" + csv(moves) + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
     }
 
-    private void sendRenjuSelect1(int move) {
+    void sendRenjuSelect1(int move) {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
