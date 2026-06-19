@@ -53,8 +53,13 @@ public final class RenjuLiveState {
         awaitingSwap = false;
     }
 
-    /** §3.5 renjuSelect1 echo. */
+    /** §3.5 renjuSelect1 echo.
+     * Selecting only occurs in Branch B, so mirror the server: set Branch-B flags even when
+     * arriving without a prior offer10 (SELECT1 rejoin path). This prevents advanceAfterMove(5)
+     * from computing windowOpens=true and opening a spurious SWAP phase for Branch-B games. */
     public void applySelect1(int move) {
+        branchChosen = true;   // selecting only happens in Branch B
+        tenOffer = true;       // mirror the server: Branch B implies tenOffer (needed for SELECT1 rejoin)
         selected = move;
     }
 

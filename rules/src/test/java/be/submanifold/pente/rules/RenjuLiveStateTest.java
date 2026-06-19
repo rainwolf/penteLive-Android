@@ -96,6 +96,26 @@ public class RenjuLiveStateTest {
         assertNotEquals(RenjuLiveState.Phase.SWAP, r.phase(4)); // no spurious swap modal
     }
 
+    // ---- SELECT1 rejoin: applySelect1 must set Branch-B flags ----
+    // applySelect1 implies Branch B (so a SELECT1 rejoin reconstructs correctly).
+    @Test public void select1_implies_branch_b_flags() {
+        RenjuLiveState r = new RenjuLiveState();
+        r.applySelect1(57);
+        assertTrue(r.tenOffer);
+        assertTrue(r.branchChosen);
+        assertEquals(Integer.valueOf(57), r.selected);
+    }
+
+    // SELECT1 rejoin: server re-sends ONLY select1 (no offer10), then bulk move replay of 5 moves.
+    // Must NOT open a spurious window-5 swap for Branch B.
+    @Test public void select1_rejoin_does_not_open_window5() {
+        RenjuLiveState r = new RenjuLiveState();
+        r.applySelect1(57);             // the re-sent select1 rejoin signal (no prior offer10)
+        r.advanceAfterMove(5, true);    // bulk replay of 5 moves, isRejoin
+        assertNotEquals(RenjuLiveState.Phase.SWAP, r.phase(5));
+        assertEquals(RenjuLiveState.Phase.COMPLETE, r.phase(5));
+    }
+
     // ---- modal buttons by window (renjuModalButtons) ----
     @Test public void modal_buttons_open_move4_window_shows_all_three() {
         RenjuLiveState r = new RenjuLiveState();
