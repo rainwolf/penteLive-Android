@@ -105,6 +105,7 @@ public class Table {
     private boolean hasPass = false;
     // True while addMoves(List) is bulk-replaying (rejoin); suppresses the per-move
     // incremental renju advance so the single isRejoin=true advance at the end wins.
+    // NOTE: relies on addMove/addMoves being called exclusively on the event-queue thread.
     private boolean bulkAddingMoves = false;
 
     public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -185,10 +186,13 @@ public class Table {
     public void addMoves(List<Integer> moveList) {
         resetBoard();
         bulkAddingMoves = true;
-        for (int move : moveList) {
-            addMove(move);
+        try {
+            for (int move : moveList) {
+                addMove(move);
+            }
+        } finally {
+            bulkAddingMoves = false;
         }
-        bulkAddingMoves = false;
         // Bulk/rejoin: advance once after the full replay (preserves any rejoin signal).
         advanceRenjuAfterMove(true);
     }
@@ -208,7 +212,7 @@ public class Table {
         int move_i = move / 19;
         int move_j = move % 19;
         abstractBoard[move_i][move_j] = color;
-        if (game != 5 && game != 6 && game != 13 && game != 14) {
+        if (game != 5 && game != 6 && game != 13 && game != 14 && !isRenju()) {
             if (game == 11 || game == 12 || game == 25 || game == 26) {
                 detectPoof(move, color);
             }
@@ -222,7 +226,8 @@ public class Table {
             }
         }
         if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8
-                && game != 17 && game != 18 && game != 27 && game != 28 && (rated || game == 9 || game == 10)) {
+                && game != 17 && game != 18 && game != 27 && game != 28 && !isRenju()
+                && (rated || game == 9 || game == 10)) {
             if (moves.size() == 2) {
                 for (int i = 7; i < 12; i++) {
                     for (int j = 7; j < 12; j++) {
