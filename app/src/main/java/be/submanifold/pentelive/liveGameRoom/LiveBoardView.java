@@ -413,14 +413,19 @@ public class LiveBoardView extends View {
                 }
             }
             setBackgroundColor(table.isRenju() ? RENJU_BG : table.getGameColor());
-            // Translucent black candidates: in-progress offer picks, or the ten offers to select from.
+            // Translucent black candidates: in-progress offer picks (offerer, while collecting),
+            // or the ten offered fifth moves during the SELECTION phase. The offered set is drawn
+            // from the authoritative renjuState.offered so BOTH players see it (the offerer's local
+            // renjuMode is PENDING/IDLE after sending, but the offers must stay visible until white
+            // selects one).
             if (table.isRenju()) {
                 if (renjuMode == RENJU_OFFER) {
                     for (int m : renjuPicks) {
                         drawStone(canvas, (byte) (m / gridSize), (byte) (m % gridSize), (byte) 4);
                     }
-                } else if (renjuMode == RENJU_SELECTION) {
-                    for (int m : renjuOffers) {
+                } else if (table.getGameState().renjuState.phase(table.getMoves().size())
+                        == RenjuLiveState.Phase.SELECTION) {
+                    for (int m : table.getGameState().renjuState.offered) {
                         drawStone(canvas, (byte) (m / gridSize), (byte) (m % gridSize), (byte) 4);
                     }
                 }
