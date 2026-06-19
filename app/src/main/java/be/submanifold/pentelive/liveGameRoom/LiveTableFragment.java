@@ -81,6 +81,7 @@ public class LiveTableFragment extends Fragment {
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
     private AlertDialog renjuDialog = null;
+    private AlertDialog opponentUnavailableDialog = null;
     private boolean renjuFirstMoveSent = false;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
@@ -329,6 +330,21 @@ public class LiveTableFragment extends Fragment {
             p2Name.setText(getString(R.string.tap_to_sit));
         } else {
             p2Name.setText(player.coloredNameString(p2Name.getLineHeight()));
+        }
+        // Both seats filled again (opponent returned) -> dismiss any disconnect/unavailable dialogs.
+        if (table.getSeats().get(1) != null && table.getSeats().get(2) != null) {
+            if (countDownTimer != null) {
+                countDownTimer.cancel();
+                countDownTimer = null;
+            }
+            if (waitForPlayerReturnDialog != null) {
+                waitForPlayerReturnDialog.dismiss();
+                waitForPlayerReturnDialog = null;
+            }
+            if (opponentUnavailableDialog != null) {
+                opponentUnavailableDialog.dismiss();
+                opponentUnavailableDialog = null;
+            }
         }
         long initialMnts = table.getTimer().get("initialMinutes");
         long incrementalScnds = table.getTimer().get("incrementalSeconds");
@@ -1177,9 +1193,7 @@ public class LiveTableFragment extends Fragment {
         }
         if (rs.showDeclinePlace(n)) {
             final boolean bare = (n == 5); // window-5 bare decline: no stone is placed
-            labels.add(getString(n == 4 ? R.string.renju_place_fifth
-                    : bare ? R.string.renju_decline_swap
-                    : R.string.renju_dont_swap));
+            labels.add(getString(R.string.renju_dont_swap));
             actions.add(() -> {
                 if (bare) {
                     board.markRenjuPending();
@@ -1198,7 +1212,6 @@ public class LiveTableFragment extends Fragment {
         }
         if (labels.isEmpty()) return;
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(activity.getString(R.string.renju_choice_title));
         builder.setItems(labels.toArray(new String[0]), (dialog, which) -> actions.get(which).run());
         AlertDialog dlg = builder.create();
         dlg.setCanceledOnTouchOutside(false);
@@ -1420,15 +1433,15 @@ public class LiveTableFragment extends Fragment {
         builder.setPositiveButton(getString(R.string.cancel_set_game), (dialog, which) -> sendForceCancelResignTableEvent(true));
         builder.setNeutralButton(getString(R.string.resign), (dialog, which) -> sendResign());
         builder.setNegativeButton(getString(R.string.force_resign), (dialog, which) -> sendForceCancelResignTableEvent(false));
-        AlertDialog dlg = builder.create();
-        dlg.setCanceledOnTouchOutside(false);
-        Window window = dlg.getWindow();
+        opponentUnavailableDialog = builder.create();
+        opponentUnavailableDialog.setCanceledOnTouchOutside(false);
+        Window window = opponentUnavailableDialog.getWindow();
         WindowManager.LayoutParams wlp = window.getAttributes();
         wlp.gravity = Gravity.BOTTOM;
 //        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         window.setAttributes(wlp);
-        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        dlg.show();
+        opponentUnavailableDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        opponentUnavailableDialog.show();
 
     }
 
