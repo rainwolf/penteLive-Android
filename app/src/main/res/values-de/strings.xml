@@ -11,6 +11,12 @@
     <string name="renju_dont_swap">Nicht tauschen</string>
     <string name="renju_place_in_box">Lege deinen Stein nahe der Mitte und bestätige.</string>
     <string name="renju_need_10_offers">Wähle genau 10 nicht-symmetrische Angebote.</string>
+    <string name="renju_place_ten">10 setzen</string>
+    <string name="renju_choice_title">Taraguchi-Eröffnung — deine Wahl</string>
+    <string name="renju_place_fifth">5. Stein setzen</string>
+    <string name="renju_decline_swap">Tausch ablehnen</string>
+    <string name="renju_offer_progress">Fünfte Züge anbieten: %1$d/10</string>
+    <string name="renju_select_prompt">Wähle einen der angebotenen Punkte</string>
     <string name="resign">Aufgeben</string>
     <string name="request_cancel">Erbitte die Löschung des Spiels</string>
     <string name="dismiss">Ablehnen</string>

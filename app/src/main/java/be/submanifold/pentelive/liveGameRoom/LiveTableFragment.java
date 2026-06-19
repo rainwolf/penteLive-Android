@@ -39,10 +39,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+
+import be.submanifold.pente.rules.RenjuLiveState;
 
 import be.submanifold.pentelive.Helpers;
 import be.submanifold.pentelive.InviteAIActivity;
@@ -77,6 +80,8 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
+    private AlertDialog renjuDialog = null;
+    private boolean renjuFirstMoveSent = false;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -472,6 +477,12 @@ public class LiveTableFragment extends Fragment {
                 }
             }
         }
+        // Renju (Taraguchi) opening: raise the swap/branch choice when it now falls to me.
+        // table.addMove(...) above already ran advanceRenjuAfterMove; the board's PLACE/OFFER/
+        // SELECTION/PENDING arming (isRenjuArmed) suppresses a re-raise until the next echo.
+        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            showRenjuChoice();
+        }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
             playButton.setText(R.string.pass);
@@ -510,6 +521,12 @@ public class LiveTableFragment extends Fragment {
                     showSwap2Choice();
                 }
             }
+        }
+        // Renju (Taraguchi) opening: raise the swap/branch choice when it now falls to me.
+        // table.addMove(...) above already ran advanceRenjuAfterMove; the board's PLACE/OFFER/
+        // SELECTION/PENDING arming (isRenjuArmed) suppresses a re-raise until the next echo.
+        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            showRenjuChoice();
         }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
@@ -593,6 +610,12 @@ public class LiveTableFragment extends Fragment {
     public void gameStateChanged() {
         if (!isAdded()) return;
         if (table.getGameState().state == State.STARTED) {
+            // Renju move 1 is NOT auto-placed by the server; the client must send the centre.
+            // Only black (seat 1) satisfies isMyTurn at n=0, so only black sends it, exactly once.
+            if (!renjuFirstMoveSent && table.isRenju() && table.getMoves().isEmpty() && table.isMyTurn(me)) {
+                sendRenjuFirstMove();
+                renjuFirstMoveSent = true;
+            }
             board.invalidate();
             if (table.isTimed()) {
                 timerUpdater.run();
@@ -606,6 +629,9 @@ public class LiveTableFragment extends Fragment {
                 waitForPlayerReturnDialog = null;
             }
         } else {
+            // Not STARTED (NOTSTARTED / PAUSED / HALFSET): re-arm the renju auto-first-move guard
+            // so a fresh game (or rematch) sends move 1 again when it next starts.
+            renjuFirstMoveSent = false;
             timerHandler.removeCallbacks(timerUpdater);
             if (table.getGameState().state == State.PAUSED && table.isSeated(me)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -1116,6 +1142,93 @@ public class LiveTableFragment extends Fragment {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
+    }
+
+    /** Renju move 1 is the centre (index 112 on a 15x15 board); sent as a normal move by black. */
+    void sendRenjuFirstMove() {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":112,\"moves\":[112],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    /**
+     * Taraguchi opening-choice dialog (swap2 methodology): a bottom, non-cancelable AlertDialog
+     * whose items are chosen dynamically from the renju state. Mirrors showSwap2Choice's window
+     * configuration. SELECTION (white picking one of the ten) is handled on the board, not here.
+     */
+    public void showRenjuChoice() {
+        if (!isAdded()) return;
+        final RenjuLiveState rs = table.getGameState().renjuState;
+        final int n = table.getMoves().size();
+        final List<String> labels = new ArrayList<>();
+        final List<Runnable> actions = new ArrayList<>();
+        if (rs.showSwap(n)) {
+            labels.add(getString(R.string.renju_swap_take_over));
+            actions.add(() -> { board.markRenjuPending(); sendRenjuSwap(true, -1); });
+        }
+        if (rs.showDeclinePlace(n)) {
+            final boolean bare = (n == 5); // window-5 bare decline: no stone is placed
+            labels.add(getString(n == 4 ? R.string.renju_place_fifth
+                    : bare ? R.string.renju_decline_swap
+                    : R.string.renju_dont_swap));
+            actions.add(() -> {
+                if (bare) {
+                    board.markRenjuPending();
+                    sendRenjuSwap(false, -1);
+                } else {
+                    board.beginRenjuPlace(); // arm board; the tapped stone sends sendRenjuSwap(false, m)
+                }
+            });
+        }
+        if (rs.showOffer10(n)) {
+            labels.add(getString(R.string.renju_place_ten));
+            actions.add(() -> {
+                board.beginRenjuOffer(); // arm board 10-pick (the 10th tap auto-sends)
+                Toast.makeText(activity, getString(R.string.renju_offer_progress, board.renjuPickCount()), Toast.LENGTH_SHORT).show();
+            });
+        }
+        if (labels.isEmpty()) return;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.renju_choice_title));
+        builder.setItems(labels.toArray(new String[0]), (dialog, which) -> actions.get(which).run());
+        AlertDialog dlg = builder.create();
+        dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        window.setAttributes(wlp);
+        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        renjuDialog = dlg;
+        dlg.show();
+    }
+
+    /**
+     * Called by the activity (Task D1) when a renju swap / offer10 / select1 echo — or a renju
+     * swapSeats echo — arrives. On the UI thread: dismiss any open choice dialog, clear board
+     * arming, then refresh — enter SELECTION on the board if the ten offers are now mine to pick
+     * from, or re-raise the swap/branch dialog if a new decision has fallen to me (e.g. a take-over
+     * handing the new black the branch choice).
+     */
+    public void onRenjuDecisionEcho(int tableId) {
+        if (!isAdded() || table == null || tableId != table.getId()) return;
+        activity.runOnUiThread(() -> {
+            if (!isAdded()) return;
+            if (renjuDialog != null) {
+                if (renjuDialog.isShowing()) renjuDialog.dismiss();
+                renjuDialog = null;
+            }
+            board.clearRenjuArming();
+            board.invalidate();
+            if (!table.isRenju()) return;
+            final RenjuLiveState rs = table.getGameState().renjuState;
+            final int n = table.getMoves().size();
+            if (rs.phase(n) == RenjuLiveState.Phase.SELECTION && table.isMyTurn(me)) {
+                board.beginRenjuSelection(rs.offered);
+                Toast.makeText(activity, getString(R.string.renju_select_prompt), Toast.LENGTH_SHORT).show();
+            } else if (table.renjuChoiceNow() && table.isMyTurn(me)) {
+                showRenjuChoice();
+            }
+        });
     }
 
     private String csv(int[] a) {

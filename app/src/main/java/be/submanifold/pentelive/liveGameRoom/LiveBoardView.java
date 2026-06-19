@@ -97,6 +97,11 @@ public class LiveBoardView extends View {
         return renjuMode != RENJU_IDLE;
     }
 
+    /** Read-only: number of fifth-move offers picked so far while in OFFER mode. */
+    public int renjuPickCount() {
+        return renjuPicks.size();
+    }
+
     public int getGridSize() {
         return gridSize;
     }
