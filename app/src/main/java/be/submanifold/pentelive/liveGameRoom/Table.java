@@ -39,6 +39,7 @@ public class Table {
     private final int oPenteColor = Color.parseColor("#52BE80");
     private final int swap2Color = Color.parseColor("#E5AA70");
     private final int swap2KeryoColor = Color.parseColor("#50C878");
+    private final int renjuColor = Color.parseColor("#D98880");
 
     private int id = 0;
     private Map<String, LivePlayer> players = new HashMap<>();
@@ -83,6 +84,8 @@ public class Table {
         gameNames.put(26, "Speed O-Pente");
         gameNames.put(28, "Speed Swap2-Pente");
         gameNames.put(30, "Speed Swap2-Keryo");
+        gameNames.put(31, "Renju");
+        gameNames.put(32, "Speed Renju");
     }
 
     private List<Integer> moves = new ArrayList<>();
@@ -101,6 +104,10 @@ public class Table {
 
     private int gridSize = 19, passMove = gridSize * gridSize;
     private boolean hasPass = false;
+    // True while addMoves(List) is bulk-replaying (rejoin); suppresses the per-move
+    // incremental renju advance so the single isRejoin=true advance at the end wins.
+    // NOTE: relies on addMove/addMoves being called exclusively on the event-queue thread.
+    private boolean bulkAddingMoves = false;
 
     public byte[][] abstractBoard = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -179,9 +186,16 @@ public class Table {
 
     public void addMoves(List<Integer> moveList) {
         resetBoard();
-        for (int move : moveList) {
-            addMove(move);
+        bulkAddingMoves = true;
+        try {
+            for (int move : moveList) {
+                addMove(move);
+            }
+        } finally {
+            bulkAddingMoves = false;
         }
+        // Bulk/rejoin: advance once after the full replay (preserves any rejoin signal).
+        advanceRenjuAfterMove(true);
     }
 
     public boolean isGo() {
@@ -196,10 +210,12 @@ public class Table {
         }
         byte color = (byte) currentColor();
         moves.add(move);
-        int move_i = move / 19;
-        int move_j = move % 19;
+        // Renju moves are 15-based (index = row*15 + col); every other variant is 19-based.
+        int width = isRenju() ? 15 : 19;
+        int move_i = move / width;
+        int move_j = move % width;
         abstractBoard[move_i][move_j] = color;
-        if (game != 5 && game != 6 && game != 13 && game != 14) {
+        if (game != 5 && game != 6 && game != 13 && game != 14 && !isRenju()) {
             if (game == 11 || game == 12 || game == 25 || game == 26) {
                 detectPoof(move, color);
             }
@@ -213,7 +229,8 @@ public class Table {
             }
         }
         if (game != 5 && game != 6 && game != 13 && game != 14 && game != 7 && game != 8
-                && game != 17 && game != 18 && game != 27 && game != 28 && (rated || game == 9 || game == 10)) {
+                && game != 17 && game != 18 && game != 27 && game != 28 && !isRenju()
+                && (rated || game == 9 || game == 10)) {
             if (moves.size() == 2) {
                 for (int i = 7; i < 12; i++) {
                     for (int j = 7; j < 12; j++) {
@@ -264,6 +281,10 @@ public class Table {
                 }
             }
         }
+        // Incremental (live) renju advance; skipped during bulk replay (see addMoves).
+        if (!bulkAddingMoves) {
+            advanceRenjuAfterMove(false);
+        }
     }
 
     public boolean isDPente() {
@@ -276,6 +297,22 @@ public class Table {
         return v != null && v.isSwap2();
     }
 
+    public boolean isRenju() {
+        Variant v = Variants.fromGameId(game);
+        return v != null && v.isRenju();
+    }
+
+    public void advanceRenjuAfterMove(boolean isRejoin) {
+        if (isRenju()) {
+            gameState.renjuState.advanceAfterMove(getMoves().size(), isRejoin);
+        }
+    }
+
+    public boolean renjuChoiceNow() {
+        return isRenju() && (gameState.renjuState.isSwapChoice(getMoves().size())
+                || gameState.renjuState.isBranchChoice(getMoves().size()));
+    }
+
     public int currentColor() {
         if (isGo()) {
             if (getGameState().goState == GoState.PLAY) {
@@ -283,6 +320,9 @@ public class Table {
             } else {
                 return 3;
             }
+        } else if (isRenju()) {
+            // Renju is black-first: move 0 -> 2 (black), move 1 -> 1 (white).
+            return 2 - (moves.size() % 2);
         } else if (game != 13 && game != 14) {
             return 1 + (moves.size() % 2);
         } else {
@@ -310,6 +350,15 @@ public class Table {
             }
             return cp;
         } else if (game != 13 && game != 14) {
+            if (isRenju()) {
+                // openingPlayer returns the seat to move during the opening
+                // (1=black/seat1, 2=white/seat2), or 0 once the opening is complete.
+                int op = gameState.renjuState.openingPlayer(moves.size());
+                if (op != 0) {
+                    return op;
+                }
+                // op == 0: opening complete -> fall through to normal parity below.
+            }
             if (isDPente()) {
                 if (moves.size() < 4) {
                     return 1;
@@ -425,6 +474,7 @@ public class Table {
         resetAbstractBoard();
         gameState.dPenteState = DPenteState.NOCHOICE;
         gameState.swap2State = Swap2State.NOCHOICE;
+        gameState.renjuState.reset();
         moves = new ArrayList<>();
         whiteCaptures = 0;
         blackCaptures = 0;
@@ -898,10 +948,13 @@ public class Table {
 
 
     public boolean gameHasCaptures() {
-        return (game != 5 && game != 6 && game != 13 && game != 14);
+        return (game != 5 && game != 6 && game != 13 && game != 14 && !isRenju());
     }
 
     public int getGameColor() {
+        if (isRenju()) {
+            return renjuColor;
+        }
         if (game < 3) {
             return penteColor;
         } else if (game < 5) {

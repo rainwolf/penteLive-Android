@@ -39,10 +39,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+
+import be.submanifold.pente.rules.RenjuLiveState;
 
 import be.submanifold.pentelive.Helpers;
 import be.submanifold.pentelive.InviteAIActivity;
@@ -77,6 +80,9 @@ public class LiveTableFragment extends Fragment {
     };
     CountDownTimer countDownTimer = null;
     AlertDialog waitForPlayerReturnDialog = null;
+    private AlertDialog renjuDialog = null;
+    private AlertDialog opponentUnavailableDialog = null;
+    private boolean renjuFirstMoveSent = false;
 
     TextView p1Name, p2Name, p1Timer, p2Timer, settingsText,
             tableTextView, capturesTextView, gameNameView;
@@ -325,6 +331,21 @@ public class LiveTableFragment extends Fragment {
         } else {
             p2Name.setText(player.coloredNameString(p2Name.getLineHeight()));
         }
+        // Both seats filled again (opponent returned) -> dismiss any disconnect/unavailable dialogs.
+        if (table.getSeats().get(1) != null && table.getSeats().get(2) != null) {
+            if (countDownTimer != null) {
+                countDownTimer.cancel();
+                countDownTimer = null;
+            }
+            if (waitForPlayerReturnDialog != null) {
+                waitForPlayerReturnDialog.dismiss();
+                waitForPlayerReturnDialog = null;
+            }
+            if (opponentUnavailableDialog != null) {
+                opponentUnavailableDialog.dismiss();
+                opponentUnavailableDialog = null;
+            }
+        }
         long initialMnts = table.getTimer().get("initialMinutes");
         long incrementalScnds = table.getTimer().get("incrementalSeconds");
         String ratedStr = "";
@@ -472,6 +493,7 @@ public class LiveTableFragment extends Fragment {
                 }
             }
         }
+        maybeRaiseRenjuChoice();
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
             playButton.setText(R.string.pass);
@@ -510,6 +532,16 @@ public class LiveTableFragment extends Fragment {
                     showSwap2Choice();
                 }
             }
+        }
+        maybeRaiseRenjuChoice();
+        // Rejoin-only: the re-sent offer10 echo arrives BEFORE this bulk move list, so SELECTION
+        // was never armed (phase was MOVE while moves was still empty). Arm it now from the
+        // replayed state. addMove (incremental live play) doesn't reach this, so no double-arm.
+        RenjuLiveState rs = table.getGameState().renjuState;
+        int rn = table.getMoves().size();
+        if (table.isRenju() && rs.phase(rn) == RenjuLiveState.Phase.SELECTION
+                && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            board.beginRenjuSelection();
         }
         if (table.isGo() && table.getGameState().state == State.STARTED && table.isMyTurn(me)) {
             playButton.setVisibility(View.VISIBLE);
@@ -593,6 +625,12 @@ public class LiveTableFragment extends Fragment {
     public void gameStateChanged() {
         if (!isAdded()) return;
         if (table.getGameState().state == State.STARTED) {
+            // Renju move 1 is NOT auto-placed by the server; the client must send the centre.
+            // Only black (seat 1) satisfies isMyTurn at n=0, so only black sends it, exactly once.
+            if (!renjuFirstMoveSent && table.isRenju() && table.getMoves().isEmpty() && table.isMyTurn(me)) {
+                sendRenjuFirstMove();
+                renjuFirstMoveSent = true;
+            }
             board.invalidate();
             if (table.isTimed()) {
                 timerUpdater.run();
@@ -606,6 +644,9 @@ public class LiveTableFragment extends Fragment {
                 waitForPlayerReturnDialog = null;
             }
         } else {
+            // Not STARTED (NOTSTARTED / PAUSED / HALFSET): re-arm the renju auto-first-move guard
+            // so a fresh game (or rematch) sends move 1 again when it next starts.
+            renjuFirstMoveSent = false;
             timerHandler.removeCallbacks(timerUpdater);
             if (table.getGameState().state == State.PAUSED && table.isSeated(me)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -1100,6 +1141,139 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
+    void sendRenjuSwap(boolean swap, int move) {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgRenjuTaraguchiSwapTableEvent\":{\"swap\":" + (swap ? "true" : "false") + ",\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    void sendRenjuOffer10(int[] moves) {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgRenjuTaraguchiOffer10TableEvent\":{\"moves\":[" + csv(moves) + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    void sendRenjuSelect1(int move) {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgRenjuTaraguchi10Select1TableEvent\":{\"move\":" + move + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    /**
+     * Raise the renju swap/branch choice dialog when the decision now falls to me. The caller has
+     * already run advanceRenjuAfterMove; the board's PLACE/OFFER/SELECTION/PENDING arming
+     * (isRenjuArmed) suppresses a re-raise until the next server echo.
+     */
+    private void maybeRaiseRenjuChoice() {
+        if (table.isRenju() && table.renjuChoiceNow() && table.isMyTurn(me) && !board.isRenjuArmed()) {
+            showRenjuChoice();
+        }
+    }
+
+    /** Renju move 1 is the centre (index 112 on a 15x15 board); sent as a normal move by black. */
+    void sendRenjuFirstMove() {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":112,\"moves\":[112],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    /**
+     * Taraguchi opening-choice dialog (swap2 methodology): a bottom, non-cancelable AlertDialog
+     * whose items are chosen dynamically from the renju state. Mirrors showSwap2Choice's window
+     * configuration. SELECTION (white picking one of the ten) is handled on the board, not here.
+     */
+    public void showRenjuChoice() {
+        if (!isAdded()) return;
+        final RenjuLiveState rs = table.getGameState().renjuState;
+        final int n = table.getMoves().size();
+        final List<String> labels = new ArrayList<>();
+        final List<Runnable> actions = new ArrayList<>();
+        if (rs.showSwap(n)) {
+            labels.add(getString(R.string.renju_swap_take_over));
+            actions.add(() -> { board.markRenjuPending(); sendRenjuSwap(true, -1); });
+        }
+        if (rs.showDeclinePlace(n)) {
+            final boolean bare = (n == 5); // window-5 bare decline: no stone is placed
+            labels.add(getString(R.string.renju_dont_swap));
+            actions.add(() -> {
+                if (bare) {
+                    board.markRenjuPending();
+                    sendRenjuSwap(false, -1);
+                } else {
+                    board.beginRenjuPlace(); // arm board; the tapped stone sends sendRenjuSwap(false, m)
+                }
+            });
+        }
+        if (rs.showOffer10(n)) {
+            labels.add(getString(R.string.renju_place_ten));
+            actions.add(() -> {
+                board.beginRenjuOffer(); // arm board 10-pick (the 10th tap auto-sends)
+                Toast.makeText(activity, getString(R.string.renju_offer_progress, board.renjuPickCount()), Toast.LENGTH_SHORT).show();
+            });
+        }
+        if (labels.isEmpty()) return;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setItems(labels.toArray(new String[0]), (dialog, which) -> actions.get(which).run());
+        AlertDialog dlg = builder.create();
+        dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        window.setAttributes(wlp);
+        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        renjuDialog = dlg;
+        dlg.show();
+    }
+
+    /**
+     * Called by the activity (Task D1) when a renju swap / offer10 / select1 echo — or a renju
+     * swapSeats echo — arrives. On the UI thread: dismiss any open choice dialog, clear board
+     * arming, then refresh — enter SELECTION on the board if the ten offers are now mine to pick
+     * from, or re-raise the swap/branch dialog if a new decision has fallen to me (e.g. a take-over
+     * handing the new black the branch choice).
+     */
+    public void onRenjuDecisionEcho(int tableId) {
+        if (!isAdded() || table == null || tableId != table.getId()) return;
+        activity.runOnUiThread(() -> {
+            if (!isAdded()) return;
+            if (renjuDialog != null) {
+                if (renjuDialog.isShowing()) renjuDialog.dismiss();
+                renjuDialog = null;
+            }
+            board.clearRenjuArming();
+            board.invalidate();
+            if (!table.isRenju()) return;
+            final RenjuLiveState rs = table.getGameState().renjuState;
+            final int n = table.getMoves().size();
+            if (rs.phase(n) == RenjuLiveState.Phase.SELECTION && table.isMyTurn(me)) {
+                board.beginRenjuSelection();
+                Toast.makeText(activity, getString(R.string.renju_select_prompt), Toast.LENGTH_SHORT).show();
+            } else if (table.renjuChoiceNow() && table.isMyTurn(me)) {
+                showRenjuChoice();
+            }
+        });
+    }
+
+    /**
+     * Called by the activity when the server rejects a renju decision/move (dsgMoveTableErrorEvent,
+     * sent only to the sender). The local state is unchanged by a rejected send, so recovery is the
+     * same clear-arming + re-raise that onRenjuDecisionEcho already performs: drop the board's
+     * RENJU_PENDING arming, then restore the user's pending decision (SELECTION or the swap/branch
+     * dialog) from the unchanged state.
+     */
+    public void onRenjuMoveError(int tableId) {
+        onRenjuDecisionEcho(tableId);
+    }
+
+    private String csv(int[] a) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < a.length; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(a[i]);
+        }
+        return sb.toString();
+    }
+
     public void updateBoard() {
         board.invalidate();
     }
@@ -1260,15 +1434,15 @@ public class LiveTableFragment extends Fragment {
         builder.setPositiveButton(getString(R.string.cancel_set_game), (dialog, which) -> sendForceCancelResignTableEvent(true));
         builder.setNeutralButton(getString(R.string.resign), (dialog, which) -> sendResign());
         builder.setNegativeButton(getString(R.string.force_resign), (dialog, which) -> sendForceCancelResignTableEvent(false));
-        AlertDialog dlg = builder.create();
-        dlg.setCanceledOnTouchOutside(false);
-        Window window = dlg.getWindow();
+        opponentUnavailableDialog = builder.create();
+        opponentUnavailableDialog.setCanceledOnTouchOutside(false);
+        Window window = opponentUnavailableDialog.getWindow();
         WindowManager.LayoutParams wlp = window.getAttributes();
         wlp.gravity = Gravity.BOTTOM;
 //        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         window.setAttributes(wlp);
-        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        dlg.show();
+        opponentUnavailableDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        opponentUnavailableDialog.show();
 
     }
 
