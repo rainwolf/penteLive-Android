@@ -427,7 +427,7 @@ public class BoardView extends View {
                 } else {
                     int[] accepted = new int[renjuPicks.size()];
                     for (int k = 0; k < renjuPicks.size(); k++) accepted[k] = renjuPicks.get(k);
-                    if (renjuPicks.size() >= 1 && be.submanifold.pente.rules.RenjuSymmetry.isSymmetricDup(m, accepted)) {
+                    if (renjuPicks.size() >= 1 && be.submanifold.pente.rules.RenjuSymmetry.isOfferDup(m, accepted, renjuStabilizer())) {
                         // symmetric duplicate: reject (ignore)
                     } else if (renjuPicks.size() < 10) {
                         renjuPicks.add(m);
@@ -706,7 +706,7 @@ public class BoardView extends View {
             } else if (n == 10) {
                 int[] arr = new int[n];
                 for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
-                if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr)) {
+                if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr, renjuStabilizer())) {
                     setSubmitEnabled(submit, true);
                     submit.setText(submitStr + " 10/10");
                     return;
@@ -1092,6 +1092,21 @@ public class BoardView extends View {
         text.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
+
+    /**
+     * Snapshot the placed 15x15 Renju board and return the position's symmetry stabilizer
+     * (affine D4 transforms about the placed-stone shape, not the fixed board centre).
+     */
+    private int[][] renjuStabilizer() {
+        byte[] snap = new byte[225];
+        be.submanifold.pente.rules.BoardState st = game.getState();
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                snap[15 * i + j] = st.cell(i, j);
+            }
+        }
+        return be.submanifold.pente.rules.RenjuSymmetry.stabilizer(snap);
+    }
 
     public void setBoardActivity(BoardActivity boardActivity) {
         this.boardActivity = boardActivity;

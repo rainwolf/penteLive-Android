@@ -53,7 +53,7 @@ public class LiveBoardView extends View {
     // collects picks, so compute the snapshot + D4 stabilizer once per OFFER session rather than
     // on every touch-move event.
     private byte[] renjuSnapshotCache;
-    private int[] renjuStabilizerCache;
+    private int[][] renjuStabilizerCache;
 
     /** Enter PLACE mode: arm a single box-constrained decline / Branch-A stone. */
     public void beginRenjuPlace() {
