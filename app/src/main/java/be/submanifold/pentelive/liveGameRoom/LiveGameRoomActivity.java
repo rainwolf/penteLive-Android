@@ -643,7 +643,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             // either way the renju SWAP window must be marked resolved (awaitingSwap=false,
             // swapTaken=true) before the bulk move replay runs advanceRenjuAfterMove(true).
             if (table.isRenju()) {
-                table.getGameState().renjuState.applySwapSeats();
+                table.getGameState().renjuState.applySwapSeats(table.getMoves().size());
                 LiveTableFragment fragment = (LiveTableFragment)
                         getSupportFragmentManager().findFragmentByTag("liveTable");
                 if (fragment != null) {

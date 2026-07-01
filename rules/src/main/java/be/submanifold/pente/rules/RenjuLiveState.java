@@ -29,6 +29,17 @@ public final class RenjuLiveState {
     /** §3.1 advanceRenjuTrackingAfterMove — runs after every stone lands. */
     public void advanceAfterMove(int numMoves, boolean isRejoin) {
         if (!isRejoin) swapTaken = false; // a fresh incremental move opens a new window
+        // Rejoin ordering: the silent seat-swap marker arrives BEFORE the bulk move
+        // replay, so applySwapSeats ran with 0 moves and could not commit Branch A.
+        // Once the 4th stone lands, a seen take-over marker (swapTaken) at move 4 means
+        // Branch A -- commit it so the swapped-in player is NOT re-shown Branch B on
+        // reconnect (mirrors React advanceRenjuTrackingAfterMove and iOS
+        // advanceRenjuTracking). Gated on swapTaken, so a decline rejoin is unaffected;
+        // the moves-first ordering is already handled by applySwapSeats(4) itself.
+        if (isRejoin && swapTaken && numMoves == 4) {
+            branchChosen = true;
+            tenOffer = false;
+        }
         boolean windowResolved = swapTaken
                 || (numMoves == 4 && (branchChosen || tenOffer || selected != null));
         // A window follows a placed stone: never open one before move 1 (numMoves==0), which would
@@ -66,16 +77,26 @@ public final class RenjuLiveState {
         selected = move;
     }
 
-    /** §3.6 swapSeats (renju part): a take-over or silent rejoin marker resolved the window. */
-    public void applySwapSeats() {
+    /** §3.6 swapSeats (renju part): the LIVE take-over signal. The server delivers a move-4
+     * take-over as a SEAT-SWAP event (DSGSwapSeatsTableEvent); the renju swap event stays a
+     * decision-only echo. A seat swap only ever happens on a TAKE-OVER (a decline changes no
+     * seats), so numMoves==4 here unambiguously means "took over move 4 -> Branch A": seats flip,
+     * play continues, and Offer-10 / Branch B are unreachable — mirroring backend
+     * renjuSwapDecisionMade(true) and RenjuRejoin.decode returning MOVE. Take-overs at any other
+     * window merely resolve the window (-> MOVE). Also used as the silent rejoin marker. */
+    public void applySwapSeats(int numMoves) {
         awaitingSwap = false;
         swapTaken = true;
+        if (numMoves == 4) {          // move-4 take-over = Branch A (seats flip, play continues)
+            branchChosen = true;
+            tenOffer = false;
+        }
     }
 
     /** §3.4 rejoin: apply the single phase signal BEFORE the bulk move replay. */
     public void applyRejoinSignal(RejoinKind kind, int numMoves) {
         switch (kind) {
-            case SILENT_SWAP: applySwapSeats(); break;     // BRANCH (n==4) or MOVE (n!=4)
+            case SILENT_SWAP: applySwapSeats(numMoves); break;  // n==4 take-over => Branch A (MOVE); else MOVE
             case OFFERS:                                    // offered[] arrives on the re-sent offer10 echo
             case SELECT1:                                   // selected arrives on the re-sent select1 echo
             case NONE:
