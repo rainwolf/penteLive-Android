@@ -1,13 +1,27 @@
 package be.submanifold.pentelive;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.zip.CRC32;
 
 //import org.pente.gameServer.core.AlphaNumericGridCoordinates;
 //import org.pente.gameServer.core.GridCoordinates;
 
 public class Ai {
 
-    public native long init(int[] atbl, int[] asrc, int size);
+    // Canonical mmai game IDs accepted by the native engine (configFor()):
+    //   1 = Pente, 3 = Keryo, 11 = Poof, 13 = Connect6, 15 = Boat, 25 = O-Pente.
+    // Even IDs are Speed twins with identical board rules. Unknown IDs fall back
+    // to plain Pente inside the engine.
+    //
+    // Connect6 (game 13/14) packs TWO stones per turn into one move int, base 362:
+    //   m1 = move / 362; m2 = move % 362; m2 == 361 is the single-stone sentinel
+    //   (used for Black's opening stone). Other variants return a plain 0..360.
+    // The native side loads pente.tbl / pente.scs / opngbk.pen from filesDir.
+    public native long init(String filesDir, int size);
 
     public native void privateDestroy(long ptr);
 
@@ -48,7 +62,9 @@ public class Ai {
 
 //	private List<AiListener> aiListeners = new ArrayList<AiListener>();
 
-    private final MarksAIPlayer marksAi = new MarksAIPlayer();
+    // Opening book is now owned by the native engine (built into the CAi ctor),
+    // so it is always on; the flag is retained only for API compatibility.
+    private boolean useOpeningBook = true;
 
 
     public Ai(int game, int level, int vct, int seat, int size) {
@@ -58,20 +74,74 @@ public class Ai {
         this.seat = seat;
         this.size = size;
 
-        marksAi.setGame(game);
-        marksAi.setLevel(level);
-        marksAi.setSeat(seat);
-
         runnable = new AIRunnable();
         runnable.reset();
         thread = new Thread(runnable);
         thread.start();
     }
 
-    public void init(InputStream scs, InputStream opnbk, InputStream tblIn)
-            throws Throwable {
-        marksAi.init(scs, opnbk, tblIn);
-        cPtr = init(marksAi.getTbl(), marksAi.getSrc(), size);
+    // New init flow: the native engine loads pente.tbl / pente.scs / opngbk.pen
+    // itself from a directory, so we materialise the three raw resources into
+    // filesDir/mmai/ (skipping any that are already present with a matching
+    // size) and hand the directory to JNI.
+    public void init(InputStream scs, InputStream opnbk, InputStream tblIn,
+                     File filesDir) throws Throwable {
+        File mmaiDir = new File(filesDir, "mmai");
+        if (!mmaiDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            mmaiDir.mkdirs();
+        }
+        copyResource(tblIn, new File(mmaiDir, "pente.tbl"));
+        copyResource(scs, new File(mmaiDir, "pente.scs"));
+        copyResource(opnbk, new File(mmaiDir, "opngbk.pen"));
+        cPtr = init(mmaiDir.getAbsolutePath(), size);
+    }
+
+    private static void copyResource(InputStream in, File dest) throws Throwable {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        try {
+            while ((n = in.read(buf)) != -1) {
+                bos.write(buf, 0, n);
+            }
+        } finally {
+            in.close();
+        }
+        byte[] data = bos.toByteArray();
+        // Skip the write only if the on-disk file is byte-identical, verified by a
+        // CRC32 over the whole file (length alone can collide, e.g. a truncated or
+        // partially-written resource of the same length as a previous version).
+        if (dest.exists() && dest.length() == data.length && crc32(dest) == crc32(data)) {
+            return;
+        }
+        FileOutputStream out = new FileOutputStream(dest);
+        try {
+            out.write(data);
+        } finally {
+            out.close();
+        }
+    }
+
+    private static long crc32(byte[] data) {
+        CRC32 crc = new CRC32();
+        crc.update(data);
+        return crc.getValue();
+    }
+
+    private static long crc32(File file) throws Throwable {
+        CRC32 crc = new CRC32();
+        InputStream fin = new FileInputStream(file);
+        try {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = fin.read(buf)) != -1) {
+                crc.update(buf, 0, n);
+            }
+        } finally {
+            fin.close();
+        }
+        return crc.getValue();
     }
 
 //	public void addAiListener(AiListener aiListener) {
@@ -125,26 +195,11 @@ public class Ai {
 //	}
     public void getMove(final int[] moves) {
 //	    new Throwable().printStackTrace();
-        marksAi.clear();
-        for (int m : moves) {
-            marksAi.addMove(m);
-        }
-        int m = marksAi.getMove();
-        if (m != -1) {
-            if (board != null) {
-                board.processAImove(m);
-            }
-            if (dbBoard != null) {
-                dbBoard.processAImove(m);
-            }
-//            for (AiListener aiListener : aiListeners) {
-//                aiListener.moveReady(moves, m);
-//            }
-        } else {
-            startThinking();
-            start(cPtr);
-            runnable.go(moves);
-        }
+        // The native engine now owns the opening book, so every move goes
+        // through the (asynchronous) native search on the AI thread.
+        startThinking();
+        start(cPtr);
+        runnable.go(moves);
     }
 
     private final Thread thread;
@@ -177,11 +232,17 @@ public class Ai {
 //	    			int newMove = marksAi.getMove();
                     // sleep for 0.x seconds
                     Thread.sleep(180);
-                    if (board != null) {
-                        board.processAImove(newMove);
-                    }
-                    if (dbBoard != null) {
-                        dbBoard.processAImove(newMove);
+                    // -1 is the cancelled/no-move sentinel from the native search
+                    // (e.g. the search was stopped). Feeding it to a board would push
+                    // -1 onto its move list and index the board at a negative row, so
+                    // skip processing entirely for a cancelled move.
+                    if (newMove != -1) {
+                        if (board != null) {
+                            board.processAImove(newMove);
+                        }
+                        if (dbBoard != null) {
+                            dbBoard.processAImove(newMove);
+                        }
                     }
                     if (alive && !destroyed) {
 //                        for (AiListener aiListener : aiListeners) {
@@ -242,7 +303,6 @@ public class Ai {
 
     public void setLevel(int level) {
         this.level = level;
-        marksAi.setLevel(level);
     }
 
     public void setVct(int vct) {
@@ -251,7 +311,6 @@ public class Ai {
 
     public void setSeat(int seat) {
         this.seat = seat;
-        marksAi.setSeat(seat);
     }
 
     public boolean isActive() {
@@ -264,7 +323,6 @@ public class Ai {
 
     public void setGame(int game) {
         this.game = game;
-        marksAi.setGame(game);
     }
 
     public int getLevel() {
@@ -276,10 +334,12 @@ public class Ai {
     }
 
     public boolean useOpeningBook() {
-        return marksAi.useOpeningBook();
+        return useOpeningBook;
     }
 
     public void useOpeningBook(boolean useBook) {
-        marksAi.useOpeningBook(useBook);
+        // Retained for API compatibility; the native engine always uses its
+        // built-in opening book (CAi ctor openingBook = true).
+        this.useOpeningBook = useBook;
     }
 }

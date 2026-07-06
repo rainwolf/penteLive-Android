@@ -26,6 +26,8 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import be.submanifold.pente.rules.VariantReferee;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,10 @@ import java.util.List;
  */
 public class MMAIBoardView extends View {
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
-            keryoPenteColor = Color.parseColor("#BAFDA3");
+            keryoPenteColor = Color.parseColor("#BAFDA3"),
+            poofColor = Color.parseColor("#A3D8FD"),
+            boatColor = Color.parseColor("#FDB2A3"),
+            openteColor = Color.parseColor("#E3A3FD");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint whitePaint = makePaint(whiteColor);
     private final Paint pentePaint = makePaint(penteColor);
@@ -427,12 +432,16 @@ public class MMAIBoardView extends View {
         text.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
+    // The board/captures/winner referee now lives in the plain-Java :rules module
+    // (VariantReferee), tied to the authority react_mmai/src/Classes/GameClass.js
+    // by a fixture regression test. This View only presents the result.
+    private final VariantReferee referee = new VariantReferee();
+
     private void replayGame(byte[][] abstractBoard) {
-        if (game == 1) {
-            replayPenteGame(abstractBoard);
-        } else {
-            replayKeryoPenteGame(abstractBoard);
-        }
+        int winner = referee.replay(game, abstractBoard, movesList, rated);
+        whiteCaptures = referee.whiteCaptures;
+        blackCaptures = referee.blackCaptures;
+        finishReplay(abstractBoard, winner);
     }
 
     private SpannableStringBuilder getCapturesText(int lineHeight) {
@@ -449,496 +458,40 @@ public class MMAIBoardView extends View {
         return sb;
     }
 
-
-    private void replayPenteGame(byte[][] abstractBoard) {
-        resetAbstractBoard(abstractBoard);
-        for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i % 2));
-            abstractBoard[movesList.get(i) % 19][movesList.get(i) / 19] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
-        }
-        if (rated && (movesList.size() == 2)) {
-            for (int i = 7; i < 12; ++i) {
-                for (int j = 7; j < 12; ++j) {
-                    if (abstractBoard[i][j] == 0) {
-                        abstractBoard[i][j] = -1;
-                    }
-                }
-            }
-        }
+    // Shared board-info + game-over presentation for the new variants. winner is
+    // 0 (game continues), 1 (white) or 2 (black); iWon = (myColor == winner).
+    private void finishReplay(byte[][] abstractBoard, int winner) {
         if (movesList.isEmpty()) {
             return;
-        } else {
-            String str = "<center><b>" + ctx.getString(R.string.color) + ":</b> "
-                    + (myColor == 1 ? ctx.getString(R.string.white) : ctx.getString(R.string.black))
-                    + ", <b>" + ctx.getString(R.string.difficulty) + " </b>" + difficulty + "</center><br>";
-            for (int i = 0; i < movesList.size(); i++) {
-                if (i % 2 == 0) {
-                    str = str + " <b>" + (i / 2 + 1) + ".</b> ";
-                } else {
-                    str = str + "-";
-                }
-                str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
-            }
-
-            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
-            redDot = movesList.get(movesList.size() - 1);
         }
+        String str = "<center><b>" + ctx.getString(R.string.color) + ":</b> "
+                + (myColor == 1 ? ctx.getString(R.string.white) : ctx.getString(R.string.black))
+                + ", <b>" + ctx.getString(R.string.difficulty) + " </b>" + difficulty + "</center><br>";
+        for (int i = 0; i < movesList.size(); i++) {
+            if (i % 2 == 0) {
+                str = str + " <b>" + (i / 2 + 1) + ".</b> ";
+            } else {
+                str = str + "-";
+            }
+            str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
+        }
+
         RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
+        setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
+        redDot = movesList.get(movesList.size() - 1);
+        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("⬤ x " + blackCaptures + " - ◯ x " + whiteCaptures);
         TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
         capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
 
-        if (whiteCaptures == 10 || blackCaptures == 10 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {
+        if (winner != 0) {
             gameOver = true;
-            boolean iWon = false;
-            if (whiteCaptures == 10) {
-                if (myColor == 2) {
-                    iWon = true;
-                }
-            } else if (blackCaptures == 10) {
-                if (myColor == 1) {
-                    iWon = true;
-                }
-            } else if (myColor == (2 - movesList.size() % 2)) {
-                iWon = true;
-            }
-            String msg = ctx.getString(R.string.you_lost);
-            if (iWon) {
-                msg = ctx.getString(R.string.you_won);
-            }
-            Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
-//            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-//            if (iWon) {
-//                v.setTextColor(Color.GREEN);
-//            } else {
-//                v.setTextColor(Color.YELLOW);
-//            }
-            toast.show();
+            boolean iWon = (myColor == winner);
+            String msg = iWon ? ctx.getString(R.string.you_won) : ctx.getString(R.string.you_lost);
+            Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
         } else {
             gameOver = false;
         }
         invalidate();
-    }
-
-    private void replayKeryoPenteGame(byte[][] abstractBoard) {
-        resetAbstractBoard(abstractBoard);
-        for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i % 2));
-            abstractBoard[movesList.get(i) % 19][movesList.get(i) / 19] = color;
-            detectPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
-            detectKeryoPenteCapture(abstractBoard, movesList.get(i) % 19, movesList.get(i) / 19, color);
-        }
-        if (rated && (movesList.size() == 2)) {
-            for (int i = 7; i < 12; ++i) {
-                for (int j = 7; j < 12; ++j) {
-                    if (abstractBoard[i][j] == 0) {
-                        abstractBoard[i][j] = -1;
-                    }
-                }
-            }
-        }
-        if (movesList.isEmpty()) {
-            return;
-        } else {
-            String str = "<center><b>" + ctx.getString(R.string.color) + ":</b> "
-                    + (myColor == 1 ? ctx.getString(R.string.white) : ctx.getString(R.string.black))
-                    + ", <b>" + ctx.getString(R.string.difficulty) + " </b>" + difficulty + "</center><br>";
-            for (int i = 0; i < movesList.size(); i++) {
-                if (i % 2 == 0) {
-                    str = str + " <b>" + (i / 2 + 1) + ".</b> ";
-                } else {
-                    str = str + "-";
-                }
-                str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
-            }
-
-            RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
-            redDot = movesList.get(movesList.size() - 1);
-        }
-        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-        TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
-        capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
-
-        if (whiteCaptures >= 15 || blackCaptures >= 15 || detectPente(abstractBoard, (byte) (2 - (movesList.size() % 2)), movesList.get(movesList.size() - 1))) {
-            gameOver = true;
-            boolean iWon = false;
-            if (whiteCaptures >= 15) {
-                if (myColor == 2) {
-                    iWon = true;
-                }
-            } else if (blackCaptures >= 15) {
-                if (myColor == 1) {
-                    iWon = true;
-                }
-            } else if (myColor == (2 - movesList.size() % 2)) {
-                iWon = true;
-            }
-            String msg = ctx.getString(R.string.you_lost);
-            if (iWon) {
-                msg = ctx.getString(R.string.you_won);
-            }
-            Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
-//            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-//            if (iWon) {
-//                v.setTextColor(Color.GREEN);
-//            } else {
-//                v.setTextColor(Color.YELLOW);
-//            }
-            toast.show();
-        } else {
-            gameOver = false;
-        }
-        invalidate();
-    }
-
-    private void resetAbstractBoard(byte[][] abstractBoard) {
-        whiteCaptures = 0;
-        blackCaptures = 0;
-        for (int i = 0; i < 19; i++) {
-            for (int j = 0; j < 19; j++) {
-                abstractBoard[i][j] = 0;
-            }
-        }
-    }
-
-    private void detectPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
-        byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i - 3) > -1) {
-            if (abstractBoard[i - 3][j] == myColor) {
-                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor)) {
-                    abstractBoard[i - 1][j] = 0;
-                    abstractBoard[i - 2][j] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if (((i - 3) > -1) && ((j - 3) > -1)) {
-            if (abstractBoard[i - 3][j - 3] == myColor) {
-                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor)) {
-                    abstractBoard[i - 1][j - 1] = 0;
-                    abstractBoard[i - 2][j - 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if ((j - 3) > -1) {
-            if (abstractBoard[i][j - 3] == myColor) {
-                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor)) {
-                    abstractBoard[i][j - 1] = 0;
-                    abstractBoard[i][j - 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if (((i + 3) < 19) && ((j - 3) > -1)) {
-            if (abstractBoard[i + 3][j - 3] == myColor) {
-                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor)) {
-                    abstractBoard[i + 1][j - 1] = 0;
-                    abstractBoard[i + 2][j - 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if ((i + 3) < 19) {
-            if (abstractBoard[i + 3][j] == myColor) {
-                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor)) {
-                    abstractBoard[i + 1][j] = 0;
-                    abstractBoard[i + 2][j] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if (((i + 3) < 19) && ((j + 3) < 19)) {
-            if (abstractBoard[i + 3][j + 3] == myColor) {
-                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor)) {
-                    abstractBoard[i + 1][j + 1] = 0;
-                    abstractBoard[i + 2][j + 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if ((j + 3) < 19) {
-            if (abstractBoard[i][j + 3] == myColor) {
-                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor)) {
-                    abstractBoard[i][j + 1] = 0;
-                    abstractBoard[i][j + 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-        if (((i - 3) > -1) && ((j + 3) < 19)) {
-            if (abstractBoard[i - 3][j + 3] == myColor) {
-                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor)) {
-                    abstractBoard[i - 1][j + 1] = 0;
-                    abstractBoard[i - 2][j + 2] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 2;
-                    } else {
-                        blackCaptures += 2;
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean detectPente(byte[][] abstractBoard, byte color, int rowCol) {
-        boolean pente = false;
-        int penteCounter = 1;
-        int row = rowCol % 19, col = rowCol / 19, i, j;
-        i = row - 1;
-        j = col;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            i -= 1;
-        }
-        i = row + 1;
-        j = col;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            i += 1;
-        }
-        if (pente) {
-            return pente;
-        }
-        penteCounter = 1;
-        i = row;
-        j = col - 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            j -= 1;
-        }
-        i = row;
-        j = col + 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            j += 1;
-        }
-        if (pente) {
-            return pente;
-        }
-        penteCounter = 1;
-        i = row - 1;
-        j = col - 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            j -= 1;
-            i -= 1;
-        }
-        i = row + 1;
-        j = col + 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            i += 1;
-            j += 1;
-        }
-        if (pente) {
-            return pente;
-        }
-        penteCounter = 1;
-        i = row - 1;
-        j = col + 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            j += 1;
-            i -= 1;
-        }
-        i = row + 1;
-        j = col - 1;
-        while (i > 0 && i < 19 && j > 0 && j < 19 && !pente) {
-            if (color == abstractBoard[i][j]) {
-                penteCounter += 1;
-                pente = (penteCounter > 4);
-            } else {
-                break;
-            }
-            i += 1;
-            j -= 1;
-        }
-
-        return pente;
-    }
-
-    private void detectKeryoPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
-        byte opponentColor = (byte) (1 + (myColor % 2));
-        if ((i - 4) > -1) {
-            if (abstractBoard[i - 4][j] == myColor) {
-                if ((abstractBoard[i - 1][j] == opponentColor) && (abstractBoard[i - 2][j] == opponentColor) && (abstractBoard[i - 3][j] == opponentColor)) {
-                    abstractBoard[i - 1][j] = 0;
-                    abstractBoard[i - 2][j] = 0;
-                    abstractBoard[i - 3][j] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if (((i - 4) > -1) && ((j - 4) > -1)) {
-            if (abstractBoard[i - 4][j - 4] == myColor) {
-                if ((abstractBoard[i - 1][j - 1] == opponentColor) && (abstractBoard[i - 2][j - 2] == opponentColor) && (abstractBoard[i - 3][j - 3] == opponentColor)) {
-                    abstractBoard[i - 1][j - 1] = 0;
-                    abstractBoard[i - 2][j - 2] = 0;
-                    abstractBoard[i - 3][j - 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if ((j - 4) > -1) {
-            if (abstractBoard[i][j - 4] == myColor) {
-                if ((abstractBoard[i][j - 1] == opponentColor) && (abstractBoard[i][j - 2] == opponentColor) && (abstractBoard[i][j - 3] == opponentColor)) {
-                    abstractBoard[i][j - 1] = 0;
-                    abstractBoard[i][j - 2] = 0;
-                    abstractBoard[i][j - 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if (((i + 4) < 19) && ((j - 4) > -1)) {
-            if (abstractBoard[i + 4][j - 4] == myColor) {
-                if ((abstractBoard[i + 1][j - 1] == opponentColor) && (abstractBoard[i + 2][j - 2] == opponentColor) && (abstractBoard[i + 3][j - 3] == opponentColor)) {
-                    abstractBoard[i + 1][j - 1] = 0;
-                    abstractBoard[i + 2][j - 2] = 0;
-                    abstractBoard[i + 3][j - 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if ((i + 4) < 19) {
-            if (abstractBoard[i + 4][j] == myColor) {
-                if ((abstractBoard[i + 1][j] == opponentColor) && (abstractBoard[i + 2][j] == opponentColor) && (abstractBoard[i + 3][j] == opponentColor)) {
-                    abstractBoard[i + 1][j] = 0;
-                    abstractBoard[i + 2][j] = 0;
-                    abstractBoard[i + 3][j] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if (((i + 4) < 19) && ((j + 4) < 19)) {
-            if (abstractBoard[i + 4][j + 4] == myColor) {
-                if ((abstractBoard[i + 1][j + 1] == opponentColor) && (abstractBoard[i + 2][j + 2] == opponentColor) && (abstractBoard[i + 3][j + 3] == opponentColor)) {
-                    abstractBoard[i + 1][j + 1] = 0;
-                    abstractBoard[i + 2][j + 2] = 0;
-                    abstractBoard[i + 3][j + 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if ((j + 4) < 19) {
-            if (abstractBoard[i][j + 4] == myColor) {
-                if ((abstractBoard[i][j + 1] == opponentColor) && (abstractBoard[i][j + 2] == opponentColor) && (abstractBoard[i][j + 3] == opponentColor)) {
-                    abstractBoard[i][j + 1] = 0;
-                    abstractBoard[i][j + 2] = 0;
-                    abstractBoard[i][j + 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
-        if (((i - 4) > -1) && ((j + 4) < 19)) {
-            if (abstractBoard[i - 4][j + 4] == myColor) {
-                if ((abstractBoard[i - 1][j + 1] == opponentColor) && (abstractBoard[i - 2][j + 2] == opponentColor) && (abstractBoard[i - 3][j + 3] == opponentColor)) {
-                    abstractBoard[i - 1][j + 1] = 0;
-                    abstractBoard[i - 2][j + 2] = 0;
-                    abstractBoard[i - 3][j + 3] = 0;
-                    if (opponentColor == 1) {
-                        whiteCaptures += 3;
-                    } else {
-                        blackCaptures += 3;
-                    }
-                }
-            }
-        }
     }
 
     @Override

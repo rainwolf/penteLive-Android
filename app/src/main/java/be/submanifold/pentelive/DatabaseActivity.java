@@ -412,7 +412,7 @@ public class DatabaseActivity extends AppCompatActivity {
                     //computer.setSize(size);
 
                     Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
-                    nativeComputer.init(scs, opnbk, tbl);
+                    nativeComputer.init(scs, opnbk, tbl, getFilesDir());
                     board.setAiPlayer(nativeComputer);
                 } catch (Throwable t) {
                     Log.v("ai", "error init", t);

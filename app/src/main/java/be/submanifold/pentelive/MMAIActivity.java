@@ -35,6 +35,55 @@ import java.io.InputStream;
 
 public class MMAIActivity extends AppCompatActivity {
 
+    // Local-AI variant chooser (§ mobile phase 2). Display label -> canonical
+    // engine game ID, cycled by tapping R.id.gameChoice and persisted under
+    // PREFS_MMAIGAME_KEY. Connect6 (game 13) is intentionally NOT offered here:
+    // it plays TWO stones per turn and the AI returns a packed base-362 move,
+    // neither of which the single-stone MMAIBoardView move loop (onTouchEvent /
+    // processAImove / replayGame, all keyed on one cell per movesList entry)
+    // can drive without real UI surgery. Engine-level Connect6 still ships (the
+    // JNI wrapper passes game 13 through). TODO(connect6-local): teach
+    // MMAIBoardView to (a) accept two human placements per turn, (b) decode the
+    // packed AI move (m1 = p/362, m2 = p%362, m2 == 361 = single-stone opening),
+    // and (c) colour stones by the 2-per-turn owner rule before listing it.
+    private static final String[] VARIANT_NAMES =
+            {"Pente", "Keryo-Pente", "Poof-Pente", "Boat-Pente", "O-Pente"};
+    private static final int[] VARIANT_GAMES = {1, 3, 11, 15, 25};
+
+    private int variantGameFor(String name) {
+        for (int i = 0; i < VARIANT_NAMES.length; i++) {
+            if (VARIANT_NAMES[i].equals(name)) {
+                return VARIANT_GAMES[i];
+            }
+        }
+        return 1; // unknown / legacy value -> plain Pente
+    }
+
+    private int variantBackgroundFor(int game) {
+        switch (game) {
+            case 3:  return board.keryoPenteColor;
+            case 11: return board.poofColor;
+            case 15: return board.boatColor;
+            case 25: return board.openteColor;
+            default: return board.penteColor;
+        }
+    }
+
+    private void applyVariant(String name) {
+        int g = variantGameFor(name);
+        board.setBackgroundColor(variantBackgroundFor(g));
+        board.setGame(g);
+    }
+
+    private String nextVariantName(String cur) {
+        for (int i = 0; i < VARIANT_NAMES.length; i++) {
+            if (VARIANT_NAMES[i].equals(cur)) {
+                return VARIANT_NAMES[(i + 1) % VARIANT_NAMES.length];
+            }
+        }
+        return VARIANT_NAMES[0];
+    }
+
     private MMAIBoardView board;
     private PopupWindow settingsWindow;
     private View settingsView;
@@ -62,13 +111,7 @@ public class MMAIActivity extends AppCompatActivity {
 
         board = findViewById(R.id.boardView);
         board.setActivity(this);
-        if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente").equals("Pente")) {
-            board.setBackgroundColor(board.penteColor);
-            board.setGame(1);
-        } else {
-            board.setBackgroundColor(board.keryoPenteColor);
-            board.setGame(3);
-        }
+        applyVariant(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente"));
         if (PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white").equals("white")) {
             board.setMyColor((byte) 1);
         } else {
@@ -121,17 +164,10 @@ public class MMAIActivity extends AppCompatActivity {
         TextView gameChoice = settingsView.findViewById(R.id.gameChoice);
         gameChoice.setOnClickListener(v -> {
             TextView tv = (TextView) v;
-            if (tv.getText().equals("Pente")) {
-                tv.setText("Keryo-Pente");
-                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Keryo-Pente");
-                board.setBackgroundColor(board.keryoPenteColor);
-                board.setGame(3);
-            } else {
-                tv.setText("Pente");
-                PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, "Pente");
-                board.setBackgroundColor(board.penteColor);
-                board.setGame(1);
-            }
+            String next = nextVariantName(tv.getText().toString());
+            tv.setText(next);
+            PrefUtils.saveToPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAIGAME_KEY, next);
+            applyVariant(next);
         });
         board.setAlpha(0.05f);
         settingsWindow.setOnDismissListener(() -> board.setAlpha(1.0f));
@@ -149,7 +185,7 @@ public class MMAIActivity extends AppCompatActivity {
             //computer.setSize(size);
 
             Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
-            nativeComputer.init(scs, opnbk, tbl);
+            nativeComputer.init(scs, opnbk, tbl, getFilesDir());
 //            nativeComputer.setVisualization(false);
 
             board.setAiPlayer(nativeComputer);
