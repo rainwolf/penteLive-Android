@@ -53,7 +53,7 @@ import be.submanifold.pente.rules.VariantReferee;
 public class VariantRefereeFixtureTest {
 
     private static final int SIZE = 19;
-    private static final int[] VARIANTS = {11, 15, 25};
+    private static final int[] VARIANTS = {11, 15, 25, 13};
 
     @Test
     public void refereeMatchesGameClassFixtures() throws Exception {
@@ -82,6 +82,12 @@ public class VariantRefereeFixtureTest {
                         game.get("white").getAsInt(), referee.whiteCaptures);
                 assertEquals(where + " blackCaptures (== GameClass captures[2])",
                         game.get("black").getAsInt(), referee.blackCaptures);
+                if (variant == 13) {
+                    // Connect6 has NO captures: both counters must stay zero (the
+                    // capture switch is skipped for game 13 in VariantReferee.replay).
+                    assertEquals(where + " connect6 whiteCaptures must be 0", 0, referee.whiteCaptures);
+                    assertEquals(where + " connect6 blackCaptures must be 0", 0, referee.blackCaptures);
+                }
                 assertEquals(where + " winner (0 none / 1 white / 2 black)",
                         game.get("winner").getAsInt(), winner);
                 assertEquals(where + " winner field", winner, referee.winner);

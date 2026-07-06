@@ -4,11 +4,15 @@ import java.util.List;
 
 /**
  * Plain-Java referee for the capture / poof board variants: Pente (game 1),
- * Keryo-Pente (3), Poof-Pente (11), Boat-Pente (15) and O-Pente (25). This was
- * extracted verbatim from {@code MMAIBoardView} (a View subclass) so the
- * board / captures / winner logic can be exercised in a JVM unit test against
- * its authority, {@code react_mmai/src/Classes/GameClass.js}. The View now only
- * presents the result of {@link #replay}.
+ * Keryo-Pente (3), Poof-Pente (11), Boat-Pente (15) and O-Pente (25), plus
+ * Connect6 (13/14). Connect6 is structurally different from the others: it
+ * plays TWO stones per turn (see {@link #colorForMove}), wins on a row of SIX
+ * OR MORE (see {@link #detectConnect6Of}, overlines count), and has NO
+ * captures at all -- the whole capture switch in {@link #replay} is skipped
+ * for game 13/14. This was extracted verbatim from {@code MMAIBoardView} (a
+ * View subclass) so the board / captures / winner logic can be exercised in a
+ * JVM unit test against its authority, {@code react_mmai/src/Classes/GameClass.js}.
+ * The View now only presents the result of {@link #replay}.
  *
  * <p>Board convention (identical to the authority and to the old View code):
  * {@code board[x][y]} with {@code x = move % 19}, {@code y = move / 19};
@@ -46,10 +50,15 @@ public class VariantReferee {
         gameOver = false;
         resetAbstractBoard(board);
         for (int i = 0; i < moves.size(); i++) {
-            byte color = (byte) (1 + (i % 2));
+            byte color = colorForMove(game, i);
             int x = moves.get(i) % 19, y = moves.get(i) / 19;
             board[x][y] = color;
             switch (game) {
+                case 13:
+                case 14:
+                    // Connect6: two stones per turn, NO captures. Skip the capture
+                    // switch entirely (spec: detectConnect6Of only, checked below).
+                    break;
                 case 11:
                     detectPoof(board, x, y, color);
                     detectPenteCapture(board, x, y, color);
@@ -78,7 +87,9 @@ public class VariantReferee {
             return 0;
         }
         int last = moves.get(moves.size() - 1);
-        byte lastColor = (byte) (2 - (moves.size() % 2));
+        // colorForMove(game, size-1) is byte-identical to the old strict-alternation
+        // form (byte)(2 - (size % 2)) for every non-Connect6 game, and correct for 13/14.
+        byte lastColor = colorForMove(game, moves.size() - 1);
         int w = 0;
         switch (game) {
             case 11:
@@ -123,6 +134,14 @@ public class VariantReferee {
                     } else if (blackCaptures >= 15 && blackCaptures > whiteCaptures) {
                         w = 1;
                     }
+                }
+                break;
+            case 13:
+            case 14:
+                // Connect6: 6 OR MORE contiguous through the just-placed stone wins
+                // (overlines count); no captures, no advantage/threshold logic.
+                if (detectConnect6Of(board, lastColor, last)) {
+                    w = lastColor;
                 }
                 break;
             case 1:
@@ -975,5 +994,48 @@ public class VariantReferee {
             }
         }
         return winner;
+    }
+
+    // Per-move color for the replay loop. Connect6 (game 13/14) plays TWO stones
+    // per turn: owner of move index i is 1 (white) iff i % 4 in {0, 3}, else 2
+    // (matches GameClass.currentPlayer). Every other game keeps strict alternation
+    // 1 + (i % 2), so this is byte-identical for games 1/3/11/15/25.
+    private static byte colorForMove(int game, int i) {
+        if (game == 13 || game == 14) {
+            int m = i % 4;
+            return (byte) ((m == 0 || m == 3) ? 1 : 2);
+        }
+        return (byte) (1 + (i % 2));
+    }
+
+    // Connect6 win: 6 OR MORE contiguous stones of `color` through rowCol, on any
+    // of the four axes, with >= 0 / < 19 guards (mirrors detectPenteOf's fixed
+    // bounds; NO >0 row/col-0 bug). The FULL run length is counted (never stopping
+    // at the threshold) so overlines (7+) win too AND so an "exactly 6" mutation is
+    // detectable by the fixture net. Winner is the placing color.
+    private boolean detectConnect6Of(byte[][] abstractBoard, byte color, int rowCol) {
+        int row = rowCol % 19, col = rowCol / 19;
+        final int[][] dirs = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
+        for (int[] d : dirs) {
+            int dx = d[0], dy = d[1];
+            int count = 1;
+            int i = row + dx, j = col + dy;
+            while (i >= 0 && i < 19 && j >= 0 && j < 19 && abstractBoard[i][j] == color) {
+                count++;
+                i += dx;
+                j += dy;
+            }
+            i = row - dx;
+            j = col - dy;
+            while (i >= 0 && i < 19 && j >= 0 && j < 19 && abstractBoard[i][j] == color) {
+                count++;
+                i -= dx;
+                j -= dy;
+            }
+            if (count >= 6) {
+                return true;
+            }
+        }
+        return false;
     }
 }

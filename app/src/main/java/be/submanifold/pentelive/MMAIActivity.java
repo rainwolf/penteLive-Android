@@ -37,18 +37,16 @@ public class MMAIActivity extends AppCompatActivity {
 
     // Local-AI variant chooser (§ mobile phase 2). Display label -> canonical
     // engine game ID, cycled by tapping R.id.gameChoice and persisted under
-    // PREFS_MMAIGAME_KEY. Connect6 (game 13) is intentionally NOT offered here:
-    // it plays TWO stones per turn and the AI returns a packed base-362 move,
-    // neither of which the single-stone MMAIBoardView move loop (onTouchEvent /
-    // processAImove / replayGame, all keyed on one cell per movesList entry)
-    // can drive without real UI surgery. Engine-level Connect6 still ships (the
-    // JNI wrapper passes game 13 through). TODO(connect6-local): teach
-    // MMAIBoardView to (a) accept two human placements per turn, (b) decode the
-    // packed AI move (m1 = p/362, m2 = p%362, m2 == 361 = single-stone opening),
-    // and (c) colour stones by the 2-per-turn owner rule before listing it.
+    // PREFS_MMAIGAME_KEY. Connect6 (game 13) is now offered: it plays TWO stones
+    // per turn and the AI returns a packed base-362 move, both handled locally.
+    // DONE(connect6-local): MMAIBoardView now (a) accepts two human placements per
+    // turn (onTouchEvent gates on owner(size) == myColor), (b) decodes the packed AI
+    // move (m1 = p/362, m2 = p%362, m2 == 361 = single-stone opening) in
+    // processAImove, and (c) colours stones by the 2-per-turn owner rule via the
+    // shared owner() helper (mirrored by VariantReferee.colorForMove).
     private static final String[] VARIANT_NAMES =
-            {"Pente", "Keryo-Pente", "Poof-Pente", "Boat-Pente", "O-Pente"};
-    private static final int[] VARIANT_GAMES = {1, 3, 11, 15, 25};
+            {"Pente", "Keryo-Pente", "Poof-Pente", "Boat-Pente", "O-Pente", "Connect6"};
+    private static final int[] VARIANT_GAMES = {1, 3, 11, 15, 25, 13};
 
     private int variantGameFor(String name) {
         for (int i = 0; i < VARIANT_NAMES.length; i++) {
@@ -65,6 +63,7 @@ public class MMAIActivity extends AppCompatActivity {
             case 11: return board.poofColor;
             case 15: return board.boatColor;
             case 25: return board.openteColor;
+            case 13: return board.connect6Color;
             default: return board.penteColor;
         }
     }

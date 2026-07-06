@@ -39,7 +39,8 @@ public class MMAIBoardView extends View {
             keryoPenteColor = Color.parseColor("#BAFDA3"),
             poofColor = Color.parseColor("#A3D8FD"),
             boatColor = Color.parseColor("#FDB2A3"),
-            openteColor = Color.parseColor("#E3A3FD");
+            openteColor = Color.parseColor("#E3A3FD"),
+            connect6Color = Color.parseColor("#D3D3D3");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint whitePaint = makePaint(whiteColor);
     private final Paint pentePaint = makePaint(penteColor);
@@ -101,6 +102,43 @@ public class MMAIBoardView extends View {
     public void setGame(int game) {
         this.game = game;
 //        this.game.parseGame(this);
+    }
+
+    // Owner (1 = white, 2 = black) of the move at index i. Connect6 (game 13/14)
+    // plays TWO stones per turn: owner is 1 iff i % 4 in {0, 3}, else 2 (matches
+    // GameClass.currentPlayer / VariantReferee.colorForMove). Every other game keeps
+    // strict alternation 1 + (i % 2), so owner() is behaviour-identical for them.
+    // Callers pass movesList.size() to ask "who owns the NEXT move to be placed".
+    private int owner(int i) {
+        if (game == 13 || game == 14) {
+            int m = i % 4;
+            return (m == 0 || m == 3) ? 1 : 2;
+        }
+        return 1 + (i % 2);
+    }
+
+    // Append one decoded Connect6 AI stone (a raw 0..360 cell index) to the move
+    // list. An out-of-range or already-occupied cell means the native engine and
+    // this client have desynced (stale/duplicate move, packing bug...) -- there is
+    // no sane way to keep playing on a board the two sides disagree about, so this
+    // is loud-fatal: log an error and freeze the game (gameOver = true) rather than
+    // silently dropping the stone, which would permanently desync turn ownership
+    // (movesList / owner() would no longer match what the engine actually played)
+    // while still looking like a normal in-progress game. Replay is the caller's
+    // responsibility so a two-stone turn draws in a single frame.
+    private void appendAiStone(int cell) {
+        if (cell < 0 || cell >= 361) {
+            android.util.Log.e("MMAIBoardView", "connect6: AI stone out of range " + cell + " -- engine/client desync, freezing game");
+            gameOver = true;
+            return;
+        }
+        int x = cell % 19, y = cell / 19;
+        if (abstractBoard[x][y] != 0) {
+            android.util.Log.e("MMAIBoardView", "connect6: AI stone on occupied cell " + cell + " -- engine/client desync, freezing game");
+            gameOver = true;
+            return;
+        }
+        movesList.add(Integer.valueOf(cell));
     }
 
     public void setMyColor(byte myColor) {
@@ -223,14 +261,21 @@ public class MMAIBoardView extends View {
                 break;
         }
 
-        if (!gameOver && active && abstractBoard[stoneI][stoneJ] == 0) {
+        // A human placement is allowed iff the next move belongs to myColor. For
+        // one-stone games this is exactly the old `active` gate; for Connect6 it also
+        // allows the SECOND stone of the human's two-stone turn (owner unchanged).
+        if (!gameOver && owner(movesList.size()) == myColor && abstractBoard[stoneI][stoneJ] == 0) {
             playedMove = 19 * stoneJ + stoneI;
         }
         if (scaling == 1) {
             if (playedMove > -1 && !gameOver) {
                 movesList.add(Integer.valueOf(playedMove));
                 replayGame(abstractBoard);
-                if (!gameOver) {
+                // Trigger the AI only once the turn has actually passed to it. For
+                // one-stone games this fires after every human move (owner flips each
+                // move); for Connect6 it does NOT fire between the human's two stones
+                // (owner still == myColor) and fires once after the second.
+                if (!gameOver && owner(movesList.size()) != myColor) {
                     ((MMAIActivity) activity).showThinking();
                     int[] moves = new int[movesList.size()];
                     for (int i = 0; i < movesList.size(); ++i) {
@@ -254,8 +299,11 @@ public class MMAIBoardView extends View {
         aiPlayer.setGame(game);
         aiPlayer.setBoard(this);
         movesList.clear();
-        movesList.add(Integer.valueOf(180));
-        if (myColor == 1) {
+        movesList.add(Integer.valueOf(180)); // centre seed is move 0 (owner 1)
+        // "AI is first" == the move after the seed does not belong to myColor. For
+        // one-stone games owner(1) != myColor is exactly myColor == 1; for Connect6
+        // it stays correct (owner(1) == 2, so the AI opens iff the human is white).
+        if (owner(movesList.size()) != myColor) {
             active = false;
             int[] moves = new int[movesList.size()];
             for (int i = 0; i < movesList.size(); ++i) {
@@ -272,9 +320,45 @@ public class MMAIBoardView extends View {
 
     public void processAImove(final int move) {
         activity.runOnUiThread(() -> {
-            active = true;
-            movesList.add(Integer.valueOf(move));
-            replayGame(abstractBoard);
+            if (game == 13 || game == 14) {
+                // Connect6: the native move packs the whole two-stone turn base-362
+                // (m1 = move / 362, m2 = move % 362; m2 == 361 is the single-stone
+                // opening sentinel). Replay after EACH stone, not once at the end:
+                // VariantReferee.replay only examines the row through the LAST move
+                // in movesList, so a six completed by m1 (with m2 landing elsewhere)
+                // would never be detected if both stones were appended before the
+                // first replay -- the game would hang "in progress" forever. This
+                // mirrors the react authority (two separate ADD_MOVE dispatches, one
+                // isGameOver check per stone) and the human path here (two separate
+                // onTouchEvent placements). If m1 already wins, m2 is skipped: the
+                // red dot / winner banner stay on the stone that actually finished
+                // the game, matching "dot ends on the last actually-applied stone".
+                int m1 = move / 362, m2 = move % 362;
+                appendAiStone(m1);
+                // appendAiStone sets gameOver = true itself on an engine/client
+                // desync (see there), but the replayGame() call right below always
+                // recomputes gameOver from the replay outcome and -- since a bailed
+                // append leaves movesList unchanged, so the replay is a no-op with
+                // winner 0 -- would silently clear that freeze again. Snapshot it
+                // here (before replay) so we can both gate m2 on it and reassert it
+                // afterward.
+                boolean desynced = gameOver;
+                replayGame(abstractBoard);
+                if (!desynced && !gameOver && m2 != 361) {
+                    appendAiStone(m2);
+                    desynced = gameOver;
+                    replayGame(abstractBoard);
+                }
+                if (desynced) {
+                    gameOver = true;
+                }
+            } else {
+                movesList.add(Integer.valueOf(move));
+                replayGame(abstractBoard);
+            }
+            // Turn has passed back to the human (owner(size) == myColor) for every
+            // game after the AI's move(s); identical to the old unconditional `true`.
+            active = owner(movesList.size()) == myColor;
             playedMove = -1;
 //                try {
 //                    Thread.sleep(100);
@@ -287,11 +371,56 @@ public class MMAIBoardView extends View {
     }
 
     public void undoMove() {
-        if (movesList.size() > 1 && !aiThinking) {
-            movesList.remove(movesList.size() - 1);
-            active = myColor == (1 + movesList.size() % 2);
-            replayGame(abstractBoard);
+        if (aiThinking) {
+            return;
         }
+        int size = movesList.size();
+        // Find the LARGEST t in [1, size-1] whose owner is myColor -- the human's
+        // own most-recently-placed move -- and truncate back to it. This replaces
+        // the old "pop one unconditionally, then keep popping while it still isn't
+        // the human's turn, floored at size 1" loop, which could floor on a state
+        // where owner(1) != myColor and get permanently stuck there (Undo would
+        // keep landing on the same inert size-1 state -- frozen). The lookahead
+        // instead recognises up front when there is nothing of the human's to
+        // retract and refuses (no-op) rather than flooring blind. For every state
+        // the old loop DIDN'T freeze on, it stopped at exactly this same t (it
+        // walks size-1, size-2, ... one at a time, stopping at the first index
+        // whose owner is myColor -- i.e. the largest such t), so behaviour is
+        // identical there; the two diverge only in case (c) below.
+        //
+        // (a) Normal mid-game undo: e.g. size 6, myColor's last move at t = 4 (the
+        //     AI played 5). Truncating to t = 4 removes the AI's whole turn AND
+        //     the human's own last move, landing back on the human's turn to
+        //     replay it -- same result the old pop-loop reached.
+        // (b) Human retracting the first stone of their own two-stone Connect6
+        //     turn: owner(size-1) is ALREADY myColor (they just placed it), so
+        //     t == size-1 and exactly one stone is popped -- the old loop's while
+        //     condition never even fired, so this is also unchanged.
+        // (c) Boundary right after the auto-seed + the AI's first reply (e.g.
+        //     size 2: the seed at index 0 owned by 1, the AI's reply at index 1
+        //     owned by 2; with myColor == 1 there is no t in [1, size-1] == [1,1]
+        //     with owner(t) == myColor). The human hasn't placed anything of their
+        //     own yet -- there is nothing to undo. The old code had no way to
+        //     express "give up" here and instead floored at size 1 regardless of
+        //     ownership, leaving active permanently false (owner(1) != myColor)
+        //     and Undo inert from then on. This lookahead detects that up front
+        //     and makes undo a no-op: movesList and active are left exactly as
+        //     they were, so the human can still play their move.
+        int target = -1;
+        for (int t = size - 1; t >= 1; t--) {
+            if (owner(t) == myColor) {
+                target = t;
+                break;
+            }
+        }
+        if (target == -1) {
+            return; // no-op: nothing of the human's own turn to retract
+        }
+        while (movesList.size() > target) {
+            movesList.remove(movesList.size() - 1);
+        }
+        active = owner(movesList.size()) == myColor;
+        replayGame(abstractBoard);
     }
 
 

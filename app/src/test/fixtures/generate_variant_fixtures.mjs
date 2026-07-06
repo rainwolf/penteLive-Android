@@ -1,5 +1,5 @@
 // Fixture generator for the VariantReferee regression net (games 11 Poof-Pente,
-// 15 Boat-Pente, 25 O-Pente).
+// 15 Boat-Pente, 25 O-Pente, 13 Connect6).
 //
 // It drives the AUTHORITY referee, react_mmai/src/Classes/GameClass.js, over a
 // fixed-seed set of pseudo-random *legal* games and records, per game, the move
@@ -36,7 +36,16 @@ const SEED = 20260706;      // fixed seed -> reproducible fixtures
 const GAMES_PER_VARIANT = 200;
 const MAX_MOVES = 80;       // capped move count per game
 const FRONTIER_BIAS = 0.8;  // fraction of moves drawn from the frontier
-const VARIANTS = [11, 15, 25];
+const VARIANTS = [11, 15, 25, 13];   // 13 = Connect6, appended so 11/15/25 stay byte-identical
+
+// Per-variant seed override (default is SEED + variant). Connect6 wins are almost
+// always an exact 6-run; a one-move OVERLINE (7+ in a row) is rare, and the natural
+// SEED+13 batch of 200 games contains none. VariantRefereeFixtureTest's overline gate
+// (the >= 6 rule in detectConnect6Of; a "== 6" mutation must be caught) needs at least
+// one overline win, so game 13 uses a dedicated seed picked to include overline wins
+// inside the standard 200-game batch -- this one yields four. Games 11/15/25 are NOT
+// listed here, so they keep SEED + variant and stay byte-identical.
+const VARIANT_SEED = { 13: 3061973397 };
 
 // Deterministic PRNG (mulberry32).
 function mulberry32(a) {
@@ -132,23 +141,61 @@ function playOneGame(Game, variant, rnd) {
     };
 }
 
+// Longest contiguous run of `color` through the last move on a finished board
+// (board is x-major, index = x*19 + y). Used only for the overline (7+) tally in
+// the per-variant log line; does not affect the emitted fixtures.
+function maxRunThroughLast(board, moves, color) {
+    if (moves.length === 0) return 0;
+    const last = moves[moves.length - 1];
+    const lx = last % SIZE, ly = Math.floor(last / SIZE);
+    const at = (x, y) => (x < 0 || x >= SIZE || y < 0 || y >= SIZE) ? -1 : board[x * SIZE + y];
+    const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+    let best = 0;
+    for (const [dx, dy] of dirs) {
+        let c = 1;
+        let x = lx + dx, y = ly + dy;
+        while (at(x, y) === color) { c++; x += dx; y += dy; }
+        x = lx - dx; y = ly - dy;
+        while (at(x, y) === color) { c++; x -= dx; y -= dy; }
+        if (c > best) best = c;
+    }
+    return best;
+}
+
 async function main() {
     const Game = await loadGame();
     mkdirSync(outDir, { recursive: true });
     for (const variant of VARIANTS) {
-        // A distinct seed per variant keeps the three files independent yet fixed.
-        const rnd = mulberry32(SEED + variant);
+        // A distinct seed per variant keeps the files independent yet fixed.
+        const seedForVariant = VARIANT_SEED[variant] ?? (SEED + variant);
+        const rnd = mulberry32(seedForVariant);
         const games = [];
-        let ended = 0, rowWins = 0, captureTotal = 0;
+        let ended = 0, rowWins = 0, captureTotal = 0, overlineWins = 0;
         for (let i = 0; i < GAMES_PER_VARIANT; i++) {
             const rec = playOneGame(Game, variant, rnd);
             games.push(rec);
             if (rec.gameOver) ended++;
             captureTotal += rec.white + rec.black;
+            if (rec.winner !== 0 && maxRunThroughLast(rec.board, rec.moves, rec.winner) >= 7) {
+                overlineWins++;
+            }
+        }
+        // Connect6's overline gate (detectConnect6Of's >= 6 rule -- an "== 6"
+        // mutation must be caught by the fixture net) is only exercised if this
+        // batch actually contains an overline win. VARIANT_SEED[13] was hand-picked
+        // to guarantee that (see the comment above); assert it here so a future
+        // regeneration with a different/reverted seed can't silently ship a
+        // variant-13 fixture that has lost overline coverage.
+        if (variant === 13 && overlineWins < 1) {
+            throw new Error(
+                `variant 13 (Connect6) fixture batch has ${overlineWins} overline win(s), ` +
+                'need >= 1 for VariantRefereeFixtureTest\'s overline gate to mean anything -- ' +
+                'pick a different VARIANT_SEED[13] before regenerating.'
+            );
         }
         const fixture = {
             variant,
-            seed: SEED + variant,
+            seed: seedForVariant,
             count: games.length,
             maxMoves: MAX_MOVES,
             note: 'Authority: react_mmai/src/Classes/GameClass.js. board is x-major ' +
@@ -160,7 +207,7 @@ async function main() {
         writeFileSync(outPath, JSON.stringify(fixture) + '\n');
         const decided = games.filter(g => g.winner !== 0).length;
         console.log(`variant ${variant}: ${games.length} games, ${ended} gameOver, ` +
-            `${decided} decided, ${captureTotal} total captures -> ${outPath}`);
+            `${decided} decided, ${overlineWins} overline(7+), ${captureTotal} total captures -> ${outPath}`);
     }
 }
 
