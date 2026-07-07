@@ -37,10 +37,10 @@ import java.util.List;
 public class MMAIBoardView extends View {
     public int blackColor = Color.BLACK, whiteColor = Color.WHITE, penteColor = Color.parseColor("#FDDEA3"),
             keryoPenteColor = Color.parseColor("#BAFDA3"),
-            poofColor = Color.parseColor("#A3D8FD"),
-            boatColor = Color.parseColor("#FDB2A3"),
-            openteColor = Color.parseColor("#E3A3FD"),
-            connect6Color = Color.parseColor("#D3D3D3");
+            poofColor = Color.parseColor("#EDA3FD"),
+            boatColor = Color.parseColor("#25BAFF"),
+            openteColor = Color.parseColor("#52be80"),
+            connect6Color = Color.parseColor("#EDA3FD");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint whitePaint = makePaint(whiteColor);
     private final Paint pentePaint = makePaint(penteColor);
