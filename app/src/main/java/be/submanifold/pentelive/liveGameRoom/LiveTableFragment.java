@@ -523,8 +523,8 @@ public class LiveTableFragment extends Fragment {
         if (renjuActionLayout == null) return;
         boolean show = renjuPostOpeningMyTurn();
         renjuActionLayout.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (!show && table.getGameState().state != State.STARTED) {
-            setDrawArmed(false); // game ended/reset
+        if (!show) {
+            setDrawArmed(false); // renju action row hidden: disarm any pending draw offer
         }
     }
 
@@ -755,6 +755,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
     }
 
     public void updateTimer() {
