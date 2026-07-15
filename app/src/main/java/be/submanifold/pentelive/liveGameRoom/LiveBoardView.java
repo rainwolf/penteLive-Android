@@ -35,6 +35,9 @@ public class LiveBoardView extends View {
 
     private byte myColor = 2, stoneI, stoneJ;
     public int playedMove = -1, redDot = -1;
+    // True when the most recent move in history was a pass (Table.isPass) -- it has no
+    // board coordinate, so the last-move marker renders a "PASS" label instead of a dot.
+    private boolean lastMoveWasPass = false;
 
     private final float zoomedScale = 3;
     float offSetX = 0, offSetY = 0;
@@ -162,8 +165,14 @@ public class LiveBoardView extends View {
         canvas.scale(scaling, scaling);
         canvas.translate(translateX, translateY);
         if (table != null && !table.getMoves().isEmpty()) {
-            redDot = table.getMoves().get(table.getMoves().size() - 1);
+            int lastMove = table.getMoves().get(table.getMoves().size() - 1);
+            // A pass has no board coordinate. redDot/gridSize, redDot%gridSize would
+            // otherwise compute an in-bounds-looking but meaningless cell (e.g. row 15
+            // on a 15-wide renju board) and draw the last-move marker off the grid.
+            lastMoveWasPass = table.isPass(lastMove);
+            redDot = lastMoveWasPass ? -1 : lastMove;
         } else {
+            lastMoveWasPass = false;
             redDot = -1;
         }
         drawBoard(canvas);
@@ -464,6 +473,8 @@ public class LiveBoardView extends View {
         }
         if (redDot > -1) {
             drawRedDot(canvas);
+        } else if (lastMoveWasPass) {
+            drawPassLabel(canvas);
         }
     }
 
@@ -579,6 +590,17 @@ public class LiveBoardView extends View {
         byte j = (byte) (redDot % gridSize);
         float cx = size * j / gridSize + size / (2 * gridSize), cy = size * i / gridSize + size / (2 * gridSize);
         canvas.drawCircle(cx, cy, radius, stonePaint);
+    }
+
+    /** Renders "PASS" where the last-move red dot would otherwise render at a bogus
+     *  coordinate -- a pass move has no board cell to mark. */
+    private void drawPassLabel(Canvas canvas) {
+        Paint textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.RED);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(size / gridSize);
+        canvas.drawText("PASS", size / 2, size / 2 + textPaint.getTextSize() / 3, textPaint);
     }
 
 

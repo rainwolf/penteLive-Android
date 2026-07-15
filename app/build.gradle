@@ -71,6 +71,15 @@ android {
         }
     }
     namespace 'be.submanifold.pentelive'
+    testOptions {
+        unitTests {
+            // Table's constructor touches android.graphics.Color.parseColor(...) (theme
+            // color fields), which the default unit-test android.jar stub throws for
+            // ("not mocked"). Test-only; does not affect app runtime behavior. Needed so
+            // JVM unit tests can construct a real Table (see LiveTablePassTest).
+            returnDefaultValues = true
+        }
+    }
 }
 
 dependencies {

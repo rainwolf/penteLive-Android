@@ -203,9 +203,33 @@ public class Table {
         return v != null && v.isGo();
     }
 
+    /**
+     * True when {@code move} is the pass sentinel for the current grid size
+     * (i.e. {@code move == gridSize * gridSize}). Currently only reachable in
+     * practice for Go (already handled separately in {@link #addGoMove}) and
+     * renju (225 on the 15x15 renju grid) -- see {@link #setGame(int)} for the
+     * per-variant grid sizing this depends on.
+     */
+    public boolean isPass(int move) {
+        return move == getGridSize() * getGridSize();
+    }
+
     public void addMove(int move) {
         if (isGo()) {
             addGoMove(move);
+            return;
+        }
+        if (isPass(move)) {
+            // Pass (currently sent only for renju, move == 15*15 == 225): must enter the
+            // move list so turn parity and RenjuLiveState.advanceAfterMove(numMoves, ...)
+            // stay correct, but must NEVER touch abstractBoard. abstractBoard is a fixed
+            // 19x19 array while renju plays on a 15x15 grid, so an unguarded write for
+            // move 225 (move_i=15, move_j=0) lands IN BOUNDS of the 19x19 array -- it
+            // would not crash, it would silently place a phantom stone at [15][0].
+            moves.add(move);
+            if (!bulkAddingMoves) {
+                advanceRenjuAfterMove(false);
+            }
             return;
         }
         byte color = (byte) currentColor();
@@ -1146,6 +1170,12 @@ public class Table {
             passMove = gridSize * gridSize;
         } else if (game == 23 || game == 24) {
             gridSize = 13;
+            passMove = gridSize * gridSize;
+        } else if (game == 31 || game == 32 || game == 81) {
+            // Renju / Speed Renju / TB Renju (Variant.RENJU): 15x15 grid. Required so
+            // isPass(225) and the client's pass-sentinel math (getGridSize()*getGridSize())
+            // resolve correctly instead of falling through to the 19x19 default.
+            gridSize = 15;
             passMove = gridSize * gridSize;
         } else {
             gridSize = 19;
