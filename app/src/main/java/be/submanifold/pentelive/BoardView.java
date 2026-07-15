@@ -158,6 +158,11 @@ public class BoardView extends View {
         if (game != null && game.isRenju() && "MOVE".equals(game.renjuPhase)) {
             renjuBoxRadius = 4;
         }
+        // Drive the TB PASS/DRAW? buttons on every render — poll refresh and stone staging both
+        // reach here via invalidate(). Runs regardless of active state so buttons hide off-turn.
+        if (boardActivity != null && game != null && game.isRenju()) {
+            boardActivity.updateRenjuTbButtons();
+        }
         if (game != null) {
             RelativeLayout parentLayout = (RelativeLayout) this.getParent();
             ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setTitle(game.getGameType());
@@ -1037,6 +1042,13 @@ public class BoardView extends View {
     }
 
     private void drawRedDot(Canvas canvas) {
+        // A renju pass (move == gridSize*gridSize, e.g. 225 on the 15x15 board) has no board
+        // cell — redDot/gridSize, redDot%gridSize would mark a bogus off-grid coordinate. Label
+        // it "PASS" instead, mirroring LiveBoardView's last-move handling.
+        if (game != null && game.isRenju() && redDot == gridSize * gridSize) {
+            drawPassLabel(canvas);
+            return;
+        }
         Paint stonePaint;
         stonePaint = new Paint();
         stonePaint.setStrokeWidth(1);
@@ -1054,6 +1066,17 @@ public class BoardView extends View {
             cy = size * j / gridSize + size / (2 * gridSize);
             canvas.drawCircle(cx, cy, radius, stonePaint);
         }
+    }
+
+    /** Renders "PASS" where the last-move red dot would otherwise render at a bogus coordinate —
+     *  a renju pass (move gridSize*gridSize) has no board cell to mark. */
+    private void drawPassLabel(Canvas canvas) {
+        Paint textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.RED);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(size / gridSize);
+        canvas.drawText("PASS", size / 2, size / 2 + textPaint.getTextSize() / 3, textPaint);
     }
 
 

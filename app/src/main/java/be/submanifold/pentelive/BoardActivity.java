@@ -61,6 +61,12 @@ public class BoardActivity extends AppCompatActivity {
     private ResignTask resignTask;
     private CancelTask cancelTask;
 
+    // TB renju draw offer: armed = DRAW? toggled on, sent with the next move; the two guard
+    // flags make the incoming-offer dialog / pending-offer toast fire once per offer, not per frame.
+    private boolean renjuDrawArmed = false;
+    private boolean drawDialogShown = false;
+    private boolean drawPendingToastShown = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +95,24 @@ public class BoardActivity extends AppCompatActivity {
 //        }
 
         setRegularSubmitListener();
+
+        renjuDrawArmed = false;
+        Button renjuPass = findViewById(R.id.renjuPassButton);
+        Button renjuDraw = findViewById(R.id.renjuDrawButton);
+        if (renjuPass != null) renjuPass.setOnClickListener(v -> {
+            if (!game.isActive()) return;
+            // PASS = renju move 225 (gridSize*gridSize); plain move, so renjuAction is null.
+            // Carries the armed draw offer when DRAW? is toggled on.
+            game.submitMove("225", msg(), null, renjuDrawArmed);
+            finish();
+        });
+        if (renjuDraw != null) renjuDraw.setOnClickListener(v -> {
+            renjuDrawArmed = !renjuDrawArmed;
+            updateRenjuTbButtons();
+            if (renjuDrawArmed) {
+                Toast.makeText(this, getString(R.string.draw_offer_armed), Toast.LENGTH_LONG).show();
+            }
+        });
 
         Button button = findViewById(R.id.playAsWhiteButton);
         if (button != null) button.setOnClickListener(v -> {
@@ -318,7 +342,10 @@ public class BoardActivity extends AppCompatActivity {
                     }
                     moves = "" + board.playedMove;
                     renjuAction = "move";
-                } else if (game.isRenju() && "MOVE".equals(game.renjuPhase)) {
+                } else if (game.isRenju() && ("MOVE".equals(game.renjuPhase)
+                        || "COMPLETE".equals(game.renjuPhase))) {
+                    // COMPLETE (regular renju play) submits a staged stone exactly like MOVE:
+                    // a plain move, renjuAction null. PASS (move 225) has its own button path.
                     if (board.playedMove == -1) {
                         Toast.makeText(BoardActivity.this, getString(R.string.no_momve_played_yet),
                                 Toast.LENGTH_LONG).show();
@@ -410,7 +437,11 @@ public class BoardActivity extends AppCompatActivity {
                 board.renjuOfferMode = false;
                 board.renjuPicks = null;
                 board.renjuSelection = null;
-                game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString(), renjuAction);
+                game.submitMove(moves, ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString(), renjuAction, renjuDrawArmed);
+                // Offer is one-shot: consumed by the move just sent. Clear the armed state and
+                // resync the DRAW? tint so a subsequent move does not re-offer unintentionally.
+                renjuDrawArmed = false;
+                updateRenjuTbButtons();
 
                 if (PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false)) {
                     game.setmGameJson(null);
@@ -605,6 +636,70 @@ public class BoardActivity extends AppCompatActivity {
         return ((EditText) messageView.findViewById(R.id.messageInput)).getText().toString();
     }
 
+    /**
+     * Drives the turn-based renju PASS / DRAW? buttons and surfaces any live draw offer.
+     * Called from BoardView.onDraw every render (poll refresh and stone-staging both invalidate),
+     * and again right after a submit. PASS shows only in COMPLETE when no stone is staged; DRAW?
+     * shows in COMPLETE regardless; SUBMIT enable/disable stays owned by styleRenjuSubmit.
+     */
+    void updateRenjuTbButtons() {
+        if (game == null || board == null) return;
+        Button renjuPass = findViewById(R.id.renjuPassButton);
+        Button renjuDraw = findViewById(R.id.renjuDrawButton);
+        boolean renjuComplete = game.isRenju() && "COMPLETE".equals(game.renjuPhase)
+                && game.isActive();
+        boolean staged = board.playedMove > -1;
+        if (renjuPass != null) {
+            renjuPass.setVisibility(renjuComplete && !staged ? View.VISIBLE : View.GONE);
+        }
+        if (renjuDraw != null) {
+            renjuDraw.setVisibility(renjuComplete ? View.VISIBLE : View.GONE);
+            if (renjuDraw.getBackground() != null) {
+                renjuDraw.getBackground().setColorFilter(
+                        renjuDrawArmed ? android.graphics.Color.parseColor("#4CAF50") : null,
+                        android.graphics.PorterDuff.Mode.MULTIPLY);
+            }
+        }
+        handleDrawOffer();
+    }
+
+    /**
+     * A pending draw offer surfaces exactly once: as a bottom chooser when it is my turn to
+     * respond (opponent offered), or as a long "pending" toast when I offered and am waiting.
+     * The guard flags reset when the offer clears so the next offer surfaces again.
+     */
+    private void handleDrawOffer() {
+        if (game == null || !game.isDrawOffered()) {
+            drawDialogShown = false;
+            drawPendingToastShown = false;
+            return;
+        }
+        if (game.isActive()) {
+            if (!drawDialogShown) {
+                drawDialogShown = true;
+                // Defer off the draw pass — showing a dialog mid-onDraw is unsafe.
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(this::showDrawOfferDialog);
+            }
+        } else if (!drawPendingToastShown) {
+            drawPendingToastShown = true;
+            Toast.makeText(this, getString(R.string.draw_offer_pending), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showDrawOfferDialog() {
+        if (isFinishing() || game == null || !game.isDrawOffered() || !game.isActive()) return;
+        AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+        builder.setTitle(getString(R.string.offers_draw, game.getOpponentName()));
+        String[] options = {getString(R.string.accept), getString(R.string.dismiss)};
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0) {
+                new AcceptDrawTask(game.getGameID()).execute((Void) null);
+            }
+            // dismiss (or playing a move) declines — no-op.
+        });
+        builder.show();
+    }
+
     public class ResignTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String gid;
@@ -668,6 +763,78 @@ public class BoardActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
             if (success) {
                 finish();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+    // Mirrors ResignTask's POST scaffold, but hits the TB game endpoint with command=acceptDraw
+    // (MoveServlet routes acceptDraw there, not the resign servlet). Server validates the pending
+    // offer; on success we re-poll so the board reflects the now-drawn game.
+    public class AcceptDrawTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String gid;
+
+        AcceptDrawTask(String gid) {
+            this.gid = gid;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                String urlParameters = "gid=" + gid + "&command=acceptDraw&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                byte[] postData = new byte[0];
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+                }
+                int postDataLength = postData.length;
+                String request = "https://www.pente.org/gameServer/tb/game";
+                if (PentePlayer.development) {
+                    request = "https://10.0.2.2/gameServer/tb/game";
+                }
+                URL url = new URL(request);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("charset", "utf-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                conn.setUseCaches(false);
+                try {
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
+                StringBuilder output = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line = "";
+                while ((line = br.readLine()) != null) {
+                    output.append(line + System.getProperty("line.separator"));
+                }
+                br.close();
+                System.out.println(output);
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                game.setmGameJson(null);
+                game.parseGame(board);
             }
         }
 

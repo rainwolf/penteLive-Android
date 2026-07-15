@@ -69,4 +69,15 @@ public class GameRenjuUnitTest {
         assertTrue(url.contains("moves=130,200"));
         assertTrue(url.contains("renjuAction=select"));
     }
+
+    @Test
+    public void submitMoveUrlCarriesDrawOffer() {
+        // drawOffer=true appends the &drawOffer=true suffix the TB move endpoint validates.
+        String url = Game.buildSubmitMoveUrl("", "42", "225", "hi", null, true);
+        assertTrue(url.contains("&drawOffer=true"));
+        assertTrue(url.contains("&moves=225"));
+        // drawOffer=false omits the suffix entirely (old-arity callers get no drawOffer param).
+        String plain = Game.buildSubmitMoveUrl("", "42", "112", "hi", null, false);
+        assertFalse(plain.contains("drawOffer"));
+    }
 }
