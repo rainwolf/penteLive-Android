@@ -344,7 +344,13 @@ public class LiveBoardView extends View {
                 if (n > 0 && empty && inBox) {
                     playedMove = move;
                     if (up) {
-                        fragment.getListener().sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + move + ",\"moves\":[" + move + "],\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
+                        boolean offer = fragment.isDrawArmed();
+                        fragment.getListener().sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + move
+                                + ",\"moves\":[" + move + "],\"player\":\"" + me
+                                + "\",\"table\":" + table.getId()
+                                + (offer ? ",\"drawOffer\":true" : "")
+                                + ",\"time\":0}}");
+                        if (offer) fragment.clearDrawArmedAfterSend();
                     }
                 }
                 break;

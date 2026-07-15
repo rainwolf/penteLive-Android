@@ -289,6 +289,13 @@
     <string name="turn_based_only">turn-based only</string>
     <string name="live_only">live only</string>
     <string name="pass">PASS</string>
+    <string name="draw_question">DRAW?</string>
+    <string name="offers_draw">%1$s offers a draw. Playing a move also declines it.</string>
+    <string name="draw_offer_armed">Draw offer will be sent with your move</string>
+    <string name="draw_offered">draw offered</string>
+    <string name="draw_accepted">draw accepted</string>
+    <string name="draw_declined">draw offer declined</string>
+    <string name="draw_offer_pending">draw offer pending…</string>
     <string name="swap2pass">Let p1 decide</string>
     <string name="score">score</string>
     <string name="scorestring">Black: %1$d + %2$d = %3$d \nWhite: 7.5 + %4$d + %5$d = %6$d.5</string>
