@@ -117,6 +117,29 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/renjuActionLayout"
+            android:layout_width="match_parent"
+            android:layout_below="@id/actionLayout"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/renjuPassButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/pass"
+                android:textStyle="bold" />
+            <Button
+                android:id="@+id/renjuDrawButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/draw_question"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tableTextView"
             android:layout_width="match_parent"
@@ -125,7 +148,7 @@
             android:paddingEnd="5dp"
             android:background="?attr/colorPrimary"
             android:gravity="bottom"
-            android:layout_below="@id/actionLayout"/>
+            android:layout_below="@id/renjuActionLayout"/>
 
     </RelativeLayout>
 

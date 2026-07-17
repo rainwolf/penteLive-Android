@@ -88,6 +88,9 @@ public class LiveTableFragment extends Fragment {
             tableTextView, capturesTextView, gameNameView;
     LinearLayout p1Layout, p2Layout;
     Button playButton;
+    private LinearLayout renjuActionLayout;
+    private Button renjuPassButton, renjuDrawButton;
+    private boolean drawArmed = false;
     private String me = "";
     LiveGameRoomActivity activity;
     View settingsView = null;
@@ -259,6 +262,26 @@ public class LiveTableFragment extends Fragment {
                 playButton.setVisibility(View.INVISIBLE);
             }
         });
+        renjuActionLayout = getView().findViewById(R.id.renjuActionLayout);
+        renjuPassButton = getView().findViewById(R.id.renjuPassButton);
+        renjuDrawButton = getView().findViewById(R.id.renjuDrawButton);
+        renjuPassButton.setOnClickListener(v -> {
+            if (mListener != null && renjuPostOpeningMyTurn()) {
+                int passMove = table.getGridSize() * table.getGridSize();
+                mListener.sendEvent("{\"dsgMoveTableEvent\":{\"move\":" + passMove
+                        + ",\"moves\":[" + passMove + "],\"player\":\"" + me
+                        + "\",\"table\":" + table.getId()
+                        + (drawArmed ? ",\"drawOffer\":true" : "")
+                        + ",\"time\":0}}");
+                setDrawArmed(false);
+            }
+        });
+        renjuDrawButton.setOnClickListener(v -> {
+            setDrawArmed(!drawArmed);
+            if (drawArmed) {
+                Toast.makeText(activity, getString(R.string.draw_offer_armed), Toast.LENGTH_LONG).show();
+            }
+        });
         p1Layout = getView().findViewById(R.id.p1Layout);
         p2Layout = getView().findViewById(R.id.p2Layout);
         p1Layout.setOnClickListener(view13 -> {
@@ -407,6 +430,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
         if (table.gameHasCaptures()) {
             capturesTextView.setVisibility(View.VISIBLE);
         } else {
@@ -469,6 +493,41 @@ public class LiveTableFragment extends Fragment {
         return mListener;
     }
 
+    public boolean isDrawArmed() {
+        return drawArmed;
+    }
+
+    private void setDrawArmed(boolean armed) {
+        drawArmed = armed;
+        if (renjuDrawButton != null) {
+            renjuDrawButton.getBackground().setColorFilter(
+                    armed ? android.graphics.Color.parseColor("#4CAF50") : null,
+                    android.graphics.PorterDuff.Mode.MULTIPLY);
+        }
+    }
+
+    /** Public disarm hook: LiveBoardView calls this after a stone move carried the armed offer. */
+    public void clearDrawArmedAfterSend() {
+        setDrawArmed(false);
+    }
+
+    private boolean renjuPostOpeningMyTurn() {
+        return table.isRenju()
+                && table.getGameState().state == State.STARTED
+                && table.isMyTurn(me)
+                && table.getGameState().renjuState.phase(table.getMoves().size())
+                == RenjuLiveState.Phase.COMPLETE;
+    }
+
+    private void updateRenjuActionButtons() {
+        if (renjuActionLayout == null) return;
+        boolean show = renjuPostOpeningMyTurn();
+        renjuActionLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) {
+            setDrawArmed(false); // renju action row hidden: disarm any pending draw offer
+        }
+    }
+
 
     public void addMove(int move) {
         if (!isAdded()) return;
@@ -500,6 +559,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
         if (table.isGo() && (table.getGameState().goState == GoState.MARKSTONES || table.getGameState().goState == GoState.EVALUATESTONES)) {
             board.setGoTerritoryByPlayer(table.getTerritories());
             board.setGoDeadStonesByPlayer(table.getGoDeadStonesByPlayer());
@@ -549,6 +609,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
         if (table.isGo() && (table.getGameState().goState == GoState.MARKSTONES || table.getGameState().goState == GoState.EVALUATESTONES)) {
             board.setGoTerritoryByPlayer(table.getTerritories());
             board.setGoDeadStonesByPlayer(table.getGoDeadStonesByPlayer());
@@ -568,6 +629,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
         board.clearGoStructures();
         board.invalidate();
     }
@@ -693,6 +755,7 @@ public class LiveTableFragment extends Fragment {
         } else {
             playButton.setVisibility(View.GONE);
         }
+        updateRenjuActionButtons();
     }
 
     public void updateTimer() {
@@ -1053,6 +1116,48 @@ public class LiveTableFragment extends Fragment {
         if (mListener != null) {
             mListener.sendEvent("{\"dsgUndoReplyTableEvent\":{\"accepted\":" + (accept ? "true" : "false") + ",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}");
         }
+    }
+
+    /** Incoming draw offer from the opponent. Bottom dialog; back-dismiss leaves the offer
+     * pending (the player's next move declines it server-side). */
+    public void drawOffered(String player) {
+        if (!isAdded()) return;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.offers_draw, player));
+        String[] options = {getString(R.string.accept), getString(R.string.decline)};
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    sendDrawReply(true);
+                    break;
+                case 1:
+                    sendDrawReply(false);
+                    break;
+            }
+        });
+        AlertDialog dlg = builder.create();
+        dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.setAttributes(wlp);
+        dlg.show();
+    }
+
+    private void sendDrawReply(boolean accept) {
+        if (mListener != null) {
+            mListener.sendEvent("{\"dsgRenju" + (accept ? "Accept" : "Reject")
+                    + "DrawTableEvent\":{\"player\":\"" + me + "\",\"table\":"
+                    + table.getId() + ",\"time\":0}}");
+        }
+    }
+
+    /** The opponent rejected our draw offer: disarm and notify. */
+    public void onDrawRejected(String player) {
+        if (!isAdded()) return;
+        setDrawArmed(false);
+        Toast.makeText(activity, getString(R.string.draw_declined), Toast.LENGTH_SHORT).show();
     }
 
     public void showDPenteChoice() {

@@ -136,6 +136,7 @@ public class JsonModels {
         public String state;
         public String goState;
         public Boolean undoRequested;
+        public Boolean drawOffered;
         public Boolean canHide;
         public Boolean canUnHide;
         public CancelInfo cancel;

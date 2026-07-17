@@ -83,6 +83,8 @@ public class Game implements Parcelable {
     public String renjuPhase = null;
     public int[] renjuOffers = null;
     public Integer renjuSwaps = null;
+    // TB draw offer: true only while an offer is active+pending (server-parsed from GameResponse).
+    public boolean drawOffered = false;
 
     /**
      * Variants proven bit-identical to the legacy replay workers by
@@ -198,6 +200,10 @@ public class Game implements Parcelable {
 
     public boolean isCanUnHide() {
         return canUnHide;
+    }
+
+    public boolean isDrawOffered() {
+        return drawOffered;
     }
 
 
@@ -521,12 +527,17 @@ public class Game implements Parcelable {
         private final String move;
         private String message;
         private final String renjuAction;
+        private final boolean drawOffer;
 
         SubmitMoveTask(String move, String message) {
             this(move, message, null);
         }
 
         SubmitMoveTask(String move, String message, String renjuAction) {
+            this(move, message, renjuAction, false);
+        }
+
+        SubmitMoveTask(String move, String message, String renjuAction, boolean drawOffer) {
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -534,6 +545,7 @@ public class Game implements Parcelable {
             }
             this.move = move;
             this.renjuAction = renjuAction;
+            this.drawOffer = drawOffer;
         }
 
         @Override
@@ -541,12 +553,15 @@ public class Game implements Parcelable {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction));
+                URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction, drawOffer));
                 if (PentePlayer.development) {
                     String devUrl = "https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
                             + PentePlayer.writeCreds();
                     if (renjuAction != null && !renjuAction.isEmpty()) {
                         devUrl += "&renjuAction=" + renjuAction;
+                    }
+                    if (drawOffer) {
+                        devUrl += "&drawOffer=true";
                     }
                     url = new URL(devUrl);
                 }
@@ -928,11 +943,20 @@ public class Game implements Parcelable {
     /** Pure builder for the TB move URL. renjuAction omitted when null/empty. */
     public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
                                             String message, String renjuAction) {
+        return buildSubmitMoveUrl(hideStr, gid, moves, message, renjuAction, false);
+    }
+
+    /** As above, appending {@code &drawOffer=true} when the move carries a draw offer. */
+    public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
+                                            String message, String renjuAction, boolean drawOffer) {
         String url = "https://www.pente.org/gameServer/tb/game?command=move" + hideStr
                 + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message
                 + PentePlayer.writeCreds();
         if (renjuAction != null && !renjuAction.isEmpty()) {
             url += "&renjuAction=" + renjuAction;
+        }
+        if (drawOffer) {
+            url += "&drawOffer=true";
         }
         return url;
     }
@@ -942,7 +966,11 @@ public class Game implements Parcelable {
     }
 
     public void submitMove(String move, String message, String renjuAction) {
-        SubmitMoveTask submitTask = new SubmitMoveTask(move, message, renjuAction);
+        submitMove(move, message, renjuAction, false);
+    }
+
+    public void submitMove(String move, String message, String renjuAction, boolean drawOffer) {
+        SubmitMoveTask submitTask = new SubmitMoveTask(move, message, renjuAction, drawOffer);
         submitTask.execute((Void) null);
     }
 
@@ -1023,6 +1051,7 @@ public class Game implements Parcelable {
             mActive = mGameJson.currentPlayer.equalsIgnoreCase(PentePlayer.mPlayerName);
         }
         undoRequested = Boolean.TRUE.equals(mGameJson.undoRequested);
+        this.drawOffered = Boolean.TRUE.equals(mGameJson.drawOffered);
         if (mGameJson.player2 != null && mGameJson.player2.name != null) {
             p2Name = mGameJson.player2.name;
             if (!p2Name.equalsIgnoreCase(PentePlayer.mPlayerName)) {

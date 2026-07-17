@@ -360,6 +360,21 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 } else if (jsonEvent.get("dsgUndoReplyTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgUndoReplyTableEvent");
                                     undoReply(data);
+                                } else if (jsonEvent.get("dsgRenjuAcceptDrawTableEvent") != null) {
+                                    Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgRenjuAcceptDrawTableEvent");
+                                    addTableMessage((int) data.get("table"), "* " + getString(R.string.draw_accepted));
+                                    // game end itself arrives via dsgGameStateTableEvent
+                                } else if (jsonEvent.get("dsgRenjuRejectDrawTableEvent") != null) {
+                                    Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgRenjuRejectDrawTableEvent");
+                                    int tblId = (int) data.get("table");
+                                    addTableMessage(tblId, "* " + getString(R.string.draw_declined));
+                                    LiveTableFragment fragment = (LiveTableFragment)
+                                            getSupportFragmentManager().findFragmentByTag("liveTable");
+                                    if (fragment != null && fragment.table.getId() == tblId) {
+                                        fragment.onDrawRejected((String) data.get("player"));
+                                    }
+                                } else if (jsonEvent.get("dsgRenjuDrawTableErrorEvent") != null) {
+                                    // invalid accept/reject — informational only
                                 } else if (jsonEvent.get("dsgSwapSeatsTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgSwapSeatsTableEvent");
                                     swapSeats(data);
@@ -556,6 +571,12 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             if (move != 0) {
                 fragment.addMove(move);
                 playSound(NEW_MOVE_SOUND);
+                Object offerFlag = data.get("drawOffer");
+                String movePlayer = (String) data.get("player");
+                if (Boolean.TRUE.equals(offerFlag) && movePlayer != null && !movePlayer.equals(me)) {
+                    addTableMessage(tableId, "* " + getString(R.string.draw_offered));
+                    fragment.drawOffered(movePlayer);
+                }
             } else {
                 // Bulk move replay (rejoin / initial state). For Renju Taraguchi-10 this routes to
                 // Table.advanceRenjuAfterMove(true) (Task C1). The server sends the renju decision
@@ -581,6 +602,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             }
             fragment.updateGameState(state);
 //            fragment.gameStateChanged();
+            String drawOfferedBy = (String) data.get("drawOfferedBy");
+            if (drawOfferedBy != null) {
+                if (drawOfferedBy.equals(me)) {
+                    addTableMessage(tableId, "* " + getString(R.string.draw_offer_pending));
+                } else {
+                    fragment.drawOffered(drawOfferedBy);
+                }
+            }
         } else {
             tablesAndPlayers.updateGameState(tableId, state);
         }
