@@ -638,9 +638,10 @@ public class BoardActivity extends AppCompatActivity {
 
     /**
      * Drives the turn-based renju PASS / DRAW? buttons and surfaces any live draw offer.
-     * Called from BoardView.onDraw every render (poll refresh and stone-staging both invalidate),
-     * and again right after a submit. PASS shows only in COMPLETE when no stone is staged; DRAW?
-     * shows in COMPLETE regardless; SUBMIT enable/disable stays owned by styleRenjuSubmit.
+     * Called from BoardView.onDraw on every render of a renju game (poll refresh and stone-staging
+     * both invalidate; BoardView guards the call on game.isRenju()), and again right after a
+     * submit. PASS shows only in COMPLETE when no stone is staged; DRAW? shows in COMPLETE
+     * regardless; SUBMIT enable/disable stays owned by styleRenjuSubmit.
      */
     void updateRenjuTbButtons() {
         if (game == null || board == null) return;
@@ -654,11 +655,11 @@ public class BoardActivity extends AppCompatActivity {
         }
         if (renjuDraw != null) {
             renjuDraw.setVisibility(renjuComplete ? View.VISIBLE : View.GONE);
-            if (renjuDraw.getBackground() != null) {
-                renjuDraw.getBackground().setColorFilter(
-                        renjuDrawArmed ? android.graphics.Color.parseColor("#4CAF50") : null,
-                        android.graphics.PorterDuff.Mode.MULTIPLY);
-            }
+            // Armed is carried as the view's selected state; res/color/renju_draw_tint.xml maps that
+            // to the green backgroundTint and picks up the values-night variant on its own. The old
+            // runtime colour filter took the tint through an `armed ? int : null` ternary, which
+            // types as Integer and unboxes to int -- that is what crashed 2.11.10 on the disarm path.
+            renjuDraw.setSelected(renjuDrawArmed);
         }
         handleDrawOffer();
     }

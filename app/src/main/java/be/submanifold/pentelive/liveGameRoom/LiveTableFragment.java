@@ -499,11 +499,12 @@ public class LiveTableFragment extends Fragment {
 
     private void setDrawArmed(boolean armed) {
         drawArmed = armed;
-        if (renjuDrawButton != null) {
-            renjuDrawButton.getBackground().setColorFilter(
-                    armed ? android.graphics.Color.parseColor("#4CAF50") : null,
-                    android.graphics.PorterDuff.Mode.MULTIPLY);
-        }
+        if (renjuDrawButton == null) return;
+        // Armed is carried as the view's selected state; res/color/renju_draw_tint.xml maps that
+        // to the green backgroundTint and picks up the values-night variant on its own. The old
+        // runtime colour filter took the tint through an `armed ? int : null` ternary, which
+        // types as Integer and unboxes to int -- that is what crashed 2.11.10 on the disarm path.
+        renjuDrawButton.setSelected(armed);
     }
 
     /** Public disarm hook: LiveBoardView calls this after a stone move carried the armed offer. */

@@ -60,6 +60,7 @@
             android:focusable="false"
             android:text="@string/draw_question"
             android:visibility="gone"
+            android:backgroundTint="@color/renju_draw_tint"
             android:textStyle="bold"
             android:id="@+id/renjuDrawButton" />
         <Button

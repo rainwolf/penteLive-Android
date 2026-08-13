@@ -136,6 +136,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/renju_draw_tint"
                 android:text="@string/draw_question"
                 android:textStyle="bold" />
         </LinearLayout>
