@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Background tint for the renju DRAW? button. Armed is carried as the view's selected
+  state (Button.setSelected), so the visual lives in resources and gets a values-night
+  variant for free. Replaces the old runtime PorterDuff colour filter, whose
+  `armed ? int : null` argument unboxed to int and crashed on the disarm path (2.11.10).
+
+  The non-selected entries reproduce AppCompat's own button tint so an unarmed DRAW?
+  is indistinguishable from the PASS button beside it.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_selected="true"
+        android:color="@color/renju_draw_armed" />
+    <item
+        android:state_enabled="false"
+        android:alpha="?android:attr/disabledAlpha"
+        android:color="?attr/colorButtonNormal" />
+    <item android:color="?attr/colorButtonNormal" />
+</selector>

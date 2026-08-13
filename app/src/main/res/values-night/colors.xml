@@ -4,4 +4,7 @@
     <color name="online_row_background">#1E261E</color>
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#000000</color>
+    <!-- Renju DRAW? armed. Green 800, not 500: dark mode puts light text on this, and
+         light-on-Green-500 is ~2.8:1. Green 800 brings it to ~4.9:1. -->
+    <color name="renju_draw_armed">#2E7D32</color>
 </resources>
