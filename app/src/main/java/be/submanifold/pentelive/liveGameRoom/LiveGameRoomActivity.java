@@ -577,7 +577,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private void playTurnSoundForTable(final int tableId) {
         LiveTableFragment fragment = (LiveTableFragment)
                 getSupportFragmentManager().findFragmentByTag("liveTable");
-        if (fragment != null && fragment.table.getId() == tableId) {
+        if (fragment != null && fragment.table != null && fragment.table.getId() == tableId) {
             playSound(NEW_MOVE_SOUND);
         }
     }
@@ -723,11 +723,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         Table table = tablesAndPlayers.tables.get(tableId);
         if (table != null) {
             table.swap2Pass(silent);
-        }
-        // "Let p1 decide": the turn returns to p1 with no stone placed. `silent` here is the
-        // server's rejoin replay marker, not the mute field.
-        if (!silent) {
-            playTurnSoundForTable(tableId);
         }
     }
 
