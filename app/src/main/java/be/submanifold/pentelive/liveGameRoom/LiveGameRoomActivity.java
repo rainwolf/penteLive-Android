@@ -408,6 +408,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                             fragment.onRenjuDecisionEcho(tbl);
                                         }
                                     }
+                                    // The offer hands SELECTION to the opponent with no move
+                                    // event. This frame carries no `silent` flag; the rejoin
+                                    // replay is recognisable only by its missing `player`
+                                    // (ServerTable.java:649 builds it with player=null, and the
+                                    // server's Gson encoder omits null fields entirely).
+                                    if (p.get("player") != null) {
+                                        playTurnSoundForTable(tbl);
+                                    }
                                 } else if (jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent") != null) {
                                     // Renju Taraguchi-10 SELECT-1 decision echo (pick one of the 10 offered).
                                     Map<String, Object> p = (Map<String, Object>) jsonEvent.get("dsgRenjuTaraguchi10Select1TableEvent");
@@ -561,6 +569,19 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         }
     }
 
+    /**
+     * The cue that it is now someone's turn. Swap events are broadcast to the whole main room,
+     * not just the table, so the visible-fragment check is mandatory here -- without it a swap
+     * at any table in the lobby would make noise. Mute is handled inside playSound().
+     */
+    private void playTurnSoundForTable(final int tableId) {
+        LiveTableFragment fragment = (LiveTableFragment)
+                getSupportFragmentManager().findFragmentByTag("liveTable");
+        if (fragment != null && fragment.table != null && fragment.table.getId() == tableId) {
+            playSound(NEW_MOVE_SOUND);
+        }
+    }
+
     private void updateTableMove(Map<String, Object> data) {
         final int tableId = (Integer) data.get("table");
         final List<Integer> moves = (List<Integer>) data.get("moves");
@@ -689,6 +710,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             } else {
                 addTableMessage(tableId, "* " + getString(R.string.seats_not_swapped));
             }
+            // A swap choice passes the turn without placing a stone, so no dsgMoveTableEvent
+            // follows and the move sound never fires. NOTE: `silent` here is the LOCAL from the
+            // top of this method (the server's replay marker), not the mute field at :73.
+            playTurnSoundForTable(tableId);
         }
     }
 
