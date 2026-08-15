@@ -8,3 +8,10 @@ build/
 obj/
 libs/
 .idea/
+
+# Eclipse / Eclipse-JDT language-server artifacts. Regenerated on every
+# indexing run, so deleting them is pointless — they come straight back.
+.project
+.classpath
+.settings/
+bin/
