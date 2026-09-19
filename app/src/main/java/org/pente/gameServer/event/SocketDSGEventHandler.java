@@ -56,7 +56,9 @@ public class SocketDSGEventHandler implements DSGEventListener {
                         if (b != 255) {
                             baos.write(b);
                         } else {
-                            jsonStr = baos.toString(StandardCharsets.UTF_8);
+                            // ByteArrayOutputStream.toString(Charset) is API 33+; this form
+                            // works from API 9 and is required while minSdk is 26.
+                            jsonStr = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 //                            System.out.println("ObjectReader: " + jsonStr);
                             baos.reset();
                             break;

@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "be.submanifold.pentelive"
         minSdkVersion 26
-        targetSdkVersion 35
+        targetSdkVersion 36
         multiDexEnabled true
         ndk {
             moduleName "Ai"

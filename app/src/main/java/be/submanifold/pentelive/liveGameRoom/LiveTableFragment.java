@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -19,7 +20,6 @@ import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -159,6 +159,7 @@ public class LiveTableFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        registerBackHandler();
         Toolbar toolbar = getView().findViewById(R.id.toolbar);
 //        toolbar.setTitle(getString(R.string.home));
         toolbar.inflateMenu(R.menu.live_table_menu);
@@ -323,20 +324,32 @@ public class LiveTableFragment extends Fragment {
         updateTable();
     }
 
+    // Back handling must go through OnBackPressedDispatcher: once the app targets API 36
+    // (predictive back) the BACK key event is no longer dispatched to view key
+    // listeners, so leaving the table has to be driven from here instead.
+    private void registerBackHandler() {
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        if (mListener != null) {
+                            mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
+                            return;
+                        }
+
+                        // No listener attached: defer to system default behavior.
+                        setEnabled(false);
+                        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                        setEnabled(true);
+                    }
+                });
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
-        getView().setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (mListener != null) {
-                    mListener.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
-                    return true;
-                }
-            }
-            return false;
-        });
     }
 
 

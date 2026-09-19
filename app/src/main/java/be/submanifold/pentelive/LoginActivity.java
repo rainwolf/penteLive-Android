@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -162,12 +163,19 @@ public class LoginActivity extends AppCompatActivity
             attemptLogin();
         }
 
+        registerBackHandler();
     }
 
-    @Override
-    public void onBackPressed() {
-        MyApplication.setShouldQuit(true);
-        finish();
+    // Back handling must go through OnBackPressedDispatcher: onBackPressed() is no
+    // longer called for back gestures once the app targets API 36 (predictive back).
+    private void registerBackHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                MyApplication.setShouldQuit(true);
+                finish();
+            }
+        });
     }
 
     @Override

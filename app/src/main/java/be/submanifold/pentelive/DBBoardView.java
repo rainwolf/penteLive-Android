@@ -38,7 +38,8 @@ public class DBBoardView extends View {
             dPenteColor = Color.parseColor("#A3CDFD"), gPenteColor = Color.parseColor("#AEA3FD"),
             poofPenteColor = Color.parseColor("#EDA3FD"), connect6Color = Color.parseColor("#EDA3FD"),
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
-            oPenteColor = Color.parseColor("#52be80");
+            oPenteColor = Color.parseColor("#52be80"), swap2PenteColor = Color.parseColor("#E5AA70"),
+            swap2KeryoColor = Color.parseColor("#50C878");
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint whitePaint = makePaint(whiteColor);
     private final Paint pentePaint = makePaint(penteColor);
@@ -145,7 +146,11 @@ public class DBBoardView extends View {
 //                ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
 //                ((TextView) parentLayout.findViewById(R.id.capturesView)).setVisibility(VISIBLE);
 //            }
-            if (game.contains("Boat-Pente")) {
+            if (game.contains("Swap2-Pente")) {
+                setBackgroundColor(swap2PenteColor);
+            } else if (game.contains("Swap2-Keryo")) {
+                setBackgroundColor(swap2KeryoColor);
+            } else if (game.contains("Boat-Pente")) {
                 setBackgroundColor(boatPenteColor);
             } else if (game.contains("Keryo-Pente")) {
                 setBackgroundColor(keryoPenteColor);
@@ -306,7 +311,8 @@ public class DBBoardView extends View {
                     detectKeryoPoof(abstractBoard, stoneI, stoneJ, color);
                 }
                 detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")) {
+                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")
+                        || game.contains("Swap2-Keryo")) {
                     detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
                 }
                 if (game.contains("G-Pente") && movesList.size() == 2) {
@@ -434,8 +440,12 @@ public class DBBoardView extends View {
     }
 
     public void undoMove() {
+        // NOTE: the contentEquals("DK-Pente") below is an exact match where resetState() and
+        // DatabaseActivity use contains(). That asymmetry is pre-existing (it affects
+        // "Speed DK-Pente") and is deliberately preserved here; only the Swap2 term is added.
         if (movesList.size() > 1 || (movesList.size() == 1 &&
-                (game.contains("D-Pente") || game.contentEquals("DK-Pente")))) {
+                (game.contains("D-Pente") || game.contentEquals("DK-Pente")
+                        || game.contains("Swap2-")))) {
             movesList.remove(movesList.size() - 1);
             replayGame(abstractBoard);
             searchResults = null;
@@ -673,7 +683,8 @@ public class DBBoardView extends View {
                     detectKeryoPoof(abstractBoard, stoneI, stoneJ, color);
                 }
                 detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")) {
+                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")
+                        || game.contains("Swap2-Keryo")) {
                     detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
                 }
                 RelativeLayout parentLayout = (RelativeLayout) this.getParent();
@@ -839,10 +850,18 @@ public class DBBoardView extends View {
     }
 
 
+    /**
+     * Games whose first stone may be played off-center (and therefore taken back again)
+     * instead of being seeded at the fixed center point K10.
+     */
+    public static boolean allowsOffCenterFirstStone(String game) {
+        return game.contains("D-Pente") || game.contains("DK-Pente") || game.contains("Swap2-");
+    }
+
     public void resetState() {
         resetAbstractBoard(abstractBoard);
         movesList = new ArrayList<>();
-        if (!game.contains("D-Pente") && !game.contains("DK-Pente")) {
+        if (!allowsOffCenterFirstStone(game)) {
             movesList.add(180);
             abstractBoard[9][9] = 1;
         }

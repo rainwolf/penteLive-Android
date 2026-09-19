@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -81,18 +82,26 @@ public class WebViewActivity extends AppCompatActivity {
 
         }
 
+        getOnBackPressedDispatcher().addCallback(this, backCallback);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (webview.canGoBack()) {
-            webview.goBack();
-            return;
+    // Back handling must go through OnBackPressedDispatcher: onBackPressed() is no
+    // longer called for back gestures once the app targets API 36 (predictive back).
+    private final OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if (webview != null && webview.canGoBack()) {
+                webview.goBack();
+                return;
+            }
+
+            // Otherwise defer to system default behavior.
+            setEnabled(false);
+            getOnBackPressedDispatcher().onBackPressed();
+            // Re-arm in case the re-dispatch did not finish the activity.
+            setEnabled(true);
         }
-
-        // Otherwise defer to system default behavior.
-        super.onBackPressed();
-    }
+    };
 
     @Override
     protected void onResume() {

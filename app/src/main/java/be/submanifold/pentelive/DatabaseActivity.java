@@ -77,7 +77,7 @@ public class DatabaseActivity extends AppCompatActivity {
         searchPrmtrsWindow.setOnDismissListener(dialogInterface -> {
             board.setAlpha(1.0f);
             if (board.getMovesList().isEmpty() || (!board.getMovesList().isEmpty() && board.getMovesList().get(0) != 180)) {
-                if (!board.getGame().contains("D-Pente") && !board.getGame().contains("DK-Pente")) {
+                if (!DBBoardView.allowsOffCenterFirstStone(board.getGame())) {
                     board.resetState();
                 }
             }
@@ -497,6 +497,23 @@ public class DatabaseActivity extends AppCompatActivity {
         searchTask.execute((Void) null);
     }
 
+    // database_game_types_array gained Swap2-Pente/Swap2-Keryo after O-Pente, which
+    // pushed every "Speed ..." entry down by two. The spinner selection is persisted as
+    // a raw index, so shift a previously stored Speed index once to keep it pointing at
+    // the same game.
+    private void migrateDbGameIndexForSwap2() {
+        if (PrefUtils.getBooleanFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_SWAP2SHIFT_KEY, false)) {
+            return;
+        }
+        int stored = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0);
+        int count = getResources().getStringArray(R.array.database_game_types_array).length;
+        if (stored >= 10 && stored <= 19) {
+            int shifted = Math.min(stored + 2, count - 1);
+            PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, shifted);
+        }
+        PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_SWAP2SHIFT_KEY, true);
+    }
+
     private void showDBSettings() {
 
 //            settingsWindow.showAtLocation(board, Gravity.TOP, 0, 260);
@@ -511,6 +528,7 @@ public class DatabaseActivity extends AppCompatActivity {
 
 
         Spinner spinner = settingsView.findViewById(R.id.gameSpinner);
+        migrateDbGameIndexForSwap2();
         spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
         spinner = settingsView.findViewById(R.id.p1RatingSpinner);
         int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP1RATING_KEY, 0);

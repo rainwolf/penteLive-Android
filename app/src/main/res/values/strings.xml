@@ -382,6 +382,8 @@
         <item>Boat-Pente</item>
         <item>DK-Pente</item>
         <item>O-Pente</item>
+        <item>Swap2-Pente</item>
+        <item>Swap2-Keryo</item>
         <item>Speed Pente</item>
         <item>Speed Keryo-Pente</item>
         <item>Speed Gomoku</item>
@@ -392,6 +394,8 @@
         <item>Speed Boat-Pente</item>
         <item>Speed DK-Pente</item>
         <item>Speed O-Pente</item>
+        <item>Speed Swap2-Pente</item>
+        <item>Speed Swap2-Keryo</item>
     </string-array>
     <string-array name="live_game_types_array">
         <item>Pente</item>

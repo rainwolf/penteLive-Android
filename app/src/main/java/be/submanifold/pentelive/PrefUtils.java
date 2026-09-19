@@ -38,6 +38,9 @@ public class PrefUtils {
     public static final String PREFS_REGISTRATIONSUCCESSFUL_KEY = "__REGISTRATIONSUCCESSFUL__";
     public static final String PREFS_DBSORT_KEY = "__DBSORT__";
     public static final String PREFS_DBGAME_KEY = "__DBGAME__";
+    // Set once the stored __DBGAME__ spinner index has been shifted for the two
+    // Swap2 entries inserted after O-Pente (every Speed game moved by +2).
+    public static final String PREFS_DBGAME_SWAP2SHIFT_KEY = "__DBGAME_SWAP2SHIFT__";
     public static final String PREFS_DBAIDIFFICULTY_KEY = "__DBAIDIFFICULTY__";
     public static final String PREFS_DBAIOPENINGBOOK_KEY = "__DBAIOPENINGBOOK__";
     public static final String PREFS_SOCIALGAME_KEY = "__SOCIALGAME__";
