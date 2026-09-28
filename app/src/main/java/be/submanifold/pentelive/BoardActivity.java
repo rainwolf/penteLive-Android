@@ -202,82 +202,82 @@ public class BoardActivity extends AppCompatActivity {
         if (button != null) button.setOnClickListener(v -> goForward());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_cancel_resign:
-                    if (!game.isActive()) {
-                        return false;
-                    }
-                    AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                    if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
-                        String[] options = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
-                        builder.setItems(options, (dialog, which) -> {
-                            switch (which) {
-                                case 0:
-                                    resignTask = new ResignTask(game.getGameID());
-                                    askConfirmation(true);
-                                    break;
-                                case 1:
-                                    cancelTask = new CancelTask(game.getSetID());
-                                    askConfirmation(false);
-                                    break;
-                                case 2:
-                                    game.changeHideString();
-                                    break;
-                            }
-                            // the user clicked on colors[which]
-                        });
+            int id = menuItem.getItemId();
+            if (id == R.id.action_cancel_resign) {
+                if (!game.isActive()) {
+                    return false;
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                if (PentePlayer.mSubscriber && (game.isCanHide() || game.isCanUnHide())) {
+                    String[] options = {getString(R.string.resign), getString(R.string.request_cancel), game.getHideString(), getString(R.string.dismiss)};
+                    builder.setItems(options, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                resignTask = new ResignTask(game.getGameID());
+                                askConfirmation(true);
+                                break;
+                            case 1:
+                                cancelTask = new CancelTask(game.getSetID());
+                                askConfirmation(false);
+                                break;
+                            case 2:
+                                game.changeHideString();
+                                break;
+                        }
+                        // the user clicked on colors[which]
+                    });
 
-                    } else {
-                        String[] options = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
-                        builder.setItems(options, (dialog, which) -> {
-                            switch (which) {
-                                case 0:
-                                    resignTask = new ResignTask(game.getGameID());
-                                    askConfirmation(true);
-                                    break;
-                                case 1:
-                                    cancelTask = new CancelTask(game.getSetID());
-                                    askConfirmation(false);
-                                    break;
-                            }
-                        });
-                    }
-                    builder.show();
-                    return true;
-                case R.id.action_lock:
-                    boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
-                    if (staywithgame) {
-                        menuItem.setIcon(R.drawable.ic_action_lock_open);
-                    } else {
-                        menuItem.setIcon(R.drawable.ic_action_lock_closed);
-                    }
-                    PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
-                    return true;
-                case R.id.go_territory:
-                    game.getTerritories();
-                    board.invalidate();
-                    builder = new AlertDialog.Builder(BoardActivity.this);
-                    builder.setTitle(getString(R.string.score));
-                    int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
-                            p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
-                            p1Stones = game.getMovesForValue(2).size(),
-                            p2Stones = game.getMovesForValue(1).size();
-                    builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones + p1Territory, p2Territory, p2Stones, p2Territory + p2Stones + 7));
-                    builder.setOnDismissListener(dialogInterface -> {
-                        if (!game.isGoMarkStones()) {
-                            game.getGoTerritoryByPlayer().get(1).clear();
-                            game.getGoTerritoryByPlayer().get(2).clear();
-                            board.invalidate();
+                } else {
+                    String[] options = {getString(R.string.resign), getString(R.string.request_cancel), getString(R.string.dismiss)};
+                    builder.setItems(options, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                resignTask = new ResignTask(game.getGameID());
+                                askConfirmation(true);
+                                break;
+                            case 1:
+                                cancelTask = new CancelTask(game.getSetID());
+                                askConfirmation(false);
+                                break;
                         }
                     });
-                    AlertDialog dlg = builder.create();
-                    dlg.setCanceledOnTouchOutside(true);
-                    Window window = dlg.getWindow();
-                    WindowManager.LayoutParams wlp = window.getAttributes();
-                    wlp.gravity = Gravity.BOTTOM;
+                }
+                builder.show();
+                return true;
+            } else if (id == R.id.action_lock) {
+                boolean staywithgame = PrefUtils.getBooleanFromPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, false);
+                if (staywithgame) {
+                    menuItem.setIcon(R.drawable.ic_action_lock_open);
+                } else {
+                    menuItem.setIcon(R.drawable.ic_action_lock_closed);
+                }
+                PrefUtils.saveBooleanToPrefs(BoardActivity.this, PrefUtils.PREFS_STAYWITHGAME_KEY, !staywithgame);
+                return true;
+            } else if (id == R.id.go_territory) {
+                game.getTerritories();
+                board.invalidate();
+                AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                builder.setTitle(getString(R.string.score));
+                int p1Territory = game.getGoTerritoryByPlayer().get(1).size(),
+                        p2Territory = game.getGoTerritoryByPlayer().get(2).size(),
+                        p1Stones = game.getMovesForValue(2).size(),
+                        p2Stones = game.getMovesForValue(1).size();
+                builder.setMessage(getString(R.string.scorestring, p1Territory, p1Stones, p1Stones + p1Territory, p2Territory, p2Stones, p2Territory + p2Stones + 7));
+                builder.setOnDismissListener(dialogInterface -> {
+                    if (!game.isGoMarkStones()) {
+                        game.getGoTerritoryByPlayer().get(1).clear();
+                        game.getGoTerritoryByPlayer().get(2).clear();
+                        board.invalidate();
+                    }
+                });
+                AlertDialog dlg = builder.create();
+                dlg.setCanceledOnTouchOutside(true);
+                Window window = dlg.getWindow();
+                WindowManager.LayoutParams wlp = window.getAttributes();
+                wlp.gravity = Gravity.BOTTOM;
 //                        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                    window.setAttributes(wlp);
-                    dlg.show();
+                window.setAttributes(wlp);
+                dlg.show();
             }
 
             return false;
@@ -714,9 +714,7 @@ public class BoardActivity extends AppCompatActivity {
             try {
                 String urlParameters = "gid=" + gid + "&command=resign&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/resign";
                 if (PentePlayer.development) {
@@ -788,9 +786,7 @@ public class BoardActivity extends AppCompatActivity {
             try {
                 String urlParameters = "gid=" + gid + "&command=acceptDraw&mobile=" + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {

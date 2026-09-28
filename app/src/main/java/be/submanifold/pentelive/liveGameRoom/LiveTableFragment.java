@@ -178,54 +178,54 @@ public class LiveTableFragment extends Fragment {
         }
 
         toolbar.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.action_players:
-                    if (table.getOwner().equals(me)) {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                        String[] options = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
-                        builder.setItems(options, (dialog, which) -> {
-                            switch (which) {
-                                case 0:
-                                    showTablePlayers();
-                                    break;
-                                case 1:
-                                    showBootablePlayers();
-                                    break;
-                                case 2:
-                                    showInvitePlayers();
-                                    break;
-                            }
-                        });
-                        builder.show();
+            int id = item.getItemId();
+            if (id == R.id.action_players) {
+                if (table.getOwner().equals(me)) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    String[] options = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
+                    builder.setItems(options, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                showTablePlayers();
+                                break;
+                            case 1:
+                                showBootablePlayers();
+                                break;
+                            case 2:
+                                showInvitePlayers();
+                                break;
+                        }
+                    });
+                    builder.show();
 
-                    } else {
-                        showTablePlayers();
-                    }
-                    return true;
+                } else {
+                    showTablePlayers();
+                }
+                return true;
 
-                case R.id.action_game:
-                    if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
-                        showGameActions(table.currentPlayerName().equals(me));
-                    } else {
-                        Toast.makeText(activity, getString(R.string.not_player),
-                                Toast.LENGTH_LONG).show();
-                    }
-                    return true;
+            } else if (id == R.id.action_game) {
+                if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
+                    showGameActions(table.currentPlayerName().equals(me));
+                } else {
+                    Toast.makeText(activity, getString(R.string.not_player),
+                            Toast.LENGTH_LONG).show();
+                }
+                return true;
 
-                case R.id.action_settings:
-                    if (table.getOwner().equals(me)) {
-                        initializeSettingsView();
-                    } else {
-                        Toast.makeText(activity, getString(R.string.not_owner),
-                                Toast.LENGTH_LONG).show();
-                    }
+            } else if (id == R.id.action_settings) {
+                if (table.getOwner().equals(me)) {
+                    initializeSettingsView();
+                } else {
+                    Toast.makeText(activity, getString(R.string.not_owner),
+                            Toast.LENGTH_LONG).show();
+                }
 
-                    return true;
+                return true;
 
-                default:
-                    // If we got here, the user's action was not recognized.
-                    // Invoke the superclass to handle it.
-                    return false;
+            } else {
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return false;
 
             }
         });

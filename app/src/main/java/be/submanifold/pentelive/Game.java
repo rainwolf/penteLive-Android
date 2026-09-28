@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Gravity;
@@ -677,9 +676,7 @@ public class Game implements Parcelable {
                 String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
                         + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/cancel";
                 if (PentePlayer.development) {
@@ -766,9 +763,7 @@ public class Game implements Parcelable {
                 String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile="
                         + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
@@ -858,9 +853,7 @@ public class Game implements Parcelable {
                 String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile="
                         + PentePlayer.writeCreds();
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/game";
                 if (PentePlayer.development) {
@@ -1146,9 +1139,7 @@ public class Game implements Parcelable {
                 ReplyCancelTask task = new ReplyCancelTask(getSetID(), getGameID(), "No", host);
                 task.execute((Void) null);
             });
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                builder.setOnDismissListener(arg0 -> host.finish());
-            }
+            builder.setOnDismissListener(arg0 -> host.finish());
             builder.show();
         }
         if (mGameJson.messages != null && !mGameJson.messages.isEmpty()) {

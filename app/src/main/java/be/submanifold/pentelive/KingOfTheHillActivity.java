@@ -257,44 +257,43 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_web_koth:
-                int game = kothSummary.getGameId();
-                String url = "https://www.pente.org/gameServer/stairs.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
-                intent.putExtra("url", url);
-                startActivity(intent);
+        int id = item.getItemId();
+        if (id == R.id.action_web_koth) {
+            int game = kothSummary.getGameId();
+            String url = "https://www.pente.org/gameServer/stairs.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
 
-                return true;
-            case R.id.action_post_open_koth:
-                if (!kothSummary.canIchallenge() && !PentePlayer.mSubscriber) {
+            return true;
+        } else if (id == R.id.action_post_open_koth) {
+            if (!kothSummary.canIchallenge() && !PentePlayer.mSubscriber) {
 //                if (true) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(KingOfTheHillActivity.this);
-                    builder.setTitle(getString(R.string.public_invitations_limit_reached));
-                    builder.setMessage(getString(R.string.koth_limit));
-                    builder.setPositiveButton(getString(R.string.dismiss), (dialog, which) -> {
-                    });
-                    builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
-                        String url1 = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                        Intent intent1 = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
-                        intent1.putExtra("url", url1);
-                        startActivity(intent1);
-                    });
-                    AlertDialog dlg = builder.create();
-                    dlg.show();
-                } else if (kothSummary.canIchallenge()) {
-                    ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
-                    challengedUser = "";
-                    popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                    challengeView.findViewById(R.id.restrictionLayout).setVisibility(View.VISIBLE);
-                    expandableList.setAlpha(0.5f);
-                }
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
+                final AlertDialog.Builder builder = new AlertDialog.Builder(KingOfTheHillActivity.this);
+                builder.setTitle(getString(R.string.public_invitations_limit_reached));
+                builder.setMessage(getString(R.string.koth_limit));
+                builder.setPositiveButton(getString(R.string.dismiss), (dialog, which) -> {
+                });
+                builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
+                    String url1 = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    Intent intent1 = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
+                    intent1.putExtra("url", url1);
+                    startActivity(intent1);
+                });
+                AlertDialog dlg = builder.create();
+                dlg.show();
+            } else if (kothSummary.canIchallenge()) {
+                ((TextView) challengeView.findViewById(R.id.titleLabel)).setText(getString(R.string.send_open_challenge));
+                challengedUser = "";
+                popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
+                challengeView.findViewById(R.id.restrictionLayout).setVisibility(View.VISIBLE);
+                expandableList.setAlpha(0.5f);
+            }
+            return true;
+        } else {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -420,9 +419,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                     urlParameters += "&join=";
                 }
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/koth";
                 if (PentePlayer.development) {
@@ -514,9 +511,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                         "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y"
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/newGame";
 //                request        = "https://10.0.2.2/gameServer/tb/newGame";

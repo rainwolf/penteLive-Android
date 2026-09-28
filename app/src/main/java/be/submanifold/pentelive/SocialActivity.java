@@ -211,35 +211,35 @@ public class SocialActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
 //            case R.id.action_settings:
 //                // User chose the "Settings" item, show the app settings UI...
 //                return true;
 
-            case R.id.follow_user:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                final EditText invitationText = new EditText(this);
-                invitationText.setHint("(" + getString(R.string.enter_username) + ")");
-                invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(invitationText);
-                builder.setTitle(getString(R.string.follow_player));
-                builder.setPositiveButton(getString(R.string.follow), (dialog, which) -> {
-                    String m_Text = invitationText.getText().toString();
-                    FollowersingTask task = new FollowersingTask(true, m_Text);
-                    task.execute();
-                });
-                builder.setNegativeButton(getString(R.string.dismiss), (dialog, which) -> dialog.cancel());
-                builder.show();
-                return true;
+        if (id == R.id.follow_user) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final EditText invitationText = new EditText(this);
+            invitationText.setHint("(" + getString(R.string.enter_username) + ")");
+            invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(invitationText);
+            builder.setTitle(getString(R.string.follow_player));
+            builder.setPositiveButton(getString(R.string.follow), (dialog, which) -> {
+                String m_Text = invitationText.getText().toString();
+                FollowersingTask task = new FollowersingTask(true, m_Text);
+                task.execute();
+            });
+            builder.setNegativeButton(getString(R.string.dismiss), (dialog, which) -> dialog.cancel());
+            builder.show();
+            return true;
 
-            case R.id.gameSpinner:
+        } else if (id == R.id.gameSpinner) {
 
 
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
+            return true;
+        } else {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            return super.onOptionsItemSelected(item);
 
         }
     }

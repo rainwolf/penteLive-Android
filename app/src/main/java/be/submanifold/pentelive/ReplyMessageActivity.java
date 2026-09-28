@@ -106,16 +106,16 @@ public class ReplyMessageActivity extends AppCompatActivity {
         loadTask.execute((Void) null);
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_trash:
-                    DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
-                    deleteTask.execute((Void) null);
-                    return true;
-                case R.id.action_challenge:
-                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                    intent.putExtra("opponent", recipient);
-                    startActivity(intent);
-                    return true;
+            int id = menuItem.getItemId();
+            if (id == R.id.action_trash) {
+                DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
+                deleteTask.execute((Void) null);
+                return true;
+            } else if (id == R.id.action_challenge) {
+                Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                intent.putExtra("opponent", recipient);
+                startActivity(intent);
+                return true;
             }
 
             return false;
@@ -237,9 +237,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {
@@ -460,9 +458,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 String urlParameters = "command=delete&mid=" + messageID + "&mobile="
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/mymessages";
                 if (PentePlayer.development) {

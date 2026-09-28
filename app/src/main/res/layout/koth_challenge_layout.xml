@@ -56,13 +56,10 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/to_players"
             android:textStyle="bold"
-            android:id="@+id/restrictionLabel"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:id="@+id/restrictionLabel" />
         <androidx.appcompat.widget.AppCompatSpinner
             android:spinnerMode="dialog"
             android:id="@+id/restrictionSpinner"
-            android:layout_toRightOf="@id/restrictionLabel"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:textAlignment="center"

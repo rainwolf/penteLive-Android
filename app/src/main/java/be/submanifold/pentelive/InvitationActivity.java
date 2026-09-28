@@ -301,9 +301,7 @@ public class InvitationActivity extends AppCompatActivity {
                         restriction + "&playAs=" + playAs + "&privateGame=" + privateGame
                         + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
                 byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
+                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
                 int postDataLength = postData.length;
                 String request = "https://www.pente.org/gameServer/tb/newGame";
                 if (PentePlayer.development) {

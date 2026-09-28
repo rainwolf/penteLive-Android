@@ -294,119 +294,119 @@ public class MainActivity extends AppCompatActivity {
 //        System.out.println("messages " + player.getMessages().size());
         myToolbar.setOnMenuItemClickListener(menuItem -> {
             Intent intent;
-            switch (menuItem.getItemId()) {
-                case R.id.play_human:
-                    intent = new Intent(getApplicationContext(), InvitationActivity.class);
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.play_human) {
+                intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.play_computer) {
+                intent = new Intent(getApplicationContext(), InviteAIActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.social) {
+                intent = new Intent(getApplicationContext(), SocialActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.play_mmai) {
+                intent = new Intent(getApplicationContext(), MMAIActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.database) {
+                if (player != null && PentePlayer.hasDBAccess()) {
+                    intent = new Intent(getApplicationContext(), DatabaseActivity.class);
                     startActivity(intent);
-                    return true;
-                case R.id.play_computer:
-                    intent = new Intent(getApplicationContext(), InviteAIActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.social:
-                    intent = new Intent(getApplicationContext(), SocialActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.play_mmai:
-                    intent = new Intent(getApplicationContext(), MMAIActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.database:
-                    if (player != null && PentePlayer.hasDBAccess()) {
-                        intent = new Intent(getApplicationContext(), DatabaseActivity.class);
-                        startActivity(intent);
-                    } else {
-                        DisplayMetrics metrics = getResources().getDisplayMetrics();
-                        Point size = new Point(metrics.widthPixels, metrics.heightPixels);
-
-                        View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
-//                        policyView.setBackgroundColor(Color.WHITE);
-                        policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
-                            popupWindow.dismiss();
-                            String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
-                            Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
-                            intent12.putExtra("url", url);
-                            startActivity(intent12);
-                        });
-                        popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                        popupWindow.setFocusable(true);
-                        popupWindow.setOutsideTouchable(true);
-//                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
-                        popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
-                        ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
-//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
-                        popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
-                        findViewById(R.id.list).setAlpha(0.05f);
-                    }
-                    return true;
-                case R.id.action_new_message:
-                    intent = new Intent(getApplicationContext(), SendMessageActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.moreSettings:
-                    intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.action_show_stats:
+                } else {
                     DisplayMetrics metrics = getResources().getDisplayMetrics();
                     Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
-                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
-//                    popUpView.setBackgroundColor(Color.BLUE);
-                    popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                    ExpandableListView ratingListView;
-                    ratingListView = popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
-                    RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
-                    adapter.setInflater(inflater, MainActivity.this);
-                    adapter.setTbRatings(player.getTbRatings());
-                    ratingListView.setAdapter(adapter);
-                    ratingListView.expandGroup(0);
-                    ratingListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
-                        return true; // This way the expander cannot be collapsed
+                    View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+//                        policyView.setBackgroundColor(Color.WHITE);
+                    policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
+                        popupWindow.dismiss();
+                        String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
+                        Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
+                        intent12.putExtra("url", url);
+                        startActivity(intent12);
                     });
-                    ratingListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-                        String username = PentePlayer.mPlayerName;
-                        int gameInt = player.getRatingStats().get(childPosition).getGameId();
-                        String url = "https://www.pente.org/gameServer/viewLiveGames?p=" + username + "&g=" + gameInt;
-                        Intent intent1 = new Intent(MainActivity.this, WebViewActivity.class);
-                        intent1.putExtra("url", url);
-                        startActivity(intent1);
-
-                        return true;
-                    });
-
+                    popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                     popupWindow.setFocusable(true);
-                    popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
                     popupWindow.setOutsideTouchable(true);
+//                        popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.border));
                     popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
+                    ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
+//                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
                     popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
                     findViewById(R.id.list).setAlpha(0.05f);
+                }
+                return true;
+            } else if (itemId == R.id.action_new_message) {
+                intent = new Intent(getApplicationContext(), SendMessageActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.moreSettings) {
+                intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.action_show_stats) {
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                Point size = new Point(metrics.widthPixels, metrics.heightPixels);
+
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
+//                    popUpView.setBackgroundColor(Color.BLUE);
+                popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+                ExpandableListView ratingListView;
+                ratingListView = popupWindow.getContentView().findViewById(R.id.ratingStatsListView);
+                RatingStatsListAdapter adapter = new RatingStatsListAdapter(player.getRatingStats());
+                adapter.setInflater(inflater, MainActivity.this);
+                adapter.setTbRatings(player.getTbRatings());
+                ratingListView.setAdapter(adapter);
+                ratingListView.expandGroup(0);
+                ratingListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+                    return true; // This way the expander cannot be collapsed
+                });
+                ratingListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+                    String username = PentePlayer.mPlayerName;
+                    int gameInt = player.getRatingStats().get(childPosition).getGameId();
+                    String url = "https://www.pente.org/gameServer/viewLiveGames?p=" + username + "&g=" + gameInt;
+                    Intent intent1 = new Intent(MainActivity.this, WebViewActivity.class);
+                    intent1.putExtra("url", url);
+                    startActivity(intent1);
 
                     return true;
-                case R.id.onlineUsers:
-                    WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
-                    onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
+                });
 
-                    WhosOnlinePresenter whosOnlinePresenter = new WhosOnlinePresenter(new WhosOnlineView() {
-                        @Override
-                        public void renderWhosOnline(WhosOnline data) {
-                            showWhosOnlinePopup(onlineListAdapter, data.rooms);
-                        }
+                popupWindow.setFocusable(true);
+                popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
+                popupWindow.setOutsideTouchable(true);
+                popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
+                popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
+                findViewById(R.id.list).setAlpha(0.05f);
 
-                        @Override
-                        public void showError(Result.Reason reason) {
-                            Toast.makeText(MainActivity.this, getString(R.string.error_connecting), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    if (whosOnlineCancelable != null) { whosOnlineCancelable.cancel(); }
-                    whosOnlineCancelable = client.enqueue(() -> api.whosOnline(), whosOnlinePresenter::onResult);
+                return true;
+            } else if (itemId == R.id.onlineUsers) {
+                WhosOnlineListAdapter onlineListAdapter = new WhosOnlineListAdapter(player);
+                onlineListAdapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), MainActivity.this);
 
-                    return true;
-                case R.id.live_games:
-                    intent = new Intent(getApplicationContext(), LobbyActivity.class);
-                    startActivity(intent);
-                    return true;
+                WhosOnlinePresenter whosOnlinePresenter = new WhosOnlinePresenter(new WhosOnlineView() {
+                    @Override
+                    public void renderWhosOnline(WhosOnline data) {
+                        showWhosOnlinePopup(onlineListAdapter, data.rooms);
+                    }
+
+                    @Override
+                    public void showError(Result.Reason reason) {
+                        Toast.makeText(MainActivity.this, getString(R.string.error_connecting), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                if (whosOnlineCancelable != null) { whosOnlineCancelable.cancel(); }
+                whosOnlineCancelable = client.enqueue(() -> api.whosOnline(), whosOnlinePresenter::onResult);
+
+                return true;
+            } else if (itemId == R.id.live_games) {
+                intent = new Intent(getApplicationContext(), LobbyActivity.class);
+                startActivity(intent);
+                return true;
             }
 
             return false;
@@ -504,29 +504,29 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
 //            case R.id.action_settings:
 //                // User chose the "Settings" item, show the app settings UI...
 //                return true;
 
-            case R.id.action_new_invitation:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
-                return true;
+        if (id == R.id.action_new_invitation) {
+            // User chose the "Favorite" action, mark the current item
+            // as a favorite...
+            return true;
 
-            case R.id.action_new_message:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
-                return true;
+        } else if (id == R.id.action_new_message) {
+            // User chose the "Favorite" action, mark the current item
+            // as a favorite...
+            return true;
 
-            case R.id.action_show_stats:
+        } else if (id == R.id.action_show_stats) {
 
-                return true;
+            return true;
 
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
+        } else {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            return super.onOptionsItemSelected(item);
 
         }
     }

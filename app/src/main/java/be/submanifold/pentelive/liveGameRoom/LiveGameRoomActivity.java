@@ -3,7 +3,6 @@ package be.submanifold.pentelive.liveGameRoom;
 import static be.submanifold.pentelive.PentePlayer.development;
 
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -211,15 +210,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 //            }
             try {
                 mediaPlayer.setDataSource(getApplicationContext(), soundUri);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    AudioAttributes att = new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build();
-                    mediaPlayer.setAudioAttributes(att);
-                } else {
-                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_NOTIFICATION).build());
-                }
+                AudioAttributes att = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                mediaPlayer.setAudioAttributes(att);
                 mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                 mediaPlayer.prepare();
             } catch (IOException e) {
