@@ -53,7 +53,7 @@ public class LobbyActivity extends AppCompatActivity {
         // Unregistered (guest) players don't choose a room — send them straight to the
         // hardcoded arena room (name + port match the iOS client).
         String username = PrefUtils.getFromPrefs(this,
-                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
         if (username.startsWith("guest")) {
             Intent intent = new Intent(this, LiveGameRoomActivity.class);
             intent.putExtra("room", new LiveGameRoom("Arena", 15999));

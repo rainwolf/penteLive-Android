@@ -224,7 +224,7 @@ public class LoginActivity extends AppCompatActivity
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString().toLowerCase();
+        String email = mEmailView.getText().toString().toLowerCase(java.util.Locale.ROOT);
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;

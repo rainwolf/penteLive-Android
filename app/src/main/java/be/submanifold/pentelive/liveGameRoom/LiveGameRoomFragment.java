@@ -96,7 +96,7 @@ public class LiveGameRoomFragment extends Fragment {
         });
 
         activity = (LiveGameRoomActivity) getActivity();
-        boolean isArena = roomName != null && roomName.toLowerCase().contains("arena");
+        boolean isArena = roomName != null && roomName.toLowerCase(java.util.Locale.ROOT).contains("arena");
         if (isArena) {
             getView().findViewById(R.id.segments).setVisibility(View.GONE);
             getView().findViewById(R.id.playersList).setVisibility(View.GONE);
@@ -117,7 +117,7 @@ public class LiveGameRoomFragment extends Fragment {
         expandableList.expandGroup(0);
         expandableList.setOnChildClickListener((expandableListView, view12, i, i1, l) -> {
             int tableId = tableListAdapter.getTablesArray().get(i1).getId();
-            if (roomName != null && roomName.toLowerCase().contains("arena")) {
+            if (roomName != null && roomName.toLowerCase(java.util.Locale.ROOT).contains("arena")) {
                 activity.sendEvent(ArenaEvents.requestJoin(activity.getMe(), tableId));
                 android.widget.Toast.makeText(activity, getString(R.string.arena_waiting),
                         android.widget.Toast.LENGTH_SHORT).show();

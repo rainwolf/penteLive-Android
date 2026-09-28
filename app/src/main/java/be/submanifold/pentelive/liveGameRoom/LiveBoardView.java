@@ -231,6 +231,9 @@ public class LiveBoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                // Accessibility: report the release as a click. No OnClickListener is set on
+                // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
+                performClick();
                 break;
         }
         playedMove = -1;
@@ -261,6 +264,11 @@ public class LiveBoardView extends View {
 
         invalidate();
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     /** True when a renju touch must be swallowed (PENDING, or an open SWAP/BRANCH decision dialog). */

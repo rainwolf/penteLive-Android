@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -43,20 +44,15 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
     private final Runnable ticker = new Runnable() {
         @Override public void run() {
             long now = System.currentTimeMillis();
-            boolean removed = false;
             for (int i = data.size() - 1; i >= 0; i--) {
                 Long start = joinedAt.get(data.get(i));
                 if (start == null || now - start >= TIMEOUT_MS) {
                     joinedAt.remove(data.get(i));
                     data.remove(i);
-                    removed = true;
+                    notifyItemRemoved(i);
                 }
             }
-            if (removed) {
-                notifyDataSetChanged();
-            } else {
-                notifyItemRangeChanged(0, data.size(), "progress");
-            }
+            notifyItemRangeChanged(0, data.size(), "progress");
             if (!data.isEmpty()) {
                 handler.postDelayed(this, TICK_MS);
             } else {
@@ -78,7 +74,7 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
     public void addPlayer(String name) {
         data.add(name);
         joinedAt.put(name, System.currentTimeMillis());
-        notifyDataSetChanged();
+        notifyItemInserted(data.size() - 1);
         if (!ticking) {
             ticking = true;
             handler.postDelayed(ticker, TICK_MS);
@@ -89,7 +85,7 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
         if (position < 0 || position >= data.size()) return;
         joinedAt.remove(data.get(position));
         data.remove(position);
-        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     public void accept(int position) {
@@ -105,6 +101,8 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
     }
 
     /** Cancel everything — call from fragment onDestroyView and on dismiss. */
+    // Whole list is cleared, so a full refresh is the accurate notification.
+    @SuppressLint("NotifyDataSetChanged")
     public void reset() {
         handler.removeCallbacks(ticker);
         ticking = false;

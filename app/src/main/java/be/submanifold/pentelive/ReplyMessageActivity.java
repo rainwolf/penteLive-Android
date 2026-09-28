@@ -209,7 +209,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         private String message;
 
         SendMessageTask(String recipient, String subject, String message) {
-            this.recipient = recipient.toLowerCase();
+            this.recipient = recipient.toLowerCase(java.util.Locale.ROOT);
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {

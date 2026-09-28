@@ -62,7 +62,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private final LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
 
-    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
     private boolean isArena = false;
 
     public String getMe() {
@@ -100,7 +100,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         setContentView(R.layout.activity_live_game_room);
         room = IntentCompat.getParcelableExtra(getIntent(), "room", LiveGameRoom.class);
         isArena = room != null && room.getName() != null
-                && room.getName().toLowerCase().contains("arena");
+                && room.getName().toLowerCase(java.util.Locale.ROOT).contains("arena");
 //        System.out.println(room.getName());
 
         self = this;

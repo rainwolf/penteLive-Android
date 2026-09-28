@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -47,6 +48,8 @@ public class RegisterActivity extends AppCompatActivity {
             DisplayMetrics metrics = getResources().getDisplayMetrics();
             Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
+            // PopupWindow content: no parent at inflation time.
+            @SuppressLint("InflateParams")
             View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
             policyView.setBackgroundColor(Color.WHITE);
             PopupWindow messageWindow = new PopupWindow(policyView, size.x - 50, size.y * 3 / 4, true);
@@ -81,7 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void attemptRegistration() {
-        String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase();
+        String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase(java.util.Locale.ROOT);
         if (username.length() < 5 || username.length() > 10) {
             ((EditText) findViewById(R.id.username)).setError(getString(R.string.username_5_10));
             return;
@@ -124,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         RegisterTask(String username, String password, String email) {
-            this.username = username.toLowerCase();
+            this.username = username.toLowerCase(java.util.Locale.ROOT);
             this.password = password;
             try {
                 this.email = URLEncoder.encode(email, "UTF-8");

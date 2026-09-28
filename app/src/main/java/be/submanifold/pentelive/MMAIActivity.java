@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -97,6 +98,8 @@ public class MMAIActivity extends AppCompatActivity {
     private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
 
+    // InflateParams: settingsView is PopupWindow content, no parent at inflation time.
+    @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

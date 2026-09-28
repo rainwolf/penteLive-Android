@@ -22,7 +22,7 @@ public class TablesAndPlayers {
     public String mainRoomText = "";
     private final Context ctx = MyApplication.getContext();
 
-    private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
 
     public String getMe() {
         return me;

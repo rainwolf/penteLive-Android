@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
@@ -803,6 +804,10 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
+    // InflateParams: settingsView is AlertDialog content (setView), no parent at inflation time.
+    // ClickableViewAccessibility: the gameSpinner OnTouchListener only hides the keyboard and returns false,
+    // so the spinner's own click handling still runs; calling performClick() there would double-fire it.
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initializeSettingsView() {
         if (settingsView == null) {
             settingsView = activity.getLayoutInflater().inflate(R.layout.live_table_settings, null);

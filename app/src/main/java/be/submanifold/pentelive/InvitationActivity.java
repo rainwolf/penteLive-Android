@@ -78,7 +78,7 @@ public class InvitationActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.sendInvitationButton);
         if (button != null) button.setOnClickListener(v -> {
-            String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
+            String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase(java.util.Locale.ROOT);
             String gameType = "";
             switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
                 case 0:

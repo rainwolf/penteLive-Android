@@ -258,6 +258,9 @@ public class MMAIBoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                // Accessibility: report the release as a click. No OnClickListener is set on
+                // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
+                performClick();
                 break;
         }
 
@@ -289,6 +292,11 @@ public class MMAIBoardView extends View {
         }
         invalidate();
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     public void startGame() {

@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -67,6 +68,9 @@ public class BoardActivity extends AppCompatActivity {
     private boolean drawDialogShown = false;
     private boolean drawPendingToastShown = false;
 
+    // InflateParams: messageView is AlertDialog content (setView) and messageIcon is a menu action view
+    // (setActionView); neither has a parent at inflation time.
+    @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -54,6 +54,8 @@ public class BoardView extends View {
     public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
     public java.util.List<Integer> renjuCandidates = null; // move indices to render as translucent black (value 4)
     public java.util.List<Integer> renjuPicks = null; // in-progress OFFERS multi-select (whole board)
+    // SELECTION offers list, refilled by onDraw each frame (reused so onDraw does not allocate).
+    private final java.util.List<Integer> renjuOfferCandidates = new java.util.ArrayList<>();
     public boolean renjuOfferMode = false; // collecting 1 (Branch A) or up to 10 (Branch B) candidate stones -> single `move`
     public java.util.List<Integer> renjuSelection = null; // SELECTION 2-tap: [offered black 5th, white 6th]
 
@@ -147,9 +149,9 @@ public class BoardView extends View {
         if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
             if (renjuSelection == null || renjuSelection.isEmpty()) {
                 applyRenjuSelectionMask();
-                java.util.List<Integer> cands = new java.util.ArrayList<>();
-                if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
-                renjuCandidates = cands;
+                renjuOfferCandidates.clear();
+                if (game.renjuOffers != null) for (int o : game.renjuOffers) renjuOfferCandidates.add(o);
+                renjuCandidates = renjuOfferCandidates;
             } else {
                 renjuCandidates = null;
             }
@@ -248,9 +250,9 @@ public class BoardView extends View {
                     // cell -1 so only an offer can show a stone) and draw the offers as the
                     // existing translucent dead-stone candidates. Idempotent per frame.
                     applyRenjuSelectionMask();
-                    java.util.List<Integer> cands = new java.util.ArrayList<>();
-                    if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
-                    renjuCandidates = cands;
+                    renjuOfferCandidates.clear();
+                    if (game.renjuOffers != null) for (int o : game.renjuOffers) renjuOfferCandidates.add(o);
+                    renjuCandidates = renjuOfferCandidates;
                 } else {
                     // 5th chosen (mask already cleared on the pick): drop the 9 other candidates;
                     // the chosen 5th (and the white 6th) render as live stones from the snapshot.
@@ -418,6 +420,11 @@ public class BoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    // Accessibility: report the release as a click. No OnClickListener is set on
+                    // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
+                    performClick();
+                }
                 break;
         }
 
@@ -640,6 +647,11 @@ public class BoardView extends View {
 
         invalidate();
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
 

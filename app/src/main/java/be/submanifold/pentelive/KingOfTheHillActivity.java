@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -62,6 +63,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
     private ExpandableListView expandableList;
     String challengedUser;
 
+    // InflateParams: challengeView is PopupWindow content, no parent at inflation time.
+    @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 

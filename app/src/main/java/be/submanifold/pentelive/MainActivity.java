@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.IntentCompat;
@@ -319,6 +321,8 @@ public class MainActivity extends AppCompatActivity {
                     DisplayMetrics metrics = getResources().getDisplayMetrics();
                     Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
+                    // PopupWindow content: no parent at inflation time.
+                    @SuppressLint("InflateParams")
                     View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
 //                        policyView.setBackgroundColor(Color.WHITE);
                     policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
@@ -352,6 +356,8 @@ public class MainActivity extends AppCompatActivity {
                 Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                // PopupWindow content: no parent at inflation time.
+                @SuppressLint("InflateParams")
                 View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
 //                    popUpView.setBackgroundColor(Color.BLUE);
                 popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -377,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 popupWindow.setFocusable(true);
-                popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
+                popupWindow.setBackgroundDrawable(AppCompatResources.getDrawable(MainActivity.this, R.drawable.border));
                 popupWindow.setOutsideTouchable(true);
                 popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 260);
                 popupWindow.setOnDismissListener(() -> findViewById(R.id.list).setAlpha(1.0f));
@@ -569,10 +575,12 @@ public class MainActivity extends AppCompatActivity {
         Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // PopupWindow content: no parent at inflation time.
+        @SuppressLint("InflateParams")
         View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
         final float scale = getResources().getDisplayMetrics().density;
         popupWindow = new PopupWindow(popUpView, size.x * 4 / 5, (int) ((30 + Math.min(Math.floor((((size.y / scale) * 2 / 3) / 44)) * 44, 30 + total * 44)) * scale), true);
-        popupWindow.setBackgroundDrawable(getDrawable(R.drawable.border));
+        popupWindow.setBackgroundDrawable(AppCompatResources.getDrawable(MainActivity.this, R.drawable.border));
         ExpandableListView onlineUsersListView = popupWindow.getContentView().findViewById(R.id.onlineUsersListView);
         onlineUsersListView.setDividerHeight(0);
         onlineUsersListView.setAdapter(listAdapter);
@@ -611,6 +619,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Drawable buildCounterDrawable(int count, int backgroundImageId) {
         LayoutInflater inflater = LayoutInflater.from(this);
+        // Rendered off-screen into a Bitmap, never attached to a parent.
+        @SuppressLint("InflateParams")
         View view = inflater.inflate(R.layout.counter_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
         if (count == 0) {
@@ -632,6 +642,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Drawable buildGreenCounterDrawable(int count, int backgroundImageId) {
         LayoutInflater inflater = LayoutInflater.from(this);
+        // Rendered off-screen into a Bitmap, never attached to a parent.
+        @SuppressLint("InflateParams")
         View view = inflater.inflate(R.layout.counter_green_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
         if (count == 0) {

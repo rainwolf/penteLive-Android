@@ -66,7 +66,7 @@ public class PrefUtils {
         SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getFromPrefs(Context context, String key, String defaultValue) {
@@ -83,7 +83,7 @@ public class PrefUtils {
         SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static boolean getBooleanFromPrefs(Context context, String key, boolean defaultValue) {
@@ -100,7 +100,7 @@ public class PrefUtils {
         SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static int getIntFromPrefs(Context context, String key, int defaultValue) {
@@ -117,7 +117,7 @@ public class PrefUtils {
         SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static long getLongFromPrefs(Context context, String key, long defaultValue) {
@@ -136,11 +136,13 @@ public class PrefUtils {
         if (players == null) {
             players = new HashSet<String>();
         }
+        // getStringSet returns the preferences' own instance, which must not be modified: work on a copy.
+        players = new HashSet<String>(players);
         if (!players.contains(value)) {
             players.add(value);
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putStringSet(PREFS_AUTOCOMPLETEPLAYERS_KEY, players);
-            editor.commit();
+            editor.apply();
         }
     }
 

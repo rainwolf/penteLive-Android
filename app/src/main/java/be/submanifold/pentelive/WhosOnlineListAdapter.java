@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -101,6 +102,9 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    // Null root kept: with the list as root, dashboardgroup_layout's fixed 30dp height would replace the list's
+    // default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -112,6 +116,9 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    // Null root kept: with the list as root, dashboardrow_layout's ?android:attr/listPreferredItemHeight height would
+    // replace the list's default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null) {
