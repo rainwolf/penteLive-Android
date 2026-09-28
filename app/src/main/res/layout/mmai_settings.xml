@@ -19,8 +19,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:layout_toRightOf="@id/gameLabel"
         android:textAlignment="center"
@@ -50,7 +49,7 @@
         android:layout_below="@id/gameChoice"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
 
 
@@ -67,8 +66,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:layout_toRightOf="@id/playAsLabel"
         android:textAlignment="center"

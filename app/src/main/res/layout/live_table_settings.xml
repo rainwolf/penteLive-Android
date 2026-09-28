@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
 
 
@@ -41,8 +41,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:layout_toRightOf="@id/privateLabel"
         android:textAlignment="center"
@@ -64,8 +63,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:layout_toRightOf="@id/ratedLabel"
         android:textAlignment="center"
@@ -87,8 +85,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:layout_toRightOf="@id/ratedLabel"
         android:textAlignment="center"

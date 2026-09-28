@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
     <LinearLayout
         android:id="@+id/restrictionLayout"
@@ -67,7 +67,7 @@
             android:layout_width="match_parent"
             android:textAlignment="center"
             android:layout_height="45dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical|center_horizontal">
         </androidx.appcompat.widget.AppCompatSpinner>
     </LinearLayout>
 

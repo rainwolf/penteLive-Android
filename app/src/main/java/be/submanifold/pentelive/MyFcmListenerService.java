@@ -274,10 +274,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             }
             if (messageStr.contains("your move")) {
                 Intent intent = new Intent("unique_name_computer");
+                intent.setPackage(getPackageName());
                 intent.putExtra("gameID", (String) data.get("gameID"));
                 sendBroadcast(intent);
 
                 intent = new Intent("unique_name");
+                intent.setPackage(getPackageName());
                 //put whatever data you want to send, if any
                 intent.putExtra("message", localMsgStr);
 
@@ -285,6 +287,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                 sendBroadcast(intent);
             } else {
                 Intent intent = new Intent("unique_name");
+                intent.setPackage(getPackageName());
                 //put whatever data you want to send, if any
                 if (!silent) {
                     intent.putExtra("message", localMsgStr);

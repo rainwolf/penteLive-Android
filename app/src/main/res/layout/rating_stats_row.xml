@@ -31,7 +31,7 @@
             android:layout_height="match_parent"/>
         <TextView android:id="@+id/ratingColorText"
             android:textSize="14sp"
-            android:gravity="center_vertical"
+            android:gravity="center_vertical|end"
             android:textAlignment="textEnd"
             android:layout_marginLeft="10dp"
             android:layout_width="0dp"
@@ -39,7 +39,7 @@
             android:layout_height="match_parent"/>
         <TextView android:id="@+id/ratingText"
             android:textSize="16sp"
-            android:gravity="center_vertical"
+            android:gravity="center_vertical|end"
             android:textAlignment="textEnd"
             android:layout_marginRight="15dp"
             android:layout_width="0dp"

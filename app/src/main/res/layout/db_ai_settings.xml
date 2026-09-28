@@ -48,7 +48,7 @@
         android:layout_below="@id/openingBookToggleButton"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
 
     <Button
