@@ -655,7 +655,7 @@ public class DBBoardView extends View {
             }
         }
 
-        CharSequence sequence = Html.fromHtml(str + html);
+        CharSequence sequence = Html.fromHtml(str + html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {

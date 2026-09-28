@@ -14,7 +14,6 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.CookieSyncManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -145,7 +144,7 @@ public class LoginActivity extends AppCompatActivity
         findViewById(R.id.inviteFriendsButton).setOnClickListener(v -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.putExtra(Intent.EXTRA_SUBJECT, "Play Pente with me?");
-            i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
+            i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName, Html.FROM_HTML_MODE_LEGACY));
             startActivity(Intent.createChooser(i, "Invite Friends"));
         });
         findViewById(R.id.getHelpButton).setOnClickListener(v -> {
@@ -371,7 +370,6 @@ public class LoginActivity extends AppCompatActivity
 //                CookieManager cookieManager = new CookieManager();
 //                CookieHandler.setDefault(cookieManager);
                 CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-                CookieSyncManager.createInstance(LoginActivity.this);
 
                 URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 if (PentePlayer.development) {

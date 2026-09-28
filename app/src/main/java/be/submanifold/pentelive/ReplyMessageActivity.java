@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 
 import android.os.Bundle;
 
@@ -51,7 +52,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reply_message);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
-        final Message message = getIntent().getParcelableExtra("message");
+        final Message message = IntentCompat.getParcelableExtra(getIntent(), "message", Message.class);
         recipient = message.getAuthor();
         toolbar.setTitle("To: " + recipient);
         ((EditText) findViewById(R.id.subject)).setText(message.getSubject());
@@ -191,7 +192,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
     }
 
     protected void setTextViewHTML(TextView text, String html) {
-        CharSequence sequence = Html.fromHtml(html);
+        CharSequence sequence = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {

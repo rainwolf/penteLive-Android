@@ -2,7 +2,6 @@ package be.submanifold.pentelive;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -58,15 +57,20 @@ public class PrefUtils {
     public static final String PREFS_GDPR_KEY = "__GDPR_0__";
     public static final String PREFS_PERSONALIZEDADS_KEY = "__PERSONALIZEDADS__";
 
+    private static SharedPreferences defaultPrefs(Context context) {
+        // Same file name and mode PreferenceManager.getDefaultSharedPreferences() uses; that API is deprecated.
+        return context.getSharedPreferences(context.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+    }
+
     public static void saveToPrefs(Context context, String key, String value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(key, value);
         editor.commit();
     }
 
     public static String getFromPrefs(Context context, String key, String defaultValue) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPrefs = defaultPrefs(context);
         try {
             return sharedPrefs.getString(key, defaultValue);
         } catch (Exception e) {
@@ -76,14 +80,14 @@ public class PrefUtils {
     }
 
     public static void saveBooleanToPrefs(Context context, String key, boolean value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(key, value);
         editor.commit();
     }
 
     public static boolean getBooleanFromPrefs(Context context, String key, boolean defaultValue) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPrefs = defaultPrefs(context);
         try {
             return sharedPrefs.getBoolean(key, defaultValue);
         } catch (Exception e) {
@@ -93,14 +97,14 @@ public class PrefUtils {
     }
 
     public static void saveIntToPrefs(Context context, String key, int value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(key, value);
         editor.commit();
     }
 
     public static int getIntFromPrefs(Context context, String key, int defaultValue) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPrefs = defaultPrefs(context);
         try {
             return sharedPrefs.getInt(key, defaultValue);
         } catch (Exception e) {
@@ -110,14 +114,14 @@ public class PrefUtils {
     }
 
     public static void saveLongToPrefs(Context context, String key, long value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = defaultPrefs(context);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(key, value);
         editor.commit();
     }
 
     public static long getLongFromPrefs(Context context, String key, long defaultValue) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPrefs = defaultPrefs(context);
         try {
             return sharedPrefs.getLong(key, defaultValue);
         } catch (Exception e) {
@@ -127,7 +131,7 @@ public class PrefUtils {
     }
 
     public static void savePlayerToPrefs(Context context, String value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = defaultPrefs(context);
         Set<String> players = prefs.getStringSet(PREFS_AUTOCOMPLETEPLAYERS_KEY, null);
         if (players == null) {
             players = new HashSet<String>();
@@ -141,7 +145,7 @@ public class PrefUtils {
     }
 
     public static Set<String> getPlayers(Context context) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPrefs = defaultPrefs(context);
         try {
             return sharedPrefs.getStringSet(PREFS_AUTOCOMPLETEPLAYERS_KEY, new HashSet<String>());
         } catch (Exception e) {

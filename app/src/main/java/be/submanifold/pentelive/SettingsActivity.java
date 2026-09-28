@@ -172,7 +172,6 @@ public class SettingsActivity extends AppCompatActivity {
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
             bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
 
             imageBitmap = BitmapFactory.decodeStream(inputStream, null, bmOptions);
             inputStream.close(); // Close the input stream when done

@@ -1104,7 +1104,7 @@ public class BoardView extends View {
     }
 
     protected void setTextViewHTML(TextView text, String html) {
-        CharSequence sequence = Html.fromHtml(html);
+        CharSequence sequence = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {

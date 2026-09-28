@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -179,12 +178,12 @@ public class SocialActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.social_menu, menu);
 
         MenuItem item = menu.findItem(R.id.gameSpinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        Spinner spinner = (Spinner) item.getActionView();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.all_game_types_array)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 ImageView view = new ImageView(getContext());
-                view.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_settings));
+                view.setImageDrawable(ContextCompat.getDrawable(SocialActivity.this, R.drawable.ic_action_settings));
                 return view;
             }
         };

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.IntentCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,8 +69,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_king_of_the_hill);
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
-        this.player = getIntent().getParcelableExtra("pentePlayer");
-        this.kothSummary = getIntent().getParcelableExtra("kothSummary");
+        this.player = IntentCompat.getParcelableExtra(getIntent(), "pentePlayer", PentePlayer.class);
+        this.kothSummary = IntentCompat.getParcelableExtra(getIntent(), "kothSummary", KingOfTheHill.class);
         myToolbar.setTitle(kothSummary.getGame());
         setSupportActionBar(myToolbar);
 

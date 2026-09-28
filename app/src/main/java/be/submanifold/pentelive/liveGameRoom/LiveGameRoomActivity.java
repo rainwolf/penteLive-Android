@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 import androidx.fragment.app.FragmentManager;
 
 import org.json.JSONArray;
@@ -98,7 +99,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_game_room);
-        room = getIntent().getParcelableExtra("room");
+        room = IntentCompat.getParcelableExtra(getIntent(), "room", LiveGameRoom.class);
         isArena = room != null && room.getName() != null
                 && room.getName().toLowerCase().contains("arena");
 //        System.out.println(room.getName());
@@ -217,7 +218,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                             .build();
                     mediaPlayer.setAudioAttributes(att);
                 } else {
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_NOTIFICATION).build());
                 }
                 mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                 mediaPlayer.prepare();

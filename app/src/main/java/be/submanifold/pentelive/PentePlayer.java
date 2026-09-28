@@ -11,6 +11,8 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.webkit.CookieManager;
 
+import androidx.core.os.ParcelCompat;
+
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -395,55 +397,55 @@ public class PentePlayer implements Parcelable {
         personalizeAds = personalizeAdsVal == 0x02 ? null : personalizeAdsVal != 0x00;
         if (in.readByte() == 0x01) {
             mInvitations = new ArrayList<Game>();
-            in.readList(mInvitations, Game.class.getClassLoader());
+            ParcelCompat.readList(in, mInvitations, Game.class.getClassLoader(), Game.class);
         } else {
             mInvitations = null;
         }
         if (in.readByte() == 0x01) {
             mSentInvitations = new ArrayList<Game>();
-            in.readList(mSentInvitations, Game.class.getClassLoader());
+            ParcelCompat.readList(in, mSentInvitations, Game.class.getClassLoader(), Game.class);
         } else {
             mSentInvitations = null;
         }
         if (in.readByte() == 0x01) {
             mActiveGames = new ArrayList<Game>();
-            in.readList(mActiveGames, Game.class.getClassLoader());
+            ParcelCompat.readList(in, mActiveGames, Game.class.getClassLoader(), Game.class);
         } else {
             mActiveGames = null;
         }
         if (in.readByte() == 0x01) {
             mNonActiveGames = new ArrayList<Game>();
-            in.readList(mNonActiveGames, Game.class.getClassLoader());
+            ParcelCompat.readList(in, mNonActiveGames, Game.class.getClassLoader(), Game.class);
         } else {
             mNonActiveGames = null;
         }
         if (in.readByte() == 0x01) {
             mPublicInvitations = new ArrayList<Game>();
-            in.readList(mPublicInvitations, Game.class.getClassLoader());
+            ParcelCompat.readList(in, mPublicInvitations, Game.class.getClassLoader(), Game.class);
         } else {
             mPublicInvitations = null;
         }
         if (in.readByte() == 0x01) {
             mMessages = new ArrayList<Message>();
-            in.readList(mMessages, Message.class.getClassLoader());
+            ParcelCompat.readList(in, mMessages, Message.class.getClassLoader(), Message.class);
         } else {
             mMessages = null;
         }
         if (in.readByte() == 0x01) {
             mRatingStats = new ArrayList<RatingStat>();
-            in.readList(mRatingStats, RatingStat.class.getClassLoader());
+            ParcelCompat.readList(in, mRatingStats, RatingStat.class.getClassLoader(), RatingStat.class);
         } else {
             mRatingStats = null;
         }
         if (in.readByte() == 0x01) {
             mTournaments = new ArrayList<Tournament>();
-            in.readList(mTournaments, Tournament.class.getClassLoader());
+            ParcelCompat.readList(in, mTournaments, Tournament.class.getClassLoader(), Tournament.class);
         } else {
             mTournaments = null;
         }
         if (in.readByte() == 0x01) {
             mHills = new ArrayList<KingOfTheHill>();
-            in.readList(mHills, KingOfTheHill.class.getClassLoader());
+            ParcelCompat.readList(in, mHills, KingOfTheHill.class.getClassLoader(), KingOfTheHill.class);
         } else {
             mHills = null;
         }

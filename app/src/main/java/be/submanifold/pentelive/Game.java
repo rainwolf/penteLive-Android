@@ -16,6 +16,8 @@ import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.core.os.ParcelCompat;
+
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -240,7 +242,7 @@ public class Game implements Parcelable {
         mPrivateGame = in.readString();
         mNameColor = in.readInt();
         mCrown = in.readInt();
-        mMovesList = (ArrayList<Integer>) in.readSerializable();
+        mMovesList = (ArrayList<Integer>) ParcelCompat.readSerializable(in, Game.class.getClassLoader(), ArrayList.class);
         mActive = in.readByte() != 0;
         mLocalizedTime = in.readString();
         mLocalizedRatedNot = in.readString();

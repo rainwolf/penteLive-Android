@@ -38,8 +38,8 @@ public class SocketDSGEventHandler implements DSGEventListener {
     Thread writeObjectThread;
     volatile boolean running;
 
-    Vector listeners = new Vector();
-    SynchronizedQueue outputQueue = new SynchronizedQueue();
+    Vector<DSGEventListener> listeners = new Vector<>();
+    SynchronizedQueue<String> outputQueue = new SynchronizedQueue<>();
 
     class ObjectReader implements Runnable {
         public void run() {
@@ -96,11 +96,9 @@ public class SocketDSGEventHandler implements DSGEventListener {
                         throw new IOException("Socket or outputstream is null.");
                     }
 
-                    Object o = outputQueue.remove();
+                    String jsonStr = outputQueue.remove();
 
                     if (!running) break;
-
-                    String jsonStr = (String) o;
 
 //                    System.out.println("ObjectWriter: " + jsonStr);
 
@@ -182,7 +180,7 @@ public class SocketDSGEventHandler implements DSGEventListener {
 
     public void notifyListeners(String dsgEvent) {
         for (int i = 0; i < listeners.size(); i++) {
-            ((DSGEventListener) listeners.elementAt(i)).eventOccurred(dsgEvent);
+            listeners.elementAt(i).eventOccurred(dsgEvent);
         }
     }
 

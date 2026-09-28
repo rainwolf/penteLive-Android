@@ -265,7 +265,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                                 .build();
                         mediaPlayer.setAudioAttributes(att);
                     } else {
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+                        mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_NOTIFICATION).build());
                     }
                     mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                     mediaPlayer.prepare();

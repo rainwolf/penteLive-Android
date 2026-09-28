@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -65,7 +66,7 @@ import be.submanifold.pentelive.R;
 public class LiveTableFragment extends Fragment {
     Table table = null;
     LiveBoardView board;
-    Handler timerHandler = new Handler();
+    Handler timerHandler = new Handler(Looper.getMainLooper());
     Runnable timerUpdater = new Runnable() {
         @Override
         public void run() {

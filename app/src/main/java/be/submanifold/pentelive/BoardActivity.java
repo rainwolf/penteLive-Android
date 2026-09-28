@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.IntentCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -81,7 +82,7 @@ public class BoardActivity extends AppCompatActivity {
 
         board = findViewById(R.id.boardView);
         board.setBoardActivity(this);
-        this.game = getIntent().getParcelableExtra("game");
+        this.game = IntentCompat.getParcelableExtra(getIntent(), "game", Game.class);
         game.parseGame(board);
         toolbar.setTitle(game.getGameType());
         setSupportActionBar(toolbar);
