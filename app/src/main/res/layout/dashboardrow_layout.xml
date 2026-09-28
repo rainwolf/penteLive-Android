@@ -7,6 +7,7 @@
 
     <ImageView
         android:id="@+id/imageView"
+        android:importantForAccessibility="no"
         android:layout_alignParentTop="true"
         android:layout_width="44dp"
         android:layout_alignWithParentIfMissing="true"

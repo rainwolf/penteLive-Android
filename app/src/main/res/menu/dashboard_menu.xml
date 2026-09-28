@@ -12,7 +12,7 @@
     <item
         android:id="@+id/action_new_invitation"
         android:icon="@drawable/ic_play_arrow"
-        android:title="choose play"
+        android:title="@string/choose_play"
         app:showAsAction="always">
         <menu>
             <item android:id="@+id/play_computer"
@@ -46,7 +46,7 @@
     <item
         android:id="@+id/action_more"
         android:icon="@drawable/ic_action_more"
-        android:title="more"
+        android:title="@string/more"
         app:showAsAction="always">
         <menu>
             <item

@@ -59,7 +59,7 @@
         android:layout_height="45dp"
         android:layout_below="@id/repeatPassword"
         android:hint="@string/email"
-        android:inputType="text"
+        android:inputType="textEmailAddress"
         android:autofillHints="emailAddress"
         android:maxLines="1"
         android:singleLine="true" />
@@ -94,7 +94,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/viewPolicy"
-        android:text="view rated play policy"
+        android:text="@string/view_rated_play_policy"
         android:layout_alignParentBottom="true"/>
 
 

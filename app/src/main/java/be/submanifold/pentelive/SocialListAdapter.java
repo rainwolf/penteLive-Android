@@ -157,7 +157,7 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         nameTextView.setText(sb);
 
         int rating = player.getRating(game);
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText(String.valueOf(rating));
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
 
         return convertView;

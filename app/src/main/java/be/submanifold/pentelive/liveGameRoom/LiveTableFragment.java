@@ -396,7 +396,7 @@ public class LiveTableFragment extends Fragment {
         if (table.isTimed()) {
             timerStr = getString(R.string.timer) + ": " + initialMnts + "/" + incrementalScnds;
         }
-        settingsText.setText(timerStr + "\n" + ratedStr);
+        settingsText.setText(getString(R.string.two_lines, timerStr, ratedStr));
         synchronized (this) {
             Map<String, Long> timer1, timer2;
             timer1 = table.getGameState().timers.get(1);
@@ -459,7 +459,7 @@ public class LiveTableFragment extends Fragment {
     public void addText(String text) {
         if (!isAdded()) return;
         String tableText = tableTextView.getText().toString();
-        tableTextView.setText(tableText + text + "\n");
+        tableTextView.setText(getString(R.string.append_line, tableText, text));
         tableTextView.setMovementMethod(new ScrollingMovementMethod());
         tableTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
@@ -879,8 +879,8 @@ public class LiveTableFragment extends Fragment {
         } else {
             ratedChoice.setText(getString(R.string.no));
         }
-        initialMinutesView.setText(table.getTimer().get("initialMinutes") + "");
-        incrementalSecondsView.setText(table.getTimer().get("incrementalSeconds") + "");
+        initialMinutesView.setText(String.valueOf(table.getTimer().get("initialMinutes")));
+        incrementalSecondsView.setText(String.valueOf(table.getTimer().get("incrementalSeconds")));
         tableSettingsWindow.show();
     }
 

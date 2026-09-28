@@ -12,7 +12,7 @@
         android:layout_height="45dp"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="challenge"
+        android:text="@string/challenge_label"
         android:textAlignment="center"
         android:id="@+id/titleLabel"
         android:layout_alignParentStart="true" />

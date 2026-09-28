@@ -768,7 +768,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             tableText.setText(getString(R.string.invites_you, gameStr));
 
             TextView invitationText = view.findViewById(R.id.invitationText);
-            invitationText.setText(getString(R.string.message) + ": \"" + inviteText + "\"");
+            invitationText.setText(getString(R.string.label_quoted, getString(R.string.message), inviteText));
             final EditText replyText = view.findViewById(R.id.replyText);
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
 

@@ -7,6 +7,7 @@
 
     <ImageView
         android:id="@+id/imageView"
+        android:importantForAccessibility="no"
         android:layout_alignParentTop="true"
         android:layout_width="44dp"
         android:layout_alignWithParentIfMissing="true"
@@ -15,6 +16,7 @@
     <ImageView
         android:id="@+id/iconView"
         android:src="@drawable/ic_action_export"
+        android:importantForAccessibility="no"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="10dp"

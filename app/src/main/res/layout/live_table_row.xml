@@ -8,6 +8,7 @@
         android:id="@+id/imageView"
         android:layout_alignParentTop="true"
         android:src="@drawable/ic_action_lock_closed"
+        android:contentDescription="@string/private_table"
         android:layout_width="30dp"
         android:layout_alignParentEnd="true"
         android:layout_alignWithParentIfMissing="true"

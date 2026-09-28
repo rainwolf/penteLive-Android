@@ -163,7 +163,7 @@
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_action_help"
                 android:layout_marginTop="5dp"
-                android:text="Get Help"/>
+                android:text="@string/get_help"/>
 
             <Button
                 android:id="@+id/privacyButton"

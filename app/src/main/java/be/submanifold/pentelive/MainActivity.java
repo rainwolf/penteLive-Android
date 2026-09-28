@@ -628,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
             counterTextPanel.setVisibility(View.GONE);
         } else {
             TextView textView = view.findViewById(R.id.BadgeCount);
-            textView.setText("" + count);
+            textView.setText(String.valueOf(count));
         }
         view.measure(
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
@@ -651,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
             counterTextPanel.setVisibility(View.GONE);
         } else {
             TextView textView = view.findViewById(R.id.BadgeCount);
-            textView.setText("" + count);
+            textView.setText(String.valueOf(count));
         }
         view.measure(
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),

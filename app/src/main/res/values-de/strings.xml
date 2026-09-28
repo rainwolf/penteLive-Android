@@ -305,4 +305,28 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="arena_waiting">Warte auf Bestätigung des Gastgebers…</string>
     <string name="arena_exit_table">Tisch verlassen</string>
 
+    <string name="title_invitations">Einladungen</string>
+    <string name="get_help">Hilfe erhalten</string>
+    <string name="label_username">Benutzername</string>
+    <string name="label_password">Passwort</string>
+    <string name="login">Einloggen</string>
+    <string name="view_rated_play_policy">Spielebewertungs-Regelung ansehen</string>
+    <string name="rated_play_policy_text">Pente.org führt eine Wertung für dich, wenn du \"gewertete\" Spiele spielst. Das Wertungssystem ist wichtig, damit du deine Spielstärke einschätzen und würdige Gegner finden kannst. Pente.org bemüht sich sicherzustellen, dass die Wertungen die Spielstärke eines Spielers genau widerspiegeln, deshalb müssen sich alle Spieler an bestimmte Regeln halten!\n\n1. Spiele gewertete Spiele nur mit deinem eigenen Kopf. Spiele ohne jegliche Hilfe von außen. Um es klar zu sagen, hier einige Beispiele, was du NICHT tun solltest: ein anderes Pente-Brett benutzen, um zukünftige Stellungen zu untersuchen, eine Spieldatenbank benutzen, um die aktuelle oder zukünftige Stellungen nachzuschlagen, einen Computer-Gegner benutzen, um Züge zu finden, schriftliche Notizen oder Bücher zu Rate ziehen.\n2. Spiele gewertete Spiele auf Pente.org mit nur einem Benutzerkonto. Erstelle nicht mehrere Benutzerkonten, um damit gewertete Spiele zu spielen.\n3. Während eines Spiels kannst du darum bitten, deinen letzten Zug rückgängig zu machen, dein Gegner kann diese Bitte annehmen oder ablehnen (Pente.org ist das egal, es liegt an euch). Wenn du nicht vorhast, Rücknahmen zu akzeptieren, solltest du das deinem Gegner vor Beginn eines gewerteten Spiels mitteilen.\n4. Wenn du einem gewerteten Spiel zuschaust, kommentiere keine bestimmten Züge, das könnte den Ausgang des Spiels beeinflussen. Nach dem Spiel ist genug Zeit für Analysen.\n5. Wenn die Internetverbindung deines Gegners unterbrochen wird, gibt Pente.org ihm/ihr 7 Minuten, um zurückzukehren und das Spiel fortzusetzen. Danach kannst du entscheiden, das Spiel abzubrechen oder die Aufgabe deines Gegners zu erzwingen. Diese Funktion wurde eingeführt, damit Spieler sich nicht aus einem verlorenen Spiel davonstehlen. Missbrauche diese Funktion jedoch nicht: Wenn du sicher bist, dass du verlieren wirst, solltest du das Spiel aufgeben. Erzwinge die Aufgabe deines Gegners nur, wenn du absolut sicher bist, dass du gewinnen wirst.\n\nDas war\'s, und vergiss natürlich nicht, Spaß zu haben!</string>
+    <string name="back_to_dashboard_after_moving">nach dem Zug zurück zur Startseite</string>
+    <string name="cancel_game_or_resign">Spiel abbrechen oder aufgeben</string>
+    <string name="add_message">Nachricht hinzufügen</string>
+    <string name="choose_play">Spielart wählen</string>
+    <string name="more">mehr</string>
+    <string name="ask_the_ai">Frag die AI</string>
+    <string name="db_settings">DB-Einstellungen</string>
+    <string name="live_table_settings_placeholder">Timer: 0/0\nnicht gewertet</string>
+    <string name="challenge_label">Herausfordern</string>
+    <string name="post_open_invitation">offene Einladung posten</string>
+    <string name="view_on_the_web">im Web ansehen</string>
+    <string name="player_actions">Spieleraktionen</string>
+    <string name="game_actions">Spielaktionen</string>
+    <string name="game_settings">Spieleinstellungen</string>
+    <string name="fav">Fav</string>
+    <string name="ai_settings">AI-Einstellungen</string>
+
 </resources>

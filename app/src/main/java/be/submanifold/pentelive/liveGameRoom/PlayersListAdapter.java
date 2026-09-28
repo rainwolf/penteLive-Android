@@ -134,7 +134,7 @@ public class PlayersListAdapter extends BaseExpandableListAdapter {
         TextView nameTextView = convertView.findViewById(R.id.nameText);
         nameTextView.setText(player.coloredNameString(nameTextView.getLineHeight()));
         int rating = player.getRating(game);
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText(String.valueOf(rating));
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
         return convertView;
     }

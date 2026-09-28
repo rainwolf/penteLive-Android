@@ -717,7 +717,7 @@ public class BoardView extends View {
                 boolean inBox = Math.abs(m % gridSize - c) <= 4 && Math.abs(m / gridSize - c) <= 4;
                 if (inBox) {
                     setSubmitEnabled(submit, true);
-                    submit.setText(submitStr + ": " + renjuCoord(m));
+                    submit.setText(getContext().getString(R.string.submit_with_move, submitStr, renjuCoord(m)));
                     return;
                 }
             } else if (n == 10) {
@@ -725,13 +725,13 @@ public class BoardView extends View {
                 for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
                 if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr, renjuStabilizer())) {
                     setSubmitEnabled(submit, true);
-                    submit.setText(submitStr + " 10/10");
+                    submit.setText(getContext().getString(R.string.submit_with_count, submitStr, 10));
                     return;
                 }
             }
             // still building toward ten (or an as-yet-incomplete count): greyed running count.
             setSubmitEnabled(submit, false);
-            submit.setText(submitStr + " " + n + "/10");
+            submit.setText(getContext().getString(R.string.submit_with_count, submitStr, n));
             return;
         }
         if ("SELECTION".equals(game.renjuPhase)) {
@@ -739,10 +739,10 @@ public class BoardView extends View {
             int n = (renjuSelection == null) ? 0 : renjuSelection.size();
             if (n >= 2) {
                 setSubmitEnabled(submit, true);
-                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-" + renjuCoord(renjuSelection.get(1)));
+                submit.setText(getContext().getString(R.string.submit_with_pair, submitStr, renjuCoord(renjuSelection.get(0)), renjuCoord(renjuSelection.get(1))));
             } else if (n == 1) {
                 setSubmitEnabled(submit, false);
-                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-");
+                submit.setText(getContext().getString(R.string.submit_with_first, submitStr, renjuCoord(renjuSelection.get(0))));
             } else {
                 setSubmitEnabled(submit, false);
                 submit.setText(submitStr);
@@ -753,7 +753,7 @@ public class BoardView extends View {
         // is placed (playedMove is clamped to the legal box in onTouchEvent), then enabled.
         if (playedMove > -1) {
             setSubmitEnabled(submit, true);
-            submit.setText(submitStr + ": " + renjuCoord(playedMove));
+            submit.setText(getContext().getString(R.string.submit_with_move, submitStr, renjuCoord(playedMove)));
         } else {
             setSubmitEnabled(submit, false);
             submit.setText(submitStr);

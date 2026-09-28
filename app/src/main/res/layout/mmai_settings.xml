@@ -24,7 +24,7 @@
         android:layout_toEndOf="@id/gameLabel"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Pente"
+        android:text="@string/game_pente"
         android:id="@+id/gameChoice"
         android:layout_alignParentEnd="true" />
 

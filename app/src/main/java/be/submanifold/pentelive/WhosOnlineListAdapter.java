@@ -111,7 +111,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(Color.GRAY);
-        ((TextView) convertView.findViewById(R.id.textView)).setText(sections.get(groupPosition) + " (" + onlinePlayers.get(sections.get(groupPosition)).size() + ")");
+        ((TextView) convertView.findViewById(R.id.textView)).setText(ctx.getString(R.string.name_with_count, sections.get(groupPosition), onlinePlayers.get(sections.get(groupPosition)).size()));
 
         return convertView;
     }

@@ -54,6 +54,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/runAIbutton"
         android:layout_below="@id/difficultyLabel"
-        android:text="ask the AI"/>
+        android:text="@string/ask_the_ai"/>
 
 </RelativeLayout>
