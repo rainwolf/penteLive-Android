@@ -725,13 +725,13 @@ public class BoardView extends View {
                 for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
                 if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr, renjuStabilizer())) {
                     setSubmitEnabled(submit, true);
-                    submit.setText(getContext().getString(R.string.submit_with_count, submitStr, 10));
+                    submit.setText(getContext().getString(R.string.submit_with_count, submitStr, String.valueOf(10)));
                     return;
                 }
             }
             // still building toward ten (or an as-yet-incomplete count): greyed running count.
             setSubmitEnabled(submit, false);
-            submit.setText(getContext().getString(R.string.submit_with_count, submitStr, n));
+            submit.setText(getContext().getString(R.string.submit_with_count, submitStr, String.valueOf(n)));
             return;
         }
         if ("SELECTION".equals(game.renjuPhase)) {

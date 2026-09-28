@@ -11,11 +11,6 @@
         <ignore path="src/main/AndroidManifest.xml" />
     </issue>
 
-    <!-- WebViewActivity only loads pente.org pages (URL is checked to contain "//pente.org" before loading), which rely on JavaScript -->
-    <issue id="SetJavaScriptEnabled">
-        <ignore path="src/main/java/be/submanifold/pentelive/WebViewActivity.java" />
-    </issue>
-
     <!-- stores the Application context, which lives for the whole process -->
     <issue id="StaticFieldLeak">
         <ignore path="src/main/java/be/submanifold/pentelive/MyApplication.java" />

@@ -92,7 +92,7 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
-        ((TextView) convertView.findViewById(R.id.textView)).setText(activity.getString(R.string.name_with_count, activity.getString(R.string.rooms), rooms.size()));
+        ((TextView) convertView.findViewById(R.id.textView)).setText(activity.getString(R.string.name_with_count, activity.getString(R.string.rooms), String.valueOf(rooms.size())));
 
         return convertView;
     }

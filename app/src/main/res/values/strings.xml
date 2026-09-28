@@ -572,11 +572,11 @@
     <string name="ai_settings">AI settings</string>
 
     <string name="submit_with_move" translatable="false">%1$s: %2$s</string>
-    <string name="submit_with_count" translatable="false">%1$s %2$d/10</string>
+    <string name="submit_with_count" translatable="false">%1$s %2$s/10</string>
     <string name="submit_with_pair" translatable="false">%1$s: %2$s-%3$s</string>
     <string name="submit_with_first" translatable="false">%1$s: %2$s-</string>
     <string name="label_quoted" translatable="false">%1$s: \"%2$s\"</string>
     <string name="two_lines" translatable="false">%1$s\n%2$s</string>
     <string name="append_line" translatable="false">%1$s%2$s\n</string>
-    <string name="name_with_count" translatable="false">%1$s (%2$d)</string>
+    <string name="name_with_count" translatable="false">%1$s (%2$s)</string>
 </resources>
