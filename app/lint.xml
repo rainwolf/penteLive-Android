@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+
+    <!-- project convention: all activities are locked to portrait (see CLAUDE.md); Android 16+ already ignores this on large screens -->
+    <issue id="LockedOrientationActivity">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+
+    <!-- project convention: all activities are locked to portrait (see CLAUDE.md); Android 16+ already ignores this on large screens -->
+    <issue id="DiscouragedApi">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+
+    <!-- WebViewActivity only loads pente.org pages (URL is checked to contain "//pente.org" before loading), which rely on JavaScript -->
+    <issue id="SetJavaScriptEnabled">
+        <ignore path="src/main/java/be/submanifold/pentelive/WebViewActivity.java" />
+    </issue>
+
+    <!-- stores the Application context, which lives for the whole process -->
+    <issue id="StaticFieldLeak">
+        <ignore path="src/main/java/be/submanifold/pentelive/MyApplication.java" />
+    </issue>
+
+    <!-- auth-check/routing launcher; SplashScreen API migration is a separate UX change -->
+    <issue id="CustomSplashScreen">
+        <ignore path="src/main/java/be/submanifold/pentelive/SplashActivity.java" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="ButtonStyle">
+        <ignore path="src/main/res/layout/activity_board.xml" />
+        <ignore path="src/main/res/layout/dashboardrow_layout.xml" />
+        <ignore path="src/main/res/layout/fragment_live_table.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="ButtonOrder">
+        <ignore path="src/main/res/layout/dashboardrow_layout.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="AlwaysShowAction">
+        <ignore path="src/main/res/menu/boardview_menu.xml" />
+        <ignore path="src/main/res/menu/dashboard_menu.xml" />
+        <ignore path="src/main/res/menu/koth_menu.xml" />
+        <ignore path="src/main/res/menu/live_table_menu.xml" />
+        <ignore path="src/main/res/menu/social_menu.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="Overdraw">
+        <ignore path="src/main/res/layout/dashboardgroup_layout.xml" />
+        <ignore path="src/main/res/layout/live_table_header.xml" />
+        <ignore path="src/main/res/layout/popupwindowinformation.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="UselessParent">
+        <ignore path="src/main/res/layout/counter_green_menu_item_layout.xml" />
+        <ignore path="src/main/res/layout/counter_menu_item_layout.xml" />
+        <ignore path="src/main/res/layout/database_options.xml" />
+        <ignore path="src/main/res/layout/fragment_live_game_room.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="DisableBaselineAlignment">
+        <ignore path="src/main/res/layout/fragment_live_table.xml" />
+    </issue>
+
+    <!-- visual-design suggestion; fixing would change how the screen looks -->
+    <issue id="RelativeOverlap">
+        <ignore path="src/main/res/layout/activity_login.xml" />
+        <ignore path="src/main/res/layout/activity_settings.xml" />
+        <ignore path="src/main/res/layout/db_ai_settings.xml" />
+    </issue>
+
+    <!-- asset-pipeline suggestion; no functional issue -->
+    <issue id="IconColors">
+        <ignore path="src/main/res/drawable-hdpi/ic_action_facebook.png" />
+        <ignore path="src/main/res/drawable-mdpi/ic_action_facebook.png" />
+        <ignore path="src/main/res/drawable-xhdpi/ic_action_facebook.png" />
+        <ignore path="src/main/res/drawable-xxhdpi/ic_action_facebook.png" />
+        <ignore path="src/main/res/drawable-xxxhdpi/ic_action_facebook.png" />
+    </issue>
+
+    <!-- asset-pipeline suggestion; no functional issue -->
+    <issue id="IconDensities">
+        <ignore path="src/main/res/drawable-hdpi" />
+        <ignore path="src/main/res/drawable-mdpi" />
+        <ignore path="src/main/res/drawable-xhdpi" />
+        <ignore path="src/main/res/drawable-xxhdpi" />
+    </issue>
+
+    <!-- asset-pipeline suggestion; no functional issue -->
+    <issue id="IconDipSize">
+        <ignore path="src/main/res/drawable-hdpi/background.png" />
+        <ignore path="src/main/res/drawable-mdpi/background.png" />
+        <ignore path="src/main/res/drawable-xhdpi/background.png" />
+        <ignore path="src/main/res/drawable-xxhdpi/background.png" />
+        <ignore path="src/main/res/drawable-xxxhdpi/background.png" />
+    </issue>
+
+    <!-- asset-pipeline suggestion; no functional issue -->
+    <issue id="IconDuplicatesConfig">
+        <ignore path="src/main/res/drawable-hdpi/background.png" />
+        <ignore path="src/main/res/drawable-mdpi/background.png" />
+        <ignore path="src/main/res/drawable-xhdpi/background.png" />
+        <ignore path="src/main/res/drawable-xxhdpi/background.png" />
+        <ignore path="src/main/res/drawable-xxxhdpi/background.png" />
+    </issue>
+
+    <!-- asset-pipeline suggestion; no functional issue -->
+    <issue id="IconDuplicates">
+        <ignore path="src/main/res/drawable-xhdpi/kothcrown36.png" />
+        <ignore path="src/main/res/drawable-xhdpi/kothcrown37.png" />
+        <ignore path="src/main/res/drawable-xhdpi/kothcrown38.png" />
+        <ignore path="src/main/res/drawable-xhdpi/kothcrown39.png" />
+    </issue>
+
+    <!-- no visible label by design; a hint would add placeholder text -->
+    <issue id="LabelFor">
+        <ignore path="src/main/res/layout/in_game_message.xml" />
+    </issue>
+
+</lint>
