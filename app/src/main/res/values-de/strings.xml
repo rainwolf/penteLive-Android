@@ -9,8 +9,6 @@
     <string name="place_stone_submit">Lege einen Stein und bestätige den Zug.</string>
     <string name="renju_swap_take_over">Tauschen</string>
     <string name="renju_dont_swap">Nicht tauschen</string>
-    <string name="renju_place_in_box">Lege deinen Stein nahe der Mitte und bestätige.</string>
-    <string name="renju_need_10_offers">Wähle genau 10 nicht-symmetrische Angebote.</string>
     <string name="renju_place_ten">10 setzen</string>
     <string name="renju_offer_progress">Fünfte Züge anbieten: %1$d/10</string>
     <string name="renju_select_prompt">Wähle einen der angebotenen Punkte</string>
@@ -50,7 +48,7 @@
     <string name="registration_open_until">Registrierung offen bis %1$s</string>
     <string name="registration_closed">Registrierung geschlossen. Start: %1$s</string>
     <string name="tournament_started">Turnier ist gestartet. Derzeitige Runde: %1$s</string>
-    <string name="white">Weiss</string>
+    <string name="white">Weiß</string>
     <string name="black">schwarz</string>
     <string name="search_parameters">Suchkriterien</string>
     <string name="database">Datenbank</string>
@@ -102,9 +100,6 @@ es dir, Spiele und (Gegen-) Spieler zu studieren und analysieren, Eröffnungen z
 werden in der Zukunft noch hinzugefügt.\n\nDie Datenbank ist nur offen für Abonnenten.
 </string>
     <string name="home">Startseite</string>
-    <string name="not_enough_credit">
-Nicht genügend Guthaben, öffentliche Einladungen folgen der Regelung \"akzeptiere 2-poste 1"\.
-</string>
     <string name="post_now">Poste jetzt!</string>
     <string name="nothing_to_see_here">
 Nichts zu sehen hier?. Poste eine öffentliche Einladung um zu beginnen.
@@ -119,11 +114,11 @@ Nichts zu sehen hier?. Poste eine öffentliche Einladung um zu beginnen.
     <string name="you_won">Du hast gewonnen</string>
     <string name="rating_stats">Bewertungsstatistiken</string>
     <string name="last_total">Letztes: %1$s, Gesamt: %2$s</string>
-    <string name="username_5_10">Benutzername muss aus 5-10 Zeichen bestehen</string>
+    <string name="username_5_10">Benutzername muss aus 5–10 Zeichen bestehen</string>
     <string name="username_only">
 Benutzername darf nur Buchstaben, Zahlen und Unterstriche enthalten
 </string>
-    <string name="password_6_16">Passwort muss aus 5-16 Zeichen bestehen</string>
+    <string name="password_6_16">Passwort muss aus 5–16 Zeichen bestehen</string>
     <string name="password_only">
 Passwort darf nur Buchstaben, Zahlen und Unterstriche enthalten
 </string>
@@ -139,8 +134,6 @@ The username %1$s ist bereits vergeben, bitte wähle einen anderen Benutzernamen
     <string name="enter_recipient">Gib bitte einen Empfänger ein.</string>
     <string name="new_message">Neue Nachricht</string>
     <string name="settings">Einstellungen</string>
-    <string name="take_photo">Foto auswählen</string>
-    <string name="choose_from_library">aus der Bibliothek auswählen</string>
     <string name="choose_color">Spielfarbe auswählen</string>
     <string name="change_avatar">Avatar wechseln</string>
     <string name="username">Benutzername</string>
@@ -234,8 +227,6 @@ Spielaktionen sind nur Spielern möglich, die sich gesetzt haben und wenn das Sp
     <string name="undo_accepted">Rücknahme akzeptiert</string>
     <string name="undo_declined">Rücknahme verweigert</string>
     <string name="cancellation_requested">Set- / Spiel-Abbruch angefordert</string>
-    <string name="cancellation_accepted">Set- / Spiel-Abbruch akzeptiert</string>
-    <string name="cancellation_declined">Set- / Spiel-Abbruch verweigert</string>
     <string name="continue_as">weiterspielen als</string>
     <string name="p1white">Spieler 1 (weiß)</string>
     <string name="p2black">Spieler 2 (schwarz)</string>
@@ -246,7 +237,6 @@ Spielaktionen sind nur Spielern möglich, die sich gesetzt haben und wenn das Sp
     <string name="boot_player">Boote Spieler</string>
     <string name="invite_player">Spieler einladen</string>
     <string name="player_booted_by">%1$s wurde von %2$s gebootet</string>
-    <string name="you_booted_by">du wurdest von %2$s gebootet,</string>
     <string name="optional_message">Optionale Nachricht</string>
     <string name="invite_player_to_table">Einladung an %1$s</string>
     <string name="accepted_your_invitation">%1$s akzeptiert deine Einladung</string>
@@ -255,7 +245,7 @@ Spielaktionen sind nur Spielern möglich, die sich gesetzt haben und wenn das Sp
     <string name="were_booted">
 Du wurdest dieses Tisches verwiesen, in 5 Minuten kannst du versuchen, erneut an diesen Tisch zu gehen.
 </string>
-    <string name="invites_you">läd dich an ihren %1$s Tisch ein</string>
+    <string name="invites_you">lädt dich an ihren %1$s Tisch ein</string>
     <string name="ignore_invitations">Ignoriere Einladungen</string>
     <string name="message">Nachricht</string>
     <string name="player_disconnected">
@@ -271,18 +261,11 @@ Du kannst dich jetzt entscheiden aufzugeben, das Spiel/Set zu beenden oder das A
     <string name="live_hill_join_leave">
 An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald man ein gewertetes Set im "King of the Hill"-live-Spielraum spielt
 </string>
-    <string name="prompt_username">Benutzername</string>
-    <string name="prompt_password">Passwort</string>
-    <string name="action_sign_in">Einloggen oder registrieren</string>
     <string name="action_sign_in_short">Einloggen</string>
     <string name="error_invalid_email">Diese E-Mail-Adresse ist ungültig</string>
     <string name="error_invalid_password">Das Passwort ist zu kurz</string>
     <string name="error_incorrect_password">Benutzername oder Passwort falsch</string>
     <string name="error_field_required">Plichtfeld</string>
-    <string name="permission_rationale">
-"Für die Bereitstellung von E-Mail-Ergänzungen sind entsprechende Berechtigungen erforderlich."
-</string>
-    <string name="title_activity_board">Spielbrettaktivität</string>
 
     <string name="social">social</string>
     <string name="followers">Followers</string>
@@ -310,7 +293,6 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
 
     <string name="arena_create_table">Arena-Tisch erstellen</string>
     <string name="arena_create_button">Tisch erstellen</string>
-    <string name="arena_reject">Ablehnen</string>
     <string name="arena_tap_to_accept">Tippe auf Spieler zum Akzeptieren</string>
     <string name="arena_play_as">Spielen als:</string>
     <string name="arena_white">weiß</string>

@@ -2,7 +2,6 @@ package be.submanifold.pentelive.liveGameRoom;
 
 import be.submanifold.pentelive.R;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
@@ -17,6 +16,7 @@ import android.text.style.StyleSpan;
 import java.util.HashMap;
 import java.util.Map;
 
+import be.submanifold.pentelive.KothCrownDrawables;
 import be.submanifold.pentelive.MyApplication;
 
 /**
@@ -29,8 +29,6 @@ public class LivePlayer {
     private boolean subscriber = false;
     private int crown = 0;
     private int color = 0;
-
-    private final Context ctx = MyApplication.getContext();
 
     public LivePlayer(String name, boolean subscriber, int crown, int color) {
         this.name = name;
@@ -81,7 +79,7 @@ public class LivePlayer {
                     break;
                 default:
                     if (crown > 3) {
-                        int resourceId = ctx.getResources().getIdentifier("kothcrown" + (crown - 3), "drawable", ctx.getPackageName());
+                        int resourceId = KothCrownDrawables.IDS[crown - 4];
                         crownIcon = ContextCompat.getDrawable(MyApplication.getContext(), resourceId);
                     }
                     break;

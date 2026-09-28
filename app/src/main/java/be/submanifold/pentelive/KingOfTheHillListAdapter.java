@@ -228,7 +228,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
                 break;
             default:
                 if (crown > 3) {
-                    int resourceId = ctx.getResources().getIdentifier("kothcrown" + (crown - 3), "drawable", ctx.getPackageName());
+                    int resourceId = KothCrownDrawables.IDS[crown - 4];
                     crownIcon = ContextCompat.getDrawable(MyApplication.getContext(), resourceId);
                 }
                 break;

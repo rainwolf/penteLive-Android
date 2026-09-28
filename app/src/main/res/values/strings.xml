@@ -11,10 +11,6 @@
     <string name="renju_swap_take_over">Swap</string>
     <string name="renju_dont_swap">No swap</string>
     <string name="renju_place_ten">Place 10</string>
-    <string name="renju_place_in_box">Place your stone near the center and submit.</string>
-    <string name="renju_need_10_offers">Pick exactly 10 non-symmetric offers.</string>
-    <string name="renju_place_1_or_10">Place 1 stone to continue (Branch A), or 10 to offer (Branch B), then submit.</string>
-    <string name="renju_select_two">Tap the offered black 5th move, then tap an empty point for your white 6th.</string>
     <string name="renju_offer_progress">Offer fifth moves: %1$d/10</string>
     <string name="renju_select_prompt">Pick one of the offered points</string>
     <string name="place_2_stones_submit">Place 2 stones and submit.</string>
@@ -100,10 +96,9 @@
     <string name="last_game_on">Last game Played on %1$s</string>
     <string name="level_up_your_game">Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games and opponents, practice opening moves, sort the results by most played or highest win percentage, and filter by player name and winner.\nMore features will be added in the future.\n\nThe database is open to subscribers or new players with at least 1 game in their first 2 months only.</string>
     <string name="home">home</string>
-    <string name="not_enough_credit">Not enough credit, public invitations have an \"accept 2-post 1\" policy.</string>
     <string name="post_now">Post now!</string>
     <string name="nothing_to_see_here">Nothing to see here. Post an open invitation to get started?</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="decline">decline</string>
     <string name="accept">accept</string>
     <string name="restart_game">restart game</string>
@@ -113,9 +108,9 @@
     <string name="you_won">You won</string>
     <string name="rating_stats">rating stats</string>
     <string name="last_total">Last: %1$s, total: %2$s</string>
-    <string name="username_5_10">username has to be 5-10 characters long</string>
+    <string name="username_5_10">username has to be 5–10 characters long</string>
     <string name="username_only">username can only contain letters, numbers, and underscores</string>
-    <string name="password_6_16">password has to be 5-16 characters long</string>
+    <string name="password_6_16">password has to be 5–16 characters long</string>
     <string name="password_only">password can only contain letters, numbers, and underscores</string>
     <string name="password_no_match">passwords don\'t match</string>
     <string name="accept_policy">You can\'t sign up without accepting the Rated Play Policy.</string>
@@ -125,8 +120,6 @@
     <string name="enter_recipient">Please enter a recipient.</string>
     <string name="new_message">new message</string>
     <string name="settings">settings</string>
-    <string name="take_photo">take photo</string>
-    <string name="choose_from_library">choose from library</string>
     <string name="choose_color">choose color</string>
     <string name="change_avatar">change avatar</string>
     <string name="username">username</string>
@@ -210,8 +203,6 @@
     <string name="undo_accepted">undo accepted</string>
     <string name="undo_declined">undo declined</string>
     <string name="cancellation_requested">set/game cancellation requested</string>
-    <string name="cancellation_accepted">set/game cancellation accepted</string>
-    <string name="cancellation_declined">set/game cancellation declined</string>
     <string name="continue_as">continue playing as</string>
     <string name="p1white">player 1 (white)</string>
     <string name="p2black">player 2 (black)</string>
@@ -222,7 +213,6 @@
     <string name="boot_player">boot player</string>
     <string name="invite_player">invite player</string>
     <string name="player_booted_by">%1$s has been booted by %2$s</string>
-    <string name="you_booted_by">you were booted by %1$s, you can rejoin this table in 5 minutes</string>
     <string name="optional_message">optional message</string>
     <string name="invite_player_to_table">invite %1$s</string>
     <string name="accepted_your_invitation">%1$s accepted your invitation</string>
@@ -315,21 +305,11 @@
     <string name="play_live_as_guest">play live games as a guest</string>
     <string name="connection_wrong">Something went wrong connecting.</string>
 
-    <string name="accept_personalize">Accept terms and allow personalized ads</string>
-    <string name="accept_anonymize">Accept terms and don\'t allow personalized ads</string>
-
-    <string name="prompt_username">Username</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This username or password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-    <string name="title_activity_board">BoardActivity</string>
 
     <string name="forgot_password">Forgot password?</string>
 
@@ -549,13 +529,8 @@
         <item>2700</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_gdpr">GDPRActivity</string>
-
     <string name="arena_create_table">Create arena table</string>
     <string name="arena_create_button">Create table</string>
-    <string name="arena_reject">Reject</string>
     <string name="arena_tap_to_accept">Tap player to accept</string>
     <string name="arena_play_as">Play as:</string>
     <string name="arena_white">white</string>
