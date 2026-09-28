@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -427,7 +426,7 @@ public class Game implements Parcelable {
         }
     }
 
-    public class RetrieveGame extends AsyncTask<Void, Void, Boolean> {
+    public class RetrieveGame extends BackgroundTask<Void, Boolean> {
 
         private final String mGameID;
         private final BoardView boardView;
@@ -524,7 +523,7 @@ public class Game implements Parcelable {
         }
     }
 
-    public class SubmitMoveTask extends AsyncTask<Void, Void, Boolean> {
+    public class SubmitMoveTask extends BackgroundTask<Void, Boolean> {
 
         private final String move;
         private String message;
@@ -655,7 +654,7 @@ public class Game implements Parcelable {
         }
     }
 
-    public class ReplyCancelTask extends AsyncTask<Void, Void, Boolean> {
+    public class ReplyCancelTask extends BackgroundTask<Void, Boolean> {
 
         private final String sid;
         private final String reply;
@@ -748,7 +747,7 @@ public class Game implements Parcelable {
         }
     }
 
-    public class RequestUndoTask extends AsyncTask<Void, Void, Boolean> {
+    public class RequestUndoTask extends BackgroundTask<Void, Boolean> {
 
         private final String gid;
         private final Activity activity;
@@ -837,7 +836,7 @@ public class Game implements Parcelable {
         }
     }
 
-    public class ReplyUndoTask extends AsyncTask<Void, Void, Boolean> {
+    public class ReplyUndoTask extends BackgroundTask<Void, Boolean> {
 
         private final String gid;
         private final Activity activity;

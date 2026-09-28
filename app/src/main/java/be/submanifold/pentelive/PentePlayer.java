@@ -3,7 +3,6 @@ package be.submanifold.pentelive;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
@@ -587,7 +586,7 @@ public class PentePlayer implements Parcelable {
         }
     };
 
-    private class LoadAvatarTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadAvatarTask extends BackgroundTask<Void, Boolean> {
 
         private final String mUsername;
         private Bitmap avatar;
@@ -641,7 +640,7 @@ public class PentePlayer implements Parcelable {
     }
 
 
-    private class LoadPlayerTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadPlayerTask extends BackgroundTask<Void, Boolean> {
 
         private final String mUsername, mPassword;
         private final DashboardListAdapter listAdapter;
@@ -766,7 +765,7 @@ public class PentePlayer implements Parcelable {
         }
     }
 
-    private class AcceptDeclineInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    private class AcceptDeclineInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String mSetID;
         private final boolean accept;
@@ -855,7 +854,7 @@ public class PentePlayer implements Parcelable {
         }
     }
 
-    private class CancelInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    private class CancelInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String mSetID;
         private final DashboardListAdapter listAdapter;

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -276,7 +275,7 @@ public class SocialActivity extends AppCompatActivity {
         (SocialActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
-    private class LoadFollowersingTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadFollowersingTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         int game = gameNames.get(gameStr);
@@ -365,7 +364,7 @@ public class SocialActivity extends AppCompatActivity {
         }
     }
 
-    private class FollowersingTask extends AsyncTask<Void, Void, Boolean> {
+    private class FollowersingTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         boolean follow = false;

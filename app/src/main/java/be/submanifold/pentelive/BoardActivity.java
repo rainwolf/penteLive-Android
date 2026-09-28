@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.graphics.Point;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -702,7 +701,7 @@ public class BoardActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public class ResignTask extends AsyncTask<Void, Void, Boolean> {
+    public class ResignTask extends BackgroundTask<Void, Boolean> {
 
         private final String gid;
 
@@ -776,7 +775,7 @@ public class BoardActivity extends AppCompatActivity {
     // Mirrors ResignTask's POST scaffold, but hits the TB game endpoint with command=acceptDraw
     // (MoveServlet routes acceptDraw there, not the resign servlet). Server validates the pending
     // offer; on success we re-poll so the board reflects the now-drawn game.
-    public class AcceptDrawTask extends AsyncTask<Void, Void, Boolean> {
+    public class AcceptDrawTask extends BackgroundTask<Void, Boolean> {
 
         private final String gid;
 
@@ -845,7 +844,7 @@ public class BoardActivity extends AppCompatActivity {
         }
     }
 
-    public class CancelTask extends AsyncTask<Void, Void, Boolean> {
+    public class CancelTask extends BackgroundTask<Void, Boolean> {
 
         private final String sid;
 

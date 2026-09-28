@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,6 +36,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.JsonModels;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
@@ -181,7 +181,7 @@ public class LobbyActivity extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
-    private class LoadActiveServersTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadActiveServersTask extends BackgroundTask<Void, Boolean> {
 
         private final LobbyListAdapter listAdapter;
         String dashboardString;
@@ -270,7 +270,7 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
 
-    private class BroadcastTask extends AsyncTask<Void, Void, Boolean> {
+    private class BroadcastTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         boolean friends = false;

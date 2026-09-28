@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -331,7 +330,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    private class LoadHillTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadHillTask extends BackgroundTask<Void, Boolean> {
 
         private final int mGame;
         private String htmlString;
@@ -402,7 +401,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         }
     }
 
-    private class JoinLeaveHillTask extends AsyncTask<Void, Void, Boolean> {
+    private class JoinLeaveHillTask extends BackgroundTask<Void, Boolean> {
 
         private final int mGame;
         private final boolean join;
@@ -490,7 +489,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         }
     }
 
-    public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String opponentName;
         private final int gameType;

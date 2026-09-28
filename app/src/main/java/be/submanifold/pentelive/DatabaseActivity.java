@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -603,7 +602,7 @@ public class DatabaseActivity extends AppCompatActivity {
     }
 
 
-    public class SearchTask extends AsyncTask<Void, Void, Boolean> {
+    public class SearchTask extends BackgroundTask<Void, Boolean> {
 
         private final String moves;
         private final String game;

@@ -1,7 +1,6 @@
 package be.submanifold.pentelive;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.IntentCompat;
@@ -203,7 +202,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         text.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private class SendMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class SendMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String recipient;
         private String subject;
@@ -321,7 +320,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
     }
 
-    private class LoadMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String messageID;
         private String messageText = "";
@@ -444,7 +443,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
     }
 
-    private class DeleteMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class DeleteMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String messageID;
 

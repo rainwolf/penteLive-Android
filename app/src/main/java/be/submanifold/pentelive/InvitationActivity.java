@@ -2,7 +2,6 @@ package be.submanifold.pentelive;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -250,7 +249,7 @@ public class InvitationActivity extends AppCompatActivity {
         this.gameType = gameType;
     }
 
-    public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String opponentName;
         private final String gameType;

@@ -7,7 +7,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -348,7 +347,7 @@ public class LoginActivity extends AppCompatActivity
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends BackgroundTask<Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
@@ -508,7 +507,7 @@ public class LoginActivity extends AppCompatActivity
     }
 
 
-    public class SendTokenTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendTokenTask extends BackgroundTask<Void, Boolean> {
 
         private final String token;
 

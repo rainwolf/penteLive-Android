@@ -1,7 +1,6 @@
 package be.submanifold.pentelive;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -96,7 +95,7 @@ public class SendMessageActivity extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
-    private class SendMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class SendMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String recipient;
         private String subject;

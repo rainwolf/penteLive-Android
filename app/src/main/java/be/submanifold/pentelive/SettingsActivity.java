@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 
@@ -241,7 +240,7 @@ public class SettingsActivity extends AppCompatActivity {
         return bm;
     }
 
-    private static class UploadAvatarTask extends AsyncTask<Void, Void, Boolean> {
+    private static class UploadAvatarTask extends BackgroundTask<Void, Boolean> {
 
         private final byte[] bytes;
 
@@ -321,7 +320,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private static class ChangeColorTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeColorTask extends BackgroundTask<Void, Boolean> {
 
         private final String colorString;
 
@@ -374,7 +373,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private static class ChangeEmailPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeEmailPreferenceTask extends BackgroundTask<Void, Boolean> {
 
         private final boolean emailMe;
 
@@ -429,7 +428,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private class ChangeAdsPersonalizationPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+    private class ChangeAdsPersonalizationPreferenceTask extends BackgroundTask<Void, Boolean> {
 
         private final boolean personalizeAds;
 

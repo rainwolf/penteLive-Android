@@ -1,7 +1,6 @@
 package be.submanifold.pentelive;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -94,7 +93,7 @@ public class InviteAIActivity extends AppCompatActivity {
     }
 
 
-    public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String gameType;
         private final String difficulty;

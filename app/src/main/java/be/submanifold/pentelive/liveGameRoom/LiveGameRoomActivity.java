@@ -6,7 +6,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -50,6 +49,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
@@ -873,7 +873,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         return list;
     }
 
-    public class BootMeTask extends AsyncTask<Void, Void, Boolean> {
+    public class BootMeTask extends BackgroundTask<Void, Boolean> {
         String storedUserName = PrefUtils.getFromPrefs(LiveGameRoomActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
         String storedPassword = PrefUtils.getFromPrefs(LiveGameRoomActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
 

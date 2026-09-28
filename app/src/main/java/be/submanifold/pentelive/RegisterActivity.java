@@ -3,7 +3,6 @@ package be.submanifold.pentelive;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.os.AsyncTask;
 
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -117,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    public class RegisterTask extends AsyncTask<Void, Void, Boolean> {
+    public class RegisterTask extends BackgroundTask<Void, Boolean> {
 
         private final String username;
         private final String password;

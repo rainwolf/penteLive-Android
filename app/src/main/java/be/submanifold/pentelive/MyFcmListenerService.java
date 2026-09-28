@@ -14,7 +14,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
@@ -56,7 +55,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         );
     }
 
-    public class SendRegistrationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendRegistrationTask extends BackgroundTask<Void, Boolean> {
 
         private final String token;
 
