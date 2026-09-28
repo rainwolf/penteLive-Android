@@ -45,11 +45,11 @@
             android:text="@string/arena_initial_minutes" android:layout_marginTop="12dp" />
         <EditText android:id="@+id/arenaInitialMinutes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:inputType="number" android:text="5" />
+            android:inputType="number" android:text="5" android:importantForAutofill="no" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/arena_incremental_seconds" android:layout_marginTop="12dp" />
         <EditText android:id="@+id/arenaIncrementalSeconds"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:inputType="number" android:text="0" />
+            android:inputType="number" android:text="0" android:importantForAutofill="no" />
     </LinearLayout>
 </LinearLayout>

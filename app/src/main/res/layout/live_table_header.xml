@@ -6,7 +6,8 @@
     android:layout_height="40dp"
     android:background="@color/britishracinggreen"
     android:orientation="horizontal"
-    android:paddingLeft="10dp">
+    android:paddingStart="10dp"
+    tools:ignore="RtlSymmetry">
 
     <TextView android:id="@+id/textView"
         android:textColor="#FFFFFF"

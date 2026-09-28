@@ -28,11 +28,10 @@
         android:text="@string/game"
         android:id="@+id/gameTypeLabel"
         android:layout_below="@id/toolbar"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/gameTypeSpinner"
-        android:layout_toRightOf="@id/gameTypeLabel"
+        android:layout_toEndOf="@id/gameTypeLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:textAlignment="center"
@@ -49,11 +48,10 @@
         android:text="@string/difficulty"
         android:id="@+id/difficultyLabel"
         android:layout_below="@id/gameTypeLabel"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/difficultySpinner"
-        android:layout_toRightOf="@id/gameTypeLabel"
+        android:layout_toEndOf="@id/gameTypeLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:textAlignment="center"
@@ -70,7 +68,6 @@
         android:text="@string/play_as_black_and_white"
         android:id="@+id/ratedLabel"
         android:layout_below="@id/difficultyLabel"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <ToggleButton
         android:layout_width="wrap_content"
@@ -81,7 +78,6 @@
         android:textOff="@string/no"
         android:id="@+id/ratedToggleButton"
         android:layout_below="@+id/difficultySpinner"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
 
@@ -94,7 +90,6 @@
         android:id="@+id/playAsLabel"
         android:visibility="gone"
         android:layout_below="@id/ratedToggleButton"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <ToggleButton
         android:layout_width="wrap_content"
@@ -105,7 +100,6 @@
         android:visibility="gone"
         android:id="@+id/playAsToggleButton"
         android:layout_below="@+id/ratedToggleButton"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
 

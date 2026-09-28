@@ -7,14 +7,14 @@
         android:id="@+id/BadgeRelativeLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/text_circle">
         <TextView
             android:id="@+id/BadgeCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerHorizontal="true"
             android:paddingLeft="7dp"
             android:paddingRight="7dp"

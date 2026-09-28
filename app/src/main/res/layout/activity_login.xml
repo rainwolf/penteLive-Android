@@ -68,6 +68,7 @@
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
+                    android:autofillHints="password"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -90,14 +91,14 @@
                     android:layout_height="50dp"
                     android:gravity="center"
                     android:text="@string/log_in_automatically"
-                    android:textSize="16dp"/>
+                    android:textSize="16sp"/>
                 <ToggleButton
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:textOff="@string/no"
                     android:textOn="@string/yes"
                     android:id="@+id/autoLoginToggle"
-                    android:layout_alignParentRight="true"/>
+                    android:layout_alignParentEnd="true"/>
 
             </RelativeLayout>
 

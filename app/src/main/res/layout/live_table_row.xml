@@ -9,15 +9,15 @@
         android:layout_alignParentTop="true"
         android:src="@drawable/ic_action_lock_closed"
         android:layout_width="30dp"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_height="30dp" />
     <TextView android:id="@+id/gameNameText"
         android:textSize="18sp"
         android:gravity="center_vertical"
-        android:layout_toLeftOf="@id/imageView"
+        android:layout_toStartOf="@id/imageView"
         android:textStyle="bold"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -25,21 +25,21 @@
         android:textSize="15sp"
         android:gravity="center_vertical"
         android:layout_below="@id/gameNameText"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <TextView android:id="@+id/settingsText"
         android:textSize="15sp"
         android:gravity="center_vertical"
         android:layout_below="@id/seatsText"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <TextView android:id="@+id/watchingText"
         android:textSize="15sp"
         android:gravity="center_vertical"
         android:layout_below="@id/settingsText"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

@@ -29,7 +29,6 @@
             android:text="@string/gdpr_terms"
             android:layout_above="@id/privacyButton"
             android:id="@+id/gdprTerms"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
         <Button
             android:id="@+id/privacyButton"
