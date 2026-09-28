@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -121,9 +121,8 @@ public class MMAIActivity extends AppCompatActivity {
         toolbar.setTitle("Mark Mammel's AI");
         setSupportActionBar(toolbar);
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        Point size = new Point(metrics.widthPixels, metrics.heightPixels);
         settingsWindow = new PopupWindow(settingsView, size.x * 2 / 3, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         settingsWindow.setFocusable(true);
         settingsWindow.setOutsideTouchable(true);

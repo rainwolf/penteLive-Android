@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,7 +17,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -569,9 +569,8 @@ public class BoardActivity extends AppCompatActivity {
             } else if (!game.isActive()) {
                 return;
             }
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 //                messageView.setBackgroundColor(Color.WHITE);
             if (!game.isActive() || game.getUntilMove() < game.getMovesList().size()) {
                 messageView.findViewById(R.id.messageInput).setVisibility(View.GONE);

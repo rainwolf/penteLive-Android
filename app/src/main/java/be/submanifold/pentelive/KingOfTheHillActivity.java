@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -16,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -137,9 +137,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         LoadHillTask loadTask = new LoadHillTask(kothSummary.getGameId());
         loadTask.execute((Void) null);
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        Point size = new Point(metrics.widthPixels, metrics.heightPixels);
         popupWindow = new PopupWindow(challengeView, size.x * 4 / 5, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setFocusable(true);
         popupWindow.setOutsideTouchable(true);

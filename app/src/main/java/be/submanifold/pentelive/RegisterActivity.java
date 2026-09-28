@@ -3,6 +3,7 @@ package be.submanifold.pentelive;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +13,6 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
 import android.text.method.ScrollingMovementMethod;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,9 +44,8 @@ public class RegisterActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         findViewById(R.id.viewPolicy).setOnClickListener(v -> {
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
             View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
             policyView.setBackgroundColor(Color.WHITE);

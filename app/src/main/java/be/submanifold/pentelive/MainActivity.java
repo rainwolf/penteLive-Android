@@ -8,10 +8,10 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -316,9 +316,8 @@ public class MainActivity extends AppCompatActivity {
                         intent = new Intent(getApplicationContext(), DatabaseActivity.class);
                         startActivity(intent);
                     } else {
-                        Display display = getWindowManager().getDefaultDisplay();
-                        Point size = new Point();
-                        display.getSize(size);
+                        DisplayMetrics metrics = getResources().getDisplayMetrics();
+                        Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
                         View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
 //                        policyView.setBackgroundColor(Color.WHITE);
@@ -349,9 +348,8 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                     return true;
                 case R.id.action_show_stats:
-                    Point size = new Point();
-                    Display display = getWindowManager().getDefaultDisplay();
-                    display.getSize(size);
+                    DisplayMetrics metrics = getResources().getDisplayMetrics();
+                    Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     View popUpView = inflater.inflate(R.layout.ratingstats_listview, null);
@@ -567,9 +565,8 @@ public class MainActivity extends AppCompatActivity {
         }
         PentePlayer.setOnlinePlayerNames(onlinePlayerNames);
         listAdapter.setOnlinePlayers(onlinePlayers);
-        Point size = new Point();
-        Display display = getWindowManager().getDefaultDisplay();
-        display.getSize(size);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View popUpView = inflater.inflate(R.layout.onlineusers_listview, null);
