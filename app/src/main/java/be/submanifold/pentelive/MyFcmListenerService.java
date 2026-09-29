@@ -32,6 +32,7 @@ import java.util.Map;
 public class MyFcmListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFcmListenerService";
+    private static final int REGISTRATION_TIMEOUT_MS = 60_000;
     private MediaPlayer mediaPlayer;
 
 
@@ -78,6 +79,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 //                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
 //                        + "&token=" + token);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(REGISTRATION_TIMEOUT_MS);
+                    connection.setReadTimeout(REGISTRATION_TIMEOUT_MS);
                     int responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
                         System.out.println("response code for submit was " + responseCode);

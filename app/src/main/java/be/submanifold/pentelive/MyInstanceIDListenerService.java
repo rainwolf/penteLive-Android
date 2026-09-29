@@ -17,6 +17,7 @@ import java.util.Date;
 public class MyInstanceIDListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyInstanceIDLS";
+    private static final int REGISTRATION_TIMEOUT_MS = 60_000;
 
     @Override
     public void onNewToken(String newToken) {
@@ -53,6 +54,8 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
 //                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
 //                        + "&token=" + token);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(REGISTRATION_TIMEOUT_MS);
+                connection.setReadTimeout(REGISTRATION_TIMEOUT_MS);
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for submit was " + responseCode);
