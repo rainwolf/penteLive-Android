@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Logs network failures without the credentials that ride in request URLs.
+ * Logs network failures without the query strings of request URLs.
  * <p>
- * Most requests still send name2/password2 in the query string, and HttpURLConnection
- * puts the full URL in the message of the exception it throws for an HTTP error status.
- * Log.e and printStackTrace print that message (and those of causes and suppressed
- * exceptions), so the stack trace is logged from a redacted copy instead.
+ * The app no longer sends name2/password2 in URLs (requests are authenticated by the
+ * shared cookie store, and login is a POST), but HttpURLConnection puts the full URL in
+ * the message of the exception it throws for an HTTP error status, and query strings can
+ * still carry other user data. Log.e and printStackTrace print that message (and those of
+ * causes and suppressed exceptions), so the stack trace is logged from a redacted copy
+ * instead, as a defence in depth.
  */
 public final class RedactingLog {
 

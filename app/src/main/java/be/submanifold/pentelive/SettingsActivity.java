@@ -36,6 +36,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import be.submanifold.pentelive.net.PenteUrls;
+
 public class SettingsActivity extends AppCompatActivity {
 
     ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
@@ -91,13 +93,13 @@ public class SettingsActivity extends AppCompatActivity {
             task.execute((Void) null);
         });
         findViewById(R.id.preferencesButton).setOnClickListener(v -> {
-            String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            String url = PenteUrls.web("/gameServer/myprofile/prefs");
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
         });
         findViewById(R.id.subscribeButton).setOnClickListener(v -> {
-            String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            String url = PenteUrls.web("/gameServer/subscriptions");
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);

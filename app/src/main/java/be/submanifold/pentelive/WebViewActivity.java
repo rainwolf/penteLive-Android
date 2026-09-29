@@ -66,7 +66,6 @@ public class WebViewActivity extends AppCompatActivity {
             webview.getSettings().setBuiltInZoomControls(true);
             webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
 
-//            cookieMap.put("Cookie", "name2="+PentePlayer.mPlayerName+"; password2="+PentePlayer.mPassword);
 
             webview.getSettings().setLoadWithOverviewMode(true);
             webview.getSettings().setUseWideViewPort(true);

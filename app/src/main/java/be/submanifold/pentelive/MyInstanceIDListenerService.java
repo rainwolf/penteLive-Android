@@ -51,8 +51,6 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
                 if (PentePlayer.development) {
                     url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                 }
-//                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
-//                        + "&token=" + token);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(REGISTRATION_TIMEOUT_MS);
                 connection.setReadTimeout(REGISTRATION_TIMEOUT_MS);

@@ -505,8 +505,6 @@ public class LoginActivity extends AppCompatActivity
                         if (PentePlayer.development) {
                             url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                         }
-//                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword
-//                        + "&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         int responseCode = connection.getResponseCode();
                         if (responseCode != 200) {

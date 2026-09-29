@@ -46,6 +46,7 @@ import be.submanifold.pentelive.net.BaseUrlProvider;
 import be.submanifold.pentelive.net.OkHttpPenteApi;
 import be.submanifold.pentelive.net.PenteApi;
 import be.submanifold.pentelive.net.PenteApiClient;
+import be.submanifold.pentelive.net.PenteUrls;
 import be.submanifold.pentelive.net.Result;
 import be.submanifold.pentelive.net.Session;
 import be.submanifold.pentelive.net.SharedPrefsSession;
@@ -113,16 +114,16 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
                 String url = "google.com";
                 if (player.getTournaments().get(childPosition).getTournamentState().equals("2")) {
-                    url = "https://www.pente.org/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    url = PenteUrls.web("/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID());
                     //                        url = "https://10.0.2.2/gameServer/tournaments/status.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else if (player.getTournaments().get(childPosition).getTournamentState().equals("1")) {
-                    url = "https://www.pente.org/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    url = PenteUrls.web("/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID());
                     //                        url = "https://10.0.2.2/gameServer/tournaments/tournamentConfirm.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID();
 
                 } else {
-                    url = "https://www.pente.org/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
-                            + "&round=" + player.getTournaments().get(childPosition).getRound() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    url = PenteUrls.web("/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
+                            + "&round=" + player.getTournaments().get(childPosition).getRound());
                     //                        url = "https://10.0.2.2/gameServer/tournaments/statusRound.jsp?eid=" + player.getTournaments().get(childPosition).getTournamentID()
 //                        + "&round=" + player.getTournaments().get(childPosition).getRound();
 
@@ -327,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
 //                        policyView.setBackgroundColor(Color.WHITE);
                     policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
                         popupWindow.dismiss();
-                        String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
+                        String url = PenteUrls.web("/gameServer/subscriptions"); // missing 'http://' will cause crashed
                         Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
                         intent12.putExtra("url", url);
                         startActivity(intent12);
@@ -593,7 +594,7 @@ public class MainActivity extends AppCompatActivity {
         onlineUsersListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
             KothPlayer onlinePlayer = onlinePlayers.get(listAdapter.sections.get(groupPosition)).get(childPosition);
             if (!listAdapter.sections.get(groupPosition).equals("Mobile")) {
-                String url = "https://www.pente.org/gameServer/profile?viewName=" + onlinePlayer.getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                String url = PenteUrls.web("/gameServer/profile?viewName=" + onlinePlayer.getName());
                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                 intent.putExtra("url", url);
                 startActivity(intent);
