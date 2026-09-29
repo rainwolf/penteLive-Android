@@ -40,7 +40,7 @@ public final class RedactingLog {
      * have every URL query string and password parameter removed. The copies print as the
      * original class name and keep the original stack frames; {@code tr} is not modified.
      */
-    static Throwable redacted(Throwable tr) {
+    public static Throwable redacted(Throwable tr) {
         return copy(tr, new IdentityHashMap<>());
     }
 

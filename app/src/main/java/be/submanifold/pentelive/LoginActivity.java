@@ -417,7 +417,7 @@ public class LoginActivity extends AppCompatActivity
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "login request failed", e1);
-                exception = e1.toString();
+                exception = RedactingLog.redacted(e1).toString();
                 return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
