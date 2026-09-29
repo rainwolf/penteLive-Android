@@ -78,12 +78,57 @@ public class RedactingLogTest {
     }
 
     @Test
+    public void passwordContainingSpace_isFullyRedactedInUrl() {
+        IOException original = new IOException("Server returned HTTP response code: 500 for URL: "
+                + "https://www.pente.org/gameServer/login.jsp?mobile=&name2=bob&password2=se cret word");
+
+        Throwable copy = RedactingLog.redacted(original);
+
+        assertEquals("java.io.IOException: Server returned HTTP response code: 500 for URL: "
+                + "https://www.pente.org/gameServer/login.jsp?<redacted>", copy.toString());
+        assertFalse(printed(copy).contains("cret"));
+    }
+
+    @Test
+    public void passwordContainingTab_isFullyRedactedInUrl() {
+        FileNotFoundException original = new FileNotFoundException(
+                "https://www.pente.org/gameServer/login.jsp?mobile=&name2=bob&password2=se\tcret");
+
+        Throwable copy = RedactingLog.redacted(original);
+
+        assertEquals("java.io.FileNotFoundException: https://www.pente.org/gameServer/login.jsp?<redacted>",
+                copy.toString());
+        assertFalse(printed(copy).contains("cret"));
+    }
+
+    @Test
+    public void barePasswordContainingSpace_isFullyRedacted() {
+        IOException original = new IOException("rejected name2=bob&password2=se cret word");
+
+        Throwable copy = RedactingLog.redacted(original);
+
+        assertEquals("java.io.IOException: rejected name2=bob&password2=<redacted>", copy.toString());
+        assertFalse(printed(copy).contains("cret"));
+    }
+
+    @Test
+    public void barePasswordContainingTab_isFullyRedacted() {
+        IOException original = new IOException("rejected name2=bob&password=se\tcret");
+
+        Throwable copy = RedactingLog.redacted(original);
+
+        assertEquals("java.io.IOException: rejected name2=bob&password=<redacted>", copy.toString());
+        assertFalse(printed(copy).contains("cret"));
+    }
+
+    @Test
     public void bareQuestionMarkPasswordFragment_isFullyRedacted() {
         IOException original = new IOException("rejected password2=se?cret by server");
 
         Throwable copy = RedactingLog.redacted(original);
 
-        assertEquals("java.io.IOException: rejected password2=<redacted> by server", copy.toString());
+        // The rest of the line goes too: the password may contain spaces.
+        assertEquals("java.io.IOException: rejected password2=<redacted>", copy.toString());
     }
 
     @Test
@@ -92,8 +137,9 @@ public class RedactingLogTest {
 
         Throwable copy = RedactingLog.redacted(original);
 
-        assertEquals("java.io.IOException: bad request name2=bob&password2=<redacted> and password=<redacted> end",
-                copy.toString());
+        // The first password parameter takes the rest of the line, the second one with it.
+        assertEquals("java.io.IOException: bad request name2=bob&password2=<redacted>", copy.toString());
+        assertFalse(printed(copy).contains("hunter"));
     }
 
     @Test

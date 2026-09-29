@@ -17,9 +17,11 @@ import java.util.regex.Pattern;
 public final class RedactingLog {
 
     private static final String REDACTED = "<redacted>";
-    // Whole query: the password is not URL-encoded, so it may itself contain '&' or '?'.
-    private static final Pattern URL_QUERY = Pattern.compile("\\?\\S*");
-    private static final Pattern BARE_PASSWORD = Pattern.compile("(?i)(password2?=)\\S*");
+    // Everything from the query to the end of the line: the password is not URL-encoded (nor
+    // trimmed), so it may itself contain '&', '?', spaces or tabs. The messages that carry a
+    // URL (FileNotFoundException(url.toString()), "... for URL: <url>") end with it.
+    private static final Pattern URL_QUERY = Pattern.compile("\\?[^\\r\\n]*");
+    private static final Pattern BARE_PASSWORD = Pattern.compile("(?i)(password2?=)[^\\r\\n]*");
 
     private RedactingLog() {
     }
