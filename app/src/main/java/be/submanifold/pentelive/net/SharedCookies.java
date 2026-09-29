@@ -2,13 +2,14 @@ package be.submanifold.pentelive.net;
 
 import java.net.CookieHandler;
 
+import be.submanifold.pentelive.PentePlayer;
 import okhttp3.CookieJar;
 
 /**
  * Holds the app's single {@link CookieStorage}. {@code MyApplication.onCreate} calls
  * {@link #install} before any Activity or Service runs; from then on HttpURLConnection
  * (through the default {@link CookieHandler}), OkHttp ({@link #okHttpJar()}) and WebView all
- * read and write the same cookies.
+ * read and write the same cookies. The CookieHandler serves only the {@link PenteHosts}.
  */
 public final class SharedCookies {
 
@@ -19,7 +20,8 @@ public final class SharedCookies {
 
     public static synchronized void install(CookieStorage cookieStorage) {
         storage = cookieStorage;
-        CookieHandler.setDefault(new SharedCookieHandler(cookieStorage));
+        CookieHandler.setDefault(new SharedCookieHandler(cookieStorage,
+                new PenteHosts(new StaticBaseUrlProvider(PentePlayer.development))));
     }
 
     /** @throws IllegalStateException if {@link #install} was never called */

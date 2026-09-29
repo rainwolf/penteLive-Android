@@ -18,9 +18,12 @@ final class FakeCookieStorage implements CookieStorage {
     final List<String> events = new ArrayList<>();
     /** Raw (url, Set-Cookie value) pairs, in arrival order. */
     final List<String[]> setCalls = new ArrayList<>();
+    /** Every url passed to {@link #cookieHeader}, in call order. */
+    final List<String> headerCalls = new ArrayList<>();
 
     @Override
     public synchronized String cookieHeader(String url) {
+        headerCalls.add(url);
         Map<String, String> cookies = byHost.get(URI.create(url).getHost());
         if (cookies == null) {
             return "";

@@ -56,7 +56,7 @@ public class AuthedHttpTest {
         host = URI.create(base).getHost();
         cookies = new FakeCookieStorage();
         previousHandler = CookieHandler.getDefault();
-        CookieHandler.setDefault(new SharedCookieHandler(cookies));
+        CookieHandler.setDefault(new SharedCookieHandler(cookies, new PenteHosts(() -> base)));
         http = new AuthedHttp(() -> base, new FakeSession("alice", "secret"), cookies);
     }
 
