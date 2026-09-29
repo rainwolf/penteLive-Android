@@ -42,6 +42,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ReplyMessageActivity extends AppCompatActivity {
 
+    private static final String TAG = "ReplyMessageActivity";
+
     private String recipient;
     private String subject;
 
@@ -412,7 +414,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 return true;
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading the message failed", e1);
                 return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {

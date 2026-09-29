@@ -47,6 +47,7 @@ import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
+import be.submanifold.pentelive.RedactingLog;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 
@@ -906,13 +907,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
 
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    RedactingLog.e(TAG, "boot request failed", e1);
                 }
 
                 // Add custom implementation, as needed.
 
             } catch (Exception e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "boot request failed", e1);
                 return false;
             }
             return true;

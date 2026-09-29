@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
@@ -417,11 +416,7 @@ public class LoginActivity extends AppCompatActivity
                 }
 
             } catch (IOException e1) {
-                // e1 itself is not passed to Log: on an HTTP error status its message is the
-                // request URL, whose query string carries the unencoded password (which may
-                // itself contain '&'), so the whole query is redacted. Its cause (e.g. the
-                // certificate or socket error behind an SSL failure) is logged with its trace.
-                Log.e(TAG, "login request failed: " + e1.toString().replaceAll("\\?[^\\s]*", "?<redacted>"), e1.getCause());
+                RedactingLog.e(TAG, "login request failed", e1);
                 exception = e1.toString();
                 return false;
             }

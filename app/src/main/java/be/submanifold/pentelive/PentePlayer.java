@@ -31,6 +31,8 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class PentePlayer implements Parcelable {
 
+    private static final String TAG = "PentePlayer";
+
     public static Boolean development = false;
 
     public static String mPlayerName = "";
@@ -744,7 +746,7 @@ public class PentePlayer implements Parcelable {
                 populateFromJson(json);
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading the player failed", e1);
                 return false;
             }
 
@@ -836,7 +838,7 @@ public class PentePlayer implements Parcelable {
 
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "replying to the invitation failed", e1);
                 return false;
             }
 
@@ -907,7 +909,7 @@ public class PentePlayer implements Parcelable {
 
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "cancelling the invitation failed", e1);
                 return false;
             }
 

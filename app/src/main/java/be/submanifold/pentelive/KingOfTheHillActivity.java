@@ -53,6 +53,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class KingOfTheHillActivity extends AppCompatActivity {
 
+    private static final String TAG = "KingOfTheHillActivity";
+
     private List<List<KothPlayer>> hill;
     private PentePlayer player;
     private KingOfTheHill kothSummary;
@@ -381,7 +383,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 htmlString = output.toString();
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading the hill failed", e1);
                 return false;
             }
 

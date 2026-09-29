@@ -42,9 +42,12 @@ import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
+import be.submanifold.pentelive.RedactingLog;
 import be.submanifold.pentelive.WebViewActivity;
 
 public class LobbyActivity extends AppCompatActivity {
+
+    private static final String TAG = "LobbyActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,7 +233,7 @@ public class LobbyActivity extends AppCompatActivity {
 //                System.out.println(dashboardString);
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading live servers failed", e1);
                 return false;
             }
 
@@ -320,7 +323,7 @@ public class LobbyActivity extends AppCompatActivity {
                 dashboardString = output.toString();
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "broadcast failed", e1);
                 return false;
             }
 

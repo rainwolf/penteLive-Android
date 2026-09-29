@@ -45,6 +45,7 @@ import be.submanifold.pente.rules.Variants;
  * Created by waliedothman on 10/04/16.
  */
 public class Game implements Parcelable {
+    private static final String TAG = "Game";
     private final String mGameID;
     private String mSetID;
     private String mGameType;
@@ -505,7 +506,7 @@ public class Game implements Parcelable {
                 mGameJson = json;
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading the game failed", e1);
                 return false;
             }
 
@@ -637,7 +638,7 @@ public class Game implements Parcelable {
 //                }
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "submitting the move failed", e1);
                 return false;
             }
 

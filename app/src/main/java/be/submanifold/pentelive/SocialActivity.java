@@ -48,6 +48,8 @@ import be.submanifold.pentelive.liveGameRoom.LivePlayer;
 
 public class SocialActivity extends AppCompatActivity {
 
+    private static final String TAG = "SocialActivity";
+
     private SocialListAdapter followerListAdapter, followingListAdapter;
     private static final Map<String, Integer> gameNames;
 
@@ -319,7 +321,7 @@ public class SocialActivity extends AppCompatActivity {
                 dashboardString = output.toString();
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading followers failed", e1);
                 return false;
             }
 
@@ -413,7 +415,7 @@ public class SocialActivity extends AppCompatActivity {
                 dashboardString = output.toString();
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "changing follow status failed", e1);
                 return false;
             }
 
