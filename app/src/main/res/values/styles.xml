@@ -3,6 +3,9 @@
 <!--     Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="statusBarScrim">@android:color/background_dark</item>
+        <!-- Edge-to-edge (target 35+) makes the status bar transparent over the window
+             background, so its icons must be dark on the light theme. Night flips it. -->
+        <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
         <!-- Inflate TextViews as OutlineTextView so dark-mode text gets a black outline. -->
         <item name="viewInflaterClass">be.submanifold.pentelive.OutlineViewInflater</item>
     </style>
