@@ -9,7 +9,6 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
-import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -19,17 +18,13 @@ import android.widget.Toast;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import javax.net.ssl.HttpsURLConnection;
+import be.submanifold.pentelive.net.AuthedHttp;
+
 
 public class SendMessageActivity extends AppCompatActivity {
 
@@ -127,52 +122,9 @@ public class SendMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
-                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/mymessages";
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
+                AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
+                String output = reply.body;
 
                 return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
 
