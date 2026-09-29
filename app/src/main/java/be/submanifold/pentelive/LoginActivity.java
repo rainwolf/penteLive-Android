@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
@@ -45,6 +46,8 @@ public class LoginActivity extends AppCompatActivity
 //        implements LoaderCallbacks<Cursor>
 {
 
+    private static final String TAG = "LoginActivity";
+    private static final int LOGIN_TIMEOUT_MS = 60_000;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -367,6 +370,8 @@ public class LoginActivity extends AppCompatActivity
                     url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 }
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(LOGIN_TIMEOUT_MS);
+                connection.setReadTimeout(LOGIN_TIMEOUT_MS);
                 int responseCode = connection.getResponseCode();
                 cookie = connection.getHeaderField("Set-Cookie");
 
@@ -412,7 +417,10 @@ public class LoginActivity extends AppCompatActivity
                 }
 
             } catch (IOException e1) {
-//                e1.printStackTrace();
+                // e1 itself is not passed to Log: on an HTTP error status its message is the
+                // request URL, whose query string carries the password. Its cause (e.g. the
+                // certificate or socket error behind an SSL failure) is logged with its trace.
+                Log.e(TAG, "login request failed: " + e1.toString().replaceAll("password2=[^&\\s]*", "password2=<redacted>"), e1.getCause());
                 exception = e1.toString();
                 return false;
             }
