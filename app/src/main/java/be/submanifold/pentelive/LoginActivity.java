@@ -27,9 +27,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
@@ -51,8 +48,6 @@ public class LoginActivity extends AppCompatActivity
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    public static String cookie = null;
-
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -360,9 +355,6 @@ public class LoginActivity extends AppCompatActivity
             // TODO: attempt authentication against a network service.
 
             try {
-//                CookieManager cookieManager = new CookieManager();
-//                CookieHandler.setDefault(cookieManager);
-                CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
 
                 URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
                 if (PentePlayer.development) {
@@ -372,7 +364,6 @@ public class LoginActivity extends AppCompatActivity
                 connection.setConnectTimeout(LOGIN_TIMEOUT_MS);
                 connection.setReadTimeout(LOGIN_TIMEOUT_MS);
                 int responseCode = connection.getResponseCode();
-                cookie = connection.getHeaderField("Set-Cookie");
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
