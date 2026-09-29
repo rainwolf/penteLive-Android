@@ -1,6 +1,7 @@
 package be.submanifold.pentelive.net;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -27,6 +28,15 @@ public class SessionTest {
         assertEquals(1, replayed.size());
         assertEquals("JSESSIONID", replayed.get(0).name());
         assertEquals("abc123", replayed.get(0).value());
+    }
+
+    /**
+     * "org" is on the public-suffix list, so a cookie scoped to it must be rejected. Only
+     * passes when OkHttp actually loaded the list; it cannot pass by skipping the lookup.
+     */
+    @Test
+    public void cookieParse_rejectsPublicSuffixDomain() {
+        assertNull(Cookie.parse(PENTE, "JSESSIONID=abc123; domain=org; path=/"));
     }
 
     @Test
