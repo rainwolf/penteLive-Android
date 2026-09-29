@@ -33,6 +33,8 @@ import java.util.Date;
 
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoom;
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoomActivity;
+import be.submanifold.pentelive.net.AuthedHttp;
+import be.submanifold.pentelive.net.LoginResponse;
 
 
 /**
@@ -43,7 +45,6 @@ public class LoginActivity extends AppCompatActivity
 {
 
     private static final String TAG = "LoginActivity";
-    private static final int LOGIN_TIMEOUT_MS = 60_000;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -355,30 +356,10 @@ public class LoginActivity extends AppCompatActivity
             // TODO: attempt authentication against a network service.
 
             try {
+                // POSTs the credentials in the form body, after clearing the cookie store.
+                LoginResponse.Outcome outcome = AuthedHttp.shared().loginFresh(mEmail, mPassword);
 
-                URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
-                }
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(LOGIN_TIMEOUT_MS);
-                connection.setReadTimeout(LOGIN_TIMEOUT_MS);
-                int responseCode = connection.getResponseCode();
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-
-//                System.out.println(output);
-
-                if (output.indexOf("Invalid name or password, please try again.") != -1) {
+                if (outcome == LoginResponse.Outcome.INVALID_CREDENTIALS) {
 //                    AlertDialog.Builder builder1 = new AlertDialog.Builder();
 //                    builder1.setMessage("Write your message here.");
 //                    builder1.setCancelable(true);
@@ -404,6 +385,9 @@ public class LoginActivity extends AppCompatActivity
                     wrongUP = true;
                     System.out.println("wrong password");
                     return false;
+                }
+                if (outcome == LoginResponse.Outcome.UNEXPECTED) {
+                    throw new IOException("login.jsp did not confirm the login");
                 }
 
             } catch (IOException e1) {
