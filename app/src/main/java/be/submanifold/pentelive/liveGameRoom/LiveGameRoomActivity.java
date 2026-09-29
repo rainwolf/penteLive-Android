@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,7 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.Socket;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import be.submanifold.pentelive.BackgroundTask;
@@ -48,6 +49,9 @@ import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
+
+    private static final String TAG = "LiveGameRoomActivity";
+    private static final int SOCKET_CONNECT_TIMEOUT_MS = 60_000;
 
     private volatile ClientSocketDSGEventHandler eventHandler;
     private LiveGameRoomActivity self;
@@ -110,16 +114,23 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private void connectSocket(final int port) {
         (new Thread() {
             public void run() {
-                Socket socket = null;
+                SSLSocket socket;
                 try {
-                    SocketFactory factory;
-                    if (development) {
-                        factory = SSLSocketFactory.getDefault();
-                        socket = factory.createSocket("10.0.2.2", port);
-                    } else {
-                        factory = SSLSocketFactory.getDefault();
-                        socket = factory.createSocket("pente.org", port);
-                    }
+                    socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
+                } catch (IOException e) {
+                    reportConnectionFailure(port, e);
+                    return;
+                }
+                try {
+                    String host = development ? "10.0.2.2" : "pente.org";
+                    socket.connect(new InetSocketAddress(host, port), SOCKET_CONNECT_TIMEOUT_MS);
+                    // Handshake now rather than on first I/O inside the event handler threads,
+                    // which drop errors silently, so TLS failures take the same path as connect
+                    // failures. The read timeout bounds only the handshake; the live socket idles
+                    // legitimately, so it is cleared again afterwards.
+                    socket.setSoTimeout(SOCKET_CONNECT_TIMEOUT_MS);
+                    socket.startHandshake();
+                    socket.setSoTimeout(0);
                     // because client sends many short messages
                     socket.setTcpNoDelay(true);
                     // timeout after 30 seconds
@@ -136,10 +147,37 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                         eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\"" + username + "\",\"password\":\"" + password + "\",\"guest\":false,\"time\":0}}");
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        socket.close();
+                    } catch (IOException closeError) {
+                        e.addSuppressed(closeError);
+                    }
+                    reportConnectionFailure(port, e);
                 }
             }
         }).start();
+    }
+
+    private void reportConnectionFailure(int port, IOException e) {
+        Log.e(TAG, "live game room connection on port " + port + " failed", e);
+        runOnUiThread(this::showConnectionError);
+    }
+
+    /**
+     * Same dialog title as LoginActivity's connection failure. Dismissing it leaves the room,
+     * as BootMeTask does when it fails, instead of staying on an empty, unconnected room.
+     */
+    private void showConnectionError() {
+        if (isFinishing() || isDestroyed()) {
+            // User already left the room; the failure is logged and there is no window to show it on.
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.connection_wrong))
+                .setMessage(getString(R.string.error_connecting))
+                .setPositiveButton(getString(R.string.dismiss), null)
+                .setOnDismissListener(dialog -> finish())
+                .show();
     }
 
     @Override
