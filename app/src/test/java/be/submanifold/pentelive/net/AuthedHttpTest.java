@@ -296,6 +296,72 @@ public class AuthedHttpTest {
         assertTrue(logins.isEmpty());
     }
 
+    /**
+     * login.jsp as LoginFilter serves it: a request carrying the live session takes the
+     * session branch, ignores the posted credentials and sets no login cookies, yet renders
+     * the logged-in page; without the session it logs in and sets the login cookies.
+     */
+    private MockResponse sessionAwareLogin(RecordedRequest request, String liveSession, String token) {
+        // A request without any cookie carries no Cookie header at all.
+        String cookie = request.getHeader("Cookie");
+        if (cookie != null && liveSession.equals(CookieHeader.parse(cookie).get("JSESSIONID"))) {
+            return new MockResponse().setResponseCode(200).setBody(LoginResponseTest.SUCCESS_PAGE);
+        }
+        return loginSuccess(token);
+    }
+
+    private void serveSessionAware(final String liveSession, final String token) {
+        server.setDispatcher(new Dispatcher() {
+            @Override
+            public MockResponse dispatch(RecordedRequest request) {
+                String path = request.getRequestUrl().encodedPath();
+                if (path.equals(LOGIN)) {
+                    logins.add(request);
+                    order.add("login");
+                    return sessionAwareLogin(request, liveSession, token);
+                }
+                data.add(request);
+                order.add("data");
+                return new MockResponse().setResponseCode(200).setBody(GAME_JSON);
+            }
+        });
+    }
+
+    @Test
+    public void preCheckLogin_withALiveSessionButNoLoginCookies_dropsTheSessionFirst() throws Exception {
+        cookies.put(host, "JSESSIONID", "live");
+        serveSessionAware("live", "tok");
+
+        AuthedHttp.Reply reply = http.get(GAME + "?gid=5");
+
+        assertEquals(GAME_JSON, reply.body);
+        assertEquals(1, logins.size());
+        String sent = logins.get(0).getHeader("Cookie");
+        assertTrue("the live session was not sent with the login POST: " + sent,
+                sent == null || !CookieHeader.parse(sent).containsKey("JSESSIONID"));
+        java.util.Map<String, String> stored = CookieHeader.parse(cookies.cookieHeader(base + "/gameServer/"));
+        assertEquals("alice", stored.get("name2"));
+        assertEquals("tok", stored.get("password2"));
+        assertEquals("s1", stored.get("JSESSIONID"));
+        assertFalse("only the session cookie is dropped", cookies.events.contains("removeAll"));
+    }
+
+    @Test
+    public void reLoginAfterLoggedOut_dropsTheSessionFirst() throws Exception {
+        loggedIn("old");
+        serve(loginSuccess("new"), (r, loginsSoFar) -> loginsSoFar == 0
+                ? redirect(MOBILE_INDEX)
+                : new MockResponse().setResponseCode(200).setBody(GAME_JSON));
+
+        http.get(GAME + "?gid=5");
+
+        assertEquals(1, logins.size());
+        String sent = logins.get(0).getHeader("Cookie");
+        assertTrue("the old session was not sent with the login POST: " + sent,
+                !CookieHeader.parse(sent).containsKey("JSESSIONID"));
+        assertTrue("the login cookies still go along", CookieHeader.parse(sent).containsKey("name2"));
+    }
+
     @Test
     public void concurrentExpiries_logInOnlyOnce() throws Exception {
         loggedIn("old");

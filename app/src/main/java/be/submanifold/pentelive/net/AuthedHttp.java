@@ -162,13 +162,18 @@ public final class AuthedHttp {
 
     /**
      * Logs in with the stored credentials, unless another thread already did since
-     * {@code seenGeneration}. Unlike {@link #loginFresh}, it keeps the store.
+     * {@code seenGeneration}. Unlike {@link #loginFresh}, it keeps the store, except for the
+     * session cookie: while the request carries a live session, LoginFilter ignores the posted
+     * credentials and sets no name2/password2 cookies.
      */
     private void relogin(int seenGeneration) throws IOException {
         synchronized (lock) {
             if (generation != seenGeneration) {
                 return;
             }
+            // Tomcat sets JSESSIONID host-only at the ROOT context path "/"; the same name, host
+            // and path make CookieManager replace it, and Max-Age=0 then drops it.
+            cookies.setCookie(urls.baseUrl() + "/", "JSESSIONID=; Max-Age=0; Path=/");
             LoginResponse.Outcome outcome = login(session.name(), session.password());
             if (outcome != LoginResponse.Outcome.SUCCESS) {
                 LoginRejectedException e = new LoginRejectedException("re-login with the stored credentials: " + outcome);
