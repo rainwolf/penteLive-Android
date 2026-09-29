@@ -21,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -32,8 +31,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,9 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import be.submanifold.pentelive.liveGameRoom.LivePlayer;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class SocialActivity extends AppCompatActivity {
 
@@ -289,27 +287,14 @@ public class SocialActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/mobile/followers.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/followers.jsp?game=" + game);
+                if (reply.code != 200) {
                     return false;
                 }
 
+                // Parsed line by line below; keep the lines joined by "\n" as before.
                 StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                BufferedReader br = new BufferedReader(new StringReader(reply.body));
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
@@ -381,38 +366,13 @@ public class SocialActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/social?" +
-                        (follow ? "follow" : "unfollow") + "=" + player
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/social?" +
+                        (follow ? "follow" : "unfollow") + "=" + player);
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-//                System.out.println(output.toString());
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "changing follow status failed", e1);

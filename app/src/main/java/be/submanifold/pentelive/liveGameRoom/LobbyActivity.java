@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Spinner;
@@ -25,16 +24,12 @@ import androidx.core.content.ContextCompat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.JsonModels;
@@ -44,6 +39,7 @@ import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.RedactingLog;
 import be.submanifold.pentelive.WebViewActivity;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class LobbyActivity extends AppCompatActivity {
 
@@ -197,39 +193,12 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url;
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                } else {
-                    url = new URL("https://www.pente.org/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                }
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/json/liveServers.jsp");
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    output.append(line);
-                }
-                br.close();
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 //                System.out.println(dashboardString);
 
             } catch (IOException e1) {
@@ -288,39 +257,14 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/broadcast?sendTo=" +
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/broadcast?sendTo=" +
                         (friends ? "friends" : "followers") + "&game=" + URLEncoder.encode(game, "UTF-8") +
-                        "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                        "&mobile=");
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-//                System.out.println(output.toString());
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "broadcast failed", e1);

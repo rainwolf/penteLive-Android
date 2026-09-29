@@ -25,12 +25,8 @@ import org.json.JSONObject;
 import org.pente.gameServer.event.ClientSocketDSGEventHandler;
 import org.pente.gameServer.event.DSGEventListener;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,6 +44,7 @@ import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.RedactingLog;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 
@@ -889,21 +886,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
             try {
                 try {
-                    URL url = new URL("https://www.pente.org/gameServer/bootMeMobile.jsp?name2=" + storedUserName + "&password2=" + storedPassword);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode != 200) {
-                        System.out.println("response code for submit was " + responseCode);
+                    AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/bootMeMobile.jsp");
+                    if (reply.code != 200) {
+                        System.out.println("response code for submit was " + reply.code);
                     }
-
-                    StringBuilder output = new StringBuilder();
-                    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    String line = "";
-                    while ((line = br.readLine()) != null) {
-                        output.append(line + "\n");
-                    }
-                    br.close();
-//                        System.out.println("output===============" + "\n" + output.toString());
 
 
                 } catch (IOException e1) {

@@ -24,7 +24,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -38,17 +37,14 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
+import be.submanifold.pentelive.net.AuthedHttp;
+import be.submanifold.pentelive.net.PenteUrls;
+
 
 
 public class KingOfTheHillActivity extends AppCompatActivity {
@@ -105,7 +101,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                         popupWindow.showAtLocation(findViewById(R.id.list), Gravity.TOP, 0, 300);
                         expandableList.setAlpha(0.5f);
                     } else {
-                        String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                        String url = PenteUrls.web("/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName());
                         Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                         intent.putExtra("url", url);
                         startActivity(intent);
@@ -129,7 +125,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         } else {
             expandableList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
                 if (groupPosition > 0) {
-                    String url = "https://www.pente.org/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName() + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    String url = PenteUrls.web("/gameServer/profile?viewName=" + hill.get(groupPosition - 1).get(childPosition).getName());
                     Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                     intent.putExtra("url", url);
                     startActivity(intent);
@@ -265,7 +261,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_web_koth) {
             int game = kothSummary.getGameId();
-            String url = "https://www.pente.org/gameServer/stairs.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            String url = PenteUrls.web("/gameServer/stairs.jsp?game=" + game);
             Intent intent = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
@@ -280,7 +276,7 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 builder.setPositiveButton(getString(R.string.dismiss), (dialog, which) -> {
                 });
                 builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
-                    String url1 = "https://www.pente.org/gameServer/subscriptions" + "?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+                    String url1 = PenteUrls.web("/gameServer/subscriptions");
                     Intent intent1 = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
                     intent1.putExtra("url", url1);
                     startActivity(intent1);
@@ -346,41 +342,14 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String request = "https://www.pente.org/gameServer/mobile/json/koth.jsp?game=" + mGame
-                        + "&name=" + PentePlayer.mPlayerName
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/mobile/json/koth.jsp?game=" + mGame
-                            + "&name=" + PentePlayer.mPlayerName
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = conn.getResponseCode();
-                if (responseCode != 200) {
+                // koth.jsp does no authentication; it reads the player from the name parameter.
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/json/koth.jsp?game=" + mGame
+                        + "&name=" + PentePlayer.mPlayerName);
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    output.append(line);
-                }
-                br.close();
-
-                htmlString = output.toString();
+                htmlString = reply.body;
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "loading the hill failed", e1);
@@ -418,58 +387,11 @@ public class KingOfTheHillActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String urlParameters = "game=" + mGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-//                String urlParameters  = "game=" + mGame+"&name2="+PentePlayer.mPlayerName;
+                String urlParameters = "game=" + mGame;
                 if (join) {
                     urlParameters += "&join=";
                 }
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/koth";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/koth";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output.toString());
+                AuthedHttp.shared().postForm("/gameServer/koth", urlParameters);
 
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -513,54 +435,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
 //                String urlParameters  = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y";
                 String urlParameters = "koth=&mobile=&invitee=" + opponentName + "&game=" + gameType +
-                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y"
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/tb/newGame";
-//                request        = "https://10.0.2.2/gameServer/tb/newGame";
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output.toString());
-
+                        "&invitationRestriction=" + restriction + "&daysPerMove=" + timeout + "&rated=Y";
+                AuthedHttp.shared().postForm("/gameServer/tb/newGame", urlParameters);
 
                 return true;
 
