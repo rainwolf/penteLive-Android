@@ -10,7 +10,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -18,27 +17,23 @@ import androidx.core.os.ParcelCompat;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import be.submanifold.pente.rules.BoardState;
 import be.submanifold.pente.rules.DefaultPenteRules;
 import be.submanifold.pente.rules.PenteRules;
 import be.submanifold.pente.rules.Variant;
 import be.submanifold.pente.rules.Variants;
+import be.submanifold.pentelive.net.AuthedHttp;
+import be.submanifold.pentelive.net.PenteUrls;
 
 
 /**
@@ -386,12 +381,12 @@ public class Game implements Parcelable {
                     thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
                 String[] players = mOpponentName.split(" vs ");
-                mBoardString = "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[0] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[0] + "</a> vs " +
-                        "<a href=\"https://www.pente.org/gameServer/profile?viewName=" + players[1] + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + players[1] + "</a>"
+                mBoardString = "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[0]) + "\">" + players[0] + "</a> vs " +
+                        "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[1]) + "\">" + players[1] + "</a>"
                         + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             } else {
-                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"https://www.pente.org/gameServer/profile?viewName=" + mOpponentName + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword + "\">" + mOpponentName + "</a>"
+                mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + mOpponentName) + "\">" + mOpponentName + "</a>"
                         + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
                         + "<br>" + thisGame + "<br><br>";
             }
@@ -440,70 +435,13 @@ public class Game implements Parcelable {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/mobile/json/game.jsp?gid=" + mGameID
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/json/game.jsp?gid=" + mGameID
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                }
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    System.out.println("response code for loadgame was " + responseCode);
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/json/game.jsp?gid=" + mGameID);
+                if (reply.code != 200) {
+                    System.out.println("response code for loadgame was " + reply.code);
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    output.append(line);
-                }
-                br.close();
-
-                JsonModels.GameResponse json = new Gson().fromJson(output.toString(), JsonModels.GameResponse.class);
-
-                if (json == null || json.gameName == null) {
-                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                    if (PentePlayer.development) {
-                        url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                    }
-                    connection = (HttpsURLConnection) url.openConnection();
-                    connection.getResponseCode();
-
-                    url = new URL("https://www.pente.org/gameServer/mobile/json/game.jsp?gid=" + mGameID);
-                    if (PentePlayer.development) {
-                        url = new URL("https://10.0.2.2/gameServer/mobile/json/game.jsp?gid=" + mGameID);
-                    }
-                    connection = (HttpsURLConnection) url.openConnection();
-                    responseCode = connection.getResponseCode();
-                    if (responseCode != 200) {
-                        System.out.println("response code for loadgame was " + responseCode);
-                        return false;
-                    }
-
-                    output = new StringBuilder();
-                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    while ((line = br.readLine()) != null) {
-                        output.append(line);
-                    }
-                    br.close();
-
-                    json = new Gson().fromJson(output.toString(), JsonModels.GameResponse.class);
-                }
-
-                mGameJson = json;
+                mGameJson = new Gson().fromJson(reply.body, JsonModels.GameResponse.class);
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "loading the game failed", e1);
@@ -553,89 +491,13 @@ public class Game implements Parcelable {
         protected Boolean doInBackground(Void... params) {
 
             try {
-//                URL url = new URL("https://www.pente.org/gameServer/tb/game?command=move&mobile=&gid="+mGameID+"&moves="+move+"&message=" + message);
-                URL url = new URL(buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction, drawOffer));
-                if (PentePlayer.development) {
-                    String devUrl = "https://10.0.2.2/gameServer/tb/game?command=move" + hideStr + "&mobile=&gid=" + mGameID + "&moves=" + move + "&message=" + message
-                            + PentePlayer.writeCreds();
-                    if (renjuAction != null && !renjuAction.isEmpty()) {
-                        devUrl += "&renjuAction=" + renjuAction;
-                    }
-                    if (drawOffer) {
-                        devUrl += "&drawOffer=true";
-                    }
-                    url = new URL(devUrl);
-                }
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    System.out.println("response code for submit was " + responseCode);
+                AuthedHttp.Reply reply = AuthedHttp.shared().get(
+                        buildSubmitMoveUrl(hideStr, mGameID, move, message, renjuAction, drawOffer));
+                if (reply.code != 200) {
+                    System.out.println("response code for submit was " + reply.code);
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output==========" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-//                System.out.println("submit output: " + output.toString());
-
-
-//                if (mGameString.indexOf("moves=") == -1) {
-//                    url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2="+PentePlayer.mPlayerName+"&password2="+ PentePlayer.mPassword);
-//                    connection = (HttpsURLConnection)url.openConnection();
-//                    responseCode = connection.getResponseCode();
-////
-////                    output = new StringBuilder();
-////                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-////                    System.out.println("output==========" + br);
-////                    line = "";
-////                    while((line = br.readLine()) != null ) {
-////                        output.append(line + System.getProperty("line.separator"));
-////                    }
-////                    br.close();
-////
-////                    output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-////                    System.out.println(output);
-//
-//
-//                    url = new URL("https://www.pente.org/gameServer/mobile/game.jsp?gid="+mGameID);
-//                    connection = (HttpsURLConnection)url.openConnection();
-//                    responseCode = connection.getResponseCode();
-//                    if (responseCode != 200) {
-//                        System.out.println("response code for loadgame was " + responseCode);
-//                        return false;
-//                    }
-//
-//                    output = new StringBuilder();
-//                    br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                    System.out.println("output==========" + br);
-//                    line = "";
-//                    while((line = br.readLine()) != null ) {
-//                        output.append(line + "\n");
-//                    }
-//                    br.close();
-//
-//                    System.out.println(output);
-//
-//                    mGameString = output.toString();
-//                }
 
             } catch (IOException e1) {
                 RedactingLog.e(TAG, "submitting the move failed", e1);
@@ -674,55 +536,8 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile="
-                        + PentePlayer.writeCreds();
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/tb/cancel";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/tb/cancel";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output==========" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
+                AuthedHttp.shared().postForm("/gameServer/tb/cancel", urlParameters);
 
 
             } catch (IOException e1) {
@@ -761,55 +576,8 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile="
-                        + PentePlayer.writeCreds();
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/tb/game";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/tb/game";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output==========" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "gid=" + gid + "&command=requestUndo" + "&mobile=";
+                AuthedHttp.shared().postForm("/gameServer/tb/game", urlParameters);
 
 
             } catch (IOException e1) {
@@ -851,55 +619,8 @@ public class Game implements Parcelable {
 
             try {
 //                String urlParameters  = "sid=" + sid + "&gid=" + gid + "&command=" + reply + "&mobile=";
-                String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile="
-                        + PentePlayer.writeCreds();
-                byte[] postData = new byte[0];
-                postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/tb/game";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/tb/game";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output==========" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "gid=" + gid + "&command=" + reply + "&mobile=";
+                AuthedHttp.shared().postForm("/gameServer/tb/game", urlParameters);
 
 
             } catch (IOException e1) {
@@ -935,7 +656,10 @@ public class Game implements Parcelable {
 //        this.mMovesList = mMovesList;
 //    }
 
-    /** Pure builder for the TB move URL. renjuAction omitted when null/empty. */
+    /**
+     * Pure builder for the TB move request: a path and query on the server, without
+     * credentials (the session cookie authenticates it). renjuAction omitted when null/empty.
+     */
     public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
                                             String message, String renjuAction) {
         return buildSubmitMoveUrl(hideStr, gid, moves, message, renjuAction, false);
@@ -944,9 +668,8 @@ public class Game implements Parcelable {
     /** As above, appending {@code &drawOffer=true} when the move carries a draw offer. */
     public static String buildSubmitMoveUrl(String hideStr, String gid, String moves,
                                             String message, String renjuAction, boolean drawOffer) {
-        String url = "https://www.pente.org/gameServer/tb/game?command=move" + hideStr
-                + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message
-                + PentePlayer.writeCreds();
+        String url = "/gameServer/tb/game?command=move" + hideStr
+                + "&mobile=&gid=" + gid + "&moves=" + moves + "&message=" + message;
         if (renjuAction != null && !renjuAction.isEmpty()) {
             url += "&renjuAction=" + renjuAction;
         }
@@ -1195,7 +918,7 @@ public class Game implements Parcelable {
 
                     builder.setMessage(host.getString(R.string.undo_subscribers_only));
                     builder.setPositiveButton(host.getString(R.string.subscribe_now), (dialog, id) -> {
-                        String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword; // missing 'http://' will cause crashed
+                        String url = PenteUrls.web("/gameServer/subscriptions"); // missing 'http://' will cause crashed
                         Intent intent = new Intent(host, WebViewActivity.class);
                         intent.putExtra("url", url);
                         host.startActivity(intent);

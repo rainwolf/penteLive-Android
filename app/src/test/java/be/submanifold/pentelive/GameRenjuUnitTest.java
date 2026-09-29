@@ -34,6 +34,8 @@ public class GameRenjuUnitTest {
     @Test
     public void buildSubmitMoveUrlOmitsRenjuActionWhenNull() {
         String url = Game.buildSubmitMoveUrl("", "999", "130", "hi", null);
+        assertTrue(url.startsWith("/gameServer/tb/game?command=move"));
+        assertFalse(url.contains("name2") || url.contains("password2"));
         assertTrue(url.contains("command=move"));
         assertTrue(url.contains("gid=999"));
         assertTrue(url.contains("moves=130"));

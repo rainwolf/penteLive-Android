@@ -38,13 +38,6 @@ public class PentePlayer implements Parcelable {
     public static String mPlayerName = "";
     public static String mPassword = "";
 
-    /**
-     * Credential query-string for authenticated TB write requests (move, invitation reply, cancel, undo).
-     */
-    public static String writeCreds() {
-        return "&name2=" + mPlayerName + "&password2=" + mPassword;
-    }
-
     public static Boolean mShowAds = true;
     public static Boolean mSubscriber = false;
     public static Boolean dbAccess = false;
