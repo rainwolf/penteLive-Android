@@ -159,7 +159,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
@@ -167,7 +166,6 @@ public class RegisterActivity extends AppCompatActivity {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
                 response = output.toString();
 
                 if (response.contains("Registration failed: Requested name " + username + " is already taken, please choose another.")) {
