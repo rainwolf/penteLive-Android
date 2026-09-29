@@ -30,10 +30,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,10 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.MyApplication;
@@ -76,23 +69,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private static final int NEW_PLAYER_SOUND = 1;
     private static final int NEW_MOVE_SOUND = 2;
     private MediaPlayer mediaPlayer;
-
-    final TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[]{};
-                }
-            }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,9 +114,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 try {
                     SocketFactory factory;
                     if (development) {
-                        final SSLContext sslContext = SSLContext.getInstance("SSL");
-                        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                        factory = sslContext.getSocketFactory();
+                        factory = SSLSocketFactory.getDefault();
                         socket = factory.createSocket("10.0.2.2", port);
                     } else {
                         factory = SSLSocketFactory.getDefault();
@@ -163,10 +137,6 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (KeyManagementException e) {
-                    throw new RuntimeException(e);
                 }
             }
         }).start();
