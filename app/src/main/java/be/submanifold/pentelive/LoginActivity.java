@@ -369,7 +369,6 @@ public class LoginActivity extends AppCompatActivity
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 int responseCode = connection.getResponseCode();
                 cookie = connection.getHeaderField("Set-Cookie");
-                System.out.println("cookie: " + cookie);
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));

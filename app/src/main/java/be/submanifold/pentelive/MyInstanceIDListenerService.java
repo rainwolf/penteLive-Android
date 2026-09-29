@@ -28,8 +28,6 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
             // Get new FCM registration token
             String refreshedToken = task.getResult();
 
-            System.out.println("Refreshed token: " + refreshedToken);
-            System.out.println("Refreshed token: " + newToken);
             // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(refreshedToken);
         }
