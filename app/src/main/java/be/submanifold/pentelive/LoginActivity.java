@@ -418,9 +418,10 @@ public class LoginActivity extends AppCompatActivity
 
             } catch (IOException e1) {
                 // e1 itself is not passed to Log: on an HTTP error status its message is the
-                // request URL, whose query string carries the password. Its cause (e.g. the
+                // request URL, whose query string carries the unencoded password (which may
+                // itself contain '&'), so the whole query is redacted. Its cause (e.g. the
                 // certificate or socket error behind an SSL failure) is logged with its trace.
-                Log.e(TAG, "login request failed: " + e1.toString().replaceAll("password2=[^&\\s]*", "password2=<redacted>"), e1.getCause());
+                Log.e(TAG, "login request failed: " + e1.toString().replaceAll("\\?[^\\s]*", "?<redacted>"), e1.getCause());
                 exception = e1.toString();
                 return false;
             }
