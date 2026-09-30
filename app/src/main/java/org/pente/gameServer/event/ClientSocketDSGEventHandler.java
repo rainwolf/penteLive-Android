@@ -23,42 +23,24 @@ import java.io.*;
 
 public class ClientSocketDSGEventHandler extends SocketDSGEventHandler {
 
-	private boolean handledError = false;
-	public ClientSocketDSGEventHandler(Socket s) {
+	/**
+	 * @param onConnectionLost told once, from a socket thread, if the connection later dies
+	 *                         from an error; not when {@link #destroy()} closes it
+	 * @throws IOException if the socket's streams cannot be opened; no threads are started
+	 */
+	public ClientSocketDSGEventHandler(Socket s, ConnectionLostListener onConnectionLost) throws IOException {
 		this.socket = s;
+		this.connectionLostListener = onConnectionLost;
 
-		try {
-			// out = new ObjectOutputStream(socket.getOutputStream());
-			// in = new ObjectInputStream(socket.getInputStream());
-			outStream = new BufferedOutputStream(socket.getOutputStream());
-			inStream = new BufferedInputStream(socket.getInputStream());
-			// outStream.flush();
-			// outStream = new DataOutputStream(socket.getOutputStream());
-			// outStream.flush();
-			// inStream = new DataInputStream(socket.getInputStream());
-		} catch (Throwable t) {
-
-			System.err.println("Error creating socket object streams");
-			t.printStackTrace();
-			// this kills the connection before it gets created
-			return;
-		}
+		// out = new ObjectOutputStream(socket.getOutputStream());
+		// in = new ObjectInputStream(socket.getInputStream());
+		outStream = new BufferedOutputStream(socket.getOutputStream());
+		inStream = new BufferedInputStream(socket.getInputStream());
+		// outStream.flush();
+		// outStream = new DataOutputStream(socket.getOutputStream());
+		// outStream.flush();
+		// inStream = new DataInputStream(socket.getInputStream());
 
 		super.go();
-	}
-
-
-	void handleError(Throwable t) {
-		// provent duplicated handling
-		synchronized (this) {
-			if (handledError) return;
-			handledError = true;
-		}
-		System.err.println("SocketHandler Unhandled exception, disconnecting.");
-		t.printStackTrace();
-		//if (!(t instanceof IOException)) {
-		//    eventOccurred(new DSGClientErrorEvent(t));
-		//}
-		super.handleError(t);
 	}
 }

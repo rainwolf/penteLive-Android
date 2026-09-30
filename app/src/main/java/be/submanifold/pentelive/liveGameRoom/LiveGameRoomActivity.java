@@ -52,6 +52,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private static final int SOCKET_CONNECT_TIMEOUT_MS = 60_000;
 
     private volatile ClientSocketDSGEventHandler eventHandler;
+    private volatile boolean destroyed;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
     private final LiveGameRoomFragment roomFragment = null;
@@ -135,7 +136,17 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     // this should be ok because we receive pings every 15 seconds
                     //socket.setSoTimeout(30 * 1000);
 
-                    eventHandler = new ClientSocketDSGEventHandler(socket);
+                    // The handler logs the lost connection; the room shows the same dialog as a
+                    // failed connect and closes on dismiss.
+                    eventHandler = new ClientSocketDSGEventHandler(socket,
+                            cause -> runOnUiThread(self::showConnectionError));
+                    if (destroyed) {
+                        // onDestroy ran while this thread was connecting and found no handler
+                        // to destroy; close this one instead of leaking the socket and the room.
+                        Log.w(TAG, "live game room closed while connecting; disconnecting");
+                        eventHandler.destroy();
+                        return;
+                    }
                     eventHandler.addListener(self);
                     String username = PentePlayer.mPlayerName;
                     String password = PentePlayer.mPassword;
@@ -181,6 +192,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy");
+        // Set before reading eventHandler (both volatile): either this thread sees the handler
+        // the connect thread stored, or the connect thread sees this flag and destroys it.
+        destroyed = true;
         (new Thread() {
             public void run() {
                 if (eventHandler != null) {
