@@ -257,7 +257,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                             @Override
                             public void run() {
                                 if (development) {
-                                    System.out.println("jsonEvent: " + jsonEvent);
+                                    System.out.println("jsonEvent: " + LiveEventRedaction.withPasswordsRedacted(jsonEvent));
                                 }
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
@@ -839,7 +839,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 return retMap;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            // Not e itself: org.json quotes the whole input in its message, and the event can be
+            // the login echo carrying the password.
+            Log.e(TAG, "incoming live event (" + jsonStr.length() + " chars) is not a JSON object;"
+                    + " the event and the parser message are withheld because they can hold the password");
         }
         return null;
     }
