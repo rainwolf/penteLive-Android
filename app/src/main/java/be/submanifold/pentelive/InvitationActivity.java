@@ -2,7 +2,6 @@ package be.submanifold.pentelive;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,7 +9,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -20,15 +18,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import javax.net.ssl.HttpsURLConnection;
+import be.submanifold.pentelive.net.AuthedHttp;
+
 
 public class InvitationActivity extends AppCompatActivity {
 
@@ -79,7 +73,7 @@ public class InvitationActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.sendInvitationButton);
         if (button != null) button.setOnClickListener(v -> {
-            String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase();
+            String opponentName = ((AutoCompleteTextView) findViewById(R.id.opponent)).getText().toString().toLowerCase(java.util.Locale.ROOT);
             String gameType = "";
             switch (((Spinner) findViewById(R.id.gameTypeSpinner)).getSelectedItemPosition()) {
                 case 0:
@@ -250,7 +244,7 @@ public class InvitationActivity extends AppCompatActivity {
         this.gameType = gameType;
     }
 
-    public class SendInvitationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendInvitationTask extends BackgroundTask<Void, Boolean> {
 
         private final String opponentName;
         private final String gameType;
@@ -275,81 +269,14 @@ public class InvitationActivity extends AppCompatActivity {
             // TODO: attempt authentication against a network service.
 
             try {
-//                URL url = new URL("https://www.pente.org/gameServer/tb/newGame?mobile=&invitee=" + opponentName + "&game=" + gameType +
-//                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
-//                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-//                HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
-//                int responseCode = connection.getResponseCode();
-//                if (responseCode != 200) {
-//                    System.out.println("response code for submit was " + responseCode);
-//                    return false;
-//                }
-//
-//                StringBuilder output = new StringBuilder();
-//                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
-//                String line = "";
-//                while((line = br.readLine()) != null ) {
-//                    output.append(line + "\n");
-//                }
-//                br.close();
-
 //                String urlParameters  = "mobile=&invitee=" + opponentName + "&game=" + gameType +
 //                        "&daysPerMove=" + timeout + "&rated=" + rated +"&invitationRestriction=" +
 //                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame;
                 String urlParameters = "mobile=&invitee=" + opponentName + "&game=" + gameType +
                         "&daysPerMove=" + timeout + "&rated=" + rated + "&invitationRestriction=" +
-                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/tb/newGame";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/tb/newGame";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                        restriction + "&playAs=" + playAs + "&privateGame=" + privateGame;
+                AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/tb/newGame", urlParameters);
+                String output = reply.body;
 
                 if (output.indexOf("Creating set failed: Player not found: " + opponentName) > -1) {
                     return false;

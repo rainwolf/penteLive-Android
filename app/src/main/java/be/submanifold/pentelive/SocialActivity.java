@@ -5,12 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -34,8 +31,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,11 +40,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import be.submanifold.pentelive.liveGameRoom.LivePlayer;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class SocialActivity extends AppCompatActivity {
+
+    private static final String TAG = "SocialActivity";
 
     private SocialListAdapter followerListAdapter, followingListAdapter;
     private static final Map<String, Integer> gameNames;
@@ -179,12 +177,12 @@ public class SocialActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.social_menu, menu);
 
         MenuItem item = menu.findItem(R.id.gameSpinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        Spinner spinner = (Spinner) item.getActionView();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.all_game_types_array)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 ImageView view = new ImageView(getContext());
-                view.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_settings));
+                view.setImageDrawable(ContextCompat.getDrawable(SocialActivity.this, R.drawable.ic_action_settings));
                 return view;
             }
         };
@@ -213,35 +211,35 @@ public class SocialActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
 //            case R.id.action_settings:
 //                // User chose the "Settings" item, show the app settings UI...
 //                return true;
 
-            case R.id.follow_user:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                final EditText invitationText = new EditText(this);
-                invitationText.setHint("(" + getString(R.string.enter_username) + ")");
-                invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(invitationText);
-                builder.setTitle(getString(R.string.follow_player));
-                builder.setPositiveButton(getString(R.string.follow), (dialog, which) -> {
-                    String m_Text = invitationText.getText().toString();
-                    FollowersingTask task = new FollowersingTask(true, m_Text);
-                    task.execute();
-                });
-                builder.setNegativeButton(getString(R.string.dismiss), (dialog, which) -> dialog.cancel());
-                builder.show();
-                return true;
+        if (id == R.id.follow_user) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final EditText invitationText = new EditText(this);
+            invitationText.setHint("(" + getString(R.string.enter_username) + ")");
+            invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(invitationText);
+            builder.setTitle(getString(R.string.follow_player));
+            builder.setPositiveButton(getString(R.string.follow), (dialog, which) -> {
+                String m_Text = invitationText.getText().toString();
+                FollowersingTask task = new FollowersingTask(true, m_Text);
+                task.execute();
+            });
+            builder.setNegativeButton(getString(R.string.dismiss), (dialog, which) -> dialog.cancel());
+            builder.show();
+            return true;
 
-            case R.id.gameSpinner:
+        } else if (id == R.id.gameSpinner) {
 
 
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
+            return true;
+        } else {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            return super.onOptionsItemSelected(item);
 
         }
     }
@@ -277,7 +275,7 @@ public class SocialActivity extends AppCompatActivity {
         (SocialActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
-    private class LoadFollowersingTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadFollowersingTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         int game = gameNames.get(gameStr);
@@ -289,27 +287,14 @@ public class SocialActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/mobile/followers.jsp?game=" + game + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/followers.jsp?game=" + game);
+                if (reply.code != 200) {
                     return false;
                 }
 
+                // Parsed line by line below; keep the lines joined by "\n" as before.
                 StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                BufferedReader br = new BufferedReader(new StringReader(reply.body));
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
@@ -321,7 +306,7 @@ public class SocialActivity extends AppCompatActivity {
                 dashboardString = output.toString();
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading followers failed", e1);
                 return false;
             }
 
@@ -366,7 +351,7 @@ public class SocialActivity extends AppCompatActivity {
         }
     }
 
-    private class FollowersingTask extends AsyncTask<Void, Void, Boolean> {
+    private class FollowersingTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         boolean follow = false;
@@ -381,41 +366,16 @@ public class SocialActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/social?" +
-                        (follow ? "follow" : "unfollow") + "=" + player
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/social?" +
+                        (follow ? "follow" : "unfollow") + "=" + player);
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-//                System.out.println(output.toString());
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "changing follow status failed", e1);
                 return false;
             }
 

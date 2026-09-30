@@ -11,10 +11,6 @@
     <string name="renju_swap_take_over">Swap</string>
     <string name="renju_dont_swap">No swap</string>
     <string name="renju_place_ten">Place 10</string>
-    <string name="renju_place_in_box">Place your stone near the center and submit.</string>
-    <string name="renju_need_10_offers">Pick exactly 10 non-symmetric offers.</string>
-    <string name="renju_place_1_or_10">Place 1 stone to continue (Branch A), or 10 to offer (Branch B), then submit.</string>
-    <string name="renju_select_two">Tap the offered black 5th move, then tap an empty point for your white 6th.</string>
     <string name="renju_offer_progress">Offer fifth moves: %1$d/10</string>
     <string name="renju_select_prompt">Pick one of the offered points</string>
     <string name="place_2_stones_submit">Place 2 stones and submit.</string>
@@ -100,10 +96,9 @@
     <string name="last_game_on">Last game Played on %1$s</string>
     <string name="level_up_your_game">Level up your game\n\nThe database allows you to search games in the pente.org database by position. This powerful tool enables you to study and analyze games and opponents, practice opening moves, sort the results by most played or highest win percentage, and filter by player name and winner.\nMore features will be added in the future.\n\nThe database is open to subscribers or new players with at least 1 game in their first 2 months only.</string>
     <string name="home">home</string>
-    <string name="not_enough_credit">Not enough credit, public invitations have an \"accept 2-post 1\" policy.</string>
     <string name="post_now">Post now!</string>
     <string name="nothing_to_see_here">Nothing to see here. Post an open invitation to get started?</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="decline">decline</string>
     <string name="accept">accept</string>
     <string name="restart_game">restart game</string>
@@ -113,9 +108,9 @@
     <string name="you_won">You won</string>
     <string name="rating_stats">rating stats</string>
     <string name="last_total">Last: %1$s, total: %2$s</string>
-    <string name="username_5_10">username has to be 5-10 characters long</string>
+    <string name="username_5_10">username has to be 5–10 characters long</string>
     <string name="username_only">username can only contain letters, numbers, and underscores</string>
-    <string name="password_6_16">password has to be 5-16 characters long</string>
+    <string name="password_6_16">password has to be 5–16 characters long</string>
     <string name="password_only">password can only contain letters, numbers, and underscores</string>
     <string name="password_no_match">passwords don\'t match</string>
     <string name="accept_policy">You can\'t sign up without accepting the Rated Play Policy.</string>
@@ -125,8 +120,6 @@
     <string name="enter_recipient">Please enter a recipient.</string>
     <string name="new_message">new message</string>
     <string name="settings">settings</string>
-    <string name="take_photo">take photo</string>
-    <string name="choose_from_library">choose from library</string>
     <string name="choose_color">choose color</string>
     <string name="change_avatar">change avatar</string>
     <string name="username">username</string>
@@ -210,8 +203,6 @@
     <string name="undo_accepted">undo accepted</string>
     <string name="undo_declined">undo declined</string>
     <string name="cancellation_requested">set/game cancellation requested</string>
-    <string name="cancellation_accepted">set/game cancellation accepted</string>
-    <string name="cancellation_declined">set/game cancellation declined</string>
     <string name="continue_as">continue playing as</string>
     <string name="p1white">player 1 (white)</string>
     <string name="p2black">player 2 (black)</string>
@@ -222,7 +213,6 @@
     <string name="boot_player">boot player</string>
     <string name="invite_player">invite player</string>
     <string name="player_booted_by">%1$s has been booted by %2$s</string>
-    <string name="you_booted_by">you were booted by %1$s, you can rejoin this table in 5 minutes</string>
     <string name="optional_message">optional message</string>
     <string name="invite_player_to_table">invite %1$s</string>
     <string name="accepted_your_invitation">%1$s accepted your invitation</string>
@@ -315,21 +305,11 @@
     <string name="play_live_as_guest">play live games as a guest</string>
     <string name="connection_wrong">Something went wrong connecting.</string>
 
-    <string name="accept_personalize">Accept terms and allow personalized ads</string>
-    <string name="accept_anonymize">Accept terms and don\'t allow personalized ads</string>
-
-    <string name="prompt_username">Username</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This username or password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-    <string name="title_activity_board">BoardActivity</string>
 
     <string name="forgot_password">Forgot password?</string>
 
@@ -549,13 +529,8 @@
         <item>2700</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_gdpr">GDPRActivity</string>
-
     <string name="arena_create_table">Create arena table</string>
     <string name="arena_create_button">Create table</string>
-    <string name="arena_reject">Reject</string>
     <string name="arena_tap_to_accept">Tap player to accept</string>
     <string name="arena_play_as">Play as:</string>
     <string name="arena_white">white</string>
@@ -567,4 +542,41 @@
     <string name="arena_incremental_seconds">Incremental seconds:</string>
     <string name="arena_waiting">Waiting for host to accept…</string>
     <string name="arena_exit_table">Exit table</string>
+
+    <string name="title_invitations">Invitations</string>
+    <string name="get_help">Get Help</string>
+    <string name="label_username">Username</string>
+    <string name="label_password">Password</string>
+    <string name="login">Login</string>
+    <string name="view_rated_play_policy">view rated play policy</string>
+    <string name="rated_play_policy_text">"Pente.org maintains a rating for you when you play \"rated\" games.  The ratings system is important to help you determine your skill level and to help you find worthy opponents.  Pente.org attempts to ensure that ratings accurately reflect a players skill, and therefore certain guidelines must be followed by all players!\n          \n1. Play rated games using only your brain.  Do not play with any outside assistance.  Just to be clear, here are some examples of what you should NOT do: use another pente board to examine future positions, use a game database to lookup the current or future positions, use a computer opponent to find moves, consult written notes or books. \n2. Play rated games at Pente.org with only one user account. Do not create multiple users at and play rated games with them.\n3. When playing games, you can request to undo your last move, your opponent can choose to accept or deny this request (Pente.org does not care, it is up to you). If you do not plan to accept undo\'s, you should mention this to your opponent before starting a rated game.\n4. When watching a rated game, do not make comments about specific game moves, this could affect the outcome of the game.  There is plenty of time for analysis after the game.\n5.If your opponent is disconnected from the internet, Pente.org allows him/her 7 minutes to return to resume the game.  After that point you may decide to cancel the game or force your opponent to resign.  This feature was implemented to stop other players from bailing out of a losing game.  However, do not abuse this feature, if you are sure you will lose, you should resign the game.  Do not force your opponent to resign unless you are absolutely sure you will win.\n\nThat\'s it, and remember to have fun of course!"</string>
+    <string name="arena_default_initial_minutes" translatable="false">5</string>
+    <string name="arena_default_incremental_seconds" translatable="false">0</string>
+    <string name="back_to_dashboard_after_moving">back to dashboard after moving</string>
+    <string name="cancel_game_or_resign">cancel game or resign</string>
+    <string name="add_message">add message</string>
+    <string name="choose_play">choose play</string>
+    <string name="more">more</string>
+    <string name="ask_the_ai">ask the AI</string>
+    <string name="db_settings">DB settings</string>
+    <string name="timer_zero" translatable="false">0:0</string>
+    <string name="live_table_settings_placeholder">Timer: 0/0\nnot rated</string>
+    <string name="challenge_label">challenge</string>
+    <string name="post_open_invitation">post open invitation</string>
+    <string name="view_on_the_web">view on the web</string>
+    <string name="player_actions">player actions</string>
+    <string name="game_actions">game actions</string>
+    <string name="game_settings">game settings</string>
+    <string name="fav">fav</string>
+    <string name="game_pente" translatable="false">Pente</string>
+    <string name="ai_settings">AI settings</string>
+
+    <string name="submit_with_move" translatable="false">%1$s: %2$s</string>
+    <string name="submit_with_count" translatable="false">%1$s %2$s/10</string>
+    <string name="submit_with_pair" translatable="false">%1$s: %2$s-%3$s</string>
+    <string name="submit_with_first" translatable="false">%1$s: %2$s-</string>
+    <string name="label_quoted" translatable="false">%1$s: \"%2$s\"</string>
+    <string name="two_lines" translatable="false">%1$s\n%2$s</string>
+    <string name="append_line" translatable="false">%1$s%2$s\n</string>
+    <string name="name_with_count" translatable="false">%1$s (%2$s)</string>
 </resources>

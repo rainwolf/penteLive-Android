@@ -17,6 +17,7 @@ import java.util.Date;
 public class MyInstanceIDListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyInstanceIDLS";
+    private static final int REGISTRATION_TIMEOUT_MS = 60_000;
 
     @Override
     public void onNewToken(String newToken) {
@@ -28,8 +29,6 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
             // Get new FCM registration token
             String refreshedToken = task.getResult();
 
-            System.out.println("Refreshed token: " + refreshedToken);
-            System.out.println("Refreshed token: " + newToken);
             // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(refreshedToken);
         }
@@ -52,9 +51,9 @@ public class MyInstanceIDListenerService extends FirebaseMessagingService {
                 if (PentePlayer.development) {
                     url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                 }
-//                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
-//                        + "&token=" + token);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(REGISTRATION_TIMEOUT_MS);
+                connection.setReadTimeout(REGISTRATION_TIMEOUT_MS);
                 int responseCode = connection.getResponseCode();
                 if (responseCode != 200) {
                     System.out.println("response code for submit was " + responseCode);

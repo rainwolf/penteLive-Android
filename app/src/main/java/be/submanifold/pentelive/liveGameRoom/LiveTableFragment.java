@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
@@ -7,6 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -65,7 +67,7 @@ import be.submanifold.pentelive.R;
 public class LiveTableFragment extends Fragment {
     Table table = null;
     LiveBoardView board;
-    Handler timerHandler = new Handler();
+    Handler timerHandler = new Handler(Looper.getMainLooper());
     Runnable timerUpdater = new Runnable() {
         @Override
         public void run() {
@@ -177,54 +179,54 @@ public class LiveTableFragment extends Fragment {
         }
 
         toolbar.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.action_players:
-                    if (table.getOwner().equals(me)) {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                        String[] options = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
-                        builder.setItems(options, (dialog, which) -> {
-                            switch (which) {
-                                case 0:
-                                    showTablePlayers();
-                                    break;
-                                case 1:
-                                    showBootablePlayers();
-                                    break;
-                                case 2:
-                                    showInvitePlayers();
-                                    break;
-                            }
-                        });
-                        builder.show();
+            int id = item.getItemId();
+            if (id == R.id.action_players) {
+                if (table.getOwner().equals(me)) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    String[] options = {getString(R.string.show_table_players), getString(R.string.boot_player), getString(R.string.invite_player)};
+                    builder.setItems(options, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                showTablePlayers();
+                                break;
+                            case 1:
+                                showBootablePlayers();
+                                break;
+                            case 2:
+                                showInvitePlayers();
+                                break;
+                        }
+                    });
+                    builder.show();
 
-                    } else {
-                        showTablePlayers();
-                    }
-                    return true;
+                } else {
+                    showTablePlayers();
+                }
+                return true;
 
-                case R.id.action_game:
-                    if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
-                        showGameActions(table.currentPlayerName().equals(me));
-                    } else {
-                        Toast.makeText(activity, getString(R.string.not_player),
-                                Toast.LENGTH_LONG).show();
-                    }
-                    return true;
+            } else if (id == R.id.action_game) {
+                if (table.isSeated(me) && table.getGameState().state == State.STARTED) {
+                    showGameActions(table.currentPlayerName().equals(me));
+                } else {
+                    Toast.makeText(activity, getString(R.string.not_player),
+                            Toast.LENGTH_LONG).show();
+                }
+                return true;
 
-                case R.id.action_settings:
-                    if (table.getOwner().equals(me)) {
-                        initializeSettingsView();
-                    } else {
-                        Toast.makeText(activity, getString(R.string.not_owner),
-                                Toast.LENGTH_LONG).show();
-                    }
+            } else if (id == R.id.action_settings) {
+                if (table.getOwner().equals(me)) {
+                    initializeSettingsView();
+                } else {
+                    Toast.makeText(activity, getString(R.string.not_owner),
+                            Toast.LENGTH_LONG).show();
+                }
 
-                    return true;
+                return true;
 
-                default:
-                    // If we got here, the user's action was not recognized.
-                    // Invoke the superclass to handle it.
-                    return false;
+            } else {
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return false;
 
             }
         });
@@ -394,7 +396,7 @@ public class LiveTableFragment extends Fragment {
         if (table.isTimed()) {
             timerStr = getString(R.string.timer) + ": " + initialMnts + "/" + incrementalScnds;
         }
-        settingsText.setText(timerStr + "\n" + ratedStr);
+        settingsText.setText(getString(R.string.two_lines, timerStr, ratedStr));
         synchronized (this) {
             Map<String, Long> timer1, timer2;
             timer1 = table.getGameState().timers.get(1);
@@ -457,7 +459,7 @@ public class LiveTableFragment extends Fragment {
     public void addText(String text) {
         if (!isAdded()) return;
         String tableText = tableTextView.getText().toString();
-        tableTextView.setText(tableText + text + "\n");
+        tableTextView.setText(getString(R.string.append_line, tableText, text));
         tableTextView.setMovementMethod(new ScrollingMovementMethod());
         tableTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
@@ -802,6 +804,10 @@ public class LiveTableFragment extends Fragment {
         }
     }
 
+    // InflateParams: settingsView is AlertDialog content (setView), no parent at inflation time.
+    // ClickableViewAccessibility: the gameSpinner OnTouchListener only hides the keyboard and returns false,
+    // so the spinner's own click handling still runs; calling performClick() there would double-fire it.
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initializeSettingsView() {
         if (settingsView == null) {
             settingsView = activity.getLayoutInflater().inflate(R.layout.live_table_settings, null);
@@ -873,8 +879,8 @@ public class LiveTableFragment extends Fragment {
         } else {
             ratedChoice.setText(getString(R.string.no));
         }
-        initialMinutesView.setText(table.getTimer().get("initialMinutes") + "");
-        incrementalSecondsView.setText(table.getTimer().get("incrementalSeconds") + "");
+        initialMinutesView.setText(String.valueOf(table.getTimer().get("initialMinutes")));
+        incrementalSecondsView.setText(String.valueOf(table.getTimer().get("incrementalSeconds")));
         tableSettingsWindow.show();
     }
 

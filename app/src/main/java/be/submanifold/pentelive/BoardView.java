@@ -54,6 +54,8 @@ public class BoardView extends View {
     public int renjuBoxRadius = 0; // 0 = no constraint; >0 limits placement to the central (2r+1)^2 box
     public java.util.List<Integer> renjuCandidates = null; // move indices to render as translucent black (value 4)
     public java.util.List<Integer> renjuPicks = null; // in-progress OFFERS multi-select (whole board)
+    // SELECTION offers list, refilled by onDraw each frame (reused so onDraw does not allocate).
+    private final java.util.List<Integer> renjuOfferCandidates = new java.util.ArrayList<>();
     public boolean renjuOfferMode = false; // collecting 1 (Branch A) or up to 10 (Branch B) candidate stones -> single `move`
     public java.util.List<Integer> renjuSelection = null; // SELECTION 2-tap: [offered black 5th, white 6th]
 
@@ -147,9 +149,9 @@ public class BoardView extends View {
         if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
             if (renjuSelection == null || renjuSelection.isEmpty()) {
                 applyRenjuSelectionMask();
-                java.util.List<Integer> cands = new java.util.ArrayList<>();
-                if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
-                renjuCandidates = cands;
+                renjuOfferCandidates.clear();
+                if (game.renjuOffers != null) for (int o : game.renjuOffers) renjuOfferCandidates.add(o);
+                renjuCandidates = renjuOfferCandidates;
             } else {
                 renjuCandidates = null;
             }
@@ -248,9 +250,9 @@ public class BoardView extends View {
                     // cell -1 so only an offer can show a stone) and draw the offers as the
                     // existing translucent dead-stone candidates. Idempotent per frame.
                     applyRenjuSelectionMask();
-                    java.util.List<Integer> cands = new java.util.ArrayList<>();
-                    if (game.renjuOffers != null) for (int o : game.renjuOffers) cands.add(o);
-                    renjuCandidates = cands;
+                    renjuOfferCandidates.clear();
+                    if (game.renjuOffers != null) for (int o : game.renjuOffers) renjuOfferCandidates.add(o);
+                    renjuCandidates = renjuOfferCandidates;
                 } else {
                     // 5th chosen (mask already cleared on the pick): drop the 9 other candidates;
                     // the chosen 5th (and the white 6th) render as live stones from the snapshot.
@@ -418,6 +420,11 @@ public class BoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    // Accessibility: report the release as a click. No OnClickListener is set on
+                    // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
+                    performClick();
+                }
                 break;
         }
 
@@ -642,6 +649,11 @@ public class BoardView extends View {
         return true;
     }
 
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
 
     // SELECTION: lock the board to the 10 offered cells (black 5th). Mark every EMPTY non-offer
     // cell as -1 ("forbidden" in BoardState's cell encoding; drawStone renders nothing for <1),
@@ -705,7 +717,7 @@ public class BoardView extends View {
                 boolean inBox = Math.abs(m % gridSize - c) <= 4 && Math.abs(m / gridSize - c) <= 4;
                 if (inBox) {
                     setSubmitEnabled(submit, true);
-                    submit.setText(submitStr + ": " + renjuCoord(m));
+                    submit.setText(getContext().getString(R.string.submit_with_move, submitStr, renjuCoord(m)));
                     return;
                 }
             } else if (n == 10) {
@@ -713,13 +725,13 @@ public class BoardView extends View {
                 for (int k = 0; k < n; k++) arr[k] = renjuPicks.get(k);
                 if (be.submanifold.pente.rules.RenjuSymmetry.isValidOfferSet(arr, renjuStabilizer())) {
                     setSubmitEnabled(submit, true);
-                    submit.setText(submitStr + " 10/10");
+                    submit.setText(getContext().getString(R.string.submit_with_count, submitStr, String.valueOf(10)));
                     return;
                 }
             }
             // still building toward ten (or an as-yet-incomplete count): greyed running count.
             setSubmitEnabled(submit, false);
-            submit.setText(submitStr + " " + n + "/10");
+            submit.setText(getContext().getString(R.string.submit_with_count, submitStr, String.valueOf(n)));
             return;
         }
         if ("SELECTION".equals(game.renjuPhase)) {
@@ -727,10 +739,10 @@ public class BoardView extends View {
             int n = (renjuSelection == null) ? 0 : renjuSelection.size();
             if (n >= 2) {
                 setSubmitEnabled(submit, true);
-                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-" + renjuCoord(renjuSelection.get(1)));
+                submit.setText(getContext().getString(R.string.submit_with_pair, submitStr, renjuCoord(renjuSelection.get(0)), renjuCoord(renjuSelection.get(1))));
             } else if (n == 1) {
                 setSubmitEnabled(submit, false);
-                submit.setText(submitStr + ": " + renjuCoord(renjuSelection.get(0)) + "-");
+                submit.setText(getContext().getString(R.string.submit_with_first, submitStr, renjuCoord(renjuSelection.get(0))));
             } else {
                 setSubmitEnabled(submit, false);
                 submit.setText(submitStr);
@@ -741,7 +753,7 @@ public class BoardView extends View {
         // is placed (playedMove is clamped to the legal box in onTouchEvent), then enabled.
         if (playedMove > -1) {
             setSubmitEnabled(submit, true);
-            submit.setText(submitStr + ": " + renjuCoord(playedMove));
+            submit.setText(getContext().getString(R.string.submit_with_move, submitStr, renjuCoord(playedMove)));
         } else {
             setSubmitEnabled(submit, false);
             submit.setText(submitStr);
@@ -1104,7 +1116,7 @@ public class BoardView extends View {
     }
 
     protected void setTextViewHTML(TextView text, String html) {
-        CharSequence sequence = Html.fromHtml(html);
+        CharSequence sequence = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {

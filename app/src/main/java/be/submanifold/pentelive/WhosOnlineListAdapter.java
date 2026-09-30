@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -101,17 +102,23 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    // Null root kept: with the list as root, dashboardgroup_layout's fixed 30dp height would replace the list's
+    // default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(Color.GRAY);
-        ((TextView) convertView.findViewById(R.id.textView)).setText(sections.get(groupPosition) + " (" + onlinePlayers.get(sections.get(groupPosition)).size() + ")");
+        ((TextView) convertView.findViewById(R.id.textView)).setText(ctx.getString(R.string.name_with_count, sections.get(groupPosition), String.valueOf(onlinePlayers.get(sections.get(groupPosition)).size())));
 
         return convertView;
     }
 
+    // Null root kept: with the list as root, dashboardrow_layout's ?android:attr/listPreferredItemHeight height would
+    // replace the list's default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -176,7 +183,7 @@ public class WhosOnlineListAdapter extends BaseExpandableListAdapter {
                 break;
             default:
                 if (crown > 3) {
-                    int resourceId = ctx.getResources().getIdentifier("kothcrown" + (crown - 3), "drawable", ctx.getPackageName());
+                    int resourceId = KothCrownDrawables.IDS[crown - 4];
                     crownIcon = ContextCompat.getDrawable(MyApplication.getContext(), resourceId);
                 }
                 break;

@@ -288,6 +288,9 @@ public class DBBoardView extends View {
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
+                // Accessibility: report the release as a click. No OnClickListener is set on
+                // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
+                performClick();
                 break;
         }
 
@@ -385,6 +388,11 @@ public class DBBoardView extends View {
         }
         invalidate();
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     public String getMovesString() {
@@ -655,7 +663,7 @@ public class DBBoardView extends View {
             }
         }
 
-        CharSequence sequence = Html.fromHtml(str + html);
+        CharSequence sequence = Html.fromHtml(str + html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {

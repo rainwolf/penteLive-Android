@@ -10,10 +10,12 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,26 +34,24 @@ import okhttp3.ResponseBody;
  * so no custom factory is wired.
  *
  * <h3>Auth-expiry signal &amp; re-auth mechanism</h3>
- * The legacy code re-authenticates on an <em>application-level</em> signal, NOT on
- * an HTTP 401. {@code PentePlayer.java:701} and {@code Game.java:466} re-login when a
- * <strong>200</strong> response parses to {@code json == null || json.player == null}
- * (resp. {@code gameName == null}) — the server returns a logged-out body with a 200
- * status. Because an {@link okhttp3.Authenticator} only fires on HTTP 401/403, it
- * could never observe this primary signal; therefore the single-flight re-auth lives
- * inside {@link #withReauth} here, triggered when an attempt yields
- * {@link Result.Reason#AUTH_EXPIRED} (a null typed entity on 200, or a literal
- * 401/403).
+ * Requests carry no credentials: authentication rides on the shared cookie store
+ * ({@link SharedCookies}). The server signals "not logged in" at the <em>application
+ * level</em>, NOT with an HTTP 401: the data JSPs redirect to
+ * {@code /gameServer/mobile/index.jsp} (OkHttp follows it) and other pages answer 200
+ * with a login form or error text ({@link LoggedOutDetector}); a 200 body that parses to
+ * no entity is treated the same way. Because an {@link okhttp3.Authenticator} only fires
+ * on HTTP 401/403, it could never observe these signals; therefore the single-flight
+ * re-auth lives inside {@link #withReauth} here, triggered when an attempt yields
+ * {@link Result.Reason#AUTH_EXPIRED} (a logged-out answer, or a literal 401/403).
  *
- * <h3>Single-flight + credential retention (the prod bug fix)</h3>
+ * <h3>Single-flight re-login</h3>
  * On the expiry signal, {@link #reauth} re-logs in <em>exactly once</em> even under N
  * concurrent expiries: it is {@code synchronized} on a private lock and guarded by a
  * generation counter, so the first thread performs the network login and bumps the
  * generation while the others observe the bump and skip straight to the retry. The
- * re-login request carries {@code name2}/{@code password2} from the {@link Session},
- * and the retried data request is the <em>same</em> {@link Request} (its URL already
- * carries {@code name2}/{@code password2}) — this keeps the credentials on the retry,
- * fixing the production credential-drop at {@code PentePlayer.java:678} where the
- * retried {@code index.jsp} dropped {@code name2}/{@code password2}. Retry is capped
+ * re-login POSTs {@code name2}/{@code password2} from the {@link Session} in the form
+ * body of login.jsp, never in the URL; the server answers with fresh session and login
+ * cookies, which the retried <em>same</em> {@link Request} then carries. Retry is capped
  * at one attempt to avoid loops: an expiry that survives re-auth maps to
  * {@link Result.Reason#AUTH_EXPIRED}.
  */
@@ -60,10 +60,6 @@ public final class OkHttpPenteApi implements PenteApi {
     private static final long CONNECT_TIMEOUT_SECONDS = 15;
     private static final long READ_TIMEOUT_SECONDS = 30;
     private static final long WRITE_TIMEOUT_SECONDS = 30;
-
-    /** Marker in the login.jsp body that means bad credentials (LoginActivity.java:390). */
-    private static final String WRONG_CREDENTIALS_MARKER =
-            "Invalid name or password, please try again.";
 
     private final Session session;
     private final BaseUrlProvider urls;
@@ -101,6 +97,23 @@ public final class OkHttpPenteApi implements PenteApi {
         return new Request.Builder().url(url).get().build();
     }
 
+    /** POSTs the credentials in the form body; the URL carries no query. */
+    private Request loginRequest(String name, String password) {
+        HttpUrl url = base().addPathSegments("gameServer/login.jsp").build();
+        FormBody form = new FormBody.Builder(StandardCharsets.UTF_8)
+                .add("mobile", "")
+                .add("name2", name)
+                .add("password2", password)
+                .build();
+        return new Request.Builder().url(url).post(form).build();
+    }
+
+    /** OkHttp follows redirects, so the final request's path is the redirect target. */
+    private static boolean isLoggedOut(Request request, Response response, String body) {
+        return LoggedOutDetector.isLoggedOut(request.url().encodedPath(),
+                response.request().url().encodedPath(), body);
+    }
+
     // -------------------------------------------------------------------------
     // PenteApi
     // -------------------------------------------------------------------------
@@ -109,8 +122,6 @@ public final class OkHttpPenteApi implements PenteApi {
     public Result<WhosOnline> whosOnline() {
         HttpUrl url = base()
                 .addPathSegments("gameServer/mobile/json/whosonlineandlive.jsp")
-                .addQueryParameter("name2", session.name())
-                .addQueryParameter("password2", session.password())
                 .build();
         Request request = get(url);
         return withReauth(() -> attemptJson(request, body -> {
@@ -145,8 +156,6 @@ public final class OkHttpPenteApi implements PenteApi {
         HttpUrl url = base()
                 .addPathSegments("gameServer/mobile/json/game.jsp")
                 .addQueryParameter("gid", gid)
-                .addQueryParameter("name2", session.name())
-                .addQueryParameter("password2", session.password())
                 .build();
         Request request = get(url);
         return withReauth(() -> attemptJson(request, body -> {
@@ -171,9 +180,7 @@ public final class OkHttpPenteApi implements PenteApi {
                 .addQueryParameter("mobile", "")
                 .addQueryParameter("gid", gid)
                 .addQueryParameter("moves", moves)
-                .addQueryParameter("message", message)
-                .addQueryParameter("name2", session.name())
-                .addQueryParameter("password2", session.password());
+                .addQueryParameter("message", message);
         if (renjuAction != null && !renjuAction.isEmpty()) {
             b.addQueryParameter("renjuAction", renjuAction);
         }
@@ -208,7 +215,7 @@ public final class OkHttpPenteApi implements PenteApi {
             // Wrong credentials on re-login: the session cannot be refreshed.
             return Result.fail(new Result.Failure(Result.Reason.AUTH_EXPIRED, first.failure.httpCode, null));
         }
-        // Retry the ORIGINAL request once. Its URL still carries name2/password2.
+        // Retry the ORIGINAL request once; it now carries the fresh login cookies.
         // Whatever it yields now is terminal (an AUTH_EXPIRED here will not loop).
         return attempt.get();
     }
@@ -239,25 +246,19 @@ public final class OkHttpPenteApi implements PenteApi {
     }
 
     /**
-     * Re-login carrying name2/password2 — the credential retention the prod path dropped.
+     * Re-login: POSTs name2/password2 in the form body of login.jsp.
      *
-     * @return {@code true} only if the response is 2xx AND does NOT contain
-     *         {@link #WRONG_CREDENTIALS_MARKER} (login.jsp returns 200 even for bad creds).
+     * @return {@code true} only if the response is 2xx AND the page confirms the login
+     *         ({@link LoginResponse#classify}; login.jsp returns 200 even for bad creds).
      * @throws IOException on network failure; propagates to {@link #reauth} so
      *         {@link #withReauth} can surface it as {@link Result.Reason#NETWORK}.
      */
     private boolean performLogin(String name, String password) throws IOException {
-        HttpUrl url = base()
-                .addPathSegments("gameServer/login.jsp")
-                .addQueryParameter("mobile", "")
-                .addQueryParameter("name2", name)
-                .addQueryParameter("password2", password)
-                .build();
-        try (Response response = client.newCall(get(url)).execute()) {
+        try (Response response = client.newCall(loginRequest(name, password)).execute()) {
             if (!response.isSuccessful()) {
                 return false;
             }
-            return !bodyString(response).contains(WRONG_CREDENTIALS_MARKER);
+            return LoginResponse.classify(bodyString(response)) == LoginResponse.Outcome.SUCCESS;
         }
         // IOException propagates — caller (reauth) distinguishes network failure from wrong creds.
     }
@@ -274,6 +275,9 @@ public final class OkHttpPenteApi implements PenteApi {
                 return authOrServer;
             }
             String text = bodyString(response);
+            if (isLoggedOut(request, response, text)) {
+                return Result.fail(new Result.Failure(Result.Reason.AUTH_EXPIRED, code, null));
+            }
             try {
                 T value = parser.parse(text);
                 if (value == null) {
@@ -318,6 +322,9 @@ public final class OkHttpPenteApi implements PenteApi {
             if (authOrServer != null) {
                 return authOrServer;
             }
+            if (isLoggedOut(request, response, bodyString(response))) {
+                return Result.fail(new Result.Failure(Result.Reason.AUTH_EXPIRED, code, null));
+            }
             return Result.ok(null);
         } catch (IOException e) {
             return Result.fail(new Result.Failure(Result.Reason.NETWORK, 0, e));
@@ -325,13 +332,7 @@ public final class OkHttpPenteApi implements PenteApi {
     }
 
     private Result<Boolean> doLoginRequest(String name, String password) {
-        HttpUrl url = base()
-                .addPathSegments("gameServer/login.jsp")
-                .addQueryParameter("mobile", "")
-                .addQueryParameter("name2", name)
-                .addQueryParameter("password2", password)
-                .build();
-        try (Response response = client.newCall(get(url)).execute()) {
+        try (Response response = client.newCall(loginRequest(name, password)).execute()) {
             int code = response.code();
             if (code == 401 || code == 403) {
                 return Result.fail(new Result.Failure(Result.Reason.INVALID_CREDENTIALS, code, null));
@@ -339,9 +340,14 @@ public final class OkHttpPenteApi implements PenteApi {
             if (!is2xx(code)) {
                 return Result.fail(new Result.Failure(Result.Reason.SERVER, code, null));
             }
-            // login.jsp returns 200 even for bad credentials; detect via the body marker.
-            if (bodyString(response).contains(WRONG_CREDENTIALS_MARKER)) {
+            // login.jsp returns 200 even for bad credentials; the page says which it was.
+            LoginResponse.Outcome outcome = LoginResponse.classify(bodyString(response));
+            if (outcome == LoginResponse.Outcome.INVALID_CREDENTIALS) {
                 return Result.fail(new Result.Failure(Result.Reason.INVALID_CREDENTIALS, code, null));
+            }
+            if (outcome == LoginResponse.Outcome.UNEXPECTED) {
+                // Neither marker: the page did not confirm the login.
+                return Result.fail(new Result.Failure(Result.Reason.PARSE, code, null));
             }
             return Result.ok(Boolean.TRUE);
         } catch (IOException e) {

@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Spinner;
@@ -26,25 +24,26 @@ import androidx.core.content.ContextCompat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
 
+import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.JsonModels;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
+import be.submanifold.pentelive.RedactingLog;
 import be.submanifold.pentelive.WebViewActivity;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class LobbyActivity extends AppCompatActivity {
+
+    private static final String TAG = "LobbyActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +52,7 @@ public class LobbyActivity extends AppCompatActivity {
         // Unregistered (guest) players don't choose a room — send them straight to the
         // hardcoded arena room (name + port match the iOS client).
         String username = PrefUtils.getFromPrefs(this,
-                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+                PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
         if (username.startsWith("guest")) {
             Intent intent = new Intent(this, LiveGameRoomActivity.class);
             intent.putExtra("room", new LiveGameRoom("Arena", 15999));
@@ -181,7 +180,7 @@ public class LobbyActivity extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
-    private class LoadActiveServersTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadActiveServersTask extends BackgroundTask<Void, Boolean> {
 
         private final LobbyListAdapter listAdapter;
         String dashboardString;
@@ -194,43 +193,16 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url;
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                } else {
-                    url = new URL("https://www.pente.org/gameServer/mobile/json/liveServers.jsp?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                }
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mobile/json/liveServers.jsp");
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    output.append(line);
-                }
-                br.close();
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 //                System.out.println(dashboardString);
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading live servers failed", e1);
                 return false;
             }
 
@@ -270,7 +242,7 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
 
-    private class BroadcastTask extends AsyncTask<Void, Void, Boolean> {
+    private class BroadcastTask extends BackgroundTask<Void, Boolean> {
 
         String dashboardString;
         boolean friends = false;
@@ -285,42 +257,17 @@ public class LobbyActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                URL url = new URL("https://www.pente.org/gameServer/broadcast?sendTo=" +
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/broadcast?sendTo=" +
                         (friends ? "friends" : "followers") + "&game=" + URLEncoder.encode(game, "UTF-8") +
-                        "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
+                        "&mobile=");
+                if (reply.code != 200) {
                     return false;
                 }
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-//                System.out.println(output.toString());
-
-                dashboardString = output.toString();
+                dashboardString = reply.body;
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "broadcast failed", e1);
                 return false;
             }
 

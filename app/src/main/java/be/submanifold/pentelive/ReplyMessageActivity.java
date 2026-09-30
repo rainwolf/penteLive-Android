@@ -1,9 +1,9 @@
 package be.submanifold.pentelive;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 
 import android.os.Bundle;
 
@@ -18,7 +18,6 @@ import android.text.style.URLSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.CookieManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,17 +29,16 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
-import javax.net.ssl.HttpsURLConnection;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class ReplyMessageActivity extends AppCompatActivity {
+
+    private static final String TAG = "ReplyMessageActivity";
 
     private String recipient;
     private String subject;
@@ -51,7 +49,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reply_message);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
-        final Message message = getIntent().getParcelableExtra("message");
+        final Message message = IntentCompat.getParcelableExtra(getIntent(), "message", Message.class);
         recipient = message.getAuthor();
         toolbar.setTitle("To: " + recipient);
         ((EditText) findViewById(R.id.subject)).setText(message.getSubject());
@@ -106,16 +104,16 @@ public class ReplyMessageActivity extends AppCompatActivity {
         loadTask.execute((Void) null);
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_trash:
-                    DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
-                    deleteTask.execute((Void) null);
-                    return true;
-                case R.id.action_challenge:
-                    Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-                    intent.putExtra("opponent", recipient);
-                    startActivity(intent);
-                    return true;
+            int id = menuItem.getItemId();
+            if (id == R.id.action_trash) {
+                DeleteMessageTask deleteTask = new DeleteMessageTask(message.getMessageID());
+                deleteTask.execute((Void) null);
+                return true;
+            } else if (id == R.id.action_challenge) {
+                Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+                intent.putExtra("opponent", recipient);
+                startActivity(intent);
+                return true;
             }
 
             return false;
@@ -191,7 +189,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
     }
 
     protected void setTextViewHTML(TextView text, String html) {
-        CharSequence sequence = Html.fromHtml(html);
+        CharSequence sequence = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
         URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
         for (URLSpan span : urls) {
@@ -202,14 +200,14 @@ public class ReplyMessageActivity extends AppCompatActivity {
         text.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private class SendMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class SendMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String recipient;
         private String subject;
         private String message;
 
         SendMessageTask(String recipient, String subject, String message) {
-            this.recipient = recipient.toLowerCase();
+            this.recipient = recipient.toLowerCase(java.util.Locale.ROOT);
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -234,57 +232,9 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
-                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/mymessages";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/mymessages";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
+                AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
+                String output = reply.body;
 
                 return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
 
@@ -320,7 +270,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
     }
 
-    private class LoadMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String messageID;
         private String messageText = "";
@@ -335,34 +285,15 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID);
-                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mymessages?command=view&mid=" + messageID
-                            + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword);
-                }
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    connection.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    System.out.println("response code for submit was " + responseCode);
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mymessages?command=view&mid=" + messageID);
+                if (reply.code != 200) {
+                    System.out.println("response code for submit was " + reply.code);
                     return false;
                 }
 
+                // viewMessage.jsp has CRLF line ends; the parsing below expects lines joined by "\n".
                 StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
+                BufferedReader br = new BufferedReader(new StringReader(reply.body));
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     output.append(line + "\n");
@@ -371,7 +302,6 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
 //                System.out.println("submit output: " + output.toString());
 //
-//                String urlParameters  = "command=view&mid=" + messageID + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
 //                byte[] postData       = new byte[0];
 //                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
 //                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
@@ -414,7 +344,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 return true;
 
             } catch (IOException e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "loading the message failed", e1);
                 return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
@@ -443,7 +373,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
     }
 
-    private class DeleteMessageTask extends AsyncTask<Void, Void, Boolean> {
+    private class DeleteMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String messageID;
 
@@ -457,57 +387,8 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  ="command=delete&mid=" + messageID + "&mobile=";
-                String urlParameters = "command=delete&mid=" + messageID + "&mobile="
-                        + "&name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
-                byte[] postData = new byte[0];
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-                }
-                int postDataLength = postData.length;
-                String request = "https://www.pente.org/gameServer/mymessages";
-                if (PentePlayer.development) {
-                    request = "https://10.0.2.2/gameServer/mymessages";
-                }
-                URL url = new URL(request);
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                String cookies = CookieManager.getInstance().getCookie("https://www.pente.org/");
-                if (cookies != null) {
-                    String[] splitCookie = cookies.split(";");
-                    String cookieStr = "";
-                    for (String item : splitCookie) {
-                        if (item.contains("name2") || item.contains("password2")) {
-                            cookieStr += item + ";";
-                        }
-                    }
-                    conn.setRequestProperty("Cookie", cookieStr);
-//                    System.out.println("cookieStr: " +cookieStr);
-                }
-                conn.setDoOutput(true);
-                conn.setInstanceFollowRedirects(false);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("charset", "utf-8");
-                conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                conn.setUseCaches(false);
-                try {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.write(postData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-//                System.out.println(output);
+                String urlParameters = "command=delete&mid=" + messageID + "&mobile=";
+                AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
 
                 return true;
 

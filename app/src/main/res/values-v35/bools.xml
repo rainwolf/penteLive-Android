@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Edge-to-edge (API 35+): dark status bar icons over the light window background. -->
+    <bool name="light_status_bar">true</bool>
+</resources>

@@ -4,6 +4,9 @@ import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
 
+import be.submanifold.pentelive.net.SharedCookies;
+import be.submanifold.pentelive.net.WebkitCookieStorage;
+
 /**
  * Created by waliedothman on 14/05/16.
  */
@@ -16,6 +19,8 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
+        // One cookie store for HttpURLConnection, OkHttp and WebView, before any Activity or Service runs.
+        SharedCookies.install(new WebkitCookieStorage());
     }
 
     public static Context getContext() {

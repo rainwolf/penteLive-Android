@@ -1,9 +1,10 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +14,6 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
 import android.text.method.ScrollingMovementMethod;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,10 +45,11 @@ public class RegisterActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         findViewById(R.id.viewPolicy).setOnClickListener(v -> {
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            Point size = new Point(metrics.widthPixels, metrics.heightPixels);
 
+            // PopupWindow content: no parent at inflation time.
+            @SuppressLint("InflateParams")
             View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.popupwindowinformation, null, false);
             policyView.setBackgroundColor(Color.WHITE);
             PopupWindow messageWindow = new PopupWindow(policyView, size.x - 50, size.y * 3 / 4, true);
@@ -56,15 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
             messageWindow.setOutsideTouchable(true);
             messageWindow.setBackgroundDrawable(ContextCompat.getDrawable(RegisterActivity.this, R.drawable.border));
             messageWindow.showAtLocation(findViewById(R.id.registerView), Gravity.TOP, 0, 260);
-            ((TextView) policyView.findViewById(R.id.informationView)).setText("Pente.org maintains a rating for you when you play \"rated\" games.  The ratings system is important to help you determine your skill level and to help you find worthy opponents.  Pente.org attempts to ensure that ratings accurately reflect a players skill, and therefore certain guidelines must be followed by all players!\n" +
-                    "          \n" +
-                    "1. Play rated games using only your brain.  Do not play with any outside assistance.  Just to be clear, here are some examples of what you should NOT do: use another pente board to examine future positions, use a game database to lookup the current or future positions, use a computer opponent to find moves, consult written notes or books. \n" +
-                    "2. Play rated games at Pente.org with only one user account. Do not create multiple users at and play rated games with them.\n" +
-                    "3. When playing games, you can request to undo your last move, your opponent can choose to accept or deny this request (Pente.org does not care, it is up to you). If you do not plan to accept undo's, you should mention this to your opponent before starting a rated game.\n" +
-                    "4. When watching a rated game, do not make comments about specific game moves, this could affect the outcome of the game.  There is plenty of time for analysis after the game.\n" +
-                    "5.If your opponent is disconnected from the internet, Pente.org allows him/her 7 minutes to return to resume the game.  After that point you may decide to cancel the game or force your opponent to resign.  This feature was implemented to stop other players from bailing out of a losing game.  However, do not abuse this feature, if you are sure you will lose, you should resign the game.  Do not force your opponent to resign unless you are absolutely sure you will win.\n" +
-                    "\n" +
-                    "That's it, and remember to have fun of course!");
+            ((TextView) policyView.findViewById(R.id.informationView)).setText(R.string.rated_play_policy_text);
             ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());
         });
         findViewById(R.id.registerButton).setOnClickListener(v -> attemptRegistration());
@@ -83,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void attemptRegistration() {
-        String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase();
+        String username = ((EditText) findViewById(R.id.username)).getText().toString().toLowerCase(java.util.Locale.ROOT);
         if (username.length() < 5 || username.length() > 10) {
             ((EditText) findViewById(R.id.username)).setError(getString(R.string.username_5_10));
             return;
@@ -117,7 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    public class RegisterTask extends AsyncTask<Void, Void, Boolean> {
+    public class RegisterTask extends BackgroundTask<Void, Boolean> {
 
         private final String username;
         private final String password;
@@ -126,7 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         RegisterTask(String username, String password, String email) {
-            this.username = username.toLowerCase();
+            this.username = username.toLowerCase(java.util.Locale.ROOT);
             this.password = password;
             try {
                 this.email = URLEncoder.encode(email, "UTF-8");
@@ -166,7 +159,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                 StringBuilder output = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                System.out.println("output===============" + br);
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     output.append(line + System.getProperty("line.separator"));
@@ -174,7 +166,6 @@ public class RegisterActivity extends AppCompatActivity {
                 br.close();
 
                 output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-                System.out.println(output);
                 response = output.toString();
 
                 if (response.contains("Registration failed: Requested name " + username + " is already taken, please choose another.")) {

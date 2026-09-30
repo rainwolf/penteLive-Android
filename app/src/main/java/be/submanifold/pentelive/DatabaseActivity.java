@@ -3,13 +3,13 @@ package be.submanifold.pentelive;
 
 import static android.view.View.VISIBLE;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -62,6 +62,10 @@ public class DatabaseActivity extends AppCompatActivity {
 
     private DatePickerDialog afterDatePickerDialog, beforeDatePickerDialog;
 
+    // InflateParams: settingsView/aiSettingsView are AlertDialog content (setView), no parent at inflation time.
+    // ClickableViewAccessibility: the spinner OnTouchListeners only hide the keyboard and return false, so the
+    // spinner's own click handling still runs; calling performClick() there would double-fire it.
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -275,7 +279,7 @@ public class DatabaseActivity extends AppCompatActivity {
         afterDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, (view, year, monthOfYear, dayOfMonth) -> {
             Calendar newDate = Calendar.getInstance();
             newDate.set(year, monthOfYear, dayOfMonth);
-            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy", java.util.Locale.US);
             ((TextView) settingsView.findViewById(R.id.afterDate)).setText(dateFormatter.format(newDate.getTime()));
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
         afterDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (dialog, which) -> {
@@ -288,7 +292,7 @@ public class DatabaseActivity extends AppCompatActivity {
         beforeDatePickerDialog = new DatePickerDialog(this, DatePickerDialog.THEME_HOLO_LIGHT, (view, year, monthOfYear, dayOfMonth) -> {
             Calendar newDate = Calendar.getInstance();
             newDate.set(year, monthOfYear, dayOfMonth);
-            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+            DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy", java.util.Locale.US);
             ((TextView) settingsView.findViewById(R.id.beforeDate)).setText(dateFormatter.format(newDate.getTime()));
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
         beforeDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (dialog, which) -> {
@@ -448,8 +452,8 @@ public class DatabaseActivity extends AppCompatActivity {
     private void doSearch() {
         board.setRedDot(-1);
         progressBar.setVisibility(View.VISIBLE);
-        String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase();
-        String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase();
+        String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase(java.util.Locale.ROOT);
+        String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase(java.util.Locale.ROOT);
         int winner = 0;
         if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(getString(R.string.player1))) {
             winner = 1;
@@ -603,7 +607,7 @@ public class DatabaseActivity extends AppCompatActivity {
     }
 
 
-    public class SearchTask extends AsyncTask<Void, Void, Boolean> {
+    public class SearchTask extends BackgroundTask<Void, Boolean> {
 
         private final String moves;
         private final String game;
@@ -626,8 +630,8 @@ public class DatabaseActivity extends AppCompatActivity {
             this.moves = moves;
             this.game = game;
             this.sortOrder = sortOrder;
-            this.player1 = player1.toLowerCase();
-            this.player2 = player2.toLowerCase();
+            this.player1 = player1.toLowerCase(java.util.Locale.ROOT);
+            this.player2 = player2.toLowerCase(java.util.Locale.ROOT);
             this.winner = winner;
             this.afterDate = afterDate;
             this.beforeDate = beforeDate;

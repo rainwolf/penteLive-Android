@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -82,17 +83,23 @@ public class LobbyListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    // Null root kept: with the list as root, dashboardgroup_layout's fixed 30dp height would replace the list's
+    // default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.dashboardgroup_layout, null);
         }
         convertView.setBackgroundColor(ContextCompat.getColor(activity, R.color.britishracinggreen));
-        ((TextView) convertView.findViewById(R.id.textView)).setText(activity.getString(R.string.rooms) + " (" + rooms.size() + ")");
+        ((TextView) convertView.findViewById(R.id.textView)).setText(activity.getString(R.string.name_with_count, activity.getString(R.string.rooms), String.valueOf(rooms.size())));
 
         return convertView;
     }
 
+    // Null root kept: with the list as root, liveroom_row_layout's ?android:attr/listPreferredItemHeight height would
+    // replace the list's default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 

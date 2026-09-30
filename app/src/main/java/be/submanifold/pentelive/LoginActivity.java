@@ -7,14 +7,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.CookieSyncManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,15 +27,14 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
 
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoom;
 import be.submanifold.pentelive.liveGameRoom.LiveGameRoomActivity;
+import be.submanifold.pentelive.net.AuthedHttp;
+import be.submanifold.pentelive.net.LoginResponse;
 
 
 /**
@@ -48,12 +44,11 @@ public class LoginActivity extends AppCompatActivity
 //        implements LoaderCallbacks<Cursor>
 {
 
+    private static final String TAG = "LoginActivity";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    public static String cookie = null;
-
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -84,7 +79,7 @@ public class LoginActivity extends AppCompatActivity
 
         mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
-            if (id == R.id.login || id == EditorInfo.IME_NULL) {
+            if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
                 attemptLogin();
                 return true;
             }
@@ -145,7 +140,7 @@ public class LoginActivity extends AppCompatActivity
         findViewById(R.id.inviteFriendsButton).setOnClickListener(v -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.putExtra(Intent.EXTRA_SUBJECT, "Play Pente with me?");
-            i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName));
+            i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("You can play with me on your <a href=\"https://itunes.apple.com/us/app/pente-live/id595426592?ls=1&mt=8\">iPhone</a> or <a href=\"https://play.google.com/store/apps/details?id=be.submanifold.pentelive\">Android Phone</a> <br> My username is " + storedUserName, Html.FROM_HTML_MODE_LEGACY));
             startActivity(Intent.createChooser(i, "Invite Friends"));
         });
         findViewById(R.id.getHelpButton).setOnClickListener(v -> {
@@ -227,7 +222,7 @@ public class LoginActivity extends AppCompatActivity
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString().toLowerCase();
+        String email = mEmailView.getText().toString().toLowerCase(java.util.Locale.ROOT);
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -282,32 +277,25 @@ public class LoginActivity extends AppCompatActivity
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
 
@@ -349,7 +337,7 @@ public class LoginActivity extends AppCompatActivity
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends BackgroundTask<Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
@@ -368,34 +356,10 @@ public class LoginActivity extends AppCompatActivity
             // TODO: attempt authentication against a network service.
 
             try {
-//                CookieManager cookieManager = new CookieManager();
-//                CookieHandler.setDefault(cookieManager);
-                CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-                CookieSyncManager.createInstance(LoginActivity.this);
+                // POSTs the credentials in the form body, after clearing the cookie store.
+                LoginResponse.Outcome outcome = AuthedHttp.shared().loginFresh(mEmail, mPassword);
 
-                URL url = new URL("https://www.pente.org/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/login.jsp?mobile=&name2=" + mEmail + "&password2=" + mPassword);
-                }
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                int responseCode = connection.getResponseCode();
-                cookie = connection.getHeaderField("Set-Cookie");
-                System.out.println("cookie: " + cookie);
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + System.getProperty("line.separator"));
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-
-//                System.out.println(output);
-
-                if (output.indexOf("Invalid name or password, please try again.") != -1) {
+                if (outcome == LoginResponse.Outcome.INVALID_CREDENTIALS) {
 //                    AlertDialog.Builder builder1 = new AlertDialog.Builder();
 //                    builder1.setMessage("Write your message here.");
 //                    builder1.setCancelable(true);
@@ -422,10 +386,13 @@ public class LoginActivity extends AppCompatActivity
                     System.out.println("wrong password");
                     return false;
                 }
+                if (outcome == LoginResponse.Outcome.UNEXPECTED) {
+                    throw new IOException("login.jsp did not confirm the login");
+                }
 
             } catch (IOException e1) {
-//                e1.printStackTrace();
-                exception = e1.toString();
+                RedactingLog.e(TAG, "login request failed", e1);
+                exception = RedactingLog.redacted(e1).toString();
                 return false;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
@@ -510,7 +477,7 @@ public class LoginActivity extends AppCompatActivity
     }
 
 
-    public class SendTokenTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendTokenTask extends BackgroundTask<Void, Boolean> {
 
         private final String token;
 
@@ -538,8 +505,6 @@ public class LoginActivity extends AppCompatActivity
                         if (PentePlayer.development) {
                             url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + token);
                         }
-//                        url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroids.jsp?name=" + storedUserName + "&password=" + storedPassword
-//                        + "&token=" + token);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         int responseCode = connection.getResponseCode();
                         if (responseCode != 200) {

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds use src/debug/res/xml/network_security_configuration.xml instead; keep its base-config identical to this one. -->
 <network-security-config>
     <base-config>
         <trust-anchors>

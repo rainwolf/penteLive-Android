@@ -28,6 +28,7 @@
         android:hint="@string/subject"
         android:layout_below="@id/toolbar"
         android:inputType="text"
+        android:importantForAutofill="no"
         android:maxLines="1"
         android:singleLine="true"/>
 
@@ -64,6 +65,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:inputType="textCapSentences|textMultiLine"
+            android:importantForAutofill="no"
             android:scrollbars="vertical"
             android:gravity="top"/>
     </LinearLayout>

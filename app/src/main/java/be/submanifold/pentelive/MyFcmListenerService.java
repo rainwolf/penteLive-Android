@@ -11,11 +11,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -35,6 +32,7 @@ import java.util.Map;
 public class MyFcmListenerService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFcmListenerService";
+    private static final int REGISTRATION_TIMEOUT_MS = 60_000;
     private MediaPlayer mediaPlayer;
 
 
@@ -48,15 +46,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             // Get new FCM registration token
             String refreshedToken = task.getResult();
 
-            System.out.println("Refreshed token: " + refreshedToken);
-            System.out.println("Refreshed token: " + newToken);
             // TODO: Implement this method to send any registration to your app's servers.
             new SendRegistrationTask(refreshedToken).execute();
         }
         );
     }
 
-    public class SendRegistrationTask extends AsyncTask<Void, Void, Boolean> {
+    public class SendRegistrationTask extends BackgroundTask<Void, Boolean> {
 
         private final String token;
 
@@ -80,9 +76,9 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                     if (PentePlayer.development) {
                         url = new URL("https://10.0.2.2/gameServer/notification?device=android&token=" + this.token);
                     }
-//                URL url = new URL("https://www.pente.org/gameServer/notifications/registerDeviceAndroid.jsp?name=" + storedUserName + "&password=" + storedPassword
-//                        + "&token=" + token);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(REGISTRATION_TIMEOUT_MS);
+                    connection.setReadTimeout(REGISTRATION_TIMEOUT_MS);
                     int responseCode = connection.getResponseCode();
                     if (responseCode != 200) {
                         System.out.println("response code for submit was " + responseCode);
@@ -225,15 +221,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
                 NotificationManager notificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    AudioAttributes att = new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build();
-                    NotificationChannel channel = new NotificationChannel(notificationChannel, "penteLive", NotificationManager.IMPORTANCE_DEFAULT);
-                    channel.setSound(notificationSoundUri, att);
-                    notificationManager.createNotificationChannel(channel);
-                }
+                AudioAttributes att = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                NotificationChannel channel = new NotificationChannel(notificationChannel, "penteLive", NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setSound(notificationSoundUri, att);
+                notificationManager.createNotificationChannel(channel);
 
 
                 notificationManager.notify(0 /* ID of notification */, notification);
@@ -258,15 +252,11 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                     }
                     mediaPlayer = new MediaPlayer();
                     mediaPlayer.setDataSource(getApplicationContext(), notificationSoundUri);
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                        AudioAttributes att = new AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .build();
-                        mediaPlayer.setAudioAttributes(att);
-                    } else {
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-                    }
+                    AudioAttributes att = new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build();
+                    mediaPlayer.setAudioAttributes(att);
                     mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                     mediaPlayer.prepare();
                 }
@@ -275,10 +265,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             }
             if (messageStr.contains("your move")) {
                 Intent intent = new Intent("unique_name_computer");
+                intent.setPackage(getPackageName());
                 intent.putExtra("gameID", (String) data.get("gameID"));
                 sendBroadcast(intent);
 
                 intent = new Intent("unique_name");
+                intent.setPackage(getPackageName());
                 //put whatever data you want to send, if any
                 intent.putExtra("message", localMsgStr);
 
@@ -286,6 +278,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                 sendBroadcast(intent);
             } else {
                 Intent intent = new Intent("unique_name");
+                intent.setPackage(getPackageName());
                 //put whatever data you want to send, if any
                 if (!silent) {
                     intent.putExtra("message", localMsgStr);

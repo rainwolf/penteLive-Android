@@ -10,13 +10,12 @@ import okhttp3.CookieJar;
  * Production Session backed by SharedPreferences via {@link PrefUtils}.
  * Credentials are read from (and credential updates written back to) the
  * PREFS_LOGIN_USERNAME_KEY / PREFS_LOGIN_PASSWORD_KEY entries, replacing the
- * PentePlayer.mPlayerName/mPassword statics (PentePlayer.java:35-36). The
- * cookie store lives in memory for the process lifetime.
+ * PentePlayer.mPlayerName/mPassword statics (PentePlayer.java:35-36). Cookies
+ * go to the app's one shared, persistent store ({@link SharedCookies}).
  */
 public final class SharedPrefsSession implements Session {
 
     private final Context appContext;
-    private final InMemoryCookieJar cookieJar = new InMemoryCookieJar();
 
     public SharedPrefsSession(Context context) {
         this.appContext = context.getApplicationContext();
@@ -34,7 +33,7 @@ public final class SharedPrefsSession implements Session {
 
     @Override
     public CookieJar cookieJar() {
-        return cookieJar;
+        return SharedCookies.okHttpJar();
     }
 
     @Override

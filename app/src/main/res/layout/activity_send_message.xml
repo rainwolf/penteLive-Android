@@ -40,6 +40,7 @@
         android:hint="@string/subject"
         android:layout_below="@id/recipient"
         android:inputType="text"
+        android:importantForAutofill="no"
         android:maxLines="1"
         android:singleLine="true"/>
 
@@ -59,8 +60,8 @@
         android:paddingRight="5dp"
         android:layout_below="@id/subject"
         android:layout_above="@id/sendButton"
-        android:imeActionId="@+id/login"
         android:inputType="textCapSentences|textMultiLine"
+        android:importantForAutofill="no"
         android:scrollbars="vertical"
         android:gravity="top"/>
 

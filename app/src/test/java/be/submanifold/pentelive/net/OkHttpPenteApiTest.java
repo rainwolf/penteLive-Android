@@ -3,6 +3,7 @@ package be.submanifold.pentelive.net;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ public class OkHttpPenteApiTest {
 
     private static final String WHOS_ONLINE = "whosonlineandlive.jsp";
     private static final String LOGIN = "login.jsp";
+    /** login.jsp confirms a login by rendering the logged-in tabs, whose Logout link is the marker. */
+    static final String LOGIN_OK = "<a href=\"/gameServer/logout\">Logout</a>";
 
     @Before
     public void setUp() throws Exception {
@@ -77,7 +80,7 @@ public class OkHttpPenteApiTest {
                 if (path.endsWith(LOGIN)) {
                     loginHits.incrementAndGet();
                     authed.set(true);
-                    return new MockResponse().setResponseCode(200).setBody("ok");
+                    return new MockResponse().setResponseCode(200).setBody(LOGIN_OK);
                 }
                 if (path.endsWith(WHOS_ONLINE)) {
                     // Logged-out sentinel before auth: 200 with an empty (null-parsing) body.
@@ -112,24 +115,26 @@ public class OkHttpPenteApiTest {
         assertEquals("exactly one re-login despite N concurrent expiries", 1, loginHits.get());
     }
 
-    /** (b) credential-drop regression: re-login AND the retried request carry name2/password2. */
+    /**
+     * (b) No credentials in any URL: the data requests carry none, and the re-login POSTs
+     * them in the form body of login.jsp.
+     */
     @Test
-    public void reAuthRetry_keepsName2AndPassword2() throws Exception {
-        final List<HttpUrl> dataRequests = Collections.synchronizedList(new ArrayList<>());
-        final List<HttpUrl> loginRequests = Collections.synchronizedList(new ArrayList<>());
+    public void reAuthRetry_sendsNoQueryCredentials_andLogsInByPost() throws Exception {
+        final List<RecordedRequest> dataRequests = Collections.synchronizedList(new ArrayList<>());
+        final List<RecordedRequest> loginRequests = Collections.synchronizedList(new ArrayList<>());
         final AtomicBoolean authed = new AtomicBoolean(false);
         server.setDispatcher(new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) {
-                HttpUrl u = request.getRequestUrl();
-                String path = u.encodedPath();
+                String path = request.getRequestUrl().encodedPath();
                 if (path.endsWith(LOGIN)) {
-                    loginRequests.add(u);
+                    loginRequests.add(request);
                     authed.set(true);
-                    return new MockResponse().setResponseCode(200).setBody("ok");
+                    return new MockResponse().setResponseCode(200).setBody(LOGIN_OK);
                 }
                 if (path.endsWith(WHOS_ONLINE)) {
-                    dataRequests.add(u);
+                    dataRequests.add(request);
                     if (!authed.get()) {
                         return new MockResponse().setResponseCode(200).setBody(""); // expiry signal
                     }
@@ -143,17 +148,56 @@ public class OkHttpPenteApiTest {
 
         assertTrue("call succeeds after a single re-auth retry", result.isOk());
         assertEquals("initial expiry + one retry == two data requests", 2, dataRequests.size());
-
-        HttpUrl retry = dataRequests.get(1);
-        assertEquals("name2 preserved on retried data request (regression for PentePlayer.java:678)",
-                "alice", retry.queryParameter("name2"));
-        assertEquals("password2 preserved on retried data request",
-                "secret", retry.queryParameter("password2"));
+        for (RecordedRequest data : dataRequests) {
+            assertNull("no query credentials on data requests", data.getRequestUrl().query());
+        }
 
         assertEquals("exactly one re-login request", 1, loginRequests.size());
-        HttpUrl login = loginRequests.get(0);
-        assertEquals("re-login carries name2", "alice", login.queryParameter("name2"));
-        assertEquals("re-login carries password2", "secret", login.queryParameter("password2"));
+        RecordedRequest login = loginRequests.get(0);
+        assertEquals("POST", login.getMethod());
+        assertNull("no query string on the login URL", login.getRequestUrl().query());
+        assertEquals("mobile=&name2=alice&password2=secret", login.getBody().readUtf8());
+    }
+
+    /**
+     * The real logged-out answer of whosonlineandlive.jsp: a 302 to mobile/index.jsp, which
+     * prints the invalid-login text. It maps to one re-login and one retry.
+     */
+    @Test
+    public void redirectToMobileIndex_reAuthsAndRetries() throws Exception {
+        final AtomicInteger loginHits = new AtomicInteger(0);
+        final AtomicInteger dataHits = new AtomicInteger(0);
+        server.setDispatcher(new Dispatcher() {
+            @Override
+            public MockResponse dispatch(RecordedRequest request) {
+                String path = request.getRequestUrl().encodedPath();
+                if (path.endsWith(LOGIN)) {
+                    loginHits.incrementAndGet();
+                    return new MockResponse().setResponseCode(200)
+                            .addHeader("Set-Cookie", "JSESSIONID=s1; Path=/")
+                            .setBody(LOGIN_OK);
+                }
+                if (path.equals("/gameServer/mobile/index.jsp")) {
+                    return new MockResponse().setResponseCode(200)
+                            .setBody("Invalid name or password, please try again.");
+                }
+                if (path.endsWith(WHOS_ONLINE)) {
+                    dataHits.incrementAndGet();
+                    if (loginHits.get() == 0) {
+                        return new MockResponse().setResponseCode(302)
+                                .addHeader("Location", "/gameServer/mobile/index.jsp");
+                    }
+                    return new MockResponse().setResponseCode(200).setBody("[]");
+                }
+                return new MockResponse().setResponseCode(404);
+            }
+        });
+
+        Result<WhosOnline> result = api.whosOnline();
+
+        assertTrue(result.isOk());
+        assertEquals(1, loginHits.get());
+        assertEquals(2, dataHits.get());
     }
 
     /** Reason mapping: a 500 (non-auth) maps to SERVER with its http code, and never re-auths. */
@@ -208,13 +252,29 @@ public class OkHttpPenteApiTest {
         assertEquals(Result.Reason.INVALID_CREDENTIALS, result.failure.reason);
     }
 
-    /** Reason mapping: a good login (200, no marker) succeeds. */
+    /** Reason mapping: a login page with neither marker is not a success. */
     @Test
-    public void loginValidCredentials_succeeds() {
+    public void loginUnconfirmed_mapsToParse() {
         server.setDispatcher(new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) {
-                return new MockResponse().setResponseCode(200).setBody("welcome");
+                return new MockResponse().setResponseCode(200).setBody("<form name=\"login_form\">");
+            }
+        });
+
+        Result<Boolean> result = api.login("alice", "secret");
+
+        assertFalse(result.isOk());
+        assertEquals(Result.Reason.PARSE, result.failure.reason);
+    }
+
+    /** Reason mapping: a good login (200, logout link) succeeds, by POST. */
+    @Test
+    public void loginValidCredentials_succeeds() throws Exception {
+        server.setDispatcher(new Dispatcher() {
+            @Override
+            public MockResponse dispatch(RecordedRequest request) {
+                return new MockResponse().setResponseCode(200).setBody(LOGIN_OK);
             }
         });
 
@@ -222,6 +282,9 @@ public class OkHttpPenteApiTest {
 
         assertTrue(result.isOk());
         assertEquals(Boolean.TRUE, result.value);
+        RecordedRequest login = server.takeRequest(5, TimeUnit.SECONDS);
+        assertEquals("POST", login.getMethod());
+        assertNull(login.getRequestUrl().query());
     }
 
     /**
@@ -255,6 +318,8 @@ public class OkHttpPenteApiTest {
         HttpUrl sel = server.takeRequest(5, TimeUnit.SECONDS).getRequestUrl();
         assertEquals("130,200", sel.queryParameter("moves"));
         assertEquals("select", sel.queryParameter("renjuAction"));
+        assertNull(sel.queryParameter("name2"));
+        assertNull(sel.queryParameter("password2"));
     }
 
     /** An expiry that survives the single re-auth maps to AUTH_EXPIRED (retry is capped at one). */
@@ -266,7 +331,7 @@ public class OkHttpPenteApiTest {
             public MockResponse dispatch(RecordedRequest request) {
                 if (request.getRequestUrl().encodedPath().endsWith(LOGIN)) {
                     loginHits.incrementAndGet();
-                    return new MockResponse().setResponseCode(200).setBody("ok");
+                    return new MockResponse().setResponseCode(200).setBody(LOGIN_OK);
                 }
                 // Always returns the logged-out sentinel, even after re-login.
                 return new MockResponse().setResponseCode(200).setBody("");

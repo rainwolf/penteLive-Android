@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 
@@ -36,6 +35,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import be.submanifold.pentelive.net.PenteUrls;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -92,13 +93,13 @@ public class SettingsActivity extends AppCompatActivity {
             task.execute((Void) null);
         });
         findViewById(R.id.preferencesButton).setOnClickListener(v -> {
-            String url = "https://www.pente.org/gameServer/myprofile/prefs?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            String url = PenteUrls.web("/gameServer/myprofile/prefs");
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
         });
         findViewById(R.id.subscribeButton).setOnClickListener(v -> {
-            String url = "https://www.pente.org/gameServer/subscriptions?name2=" + PentePlayer.mPlayerName + "&password2=" + PentePlayer.mPassword;
+            String url = PenteUrls.web("/gameServer/subscriptions");
             Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
             intent.putExtra("url", url);
             startActivity(intent);
@@ -172,7 +173,6 @@ public class SettingsActivity extends AppCompatActivity {
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
             bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
 
             imageBitmap = BitmapFactory.decodeStream(inputStream, null, bmOptions);
             inputStream.close(); // Close the input stream when done
@@ -214,7 +214,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
@@ -242,7 +242,7 @@ public class SettingsActivity extends AppCompatActivity {
         return bm;
     }
 
-    private static class UploadAvatarTask extends AsyncTask<Void, Void, Boolean> {
+    private static class UploadAvatarTask extends BackgroundTask<Void, Boolean> {
 
         private final byte[] bytes;
 
@@ -322,7 +322,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private static class ChangeColorTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeColorTask extends BackgroundTask<Void, Boolean> {
 
         private final String colorString;
 
@@ -375,7 +375,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private static class ChangeEmailPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+    private static class ChangeEmailPreferenceTask extends BackgroundTask<Void, Boolean> {
 
         private final boolean emailMe;
 
@@ -430,7 +430,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private class ChangeAdsPersonalizationPreferenceTask extends AsyncTask<Void, Void, Boolean> {
+    private class ChangeAdsPersonalizationPreferenceTask extends BackgroundTask<Void, Boolean> {
 
         private final boolean personalizeAds;
 

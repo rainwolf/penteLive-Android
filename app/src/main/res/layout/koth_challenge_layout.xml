@@ -12,10 +12,9 @@
         android:layout_height="45dp"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="challenge"
+        android:text="@string/challenge_label"
         android:textAlignment="center"
         android:id="@+id/titleLabel"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -27,18 +26,17 @@
         android:textStyle="bold"
         android:id="@+id/timeoutLabel"
         android:layout_below="@id/titleLabel"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <androidx.appcompat.widget.AppCompatSpinner
         android:spinnerMode="dialog"
         android:id="@+id/timeoutSpinner"
-        android:layout_toRightOf="@id/timeoutLabel"
+        android:layout_toEndOf="@id/timeoutLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_below="@id/titleLabel"
         android:layout_width="match_parent"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
     <LinearLayout
         android:id="@+id/restrictionLayout"
@@ -56,18 +54,15 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/to_players"
             android:textStyle="bold"
-            android:id="@+id/restrictionLabel"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:id="@+id/restrictionLabel" />
         <androidx.appcompat.widget.AppCompatSpinner
             android:spinnerMode="dialog"
             android:id="@+id/restrictionSpinner"
-            android:layout_toRightOf="@id/restrictionLabel"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:textAlignment="center"
             android:layout_height="45dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical|center_horizontal">
         </androidx.appcompat.widget.AppCompatSpinner>
     </LinearLayout>
 

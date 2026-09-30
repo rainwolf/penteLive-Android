@@ -1,5 +1,6 @@
 package be.submanifold.pentelive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -98,6 +99,9 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    // Null root kept: with the list as root, dashboardgroup_layout's fixed 30dp height and empty's 0dp width would
+    // replace the list's default match_parent x wrap_content.
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (following) {
@@ -115,6 +119,9 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    // Null root kept: with the list as root, social_row's ?android:attr/listPreferredItemHeight height would replace
+    // the list's default wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
@@ -150,7 +157,7 @@ public class SocialListAdapter extends BaseExpandableListAdapter {
         nameTextView.setText(sb);
 
         int rating = player.getRating(game);
-        ((TextView) convertView.findViewById(R.id.ratingText)).setText("" + rating);
+        ((TextView) convertView.findViewById(R.id.ratingText)).setText(String.valueOf(rating));
         ((TextView) convertView.findViewById(R.id.ratingColorText)).setText(player.coloredRatingSquare(rating));
 
         return convertView;

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-build override of src/main/res/xml/network_security_configuration.xml. Keep the base-config below identical to that file. -->
+<network-security-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="@raw/isrgrootx1" />
+            <certificates src="@raw/isrgrootx2" />
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="@raw/dev_localhost" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

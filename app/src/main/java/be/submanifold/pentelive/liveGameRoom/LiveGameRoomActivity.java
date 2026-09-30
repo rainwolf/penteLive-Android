@@ -3,13 +3,12 @@ package be.submanifold.pentelive.liveGameRoom;
 import static be.submanifold.pentelive.PentePlayer.development;
 
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 import androidx.fragment.app.FragmentManager;
 
 import org.json.JSONArray;
@@ -25,16 +25,8 @@ import org.json.JSONObject;
 import org.pente.gameServer.event.ClientSocketDSGEventHandler;
 import org.pente.gameServer.event.DSGEventListener;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.Socket;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,26 +35,33 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
+import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
+import be.submanifold.pentelive.RedactingLog;
+import be.submanifold.pentelive.net.AuthedHttp;
 
 public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventListener, LiveGameRoomFragment.OnFragmentInteractionListener, LiveTableFragment.OnFragmentInteractionListener {
 
+    private static final String TAG = "LiveGameRoomActivity";
+    private static final int SOCKET_CONNECT_TIMEOUT_MS = 60_000;
+    // The server pings every logged-in player, idle or not, every 15 s (DSGEventPingManager),
+    // so 60 s of silence means about four missed pings: the connection is gone.
+    private static final int LIVE_READ_TIMEOUT_MS = 60_000;
+
     private volatile ClientSocketDSGEventHandler eventHandler;
+    private volatile boolean destroyed;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
     private final LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
 
-    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase();
+    private String me = PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
     private boolean isArena = false;
 
     public String getMe() {
@@ -77,30 +76,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private static final int NEW_MOVE_SOUND = 2;
     private MediaPlayer mediaPlayer;
 
-    final TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[]{};
-                }
-            }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_game_room);
-        room = getIntent().getParcelableExtra("room");
+        room = IntentCompat.getParcelableExtra(getIntent(), "room", LiveGameRoom.class);
         isArena = room != null && room.getName() != null
-                && room.getName().toLowerCase().contains("arena");
+                && room.getName().toLowerCase(java.util.Locale.ROOT).contains("arena");
 //        System.out.println(room.getName());
 
         self = this;
@@ -134,25 +116,38 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private void connectSocket(final int port) {
         (new Thread() {
             public void run() {
-                Socket socket = null;
+                SSLSocket socket;
                 try {
-                    SocketFactory factory;
-                    if (development) {
-                        final SSLContext sslContext = SSLContext.getInstance("SSL");
-                        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                        factory = sslContext.getSocketFactory();
-                        socket = factory.createSocket("10.0.2.2", port);
-                    } else {
-                        factory = SSLSocketFactory.getDefault();
-                        socket = factory.createSocket("pente.org", port);
-                    }
+                    socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
+                } catch (IOException e) {
+                    reportConnectionFailure(port, e);
+                    return;
+                }
+                try {
+                    String host = development ? "10.0.2.2" : "pente.org";
+                    socket.connect(new InetSocketAddress(host, port), SOCKET_CONNECT_TIMEOUT_MS);
+                    // Handshake now rather than on first I/O inside the event handler threads,
+                    // which drop errors silently, so TLS failures take the same path as connect
+                    // failures.
+                    socket.setSoTimeout(SOCKET_CONNECT_TIMEOUT_MS);
+                    socket.startHandshake();
+                    // Keep a read timeout on the live socket so a connection that silently stops
+                    // delivering data is reported instead of hanging the room.
+                    socket.setSoTimeout(LIVE_READ_TIMEOUT_MS);
                     // because client sends many short messages
                     socket.setTcpNoDelay(true);
-                    // timeout after 30 seconds
-                    // this should be ok because we receive pings every 15 seconds
-                    //socket.setSoTimeout(30 * 1000);
 
-                    eventHandler = new ClientSocketDSGEventHandler(socket);
+                    // The handler logs the lost connection; the room shows the same dialog as a
+                    // failed connect and closes on dismiss.
+                    eventHandler = new ClientSocketDSGEventHandler(socket,
+                            cause -> runOnUiThread(self::showConnectionError));
+                    if (destroyed) {
+                        // onDestroy ran while this thread was connecting and found no handler
+                        // to destroy; close this one instead of leaking the socket and the room.
+                        Log.w(TAG, "live game room closed while connecting; disconnecting");
+                        eventHandler.destroy();
+                        return;
+                    }
                     eventHandler.addListener(self);
                     String username = PentePlayer.mPlayerName;
                     String password = PentePlayer.mPassword;
@@ -162,19 +157,45 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                         eventHandler.eventOccurred("{\"dsgLoginEvent\":{\"player\":\"" + username + "\",\"password\":\"" + password + "\",\"guest\":false,\"time\":0}}");
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (KeyManagementException e) {
-                    throw new RuntimeException(e);
+                    try {
+                        socket.close();
+                    } catch (IOException closeError) {
+                        e.addSuppressed(closeError);
+                    }
+                    reportConnectionFailure(port, e);
                 }
             }
         }).start();
     }
 
+    private void reportConnectionFailure(int port, IOException e) {
+        Log.e(TAG, "live game room connection on port " + port + " failed", e);
+        runOnUiThread(this::showConnectionError);
+    }
+
+    /**
+     * Same dialog title as LoginActivity's connection failure. Dismissing it leaves the room,
+     * as BootMeTask does when it fails, instead of staying on an empty, unconnected room.
+     */
+    private void showConnectionError() {
+        if (isFinishing() || isDestroyed()) {
+            // User already left the room; the failure is logged and there is no window to show it on.
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.connection_wrong))
+                .setMessage(getString(R.string.error_connecting))
+                .setPositiveButton(getString(R.string.dismiss), null)
+                .setOnDismissListener(dialog -> finish())
+                .show();
+    }
+
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy");
+        // Set before reading eventHandler (both volatile): either this thread sees the handler
+        // the connect thread stored, or the connect thread sees this flag and destroys it.
+        destroyed = true;
         (new Thread() {
             public void run() {
                 if (eventHandler != null) {
@@ -210,15 +231,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 //            }
             try {
                 mediaPlayer.setDataSource(getApplicationContext(), soundUri);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    AudioAttributes att = new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build();
-                    mediaPlayer.setAudioAttributes(att);
-                } else {
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-                }
+                AudioAttributes att = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                mediaPlayer.setAudioAttributes(att);
                 mediaPlayer.setOnPreparedListener(mediaPlayer -> mediaPlayer.start());
                 mediaPlayer.prepare();
             } catch (IOException e) {
@@ -241,7 +258,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                             @Override
                             public void run() {
                                 if (development) {
-                                    System.out.println("jsonEvent: " + jsonEvent);
+                                    System.out.println("jsonEvent: " + LiveEventRedaction.withPasswordsRedacted(jsonEvent));
                                 }
                                 if (jsonEvent.get("dsgJoinMainRoomEvent") != null) {
                                     tablesAndPlayers.joinMainRoom((Map<String, ?>) jsonEvent.get("dsgJoinMainRoomEvent"));
@@ -772,7 +789,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             tableText.setText(getString(R.string.invites_you, gameStr));
 
             TextView invitationText = view.findViewById(R.id.invitationText);
-            invitationText.setText(getString(R.string.message) + ": \"" + inviteText + "\"");
+            invitationText.setText(getString(R.string.label_quoted, getString(R.string.message), inviteText));
             final EditText replyText = view.findViewById(R.id.replyText);
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
 
@@ -823,7 +840,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 return retMap;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            // Not e itself: org.json quotes the whole input in its message, and the event can be
+            // the login echo carrying the password.
+            Log.e(TAG, "incoming live event (" + jsonStr.length() + " chars) is not a JSON object;"
+                    + " the event and the parser message are withheld because they can hold the password");
         }
         return null;
     }
@@ -872,7 +892,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         return list;
     }
 
-    public class BootMeTask extends AsyncTask<Void, Void, Boolean> {
+    public class BootMeTask extends BackgroundTask<Void, Boolean> {
         String storedUserName = PrefUtils.getFromPrefs(LiveGameRoomActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, null);
         String storedPassword = PrefUtils.getFromPrefs(LiveGameRoomActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, null);
 
@@ -884,31 +904,20 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
             try {
                 try {
-                    URL url = new URL("https://www.pente.org/gameServer/bootMeMobile.jsp?name2=" + storedUserName + "&password2=" + storedPassword);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode != 200) {
-                        System.out.println("response code for submit was " + responseCode);
+                    AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/bootMeMobile.jsp");
+                    if (reply.code != 200) {
+                        System.out.println("response code for submit was " + reply.code);
                     }
-
-                    StringBuilder output = new StringBuilder();
-                    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    String line = "";
-                    while ((line = br.readLine()) != null) {
-                        output.append(line + "\n");
-                    }
-                    br.close();
-//                        System.out.println("output===============" + "\n" + output.toString());
 
 
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    RedactingLog.e(TAG, "boot request failed", e1);
                 }
 
                 // Add custom implementation, as needed.
 
             } catch (Exception e1) {
-                e1.printStackTrace();
+                RedactingLog.e(TAG, "boot request failed", e1);
                 return false;
             }
             return true;

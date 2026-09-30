@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug builds can point at a local backend (https://10.0.2.2 on the emulator). From
+    targetSdk 37, local-network traffic is blocked unless ACCESS_LOCAL_NETWORK is granted.
+    It is a runtime permission (NEARBY_DEVICES group) and is not requested in-app; grant it
+    with `adb install -g` or
+    `adb shell pm grant be.submanifold.pentelive android.permission.ACCESS_LOCAL_NETWORK`.
+    Release builds only reach public hosts and do not declare it.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+</manifest>

@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_lock"
         android:icon="@drawable/ic_action_lock_open"
-        android:title="back to dashboard after moving"
+        android:title="@string/back_to_dashboard_after_moving"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="always"/>
     <item
@@ -17,13 +17,13 @@
     <item
         android:id="@+id/action_cancel_resign"
         android:icon="@drawable/ic_do_not_disturb"
-        android:title="cancel game or resign"
+        android:title="@string/cancel_game_or_resign"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_new_message"
         android:icon="@drawable/ic_chat"
-        android:title="add message"
+        android:title="@string/add_message"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="always"/>
 

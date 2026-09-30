@@ -18,12 +18,16 @@
 
 package org.pente.gameServer.event;
 
+import android.util.Log;
+
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class SocketDSGEventHandler implements DSGEventListener {
+
+    private static final String TAG = "SocketDSGEventHandler";
 
     Socket socket;
     ObjectInputStream in;
@@ -38,12 +42,18 @@ public class SocketDSGEventHandler implements DSGEventListener {
     Thread writeObjectThread;
     volatile boolean running;
 
-    Vector listeners = new Vector();
-    SynchronizedQueue outputQueue = new SynchronizedQueue();
+    /** Told once when the connection dies from an error; not when {@link #destroy()} closes it. */
+    public interface ConnectionLostListener {
+        void connectionLost(Throwable cause);
+    }
+
+    ConnectionLostListener connectionLostListener;
+
+    Vector<DSGEventListener> listeners = new Vector<>();
+    SynchronizedQueue<String> outputQueue = new SynchronizedQueue<>();
 
     class ObjectReader implements Runnable {
         public void run() {
-            Throwable t = null;
             try {
                 String jsonStr = null;
                 int b = -1;
@@ -71,23 +81,20 @@ public class SocketDSGEventHandler implements DSGEventListener {
                         notifyListeners(jsonStr);
 //                        System.out.println("ObjectReader: " + jsonStr);
                     } else {
-                        handleError(null);
-                        return;
+                        throw new EOFException("server closed the connection");
                     }
                 }
+                // the loop only ends when destroy() stopped the handler: nothing to report
                 // on any throwable stop the thread
             } catch (Throwable th) {
 //                System.out.println("ObjectReader error: " + th);
-                t = th;
+                handleError(th);
             }
-
-            handleError(t);
         }
     }
 
     class ObjectWriter implements Runnable {
         public void run() {
-            Throwable t = null;
             try {
                 while (running) {
 
@@ -96,11 +103,9 @@ public class SocketDSGEventHandler implements DSGEventListener {
                         throw new IOException("Socket or outputstream is null.");
                     }
 
-                    Object o = outputQueue.remove();
+                    String jsonStr = outputQueue.remove();
 
                     if (!running) break;
-
-                    String jsonStr = (String) o;
 
 //                    System.out.println("ObjectWriter: " + jsonStr);
 
@@ -114,13 +119,12 @@ public class SocketDSGEventHandler implements DSGEventListener {
                     // out.writeObject(o);
                     // out.reset();
                 }
+                // the loop only ends when destroy() stopped the handler: nothing to report
                 // on any throwable stop the thread
             } catch (Throwable th) {
 //                System.out.println("ObjectWriter error: " + th);
-                t = th;
+                handleError(th);
             }
-
-            handleError(t);
         }
     }
 
@@ -140,11 +144,18 @@ public class SocketDSGEventHandler implements DSGEventListener {
     }
 
     public void destroy() {
+        stop();
+    }
 
-        // only destroy once
-        if (!running) return;
-
-        running = false;
+    /**
+     * Stops both threads and closes the socket, once: returns false, doing nothing, if the
+     * handler was already stopped (by destroy() or by an earlier error).
+     */
+    private boolean stop() {
+        synchronized (this) {
+            if (!running) return false;
+            running = false;
+        }
         if (readObjectThread != null) {
             readObjectThread.interrupt();
             readObjectThread = null;
@@ -166,10 +177,21 @@ public class SocketDSGEventHandler implements DSGEventListener {
                 out = null;
             }
         }
+        return true;
     }
 
+    /**
+     * A reader or writer thread failed. If the handler was still running the connection is
+     * lost: tear it down and tell the listener. If destroy() already stopped it, the failure
+     * is that destroy closing the socket under the thread.
+     */
     void handleError(Throwable t) {
-        destroy();
+        if (stop()) {
+            Log.e(TAG, "live connection lost, disconnecting", t);
+            connectionLostListener.connectionLost(t);
+        } else {
+            Log.d(TAG, "socket thread ended after destroy", t);
+        }
 //        notifyListeners(new DSGExitMainRoomEvent());
     }
 
@@ -182,7 +204,7 @@ public class SocketDSGEventHandler implements DSGEventListener {
 
     public void notifyListeners(String dsgEvent) {
         for (int i = 0; i < listeners.size(); i++) {
-            ((DSGEventListener) listeners.elementAt(i)).eventOccurred(dsgEvent);
+            listeners.elementAt(i).eventOccurred(dsgEvent);
         }
     }
 

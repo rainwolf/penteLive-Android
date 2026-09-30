@@ -24,16 +24,16 @@
         android:text="@string/game"
         android:textStyle="bold"
         android:id="@+id/gameLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <androidx.appcompat.widget.AppCompatSpinner
         android:spinnerMode="dialog"
         android:id="@+id/gameSpinner"
-        android:layout_toRightOf="@id/gameLabel"
+        android:layout_toEndOf="@id/gameLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
 
 
@@ -46,20 +46,19 @@
         android:textStyle="bold"
         android:id="@+id/sortLabel"
         android:layout_below="@id/gameLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
-        android:layout_toRightOf="@id/sortLabel"
+        android:layout_toEndOf="@id/sortLabel"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/popularity"
         android:layout_below="@id/gameSpinner"
         android:id="@+id/sortChoice"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -67,18 +66,19 @@
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/player1_label"
+        android:labelFor="@+id/player1"
         android:textStyle="bold"
         android:id="@+id/player1Label"
         android:layout_below="@id/sortLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <AutoCompleteTextView
         android:id="@+id/player1"
         android:layout_width="match_parent"
         android:layout_below="@id/sortChoice"
-        android:layout_toRightOf="@id/player1Label"
+        android:layout_toEndOf="@id/player1Label"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical|center_horizontal" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -86,18 +86,19 @@
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/player2_label"
+        android:labelFor="@+id/player2"
         android:textStyle="bold"
         android:id="@+id/player2Label"
         android:layout_below="@id/player1Label"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <AutoCompleteTextView
         android:id="@+id/player2"
         android:layout_width="match_parent"
         android:layout_below="@id/player1"
         android:textAlignment="center"
-        android:layout_toRightOf="@id/player2Label"
+        android:layout_toEndOf="@id/player2Label"
         android:layout_height="45dp"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical|center_horizontal" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -108,20 +109,19 @@
         android:textStyle="bold"
         android:id="@+id/winnerLabel"
         android:layout_below="@id/player2Label"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
-        android:layout_toRightOf="@id/winnerLabel"
+        android:layout_toEndOf="@id/winnerLabel"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/either"
         android:layout_below="@id/player2"
         android:id="@+id/winner"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -132,20 +132,19 @@
         android:textStyle="bold"
         android:id="@+id/afterLabel"
         android:layout_below="@id/winnerLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_below="@id/winner"
         android:hint="@string/tap_to_set"
-        android:layout_toRightOf="@id/afterLabel"
+        android:layout_toEndOf="@id/afterLabel"
         android:id="@+id/afterDate"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentEnd="true" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="45dp"
@@ -155,20 +154,19 @@
         android:textStyle="bold"
         android:id="@+id/beforeLabel"
         android:layout_below="@id/afterLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:gravity="center_vertical"
-        android:onClick="onClick"
+        android:gravity="center_vertical|center_horizontal"
         android:clickable="true"
         android:textAlignment="center"
         android:hint="@string/tap_to_set"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_below="@id/afterDate"
-        android:layout_toRightOf="@id/beforeLabel"
+        android:layout_toEndOf="@id/beforeLabel"
         android:id="@+id/beforeDate"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentEnd="true" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
@@ -178,17 +176,17 @@
                 android:textStyle="bold"
                 android:id="@+id/p1RatingLabel"
                 android:layout_below="@id/beforeLabel"
-                android:layout_alignParentLeft="true" />
+                android:layout_alignParentStart="true" />
             <androidx.appcompat.widget.AppCompatSpinner
                 android:spinnerMode="dialog"
                 android:id="@+id/p1RatingSpinner"
-                android:layout_toRightOf="@id/p1RatingLabel"
+                android:layout_toEndOf="@id/p1RatingLabel"
                 android:layout_below="@id/beforeDate"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:layout_width="match_parent"
                 android:textAlignment="center"
                 android:layout_height="45dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical|center_horizontal">
             </androidx.appcompat.widget.AppCompatSpinner>
             <TextView
                 android:layout_width="wrap_content"
@@ -199,17 +197,17 @@
                 android:textStyle="bold"
                 android:id="@+id/p2RatingLabel"
                 android:layout_below="@id/p1RatingLabel"
-                android:layout_alignParentLeft="true" />
+                android:layout_alignParentStart="true" />
             <androidx.appcompat.widget.AppCompatSpinner
                 android:spinnerMode="dialog"
                 android:id="@+id/p2RatingSpinner"
-                android:layout_toRightOf="@id/p2RatingLabel"
+                android:layout_toEndOf="@id/p2RatingLabel"
                 android:layout_below="@id/p1RatingSpinner"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:layout_width="match_parent"
                 android:textAlignment="center"
                 android:layout_height="45dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical|center_horizontal">
             </androidx.appcompat.widget.AppCompatSpinner>
             <TextView
                 android:layout_width="wrap_content"
@@ -220,20 +218,19 @@
                 android:textStyle="bold"
                 android:id="@+id/eitherOrBothLabel"
                 android:layout_below="@id/p2RatingLabel"
-                android:layout_alignParentLeft="true" />
+                android:layout_alignParentStart="true" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
-                android:gravity="center_vertical"
-                android:onClick="onClick"
+                android:gravity="center_vertical|center_horizontal"
                 android:clickable="true"
-                android:layout_toRightOf="@id/eitherOrBothLabel"
+                android:layout_toEndOf="@id/eitherOrBothLabel"
                 android:textAlignment="center"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/both"
                 android:layout_below="@id/p2RatingSpinner"
                 android:id="@+id/eitherOrBoth"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentEnd="true" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
@@ -243,20 +240,19 @@
                 android:textStyle="bold"
                 android:id="@+id/excludeTimeoutsLabel"
                 android:layout_below="@id/eitherOrBothLabel"
-                android:layout_alignParentLeft="true" />
+                android:layout_alignParentStart="true" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
-                android:gravity="center_vertical"
-                android:onClick="onClick"
+                android:gravity="center_vertical|center_horizontal"
                 android:clickable="true"
-                android:layout_toRightOf="@id/excludeTimeoutsLabel"
+                android:layout_toEndOf="@id/excludeTimeoutsLabel"
                 android:textAlignment="center"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/no"
                 android:layout_below="@id/eitherOrBoth"
                 android:id="@+id/excludeTimeouts"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentEnd="true" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
@@ -266,20 +262,19 @@
                 android:textStyle="bold"
                 android:id="@+id/liveOrTBLabel"
                 android:layout_below="@id/excludeTimeoutsLabel"
-                android:layout_alignParentLeft="true" />
+                android:layout_alignParentStart="true" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
-                android:gravity="center_vertical"
-                android:onClick="onClick"
+                android:gravity="center_vertical|center_horizontal"
                 android:clickable="true"
-                android:layout_toRightOf="@id/liveOrTBLabel"
+                android:layout_toEndOf="@id/liveOrTBLabel"
                 android:textAlignment="center"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/all"
                 android:layout_below="@id/excludeTimeouts"
                 android:id="@+id/liveOrTB"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentEnd="true" />
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

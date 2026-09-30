@@ -22,6 +22,7 @@
         android:layout_below="@+id/opponentMessage"
         android:layout_centerHorizontal="true"
         android:inputType="textCapSentences"
+        android:importantForAutofill="no"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"/>
 </RelativeLayout>

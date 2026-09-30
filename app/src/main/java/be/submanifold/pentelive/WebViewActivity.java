@@ -3,12 +3,12 @@ package be.submanifold.pentelive;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -29,7 +29,8 @@ public class WebViewActivity extends AppCompatActivity {
             webview = findViewById(R.id.webview);
             webview.setWebViewClient(new WebViewClient() {
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    String url = request.getUrl().toString();
                     if (url.contains("?mobile&g=") || url.contains("gameServer/tb/game?gid=")) {
                         if (url.contains("?mobile&g=")) {
                             while (!url.startsWith("?mobile&g=")) {
@@ -63,11 +64,8 @@ public class WebViewActivity extends AppCompatActivity {
             });
             webview.getSettings().setJavaScriptEnabled(true);
             webview.getSettings().setBuiltInZoomControls(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
-            }
+            webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
 
-//            cookieMap.put("Cookie", "name2="+PentePlayer.mPlayerName+"; password2="+PentePlayer.mPassword);
 
             webview.getSettings().setLoadWithOverviewMode(true);
             webview.getSettings().setUseWideViewPort(true);

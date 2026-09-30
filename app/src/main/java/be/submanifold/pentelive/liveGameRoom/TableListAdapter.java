@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.core.content.ContextCompat;
@@ -40,14 +41,14 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         this.roomName = roomName;
         this.activity = activity;
         ctx = MyApplication.getContext();
-        this.isArena = roomName != null && roomName.toLowerCase().contains("arena");
+        this.isArena = roomName != null && roomName.toLowerCase(java.util.Locale.ROOT).contains("arena");
         this.tablesArray = buildTablesArray();
     }
 
     private List<Table> buildTablesArray() {
         // Guest users should not see rated tables.
         boolean isGuest = activity.getMe() != null
-                && activity.getMe().toLowerCase().startsWith("guest");
+                && activity.getMe().toLowerCase(java.util.Locale.ROOT).startsWith("guest");
         List<Table> filtered = new ArrayList<>();
         for (Table t : tables.values()) {
             if (isGuest && t.isRated()) {
@@ -101,6 +102,9 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    // Null root kept: with the list as root, live_table_header's fixed 40dp height would replace the list's default
+    // wrap_content height.
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -123,7 +127,7 @@ public class TableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.live_table_row, null);
+            convertView = inflater.inflate(R.layout.live_table_row, parent, false);
         }
         TextView gameNameTextView = convertView.findViewById(R.id.gameNameText);
         TextView watchingTextView = convertView.findViewById(R.id.watchingText);

@@ -15,7 +15,7 @@
         android:text="@string/opening_book"
         android:textStyle="bold"
         android:id="@+id/openingBookLabel"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentStart="true" />
     <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="45dp"
@@ -24,7 +24,6 @@
         android:textOn="@string/yes"
         android:textOff="@string/no"
         android:id="@+id/openingBookToggleButton"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
 
@@ -37,18 +36,17 @@
         android:textStyle="bold"
         android:id="@+id/difficultyLabel"
         android:layout_below="@id/openingBookLabel"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <androidx.appcompat.widget.AppCompatSpinner
         android:spinnerMode="dialog"
         android:id="@+id/difficultySpinner"
-        android:layout_toRightOf="@id/difficultyLabel"
+        android:layout_toEndOf="@id/difficultyLabel"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_below="@id/openingBookToggleButton"
         android:textAlignment="center"
         android:layout_height="45dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical|center_horizontal">
     </androidx.appcompat.widget.AppCompatSpinner>
 
     <Button
@@ -56,6 +54,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/runAIbutton"
         android:layout_below="@id/difficultyLabel"
-        android:text="ask the AI"/>
+        android:text="@string/ask_the_ai"/>
 
 </RelativeLayout>
