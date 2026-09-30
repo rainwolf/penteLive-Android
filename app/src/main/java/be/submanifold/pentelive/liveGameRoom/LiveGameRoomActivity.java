@@ -50,6 +50,9 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
 
     private static final String TAG = "LiveGameRoomActivity";
     private static final int SOCKET_CONNECT_TIMEOUT_MS = 60_000;
+    // The server pings every logged-in player, idle or not, every 15 s (DSGEventPingManager),
+    // so 60 s of silence means about four missed pings: the connection is gone.
+    private static final int LIVE_READ_TIMEOUT_MS = 60_000;
 
     private volatile ClientSocketDSGEventHandler eventHandler;
     private volatile boolean destroyed;
@@ -125,16 +128,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                     socket.connect(new InetSocketAddress(host, port), SOCKET_CONNECT_TIMEOUT_MS);
                     // Handshake now rather than on first I/O inside the event handler threads,
                     // which drop errors silently, so TLS failures take the same path as connect
-                    // failures. The read timeout bounds only the handshake; the live socket idles
-                    // legitimately, so it is cleared again afterwards.
+                    // failures.
                     socket.setSoTimeout(SOCKET_CONNECT_TIMEOUT_MS);
                     socket.startHandshake();
-                    socket.setSoTimeout(0);
+                    // Keep a read timeout on the live socket so a connection that silently stops
+                    // delivering data is reported instead of hanging the room.
+                    socket.setSoTimeout(LIVE_READ_TIMEOUT_MS);
                     // because client sends many short messages
                     socket.setTcpNoDelay(true);
-                    // timeout after 30 seconds
-                    // this should be ok because we receive pings every 15 seconds
-                    //socket.setSoTimeout(30 * 1000);
 
                     // The handler logs the lost connection; the room shows the same dialog as a
                     // failed connect and closes on dismiss.
