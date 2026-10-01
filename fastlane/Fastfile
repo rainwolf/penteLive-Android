@@ -1,0 +1,330 @@
+# Publishes penteLive updates to the Google Play production track. Run from the repo root:
+#   bundle exec fastlane release version:2.11.14 changelog:"What's new"
+
+require "fileutils"
+require "open3"
+require "tmpdir"
+
+# fastlane/README.md carries hand-written setup notes; keep fastlane from regenerating it.
+ENV["FASTLANE_SKIP_DOCS"] ||= "1"
+
+default_platform(:android)
+
+ROOT = File.expand_path("..", __dir__)
+MANIFEST = File.join(ROOT, "app", "src", "main", "AndroidManifest.xml")
+PACKAGE_NAME = "be.submanifold.pentelive"
+AAB_OUTPUT = File.join(ROOT, "app", "build", "outputs", "bundle", "release", "app-release.aab")
+BUILD_DIR = File.join(ROOT, "fastlane", "build")
+TRACK = "production"
+# Release notes go to this language only; Google Play caps them at 500 characters per language.
+RELEASE_NOTES_LANGUAGE = "en-US"
+RELEASE_NOTES_MAX = 500
+# Highest versionCode Google Play accepts.
+MAX_VERSION_CODE = 2_100_000_000
+# fastlane/.env name => Gradle injected signing property. Passed to Gradle as ORG_GRADLE_PROJECT_* environment
+# variables, so the passwords never appear on the command line (`ps`, fastlane's command echo or error messages).
+SIGNING_ENV = {
+  "ANDROID_KEYSTORE_PATH" => "android.injected.signing.store.file",
+  "ANDROID_KEYSTORE_PASSWORD" => "android.injected.signing.store.password",
+  "ANDROID_KEY_ALIAS" => "android.injected.signing.key.alias",
+  "ANDROID_KEY_PASSWORD" => "android.injected.signing.key.password"
+}.freeze
+
+def require_version!(options)
+  version = options[:version].to_s
+  UI.user_error!("Pass version:X.Y.Z (e.g. version:2.11.14)") unless version.match?(/\A\d+(\.\d+){1,2}\z/)
+  version
+end
+
+# Returns [versionName, versionCode] from the <manifest> tag; the versions live there, not in app/build.gradle.
+def manifest_versions
+  xml = File.read(MANIFEST)
+  name = xml[/android:versionName="([^"]*)"/, 1] || UI.user_error!("No android:versionName in #{MANIFEST}")
+  code = xml[/android:versionCode="(\d+)"/, 1] || UI.user_error!("No android:versionCode in #{MANIFEST}")
+  [name, code.to_i]
+end
+
+# code:N if given, otherwise the current versionCode + 1.
+def require_version_code!(options)
+  return manifest_versions[1] + 1 if options[:code].nil?
+  code = options[:code].to_s
+  UI.user_error!("Pass code:N with digits only (e.g. code:214), got code:#{code}") unless code.match?(/\A\d+\z/)
+  code = code.to_i
+  UI.user_error!("code:#{code} is out of range; Google Play allows 1 to #{MAX_VERSION_CODE}") unless code.between?(1, MAX_VERSION_CODE)
+  code
+end
+
+def changelog_from(options)
+  changelog = options[:changelog].to_s.strip
+  UI.user_error!("Pass changelog:\"What's new\" (the release notes for this update)") if changelog.empty?
+  if changelog.length > RELEASE_NOTES_MAX
+    UI.user_error!("changelog is #{changelog.length} characters; Google Play allows #{RELEASE_NOTES_MAX}")
+  end
+  changelog
+end
+
+# Fails before anything is touched when the Google Play service account key is not configured.
+def play_json_key!
+  if ENV["PLAY_JSON_KEY_PATH"].to_s.strip.empty?
+    UI.user_error!("Missing PLAY_JSON_KEY_PATH. Copy fastlane/.env.example to fastlane/.env and fill it in.")
+  end
+  key_path = File.expand_path(ENV["PLAY_JSON_KEY_PATH"])
+  UI.user_error!("PLAY_JSON_KEY_PATH does not point to a file: #{key_path}") unless File.file?(key_path)
+  key_path
+end
+
+# Fails before anything is built when the upload keystore is not configured.
+# Returns the ORG_GRADLE_PROJECT_* environment that makes Gradle sign the release bundle.
+def signing_env!
+  missing = SIGNING_ENV.keys.select { |k| ENV[k].to_s.empty? }
+  unless missing.empty?
+    UI.user_error!("Missing #{missing.join(', ')}. Copy fastlane/.env.example to fastlane/.env and fill it in.")
+  end
+  keystore = File.expand_path(ENV["ANDROID_KEYSTORE_PATH"])
+  UI.user_error!("ANDROID_KEYSTORE_PATH does not point to a file: #{keystore}") unless File.file?(keystore)
+  keystore_opens!(keystore)
+  SIGNING_ENV.to_h do |env_name, property|
+    ["ORG_GRADLE_PROJECT_#{property}", env_name == "ANDROID_KEYSTORE_PATH" ? keystore : ENV[env_name]]
+  end
+end
+
+# Catches a wrong keystore password or alias before a full clean build. keytool reads the password from the
+# environment (-storepass:env), so it stays off the command line. The key password is only checked by the build.
+def keystore_opens!(keystore)
+  java_keytool = File.join(ENV["JAVA_HOME"].to_s, "bin", "keytool")
+  keytool = ENV["JAVA_HOME"].to_s.empty? || !File.executable?(java_keytool) ? "keytool" : java_keytool
+  output, status = Open3.capture2e(keytool, "-list", "-keystore", keystore, "-alias", ENV["ANDROID_KEY_ALIAS"],
+                                   "-storepass:env", "ANDROID_KEYSTORE_PASSWORD")
+  return if status.success?
+  UI.user_error!("keytool could not open alias #{ENV['ANDROID_KEY_ALIAS']} in #{keystore}; check ANDROID_KEYSTORE_PASSWORD " \
+                 "and ANDROID_KEY_ALIAS in fastlane/.env:\n#{output.strip}")
+rescue Errno::ENOENT
+  UI.user_error!("keytool not found; set JAVA_HOME to a JDK or put keytool on the PATH")
+end
+
+# supply reads any option the lane does not pass from SUPPLY_* environment variables (fastlane/.env included),
+# e.g. SUPPLY_VALIDATE_ONLY or SUPPLY_TRACK_PROMOTE_TO, which would quietly change what the upload does.
+def no_supply_env!
+  set = ENV.keys.grep(/\ASUPPLY_/).sort
+  UI.user_error!("Unset #{set.join(', ')}; the lanes pass every upload option themselves") unless set.empty?
+end
+
+# The native "Ai" library is built by ndk-build from the path in local.properties during compile.
+def ndk_configured!
+  properties = File.join(ROOT, "local.properties")
+  UI.user_error!("local.properties not found; open the project in Android Studio once or create it with sdk.dir and ndk.dir") unless File.file?(properties)
+  ndk_dir = File.read(properties)[/^\s*ndk\.dir\s*=\s*(.+?)\s*$/, 1]
+  UI.user_error!("ndk.dir is not set in local.properties (needed for the native Ai library)") unless ndk_dir
+  ndk_dir = ndk_dir.gsub("\\:", ":").gsub("\\\\", "\\")
+  UI.user_error!("ndk.dir in local.properties does not exist: #{ndk_dir}") unless File.directory?(ndk_dir)
+end
+
+# The release commit may contain only the version bump, so tracked files must be clean.
+# Untracked files are not checked; they never end up in the commit.
+def ensure_tracked_files_clean!
+  changes = sh("git", "-C", ROOT, "status", "--porcelain", "--untracked-files=no", log: false).strip
+  UI.user_error!("Uncommitted changes to tracked files; commit or stash them, then rerun:\n#{changes}") unless changes.empty?
+end
+
+# Read-only Google Play checks (opens an edit and deletes it again; nothing is changed on Google Play):
+# the key can reach the app, version_code is higher than every version code Google Play has seen,
+# and the release notes language exists in the store listing.
+def play_preflight!(json_key, version_code)
+  require "supply"
+  require "supply/client"
+  UI.message("Checking Google Play (read-only)...")
+  client = Supply::Client.make_from_config(params: { json_key: json_key, timeout: 300 })
+  client.begin_edit(package_name: PACKAGE_NAME)
+  begin
+    tracks = client.tracks
+    used = client.aab_version_codes + client.apks_version_codes +
+           tracks.flat_map { |t| (t.releases || []).flat_map { |r| r.version_codes || [] } }
+    highest = used.map(&:to_i).max
+    if highest && version_code <= highest
+      UI.user_error!("versionCode #{version_code} is not higher than #{highest}, the highest Google Play already has; " \
+                     "rerun with code:#{highest + 1} or higher")
+    end
+    UI.message("Highest versionCode on Google Play: #{highest || 'none'}; this upload: #{version_code}")
+    languages = client.listings.map(&:language)
+    unless languages.include?(RELEASE_NOTES_LANGUAGE)
+      UI.user_error!("The store listing has no #{RELEASE_NOTES_LANGUAGE} language (it has #{languages.join(', ')}); " \
+                     "the release notes would be rejected")
+    end
+    # supply replaces the track's releases with the new one, which drops a draft release on it.
+    target = tracks.find { |t| t.track == TRACK }
+    (target&.releases || []).each do |release|
+      if release.status == "draft"
+        UI.user_error!("Track #{TRACK} has a draft release #{release.name} (#{Array(release.version_codes).join(', ')}); " \
+                       "the upload would discard it. Release or delete it in Play Console, then rerun")
+      end
+      next unless release.status == "inProgress"
+      UI.important("Track #{TRACK} has release #{release.name} in a staged rollout (#{release.user_fraction}); this upload supersedes it")
+    end
+  ensure
+    client.abort_current_edit
+  end
+end
+
+# Pre-flight for release: fails before anything is touched.
+# Returns [version, version_code, changelog, json_key].
+def preflight!(options)
+  version = require_version!(options)
+  changelog = changelog_from(options)
+  current_name, current_code = manifest_versions
+  unless Gem::Version.new(version) > Gem::Version.new(current_name)
+    UI.user_error!("version:#{version} must be higher than the current versionName #{current_name}")
+  end
+  version_code = require_version_code!(options)
+  if version_code <= current_code
+    UI.user_error!("code:#{version_code} must be higher than the current versionCode #{current_code} (#{current_name})")
+  end
+  json_key = play_json_key!
+  no_supply_env!
+  signing_env!
+  ndk_configured!
+  ensure_tracked_files_clean!
+  UI.user_error!("Tag v#{version} already exists; pick a new version") if git_tag_exists(tag: "v#{version}")
+  play_preflight!(json_key, version_code)
+  [version, version_code, changelog, json_key]
+end
+
+# Bumps, builds, then yields the .aab and a `step` setter to the upload block. On any failure (or Ctrl-C)
+# the bump is reverted and the message for the step that failed is shown; `hints` maps
+# step => [title, advice] for the steps after :build.
+def bump_build_and_ship(version, version_code, hints)
+  hints = { build: ["Build failed", "Fix the problem and rerun."] }.merge(hints)
+  bump(version: version, code: version_code)
+  step = :build
+  begin
+    aab = build
+    yield aab, ->(next_step) { step = next_step }
+  rescue Exception => e # also Ctrl-C: never leave the bump behind
+    sh("git", "checkout", "--", MANIFEST)
+    title, advice = hints.fetch(step)
+    UI.user_error!("#{title}: #{e.message}\nThe version bump in AndroidManifest.xml was reverted. #{advice}")
+  end
+end
+
+# Uploads only the bundle and the release notes. supply reads release notes from
+# <metadata_path>/<language>/changelogs/<versionCode>.txt; a fresh temp directory holding just that file
+# keeps anything in fastlane/metadata from being uploaded.
+def upload_bundle!(aab:, json_key:, version:, version_code:, changelog:, rollout: nil)
+  metadata_dir = Dir.mktmpdir("supply-metadata")
+  begin
+    notes = File.join(metadata_dir, RELEASE_NOTES_LANGUAGE, "changelogs", "#{version_code}.txt")
+    FileUtils.mkdir_p(File.dirname(notes))
+    File.write(notes, changelog)
+    params = {
+      json_key: json_key,
+      package_name: PACKAGE_NAME,
+      track: TRACK,
+      version_name: version, # the release name shown in Play Console
+      aab: aab,
+      release_status: rollout ? "inProgress" : "completed",
+      metadata_path: metadata_dir,
+      skip_upload_aab: false,
+      validate_only: false,
+      # supply's default silently re-commits with changesNotSentForReview=true when Google asks for it (e.g. an
+      # earlier update was rejected), leaving the release unsubmitted while the lane reports success. Fail instead.
+      changes_not_sent_for_review: false,
+      rescue_changes_not_sent_for_review: false,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    }
+    params[:rollout] = rollout if rollout
+    upload_to_play_store(**params)
+  ensure
+    FileUtils.rm_rf(metadata_dir)
+  end
+end
+
+def upload_hint(version_code)
+  ["Google Play upload failed", "Nothing is published unless the upload finished. If versionCode #{version_code} shows up in " \
+                                "Play Console (App bundle explorer) anyway, rerun with code:<higher number> " \
+                                "(Google Play rejects a reused versionCode). If Google asks for changesNotSentForReview, " \
+                                "fix the blocker in Play Console (Publishing overview) or send the pending changes " \
+                                "for review there, then rerun."]
+end
+
+def commit_and_tag!(version, done_message)
+  begin
+    git_commit(path: MANIFEST, message: version, allow_nothing_to_commit: true)
+    add_git_tag(tag: "v#{version}")
+  rescue Exception => e # the upload already went through; never leave that unsaid
+    UI.user_error!("The upload to Google Play went through, but committing/tagging failed: #{e.message}\n" \
+                   "Finish by hand: commit app/src/main/AndroidManifest.xml as \"#{version}\" and tag v#{version} " \
+                   "(check git log and git tag for what already happened).")
+  end
+  UI.success(done_message)
+  UI.important("Push when ready: git push && git push origin v#{version}")
+end
+
+platform :android do
+  desc "Set android:versionName and android:versionCode in AndroidManifest.xml. No commit."
+  desc "Usage: bump version:X.Y.Z [code:N]   (code defaults to the current versionCode + 1)"
+  lane :bump do |options|
+    version = require_version!(options)
+    code = require_version_code!(options)
+    xml = File.read(MANIFEST)
+    %w[versionName versionCode].each do |attr|
+      count = xml.scan(/android:#{attr}="[^"]*"/).length
+      UI.user_error!("Expected one android:#{attr} in #{MANIFEST}, found #{count}") unless count == 1
+    end
+    xml = xml.sub(/android:versionName="[^"]*"/, %(android:versionName="#{version}"))
+             .sub(/android:versionCode="[^"]*"/, %(android:versionCode="#{code}"))
+    File.write(MANIFEST, xml)
+    UI.success("AndroidManifest.xml: versionName=#{version}, versionCode=#{code}")
+  end
+
+  desc "Build a release .aab signed with the upload key from fastlane/.env into fastlane/build/"
+  lane :build do
+    signing = signing_env!
+    ndk_configured!
+    saved = signing.keys.to_h { |k| [k, ENV[k]] }
+    signing.each { |k, v| ENV[k] = v }
+    begin
+      gradle(tasks: ["clean", "bundleRelease"], project_dir: ROOT)
+    ensure
+      saved.each { |k, v| ENV[k] = v }
+    end
+    UI.user_error!("Gradle did not produce #{AAB_OUTPUT}") unless File.file?(AAB_OUTPUT)
+    # app/build.gradle has no release signingConfig; if the injected signing properties were ignored the
+    # bundle is unsigned and Google Play would only reject it after the upload.
+    require "zip"
+    signed = Zip::File.open(AAB_OUTPUT) { |zip| zip.glob("META-INF/*.{RSA,DSA,EC}").any? }
+    UI.user_error!("#{AAB_OUTPUT} is not signed; check the ANDROID_* signing values in fastlane/.env") unless signed
+    FileUtils.mkdir_p(BUILD_DIR)
+    aab = File.join(BUILD_DIR, "pentelive.aab")
+    FileUtils.cp(AAB_OUTPUT, aab)
+    UI.success("Signed bundle: #{aab}")
+    aab
+  end
+
+  desc "Bump, build and upload to the production track (full release, or a staged rollout with rollout:0.x)."
+  desc "Then commits the bump as \"X.Y.Z\" and tags vX.Y.Z (no push). Uploads only the bundle and the en-US release notes."
+  desc "Usage: release version:X.Y.Z changelog:\"What's new\" [code:N] [rollout:0.x]"
+  lane :release do |options|
+    rollout = nil
+    unless options[:rollout].nil?
+      rollout = Float(options[:rollout].to_s, exception: false)
+      unless rollout && rollout > 0 && rollout < 1
+        UI.user_error!("Pass rollout: as a fraction between 0 and 1 (e.g. rollout:0.2), got rollout:#{options[:rollout]}; " \
+                       "leave it out for a full release")
+      end
+    end
+    version, version_code, changelog, json_key = preflight!(options)
+
+    bump_build_and_ship(version, version_code, { upload: upload_hint(version_code) }) do |aab, step|
+      step.call(:upload)
+      upload_bundle!(aab: aab, json_key: json_key, version: version, version_code: version_code,
+                     changelog: changelog, rollout: rollout && rollout.to_s)
+    end
+
+    rolled = rollout ? "a #{(rollout * 100).round(1)}% staged rollout" : "a full release"
+    commit_and_tag!(version, "Uploaded #{version} (#{version_code}) to production as #{rolled}; Google Play reviews it " \
+                             "before it goes live. Committed/tagged locally.")
+  end
+end

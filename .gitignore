@@ -15,3 +15,15 @@ libs/
 .classpath
 .settings/
 bin/
+
+# fastlane: track Fastfile, Appfile, README.md, .env.example only.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output
+fastlane/metadata/
+fastlane/screenshots/
+fastlane/.env*
+!fastlane/.env.example
+fastlane/build/
+*.jks
+*.keystore
