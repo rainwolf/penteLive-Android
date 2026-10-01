@@ -490,20 +490,18 @@ public class MainActivity extends AppCompatActivity {
         ColorStateList tintList = Helpers.tintList(this);
         int livePlayers = player.getLivePlayers();
         MenuItem menuItem = menu.findItem(R.id.action_new_invitation);
-        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.ic_play_arrow));
-//        menuItem.setIconTintList(tintList);
+        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.ic_play_arrow, tintList));
         menuItem = menu.findItem(R.id.live_games);
-        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning));
+        menuItem.setIcon(buildCounterDrawable(livePlayers, R.drawable.lightning, null));
 
         menuItem = menu.findItem(R.id.action_show_stats);
         menuItem.setIconTintList(tintList);
 
         int onlineFollowing = player.getOnlineFollowingers();
         menuItem = menu.findItem(R.id.action_more);
-        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.ic_action_more));
-//        menuItem.setIconTintList(tintList);
+        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.ic_action_more, tintList));
         menuItem = menu.findItem(R.id.onlineUsers);
-        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.online_users));
+        menuItem.setIcon(buildGreenCounterDrawable(onlineFollowing, R.drawable.online_users, null));
 
         return true;
     }
@@ -618,12 +616,15 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.list).setAlpha(0.05f);
     }
 
-    private Drawable buildCounterDrawable(int count, int backgroundImageId) {
+    // iconTint: tints only the black background icon, never the badge; toolbar items pass the
+    // toolbar tint, submenu items (light popup in both modes) pass null to stay black.
+    private Drawable buildCounterDrawable(int count, int backgroundImageId, ColorStateList iconTint) {
         LayoutInflater inflater = LayoutInflater.from(this);
         // Rendered off-screen into a Bitmap, never attached to a parent.
         @SuppressLint("InflateParams")
         View view = inflater.inflate(R.layout.counter_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
+        view.setBackgroundTintList(iconTint);
         if (count == 0) {
             View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
             counterTextPanel.setVisibility(View.GONE);
@@ -641,12 +642,15 @@ public class MainActivity extends AppCompatActivity {
         return new BitmapDrawable(getResources(), bitmap);
     }
 
-    private Drawable buildGreenCounterDrawable(int count, int backgroundImageId) {
+    // iconTint: tints only the black background icon, never the badge; toolbar items pass the
+    // toolbar tint, submenu items (light popup in both modes) pass null to stay black.
+    private Drawable buildGreenCounterDrawable(int count, int backgroundImageId, ColorStateList iconTint) {
         LayoutInflater inflater = LayoutInflater.from(this);
         // Rendered off-screen into a Bitmap, never attached to a parent.
         @SuppressLint("InflateParams")
         View view = inflater.inflate(R.layout.counter_green_menu_item_layout, null);
         view.setBackgroundResource(backgroundImageId);
+        view.setBackgroundTintList(iconTint);
         if (count == 0) {
             View counterTextPanel = view.findViewById(R.id.BadgeRelativeLayout);
             counterTextPanel.setVisibility(View.GONE);

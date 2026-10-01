@@ -13,6 +13,7 @@
         android:id="@+id/follow_user"
         android:title="@string/follow_player"
         android:icon="@drawable/adduser"
+        app:iconTint="@color/toolbar_icon_tint"
         app:showAsAction="always"/>
 
 </menu>

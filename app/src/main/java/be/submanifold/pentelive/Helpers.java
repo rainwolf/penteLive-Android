@@ -2,22 +2,13 @@ package be.submanifold.pentelive;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 
 import androidx.core.content.ContextCompat;
 
 public class Helpers {
+    /** Toolbar icon tint; same list the menus apply via app:iconTint (res/color/toolbar_icon_tint.xml). */
     public static ColorStateList tintList(Context ctx) {
-        return new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled}, //disabled
-                        new int[]{android.R.attr.state_enabled} //enabled
-                },
-                new int[]{
-                        Color.GRAY //disabled
-                        , ContextCompat.getColor(ctx, R.color.colorPrimary) //enabled
-                }
-        );
+        return ContextCompat.getColorStateList(ctx, R.color.toolbar_icon_tint);
     }
 
     public static int getResourceColor(Context ctx, int colorPrimary) {
