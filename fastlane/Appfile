@@ -1,0 +1,3 @@
+package_name("be.submanifold.pentelive")
+# Google Play service account key (see .env.example); the lanes pass it explicitly too.
+json_key_file(ENV["PLAY_JSON_KEY_PATH"]) if ENV["PLAY_JSON_KEY_PATH"]
