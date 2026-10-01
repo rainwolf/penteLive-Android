@@ -183,6 +183,7 @@ public class SocialActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 ImageView view = new ImageView(getContext());
                 view.setImageDrawable(ContextCompat.getDrawable(SocialActivity.this, R.drawable.ic_action_settings));
+                view.setImageTintList(Helpers.tintList(SocialActivity.this));
                 return view;
             }
         };

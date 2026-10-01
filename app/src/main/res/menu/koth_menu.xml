@@ -6,11 +6,13 @@
         android:id="@+id/action_post_open_koth"
         android:title="@string/post_open_invitation"
         android:icon="@drawable/ic_wc"
+        app:iconTint="@color/toolbar_icon_tint"
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_web_koth"
         android:title="@string/view_on_the_web"
         android:icon="@drawable/ic_action_info"
+        app:iconTint="@color/toolbar_icon_tint"
         app:showAsAction="always"/>
 
 </menu>

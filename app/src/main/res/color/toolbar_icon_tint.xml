@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Toolbar action icons: black on light toolbars, white on dark ones (colorPrimary flips in
+     values-night), grey when disabled. The icon PNGs/vectors are all drawn black, so every icon
+     shown directly on a toolbar needs this tint or it disappears in dark mode. Popup/submenu items
+     sit on a light popup in both modes and stay untinted. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#FF888888" android:state_enabled="false" />
+    <item android:color="@color/colorPrimary" />
+</selector>

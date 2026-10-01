@@ -6,6 +6,7 @@
         android:id="@+id/broadcast"
         android:title="@string/broadcast"
         android:icon="@drawable/broadcast"
+        app:iconTint="@color/toolbar_icon_tint"
         app:showAsAction="always"/>
 
 </menu>
