@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive launcher icon: the square artwork on a solid green layer, so launchers draw a green
+     disc behind it instead of the white one they give legacy icons. The 22% inset keeps the
+     square's corners inside the 66dp safe-zone circle, so no mask shape clips them. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground>
+        <inset
+            android:drawable="@mipmap/ic_launcher_square"
+            android:inset="22%" />
+    </foreground>
+</adaptive-icon>
