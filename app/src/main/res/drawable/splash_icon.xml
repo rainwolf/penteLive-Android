@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The splash screen masks its icon to a circle two-thirds the drawable's size. The 26% inset
+     shrinks the square launcher icon to fit inside that circle so its corners are not clipped. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@mipmap/ic_launcher"
+    android:inset="26%" />

@@ -1,0 +1,11 @@
+<resources>
+
+    <!-- Android 12+ replaces windowBackground with the system splash screen, which wraps a
+         non-adaptive launcher icon in a white circle. Use the brand green and our own icon. -->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/background_splash</item>
+        <item name="android:windowSplashScreenBackground">@color/britishracinggreen</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+    </style>
+
+</resources>
