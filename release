@@ -20,7 +20,8 @@ branch=$(git rev-parse --abbrev-ref HEAD)
 # Untracked files are ignored, as in the lane's own check.
 [[ -z $(git status --porcelain --untracked-files=no) ]] || die "uncommitted changes to tracked files; commit or stash them first"
 git fetch --quiet origin main
-read -r ahead behind < <(git rev-list --left-right --count main...origin/main)
+read -r ahead behind < <(git rev-list --left-right --count main...origin/main) ||
+  die "can't compare main with origin/main"
 ((behind == 0)) || die "local main is $behind commit(s) behind origin/main; pull first"
 ((ahead == 0)) || die "local main is $ahead commit(s) ahead of origin/main; push or drop them first"
 
@@ -38,8 +39,11 @@ while true; do
   echo "Version must look like X.Y.Z (e.g. ${default:-2.11.14})." >&2
 done
 # The lane checks local tags only; a tag only on origin would make the push fail after the upload.
-! git ls-remote --quiet --exit-code --tags origin "refs/tags/v$version" >/dev/null ||
-  die "tag v$version already exists on origin; pick a new version"
+# --exit-code: 0 = found, 2 = not found, anything else = couldn't ask origin.
+rc=0
+git ls-remote --quiet --exit-code --tags origin "refs/tags/v$version" >/dev/null || rc=$?
+((rc != 0)) || die "tag v$version already exists on origin; pick a new version"
+((rc == 2)) || die "can't list tags on origin (git ls-remote exit $rc)"
 
 while true; do
   echo "Release notes (en-US, max $NOTES_MAX characters); finish with an empty line or Ctrl-D:" >&2
