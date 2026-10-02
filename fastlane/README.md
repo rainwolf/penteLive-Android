@@ -29,6 +29,8 @@ Release: `bundle exec fastlane release version:2.11.14 changelog:"What's new"`. 
 - `code:N` sets `android:versionCode`; defaults to the current versionCode + 1.
 - `rollout:0.2` makes it a staged rollout to that fraction of users; leave it out for a full release.
 
+Or run `./release`: it checks you are on an up-to-date, clean `main`, asks for the version and release notes, runs the lane and pushes the commit and tag.
+
 It bumps `android:versionName`/`android:versionCode` in `app/src/main/AndroidManifest.xml`, builds a signed
 `.aab` (`clean bundleRelease`, copied to `fastlane/build/pentelive.aab`), uploads it to the production track
 with the release notes, and Google Play reviews it before it goes live. Then it commits the bump as

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Interactive wrapper around the fastlane release lane: checks git, asks for the version and the release
+# notes, runs `bundle exec fastlane release`, then pushes the release commit and tag. Run from anywhere:
+#   ./release
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+# Count release-note characters, not bytes, whatever the caller's locale.
+export LC_ALL=en_US.UTF-8
+
+MANIFEST=app/src/main/AndroidManifest.xml
+NOTES_MAX=500 # Google Play's release-notes limit, as in the Fastfile
+
+die() { echo "release: $*" >&2; exit 1; }
+# Prompts on stderr, so they show even when stdin is piped; the answer is trimmed; EOF (Ctrl-D) aborts.
+ask() { printf '%s' "$1" >&2; read -r REPLY || die "no input; aborted, nothing changed"; }
+
+# The lane commits and tags on the current branch; release only from an up-to-date main.
+branch=$(git rev-parse --abbrev-ref HEAD)
+[[ $branch == main ]] || die "on branch $branch; switch to main first"
+# Untracked files are ignored, as in the lane's own check.
+[[ -z $(git status --porcelain --untracked-files=no) ]] || die "uncommitted changes to tracked files; commit or stash them first"
+git fetch --quiet origin main
+read -r ahead behind < <(git rev-list --left-right --count main...origin/main)
+((behind == 0)) || die "local main is $behind commit(s) behind origin/main; pull first"
+((ahead == 0)) || die "local main is $ahead commit(s) ahead of origin/main; push or drop them first"
+
+name=$(sed -n 's/.*android:versionName="\([^"]*\)".*/\1/p' "$MANIFEST")
+code=$(sed -n 's/.*android:versionCode="\([0-9]*\)".*/\1/p' "$MANIFEST")
+[[ -n $name && -n $code ]] || die "no android:versionName/versionCode in $MANIFEST"
+default=""
+[[ $name =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] &&
+  default="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((10#${BASH_REMATCH[3]} + 1))"
+
+while true; do
+  ask "Version${default:+ [$default]}: "
+  version=${REPLY:-$default}
+  [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && break
+  echo "Version must look like X.Y.Z (e.g. ${default:-2.11.14})." >&2
+done
+# The lane checks local tags only; a tag only on origin would make the push fail after the upload.
+! git ls-remote --quiet --exit-code --tags origin "refs/tags/v$version" >/dev/null ||
+  die "tag v$version already exists on origin; pick a new version"
+
+while true; do
+  echo "Release notes (en-US, max $NOTES_MAX characters); finish with an empty line or Ctrl-D:" >&2
+  notes="" eof=1
+  while IFS= read -r line || [[ -n $line ]]; do
+    [[ -z $line ]] && { eof=0; break; }
+    notes+="$line"$'\n'
+  done
+  # Trim leading/trailing whitespace (the lane strips the notes the same way).
+  notes="${notes#"${notes%%[![:space:]]*}"}"
+  notes="${notes%"${notes##*[![:space:]]}"}"
+  if [[ -z $notes ]]; then
+    ((eof)) && die "no release notes; aborted, nothing changed"
+    echo "Release notes can't be empty." >&2
+  elif ((${#notes} > NOTES_MAX)); then
+    echo "Release notes are ${#notes} characters; Google Play allows $NOTES_MAX." >&2
+  else
+    break
+  fi
+done
+
+cat >&2 <<EOF
+
+  Version:      $name -> $version
+  versionCode:  $code -> $((10#$code + 1))
+  Track:        production
+  Release notes:
+$(sed 's/^/    /' <<<"$notes")
+
+EOF
+ask "Release to Google Play? [y/N] "
+[[ $REPLY == [yY] ]] || die "aborted, nothing changed"
+
+# The notes go as one argv element; fastlane splits key:value on the first ':' only, so newlines survive.
+if bundle exec fastlane release "version:$version" "changelog:$notes"; then :; else
+  rc=$?
+  echo "release: fastlane release failed (exit $rc); nothing was pushed. The lane reverts its version bump on failure" \
+    "(unless its error above says the upload went through); fix the problem and rerun." >&2
+  exit "$rc"
+fi
+
+git push --atomic origin main "v$version" ||
+  die "pushing failed; the release is uploaded, committed and tagged locally. Retry with: git push --atomic origin main v$version"
+echo "Released $version and pushed main and v$version."
