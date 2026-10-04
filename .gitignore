@@ -27,3 +27,4 @@ fastlane/.env*
 fastlane/build/
 *.jks
 *.keystore
+graphify-out/
