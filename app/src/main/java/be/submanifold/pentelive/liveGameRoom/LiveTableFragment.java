@@ -905,6 +905,7 @@ public class LiveTableFragment extends Fragment {
         arenaList = new RecyclerView(activity);
         arenaList.setLayoutManager(new LinearLayoutManager(activity));
         arenaList.setAdapter(arenaAdapter);
+        arenaList.setItemAnimator(null);
         arenaFreezeSpinner = new ProgressBar(activity);
         arenaFreezeSpinner.setIndeterminate(true);
         FrameLayout container = new FrameLayout(activity);
