@@ -117,10 +117,8 @@ public class LiveGameRoomFragment extends Fragment {
         expandableList.expandGroup(0);
         expandableList.setOnChildClickListener((expandableListView, view12, i, i1, l) -> {
             int tableId = tableListAdapter.getTablesArray().get(i1).getId();
-            if (roomName != null && roomName.toLowerCase(java.util.Locale.ROOT).contains("arena")) {
-                activity.sendEvent(ArenaEvents.requestJoin(activity.getMe(), tableId));
-                android.widget.Toast.makeText(activity, getString(R.string.arena_waiting),
-                        android.widget.Toast.LENGTH_SHORT).show();
+            if (isArena) {
+                onArenaTableTapped(tableId);
             } else {
                 activity.sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
             }
@@ -164,6 +162,32 @@ public class LiveGameRoomFragment extends Fragment {
         playersListAdapter.updateList();
         tableListAdapter.updateList();
         mainRoomTextView.setText(activity.tablesAndPlayers.mainRoomText);
+    }
+
+    /** Spec C3: an unmarked table sends one request; a marked table asks before withdrawing; a
+     *  table whose action still awaits dsgArenaMyRequestsEvent ignores the tap. */
+    private void onArenaTableTapped(final int tableId) {
+        switch (activity.arenaMyRequests.onTap(tableId)) {
+            case REQUEST:
+                activity.sendEvent(ArenaEvents.requestJoin(activity.getMe(), tableId));
+                break;
+            case CONFIRM_WITHDRAW:
+                new AlertDialog.Builder(activity)
+                        .setMessage(getString(R.string.arena_withdraw_confirm, tableId))
+                        .setPositiveButton(getString(R.string.arena_withdraw), (dialog, which) -> {
+                            if (activity.arenaMyRequests.confirmWithdraw(tableId)) {
+                                activity.sendEvent(ArenaEvents.withdraw(activity.getMe(), tableId));
+                            }
+                        })
+                        // android.R.string.cancel, as ArenaTableSetupDialog.java:71 does: the app's
+                        // R.string.cancel is "Löschen" (Delete) in values-de/strings.xml:107.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+                break;
+            case IGNORE:
+            default:
+                break;
+        }
     }
 
 

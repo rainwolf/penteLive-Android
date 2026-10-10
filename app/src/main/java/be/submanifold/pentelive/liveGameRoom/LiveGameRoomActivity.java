@@ -58,6 +58,7 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     private volatile boolean destroyed;
     private LiveGameRoomActivity self;
     public TablesAndPlayers tablesAndPlayers = new TablesAndPlayers();
+    public final ArenaMyRequests arenaMyRequests = new ArenaMyRequests();
     private final LiveGameRoomFragment roomFragment = null;
     private LiveGameRoom room;
 
@@ -300,6 +301,10 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                         // New-request cue: the snapshot holds a player who was not in the previous one.
                                         playSound(NEW_PLAYER_SOUND);
                                     }
+                                } else if (jsonEvent.get("dsgArenaMyRequestsEvent") != null) {
+                                    arenaMyRequests.onMyRequests(ArenaEventParser.myRequestTables(
+                                            (Map<String, Object>) jsonEvent.get("dsgArenaMyRequestsEvent")));
+                                    updateMainRoom();
                                 } else if (jsonEvent.get("dsgArenaRequestEndedEvent") != null) {
                                     // The server addresses this only to the player who needs it (spec C4).
                                     ArenaRequestNotice notice = ArenaRequestNotice.of(ArenaEventParser.requestEnded(

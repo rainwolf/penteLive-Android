@@ -302,7 +302,9 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="arena_timed">Mit Zeit:</string>
     <string name="arena_initial_minutes">Startminuten:</string>
     <string name="arena_incremental_seconds">Inkrementsekunden:</string>
-    <string name="arena_waiting">Warte auf Bestätigung des Gastgebers…</string>
+    <string name="arena_requested">Angefragt</string>
+    <string name="arena_withdraw">Zurückziehen</string>
+    <string name="arena_withdraw_confirm">Deine Anfrage an Tisch %1$d zurückziehen? Du kannst ihn erst nach seinem nächsten Spiel wieder anfragen.</string>
     <string name="arena_exit_table">Tisch verlassen</string>
     <string name="arena_notice_declined">%1$s hat deine Anfrage abgelehnt</string>
     <string name="arena_notice_table_full">Tisch %1$d ist nicht mehr verfügbar</string>
