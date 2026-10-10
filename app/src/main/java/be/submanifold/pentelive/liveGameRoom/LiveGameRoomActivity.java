@@ -301,6 +301,14 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                         playSound(NEW_PLAYER_SOUND);
                                         fragment.arenaTableRequestJoinEvent(player);
                                     }
+                                } else if (jsonEvent.get("dsgArenaRequestEndedEvent") != null) {
+                                    // The server addresses this only to the player who needs it (spec C4).
+                                    ArenaRequestNotice notice = ArenaRequestNotice.of(ArenaEventParser.requestEnded(
+                                            (Map<String, Object>) jsonEvent.get("dsgArenaRequestEndedEvent")));
+                                    if (notice != null) {
+                                        Toast.makeText(LiveGameRoomActivity.this,
+                                                getString(notice.kind.resId, notice.args), Toast.LENGTH_LONG).show();
+                                    }
                                 } else if (jsonEvent.get("dsgJoinTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgJoinTableEvent");
                                     String player = (String) data.get("player");

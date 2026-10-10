@@ -304,6 +304,15 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="arena_incremental_seconds">Inkrementsekunden:</string>
     <string name="arena_waiting">Warte auf Bestätigung des Gastgebers…</string>
     <string name="arena_exit_table">Tisch verlassen</string>
+    <string name="arena_notice_declined">%1$s hat deine Anfrage abgelehnt</string>
+    <string name="arena_notice_table_full">Tisch %1$d ist nicht mehr verfügbar</string>
+    <string name="arena_notice_table_closed">Tisch %1$d wurde geschlossen</string>
+    <string name="arena_notice_duplicate">Du hast %1$s bereits eine Anfrage geschickt</string>
+    <string name="arena_notice_booted">%1$s hat dich von Tisch %2$d entfernt, versuche es in ein paar Minuten noch einmal</string>
+    <string name="arena_notice_blocked">Du kannst Tisch %1$d erst nach seinem nächsten Spiel wieder anfragen</string>
+    <string name="arena_notice_not_available">Du kannst Tisch %1$d gerade nicht beitreten</string>
+    <string name="arena_notice_guest_rated">Gäste können gewerteten Tischen nicht beitreten</string>
+    <string name="arena_notice_no_longer_available">%1$s ist nicht mehr verfügbar</string>
 
     <string name="title_invitations">Einladungen</string>
     <string name="get_help">Hilfe erhalten</string>
