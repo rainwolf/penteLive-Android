@@ -30,9 +30,18 @@ public class ArenaEventsTest {
     }
 
     @Test
-    public void reject_usesCapitalDsgAndCorrectedMessageKey() {
+    public void reject_usesLowercaseKey() {
+        // A capital "DSG" key decodes to null in the server's Gson wrapper, and the server
+        // then disconnects the owner and closes their table (spec C2 "Decline key").
         assertEquals(
-            "{\"DSGArenaRejectTableJoinEvent\":{\"player\":\"alice\",\"playerToReject\":\"bob\",\"table\":42,\"message\":null}}",
+            "{\"dsgArenaRejectTableJoinEvent\":{\"player\":\"alice\",\"playerToReject\":\"bob\",\"table\":42}}",
             ArenaEvents.reject("alice", "bob", 42));
+    }
+
+    @Test
+    public void withdraw_buildsExpectedJson() {
+        assertEquals(
+            "{\"dsgArenaWithdrawJoinRequestEvent\":{\"player\":\"bob\",\"table\":42,\"time\":0}}",
+            ArenaEvents.withdraw("bob", 42));
     }
 }
