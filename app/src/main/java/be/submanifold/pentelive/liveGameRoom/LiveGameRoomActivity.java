@@ -288,18 +288,17 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     int tableId = tablesAndPlayers.changeTableState((Map<String, Object>) jsonEvent.get("dsgChangeStateTableEvent"));
                                     updateMainRoom();
                                     updateTable(tableId);
-                                } else if (jsonEvent.get("dsgArenaRequestJoinTableEvent") != null) {
+                                } else if (jsonEvent.get("dsgArenaJoinRequestsEvent") != null) {
                                     Map<String, Object> data =
-                                            (Map<String, Object>) jsonEvent.get("dsgArenaRequestJoinTableEvent");
-                                    String player = (String) data.get("player");
-                                    int tableId = (Integer) data.get("table");
+                                            (Map<String, Object>) jsonEvent.get("dsgArenaJoinRequestsEvent");
+                                    int tableId = ArenaEventParser.table(data);
                                     LiveTableFragment fragment = (LiveTableFragment)
                                             getSupportFragmentManager().findFragmentByTag("liveTable");
                                     if (fragment != null && fragment.table != null
-                                            && fragment.table.getId() == tableId) {
-                                        // Play the new-player sound when you receive a join request for your arena table.
+                                            && fragment.table.getId() == tableId
+                                            && fragment.arenaJoinRequestsEvent(ArenaEventParser.joinRequests(data))) {
+                                        // New-request cue: the snapshot holds a player who was not in the previous one.
                                         playSound(NEW_PLAYER_SOUND);
-                                        fragment.arenaTableRequestJoinEvent(player);
                                     }
                                 } else if (jsonEvent.get("dsgArenaRequestEndedEvent") != null) {
                                     // The server addresses this only to the player who needs it (spec C4).

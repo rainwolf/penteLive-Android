@@ -17,6 +17,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -37,6 +40,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,11 +107,18 @@ public class LiveTableFragment extends Fragment {
     AlertDialog tableSettingsWindow;
 
     public boolean isArenaTable = false;
+    private ArenaRequestListModel arenaModel;
     private ArenaJoinRequestAdapter arenaAdapter;
     private AlertDialog arenaRequestDialog;
+    private RecyclerView arenaList;
+    private ProgressBar arenaFreezeSpinner;
 
     public void setArena(boolean isArena) {
         this.isArenaTable = isArena;
+        if (isArena && arenaModel == null) {
+            // Created before the view: a snapshot that lands before onViewCreated is kept and shown then.
+            arenaModel = new ArenaRequestListModel(new ArenaHandlerScheduler(), this::onArenaRequestsChanged);
+        }
     }
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -237,8 +249,10 @@ public class LiveTableFragment extends Fragment {
             arenaAdapter = new ArenaJoinRequestAdapter(
                     activity.getLayoutInflater(),
                     activity.tablesAndPlayers,
+                    arenaModel,
                     activity::sendEvent,
                     me, table.getId(), table.getGame());
+            arenaAdapter.render();
             if (table.getPlayers().size() <= 1) {
                 showArenaJoinRequest();
             }
@@ -888,22 +902,32 @@ public class LiveTableFragment extends Fragment {
         if (!isArenaTable || arenaAdapter == null) return;
         if (arenaRequestDialog != null && arenaRequestDialog.isShowing()) return;
 
-        androidx.recyclerview.widget.RecyclerView list =
-                new androidx.recyclerview.widget.RecyclerView(activity);
-        list.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(activity));
-        list.setAdapter(arenaAdapter);
+        arenaList = new RecyclerView(activity);
+        arenaList.setLayoutManager(new LinearLayoutManager(activity));
+        arenaList.setAdapter(arenaAdapter);
+        arenaFreezeSpinner = new ProgressBar(activity);
+        arenaFreezeSpinner.setIndeterminate(true);
+        FrameLayout container = new FrameLayout(activity);
+        container.addView(arenaList, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        container.addView(arenaFreezeSpinner, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
         // tap = accept (single tap only, so scroll/fling end does not accept)
         final android.view.GestureDetector tapDetector =
                 new android.view.GestureDetector(activity, new android.view.GestureDetector.SimpleOnGestureListener() {
                     @Override
-                    public boolean onSingleTapUp(android.view.MotionEvent e) {
+                    public boolean onSingleTapUp(MotionEvent e) {
                         return true;
                     }
                 });
-        list.addOnItemTouchListener(new androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener() {
+        arenaList.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
             @Override
-            public boolean onInterceptTouchEvent(androidx.recyclerview.widget.RecyclerView rv, android.view.MotionEvent e) {
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                if (!arenaModel.isInteractive()) {
+                    // Frozen, or an accept/decline awaits the server: swallow the gesture.
+                    return true;
+                }
                 View child = rv.findChildViewUnder(e.getX(), e.getY());
                 if (child != null && tapDetector.onTouchEvent(e)) {
                     arenaAdapter.accept(rv.getChildAdapterPosition(child));
@@ -913,45 +937,90 @@ public class LiveTableFragment extends Fragment {
             }
         });
 
-        // swipe = reject
-        new androidx.recyclerview.widget.ItemTouchHelper(
-            new androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback(0,
-                androidx.recyclerview.widget.ItemTouchHelper.LEFT | androidx.recyclerview.widget.ItemTouchHelper.RIGHT) {
-                @Override
-                public boolean onMove(androidx.recyclerview.widget.RecyclerView rv,
-                                      androidx.recyclerview.widget.RecyclerView.ViewHolder vh,
-                                      androidx.recyclerview.widget.RecyclerView.ViewHolder t) { return false; }
-                @Override
-                public void onSwiped(androidx.recyclerview.widget.RecyclerView.ViewHolder vh, int dir) {
-                    arenaAdapter.reject(vh.getBindingAdapterPosition());
+        // swipe = decline
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
+                                  @NonNull RecyclerView.ViewHolder t) {
+                return false;
+            }
+
+            @Override
+            public int getSwipeDirs(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh) {
+                return arenaModel.isInteractive() ? super.getSwipeDirs(rv, vh) : 0;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int dir) {
+                // No local removal. On success the model marks the row in flight and the adapter
+                // rebinds it with a spinner, which brings the swiped view back. If nothing was sent
+                // (stale position, or the list froze mid-swipe), put the view back here.
+                int position = vh.getBindingAdapterPosition();
+                if (!arenaAdapter.reject(position)) {
+                    arenaAdapter.restoreSwipedRow(position);
                 }
-            }).attachToRecyclerView(list);
+            }
+        }).attachToRecyclerView(arenaList);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(getString(R.string.arena_tap_to_accept));
-        builder.setView(list);
-        builder.setNegativeButton(getString(R.string.arena_exit_table), (dialog, which) ->
-                activity.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}"));
+        builder.setView(container);
+        builder.setNegativeButton(getString(R.string.arena_exit_table), (dialog, which) -> {
+            activity.sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + table.getId() + ",\"booted\":false,\"time\":0}}");
+            // Ruling C4: reset the model now, so a snapshot that lands before the exit echo
+            // finds an empty, hidden list instead of re-popping the dialog with stale rows.
+            dismissArenaJoinRequest();
+        });
         arenaRequestDialog = builder.create();
         arenaRequestDialog.setCancelable(false);
         arenaRequestDialog.setCanceledOnTouchOutside(false);
         arenaRequestDialog.show();
+        // From now on every snapshot freezes first, including the first row onto the empty list
+        // (it grows the dialog and moves "Exit table"). dismissArenaJoinRequest's reset() undoes this.
+        arenaModel.onShown();
+        renderArenaFreeze();
     }
 
     public void dismissArenaJoinRequest() {
-        if (arenaAdapter != null) arenaAdapter.reset();
+        if (arenaModel != null) arenaModel.reset();
         if (arenaRequestDialog != null) {
             arenaRequestDialog.dismiss();
             arenaRequestDialog = null;
         }
+        arenaList = null;
+        arenaFreezeSpinner = null;
     }
 
-    public void arenaTableRequestJoinEvent(String playerName) {
-        if (arenaAdapter == null) return;
-        if (arenaRequestDialog == null || !arenaRequestDialog.isShowing()) {
+    /** dsgArenaJoinRequestsEvent for this table. Returns true when the snapshot holds a player who
+     *  was not in the previous one, so the caller plays the new-request sound. */
+    public boolean arenaJoinRequestsEvent(List<ArenaJoinRequest> requests) {
+        if (arenaModel == null) return false;
+        if (!requests.isEmpty() && arenaAdapter != null && table.getPlayers().size() <= 1) {
+            // Ruling C1: a list that appears because of a snapshot opens frozen. Show the dialog
+            // (which calls onShown()) before the snapshot applies, so its rows sit out the freeze
+            // instead of landing tappable under the owner's finger. No-op while already showing.
             showArenaJoinRequest();
         }
-        arenaAdapter.addPlayer(playerName);
+        return arenaModel.onSnapshot(requests);
+    }
+
+    private void onArenaRequestsChanged() {
+        if (arenaAdapter == null) return; // no view yet: onViewCreated renders the model
+        arenaAdapter.render();
+        if (!arenaModel.rows().isEmpty() && table.getPlayers().size() <= 1) {
+            showArenaJoinRequest(); // no-op while it is already showing
+        }
+        renderArenaFreeze();
+    }
+
+    private void renderArenaFreeze() {
+        if (arenaList == null || arenaFreezeSpinner == null) return;
+        boolean frozen = arenaModel.isFrozen();
+        // Empty snapshot: the list hides; the dialog stays as the owner's waiting screen with "Exit table".
+        // While the first rows are held the list is still hidden and only the spinner shows.
+        arenaList.setVisibility(arenaModel.rows().isEmpty() ? View.GONE : View.VISIBLE);
+        arenaList.setAlpha(frozen ? 0.4f : 1f);
+        arenaFreezeSpinner.setVisibility(frozen ? View.VISIBLE : View.GONE);
     }
 
     private void sendTableChange() {
@@ -1580,6 +1649,7 @@ public class LiveTableFragment extends Fragment {
     @Override
     public void onDestroyView() {
         dismissArenaJoinRequest();
+        arenaAdapter = null; // the model may still get snapshots; nothing renders without a view
         super.onDestroyView();
     }
 }
