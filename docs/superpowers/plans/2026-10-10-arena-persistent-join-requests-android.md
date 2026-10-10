@@ -14,10 +14,10 @@
 
 - Repo: `/Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android`, branch `arena-persistent-join-requests` (already checked out; confirm with `git -C <repo> branch --show-current`).
 - Wire keys, copied verbatim from the spec. C→S: `dsgArenaRequestJoinTableEvent {table}`, `dsgArenaAcceptTableJoinEvent {table, playerToAccept}`, `dsgArenaRejectTableJoinEvent {table, playerToReject}` (lowercase `dsg`), new `dsgArenaWithdrawJoinRequestEvent {table}`. S→C: `dsgArenaJoinRequestsEvent {table, requests: [{player, seq}]}`, `dsgArenaMyRequestsEvent {tables: [int]}`, `dsgArenaRequestEndedEvent {table, player, owner, reason}`.
-- Reasons, verbatim: `DECLINED`, `TABLE_FULL`, `TABLE_CLOSED`, `DUPLICATE`, `BLOCKED`, `NOT_AVAILABLE`, `GUEST_RATED`, `NO_LONGER_AVAILABLE`.
+- Reasons, verbatim: `DECLINED`, `TABLE_FULL`, `TABLE_CLOSED`, `DUPLICATE`, `BLOCKED`, `NOT_AVAILABLE`, `GUEST_RATED`, `BOOTED`, `NO_LONGER_AVAILABLE`. `BOOTED` means the requester was booted from that table less than 5 minutes ago (R2).
 - No longer sent S→C, so no Android handler: `dsgArenaRequestJoinTableEvent`, `dsgArenaRejectTableJoinEvent`. There is no server alias for the capital-key decline.
 - Freeze: 400 ms (milliseconds). Minimum interactive window after an unfreeze: 1000 ms. No other client timer may exist for requests (spec C1).
-- Notice texts (English, verbatim from spec C4, `<n>` = table number): "<owner> declined your request", "Table <n> is no longer available", "Table <n> was closed", "You already requested table <n>", "You can't request table <n> again until its next game", "You can't join table <n> right now", "Guests can't join rated tables", "<player> is no longer available". Withdraw confirm: "Withdraw your request to table <n>? You won't be able to request it again until its next game."
+- Notice texts (English, verbatim from spec C4, `<n>` = table number): "<owner> declined your request", "Table <n> is no longer available", "Table <n> was closed", "You already sent a request to <owner>", "<owner> removed you from table <n>, try again in a few minutes", "You can't request table <n> again until its next game", "You can't join table <n> right now", "Guests can't join rated tables", "<player> is no longer available". `<owner>` is always the event's own `owner` field, never the lobby's table model. Withdraw confirm: "Withdraw your request to table <n>? You won't be able to request it again until its next game."
 - Every new string gets a German translation in `res/values-de/strings.xml` (German is the only other locale). Apostrophes in string resources are escaped as `\'`.
 - Local unit tests run with `returnDefaultValues = true` (`app/build.gradle:74-82`), so `org.json` is a stub that returns null/0. Parsers therefore take the already-decoded `Map<String, Object>`, never a JSON string.
 - Gradle needs JDK 17+. Every gradle command in this plan is written in full as `env JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android/gradlew -p /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android <task>`. The default `JAVA_HOME` is JDK 8 and fails.
@@ -1409,10 +1409,10 @@ git -C /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android c
 **Interfaces:**
 - Consumes: `ArenaRequestEnded`, `ArenaEventParser.requestEnded(Map<String, Object>)` (Task 2).
 - Produces:
-  - `enum ArenaRequestNotice.Kind { DECLINED, TABLE_FULL, TABLE_CLOSED, DUPLICATE, BLOCKED, NOT_AVAILABLE, GUEST_RATED, NO_LONGER_AVAILABLE }`, each with `public final int resId`
+  - `enum ArenaRequestNotice.Kind { DECLINED, TABLE_FULL, TABLE_CLOSED, DUPLICATE, BOOTED, BLOCKED, NOT_AVAILABLE, GUEST_RATED, NO_LONGER_AVAILABLE }`, each with `public final int resId`
   - `public final ArenaRequestNotice.Kind kind; public final Object[] args;`
   - `static ArenaRequestNotice ArenaRequestNotice.of(ArenaRequestEnded ended)` — null for an unknown or missing reason
-  - String resources `arena_notice_declined`, `arena_notice_table_full`, `arena_notice_table_closed`, `arena_notice_duplicate`, `arena_notice_blocked`, `arena_notice_not_available`, `arena_notice_guest_rated`, `arena_notice_no_longer_available`
+  - String resources `arena_notice_declined`, `arena_notice_table_full`, `arena_notice_table_closed`, `arena_notice_duplicate`, `arena_notice_booted`, `arena_notice_blocked`, `arena_notice_not_available`, `arena_notice_guest_rated`, `arena_notice_no_longer_available`
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1443,12 +1443,25 @@ public class ArenaRequestNoticeTest {
     }
 
     @Test
+    public void duplicate_namesTheOwnerFromTheEvent() {
+        ArenaRequestNotice n = ArenaRequestNotice.of(ended("DUPLICATE"));
+        assertEquals(ArenaRequestNotice.Kind.DUPLICATE, n.kind);
+        assertArrayEquals(new Object[]{"alice"}, n.args);
+    }
+
+    @Test
+    public void booted_namesTheOwnerAndTheTable() {
+        ArenaRequestNotice n = ArenaRequestNotice.of(ended("BOOTED"));
+        assertEquals(ArenaRequestNotice.Kind.BOOTED, n.kind);
+        assertArrayEquals(new Object[]{"alice", 7}, n.args);
+    }
+
+    @Test
     public void tableReasons_nameTheTable() {
-        String[] reasons = {"TABLE_FULL", "TABLE_CLOSED", "DUPLICATE", "BLOCKED", "NOT_AVAILABLE"};
+        String[] reasons = {"TABLE_FULL", "TABLE_CLOSED", "BLOCKED", "NOT_AVAILABLE"};
         ArenaRequestNotice.Kind[] kinds = {
                 ArenaRequestNotice.Kind.TABLE_FULL, ArenaRequestNotice.Kind.TABLE_CLOSED,
-                ArenaRequestNotice.Kind.DUPLICATE, ArenaRequestNotice.Kind.BLOCKED,
-                ArenaRequestNotice.Kind.NOT_AVAILABLE};
+                ArenaRequestNotice.Kind.BLOCKED, ArenaRequestNotice.Kind.NOT_AVAILABLE};
         for (int i = 0; i < reasons.length; i++) {
             ArenaRequestNotice n = ArenaRequestNotice.of(ended(reasons[i]));
             assertEquals(reasons[i], kinds[i], n.kind);
@@ -1499,7 +1512,8 @@ In `app/src/main/res/values/strings.xml`, insert after line 544 (`<string name="
     <string name="arena_notice_declined">%1$s declined your request</string>
     <string name="arena_notice_table_full">Table %1$d is no longer available</string>
     <string name="arena_notice_table_closed">Table %1$d was closed</string>
-    <string name="arena_notice_duplicate">You already requested table %1$d</string>
+    <string name="arena_notice_duplicate">You already sent a request to %1$s</string>
+    <string name="arena_notice_booted">%1$s removed you from table %2$d, try again in a few minutes</string>
     <string name="arena_notice_blocked">You can\'t request table %1$d again until its next game</string>
     <string name="arena_notice_not_available">You can\'t join table %1$d right now</string>
     <string name="arena_notice_guest_rated">Guests can\'t join rated tables</string>
@@ -1512,7 +1526,8 @@ In `app/src/main/res/values-de/strings.xml`, insert after line 306 (`<string nam
     <string name="arena_notice_declined">%1$s hat deine Anfrage abgelehnt</string>
     <string name="arena_notice_table_full">Tisch %1$d ist nicht mehr verfügbar</string>
     <string name="arena_notice_table_closed">Tisch %1$d wurde geschlossen</string>
-    <string name="arena_notice_duplicate">Du hast Tisch %1$d bereits angefragt</string>
+    <string name="arena_notice_duplicate">Du hast %1$s bereits eine Anfrage geschickt</string>
+    <string name="arena_notice_booted">%1$s hat dich von Tisch %2$d entfernt, versuche es in ein paar Minuten noch einmal</string>
     <string name="arena_notice_blocked">Du kannst Tisch %1$d erst nach seinem nächsten Spiel wieder anfragen</string>
     <string name="arena_notice_not_available">Du kannst Tisch %1$d gerade nicht beitreten</string>
     <string name="arena_notice_guest_rated">Gäste können gewerteten Tischen nicht beitreten</string>
@@ -1539,6 +1554,7 @@ public final class ArenaRequestNotice {
         TABLE_FULL(R.string.arena_notice_table_full),
         TABLE_CLOSED(R.string.arena_notice_table_closed),
         DUPLICATE(R.string.arena_notice_duplicate),
+        BOOTED(R.string.arena_notice_booted),
         BLOCKED(R.string.arena_notice_blocked),
         NOT_AVAILABLE(R.string.arena_notice_not_available),
         GUEST_RATED(R.string.arena_notice_guest_rated),
@@ -1571,7 +1587,10 @@ public final class ArenaRequestNotice {
             case "TABLE_CLOSED":
                 return new ArenaRequestNotice(Kind.TABLE_CLOSED, ended.table);
             case "DUPLICATE":
-                return new ArenaRequestNotice(Kind.DUPLICATE, ended.table);
+                // owner comes from the event, never from the lobby's table model
+                return new ArenaRequestNotice(Kind.DUPLICATE, ended.owner);
+            case "BOOTED":
+                return new ArenaRequestNotice(Kind.BOOTED, ended.owner, ended.table);
             case "BLOCKED":
                 return new ArenaRequestNotice(Kind.BLOCKED, ended.table);
             case "NOT_AVAILABLE":
@@ -1590,7 +1609,7 @@ public final class ArenaRequestNotice {
 - [ ] **Step 5: Run the tests to verify they pass**
 
 Run: `env JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android/gradlew -p /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android :app:testDebugUnitTest --tests "be.submanifold.pentelive.liveGameRoom.ArenaRequestNoticeTest"`
-Expected: PASS, 6 tests.
+Expected: PASS, 8 tests.
 
 - [ ] **Step 6: Dispatch the event**
 
@@ -2335,7 +2354,7 @@ git -C /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android c
 Run: `env JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android/gradlew -p /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android clean :app:testDebugUnitTest assembleDebug`
 Expected: `BUILD SUCCESSFUL`. Then count results:
 Run: `grep -h -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' /Users/waliedothman/mariposa/coding/pente.org-project/pentelive-android/app/build/test-results/testDebugUnitTest/TEST-be.submanifold.pentelive.liveGameRoom.Arena*.xml`
-Expected: six lines (ArenaEventsTest 5, ArenaEventParserTest 10, ArenaRequestListModelTest 15, ArenaRequestRowsTest 7, ArenaMyRequestsTest 7, ArenaRequestNoticeTest 6), all with `failures="0" errors="0"`.
+Expected: six lines (ArenaEventsTest 5, ArenaEventParserTest 10, ArenaRequestListModelTest 15, ArenaRequestRowsTest 7, ArenaMyRequestsTest 7, ArenaRequestNoticeTest 8), all with `failures="0" errors="0"`.
 
 - [ ] **Step 2: Confirm no countdown remains**
 
