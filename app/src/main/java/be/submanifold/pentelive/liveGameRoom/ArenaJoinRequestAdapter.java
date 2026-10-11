@@ -1,8 +1,6 @@
 package be.submanifold.pentelive.liveGameRoom;
 
 import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,105 +8,81 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import be.submanifold.pentelive.R;
 
-/** Host-side list of arena join requesters. Each request lives 6s (auto-removed).
- *  A single 100ms ticker drives the countdown bars (avoids per-view timer leaks).
- *  Tap a row = accept; swipe (wired via ItemTouchHelper in the fragment) = reject. */
+/** Host-side list of arena join requesters. It shows ArenaRequestListModel's applied rows (the
+ *  server's snapshot, in seq order, keyed by player) and never removes a row itself.
+ *  Tap a row = accept; swipe (wired via ItemTouchHelper in the fragment) = decline. The acted-on
+ *  row shows a spinner until the server's next snapshot. */
 public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinRequestAdapter.VH> {
-
-    private static final long TIMEOUT_MS = 6000L;
-    private static final long TICK_MS = 100L;
 
     public interface ActionSender { void send(String event); }
 
     private final LayoutInflater inflater;
     private final TablesAndPlayers tablesAndPlayers;
+    private final ArenaRequestListModel model;
     private final ActionSender sender;
     private final String me;
     private final int tableId;
     private final int gameId;
 
-    private final List<String> data = new ArrayList<>();
-    private final Map<String, Long> joinedAt = new HashMap<>();
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private boolean ticking = false;
-
-    private final Runnable ticker = new Runnable() {
-        @Override public void run() {
-            long now = System.currentTimeMillis();
-            for (int i = data.size() - 1; i >= 0; i--) {
-                Long start = joinedAt.get(data.get(i));
-                if (start == null || now - start >= TIMEOUT_MS) {
-                    joinedAt.remove(data.get(i));
-                    data.remove(i);
-                    notifyItemRemoved(i);
-                }
-            }
-            notifyItemRangeChanged(0, data.size(), "progress");
-            if (!data.isEmpty()) {
-                handler.postDelayed(this, TICK_MS);
-            } else {
-                ticking = false;
-            }
-        }
-    };
+    private List<ArenaRequestRows.Row> shown = new ArrayList<>();
 
     public ArenaJoinRequestAdapter(LayoutInflater inflater, TablesAndPlayers tablesAndPlayers,
-                                   ActionSender sender, String me, int tableId, int gameId) {
+                                   ArenaRequestListModel model, ActionSender sender,
+                                   String me, int tableId, int gameId) {
         this.inflater = inflater;
         this.tablesAndPlayers = tablesAndPlayers;
+        this.model = model;
         this.sender = sender;
         this.me = me;
         this.tableId = tableId;
         this.gameId = gameId;
     }
 
-    public void addPlayer(String name) {
-        data.add(name);
-        joinedAt.put(name, System.currentTimeMillis());
-        notifyItemInserted(data.size() - 1);
-        if (!ticking) {
-            ticking = true;
-            handler.postDelayed(ticker, TICK_MS);
-        }
+    /** Re-reads the model and dispatches row-level changes, matched by player. */
+    public void render() {
+        List<ArenaRequestRows.Row> next = ArenaRequestRows.build(model.rows(), model.inFlightPlayer());
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(ArenaRequestRows.diff(shown, next));
+        shown = next;
+        diff.dispatchUpdatesTo(this);
     }
 
-    private void removeAt(int position) {
-        if (position < 0 || position >= data.size()) return;
-        joinedAt.remove(data.get(position));
-        data.remove(position);
-        notifyItemRemoved(position);
+    public String playerAt(int position) {
+        return position >= 0 && position < shown.size() ? shown.get(position).player : null;
     }
 
-    public void accept(int position) {
-        if (position < 0 || position >= data.size()) return;
-        sender.send(ArenaEvents.accept(me, data.get(position), tableId));
-        removeAt(position);
+    /** Sends an accept for the row at position. False (nothing sent) if the model refuses the tap. */
+    public boolean accept(int position) {
+        String player = playerAt(position);
+        if (player == null || !model.beginAction(player)) return false;
+        sender.send(ArenaEvents.accept(me, player, tableId));
+        return true;
     }
 
-    public void reject(int position) {
-        if (position < 0 || position >= data.size()) return;
-        sender.send(ArenaEvents.reject(me, data.get(position), tableId));
-        removeAt(position);
+    /** Sends a decline for the row at position. False (nothing sent) if the model refuses it. */
+    public boolean reject(int position) {
+        String player = playerAt(position);
+        if (player == null || !model.beginAction(player)) return false;
+        sender.send(ArenaEvents.reject(me, player, tableId));
+        return true;
     }
 
-    /** Cancel everything — call from fragment onDestroyView and on dismiss. */
-    // Whole list is cleared, so a full refresh is the accurate notification.
+    /** Brings back a row that was swiped away but not declined. */
     @SuppressLint("NotifyDataSetChanged")
-    public void reset() {
-        handler.removeCallbacks(ticker);
-        ticking = false;
-        data.clear();
-        joinedAt.clear();
-        notifyDataSetChanged();
+    public void restoreSwipedRow(int position) {
+        if (position == RecyclerView.NO_POSITION) {
+            // The swiped holder no longer maps to a row: rebind everything so no gap is left.
+            notifyDataSetChanged();
+        } else {
+            notifyItemChanged(position);
+        }
     }
 
     @NonNull
@@ -119,8 +93,8 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        String name = data.get(position);
-        LivePlayer player = tablesAndPlayers.players.get(name);
+        ArenaRequestRows.Row row = shown.get(position);
+        LivePlayer player = tablesAndPlayers.players.get(row.player);
         if (player != null) {
             int rating = player.getRating(gameId);
             holder.name.setText(player.coloredNameString(holder.name.getLineHeight()));
@@ -128,28 +102,26 @@ public class ArenaJoinRequestAdapter extends RecyclerView.Adapter<ArenaJoinReque
             ratingText.append(" ").append(String.valueOf(rating));
             holder.rating.setText(ratingText);
         } else {
-            holder.name.setText(name);
+            holder.name.setText(row.player);
             holder.rating.setText("");
         }
-        Long start = joinedAt.get(name);
-        long remaining = start == null ? 0 : Math.max(0, TIMEOUT_MS - (System.currentTimeMillis() - start));
-        holder.progress.setProgress((int) remaining);
+        holder.spinner.setVisibility(row.inFlight ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return shown.size();
     }
 
     static class VH extends RecyclerView.ViewHolder {
         final TextView name;
         final TextView rating;
-        final ProgressBar progress;
+        final ProgressBar spinner;
         VH(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.requestPlayerName);
             rating = itemView.findViewById(R.id.requestPlayerRating);
-            progress = itemView.findViewById(R.id.requestProgress);
+            spinner = itemView.findViewById(R.id.requestSpinner);
         }
     }
 }

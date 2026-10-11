@@ -43,4 +43,14 @@
         android:layout_marginStart="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <TextView android:id="@+id/requestedText"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:layout_below="@id/watchingText"
+        android:layout_marginStart="10dp"
+        android:text="@string/arena_requested"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </RelativeLayout>

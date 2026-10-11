@@ -1,8 +1,8 @@
 package be.submanifold.pentelive.liveGameRoom;
 
 /** Builds the raw-JSON-string arena protocol events sent via LiveGameRoomActivity.sendEvent.
- *  NOTE: diverges from iOS PR #4 on purpose — requestJoin adds "player"; reject uses
- *  "message" (iOS had "mesage"). The "DSG" capitalization on reject matches the backend. */
+ *  requestJoin and withdraw add "player"; the server fills or checks it against the session.
+ *  Every key starts with lowercase "dsg": the server's Gson wrapper matches keys case-sensitively. */
 public final class ArenaEvents {
     private ArenaEvents() {}
 
@@ -30,8 +30,13 @@ public final class ArenaEvents {
     }
 
     public static String reject(String player, String playerToReject, int tableId) {
-        return "{\"DSGArenaRejectTableJoinEvent\":{\"player\":\"" + player
+        return "{\"dsgArenaRejectTableJoinEvent\":{\"player\":\"" + player
                 + "\",\"playerToReject\":\"" + playerToReject
-                + "\",\"table\":" + tableId + ",\"message\":null}}";
+                + "\",\"table\":" + tableId + "}}";
+    }
+
+    public static String withdraw(String player, int tableId) {
+        return "{\"dsgArenaWithdrawJoinRequestEvent\":{\"player\":\"" + player
+                + "\",\"table\":" + tableId + ",\"time\":0}}";
     }
 }

@@ -540,8 +540,19 @@
     <string name="arena_timed">Timed:</string>
     <string name="arena_initial_minutes">Initial minutes:</string>
     <string name="arena_incremental_seconds">Incremental seconds:</string>
-    <string name="arena_waiting">Waiting for host to accept…</string>
+    <string name="arena_requested">Requested</string>
+    <string name="arena_withdraw">Withdraw</string>
+    <string name="arena_withdraw_confirm">Withdraw your request to table %1$d? You won\'t be able to request it again until its next game.</string>
     <string name="arena_exit_table">Exit table</string>
+    <string name="arena_notice_declined">%1$s declined your request</string>
+    <string name="arena_notice_table_full">Table %1$d is no longer available</string>
+    <string name="arena_notice_table_closed">Table %1$d was closed</string>
+    <string name="arena_notice_duplicate">You already sent a request to %1$s</string>
+    <string name="arena_notice_booted">%1$s removed you from table %2$d, try again in a few minutes</string>
+    <string name="arena_notice_blocked">You can\'t request table %1$d again until its next game</string>
+    <string name="arena_notice_not_available">You can\'t join table %1$d right now</string>
+    <string name="arena_notice_guest_rated">Guests can\'t join rated tables</string>
+    <string name="arena_notice_no_longer_available">%1$s is no longer available</string>
 
     <string name="title_invitations">Invitations</string>
     <string name="get_help">Get Help</string>

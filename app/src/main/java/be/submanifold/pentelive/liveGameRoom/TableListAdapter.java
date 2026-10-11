@@ -154,6 +154,11 @@ public class TableListAdapter extends BaseExpandableListAdapter {
         }
         settingsTextView.setText(table.getSettingsText());
         watchingTextView.setText(table.getWatchingText(watchingTextView.getLineHeight()));
+        TextView requestedTextView = convertView.findViewById(R.id.requestedText);
+        requestedTextView.setTextColor(primaryColor);
+        // Tables in the latest dsgArenaMyRequestsEvent show the "Requested" mark (spec C3).
+        requestedTextView.setVisibility(isArena && activity.arenaMyRequests.isRequested(table.getId())
+                ? View.VISIBLE : View.GONE);
         return convertView;
     }
 
