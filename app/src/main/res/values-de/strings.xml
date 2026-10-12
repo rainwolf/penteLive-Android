@@ -347,5 +347,25 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="billing_already_owned">Dieses Google-Konto besitzt diesen Artikel bereits. Er ist möglicherweise mit einem anderen pente.org-Konto verknüpft. Verwenden Sie „Käufe wiederherstellen“.</string>
     <string name="billing_unavailable">Google Play-Käufe sind auf diesem Gerät nicht verfügbar.</string>
     <string name="billing_error">Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.</string>
+    <string name="store_loading">Wird geladen…</string>
+    <string name="store_load_failed">Ihr pente.org-Konto konnte nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="store_products_unavailable">Käufe sind derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.</string>
+    <string name="store_subscribed_until">Abonniert bis %1$s</string>
+    <string name="store_yearly_title">Jahresabonnement</string>
+    <string name="store_benefits">• keine Spielbeschränkungen\n• Rücknahme in rundenbasierten Spielen anfragen\n• Namensfarbe oder Avatar ändern\n• Zugriff auf die Datenbank!</string>
+    <string name="store_price_per_year">%1$s / Jahr</string>
+    <string name="store_buy_yearly">Abonnieren</string>
+    <string name="store_yearly_overlap">Sie haben bereits Zugang bis zum oben genannten Datum. Ein neues Abonnement beginnt sofort und läuft parallel zu Ihrem aktuellen Zugang; es wird nicht hinten angehängt.</string>
+    <string name="store_yearly_owned">Sie haben dieses Abonnement bereits. Über „Abo verwalten“ unten können Sie es ändern oder kündigen.</string>
+    <string name="store_auto_renew_disclosure">(Dieses Abonnement verlängert sich jedes Jahr automatisch zum gleichen Preis, bis Sie es kündigen. Die Zahlung wird über Ihr Google Play-Konto abgerechnet. Sie können jederzeit über „Abo verwalten“ kündigen; der Zugang bleibt bis zum Ende des bezahlten Jahres bestehen.)</string>
+    <string name="store_manage_subscription">Abo verwalten</string>
+    <string name="store_eula">Nutzungsbedingungen (EULA)</string>
+    <string name="store_month_pass_title">1-Monats-Pass</string>
+    <string name="store_month_pass_desc">31 Tage unbegrenzte rundenbasierte Spiele, Namensfarbe und Avatar sowie Datenbankzugriff. Verlängert sich nicht.</string>
+    <string name="store_month_pass_stacks">Ihr Pass beginnt, wenn Ihr aktueller Zugang endet.</string>
+    <string name="store_buy_month_pass">1 Monat kaufen: %1$s</string>
+    <string name="store_vacation_title">Zusätzliche Urlaubstage (kein Abonnement erforderlich)</string>
+    <string name="store_vacation_note">Diese Urlaubstage werden nicht ins Jahr %1$d übertragen.</string>
+    <string name="store_buy_vacation">Zusätzliche Urlaubstage (%1$d): %2$s</string>
 
 </resources>

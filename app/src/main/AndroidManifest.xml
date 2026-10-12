@@ -64,6 +64,9 @@
             android:name=".WebViewActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".StoreActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".InviteAIActivity"
             android:screenOrientation="portrait" />
         <activity

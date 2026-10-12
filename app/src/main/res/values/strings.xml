@@ -598,4 +598,24 @@
     <string name="billing_already_owned">This Google account already owns this item. It may be linked to another pente.org account. Use Restore purchases.</string>
     <string name="billing_unavailable">Google Play purchases are not available on this device.</string>
     <string name="billing_error">The purchase could not be completed. Please try again later.</string>
+    <string name="store_loading">Loading…</string>
+    <string name="store_load_failed">Could not load your pente.org account. Check your connection and try again.</string>
+    <string name="store_products_unavailable">Purchases are not available right now. Please try again later.</string>
+    <string name="store_subscribed_until">Subscribed until %1$s</string>
+    <string name="store_yearly_title">1 year subscription</string>
+    <string name="store_benefits">• remove play limits\n• request undo in turn-based games\n• change your name color or avatar\n• access the database!</string>
+    <string name="store_price_per_year">%1$s / year</string>
+    <string name="store_buy_yearly">Subscribe</string>
+    <string name="store_yearly_overlap">You already have access until the date above. A new subscription starts now and runs alongside your current access; it is not added on after it.</string>
+    <string name="store_yearly_owned">You already have this subscription. Use \"Manage subscription\" below to change or cancel it.</string>
+    <string name="store_auto_renew_disclosure">(This subscription renews automatically every year at the same price until you cancel it. Payment is charged to your Google Play account. You can cancel at any time with \"Manage subscription\"; you keep access until the end of the year you paid for.)</string>
+    <string name="store_manage_subscription">Manage subscription</string>
+    <string name="store_eula">Terms of use (EULA)</string>
+    <string name="store_month_pass_title">1 month pass</string>
+    <string name="store_month_pass_desc">31 days of unlimited turn-based games, name color and avatar, and database access. Does not renew.</string>
+    <string name="store_month_pass_stacks">Your pass starts when your current access ends.</string>
+    <string name="store_buy_month_pass">Buy 1 month: %1$s</string>
+    <string name="store_vacation_title">Extra vacation days (no subscription required)</string>
+    <string name="store_vacation_note">These vacation days do not roll over to %1$d.</string>
+    <string name="store_buy_vacation">Extra vacation days (%1$d): %2$s</string>
 </resources>
