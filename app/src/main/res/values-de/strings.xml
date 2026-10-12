@@ -367,5 +367,6 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="store_vacation_title">Zusätzliche Urlaubstage (kein Abonnement erforderlich)</string>
     <string name="store_vacation_note">Diese Urlaubstage werden nicht ins Jahr %1$d übertragen.</string>
     <string name="store_buy_vacation">Zusätzliche Urlaubstage (%1$d): %2$s</string>
+    <string name="restore_purchases">Käufe wiederherstellen</string>
 
 </resources>

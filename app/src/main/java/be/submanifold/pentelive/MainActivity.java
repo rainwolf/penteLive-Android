@@ -447,6 +447,8 @@ public class MainActivity extends AppCompatActivity {
                 showOnlyTB = PrefUtils.getBooleanFromPrefs(MainActivity.this, PrefUtils.PREFS_TBONLY_KEY, false);
         this.player.loadPlayer(this.listAdapter, loadAvatars, showOnlyTB);
         ContextCompat.registerReceiver((MainActivity.this), mMessageReceiver, new IntentFilter("unique_name"), ContextCompat.RECEIVER_NOT_EXPORTED);
+        MyApplication.billing().attach(this);
+        MyApplication.billing().resync(false);
     }
 
     @Override
@@ -459,6 +461,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MyApplication.billing().detach(this);
         if (whosOnlineCancelable != null) {
             whosOnlineCancelable.cancel();
         }

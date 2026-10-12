@@ -618,4 +618,5 @@
     <string name="store_vacation_title">Extra vacation days (no subscription required)</string>
     <string name="store_vacation_note">These vacation days do not roll over to %1$d.</string>
     <string name="store_buy_vacation">Extra vacation days (%1$d): %2$s</string>
+    <string name="restore_purchases">Restore purchases</string>
 </resources>

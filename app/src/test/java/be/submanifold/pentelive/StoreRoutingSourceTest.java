@@ -53,6 +53,21 @@ public class StoreRoutingSourceTest {
         assertEquals(2, count(source, "StoreActivity.class"));
     }
 
+    @Test
+    public void restoreAndResyncAreWired() throws IOException {
+        assertTrue(read("src/main/res/layout/activity_settings.xml").contains("@+id/restorePurchasesButton\""));
+        assertTrue(read("src/main/res/values/strings.xml").contains("<string name=\"restore_purchases\">"));
+        assertTrue(read("src/main/res/values-de/strings.xml").contains("<string name=\"restore_purchases\">"));
+        String settings = read(JAVA + "SettingsActivity.java");
+        assertEquals(1, count(settings, "MyApplication.billing().resync(true)"));
+        assertEquals(1, count(settings, "MyApplication.billing().attach(this)"));
+        assertEquals(1, count(settings, "MyApplication.billing().detach(this)"));
+        String main = read(JAVA + "MainActivity.java");
+        assertEquals(1, count(main, "MyApplication.billing().resync(false)"));
+        assertEquals(1, count(main, "MyApplication.billing().attach(this)"));
+        assertEquals(1, count(main, "MyApplication.billing().detach(this)"));
+    }
+
     // ---- helpers ----
 
     private static String read(String path) throws IOException {
