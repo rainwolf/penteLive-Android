@@ -2,9 +2,12 @@ package be.submanifold.pentelive.billing;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * POSTs purchases to /gameServer/googlePlayPurchase and turns the replies into what the
@@ -15,12 +18,14 @@ public final class PurchaseSender {
 
     public static final String PATH = "/gameServer/googlePlayPurchase";
 
+    private static final Logger LOG = Logger.getLogger(PurchaseSender.class.getName());
+
     /** Sends one purchase; returns the reply body, or null when the status was not 200. */
     public interface Transport {
         String post(String productId, String purchaseToken) throws IOException;
     }
 
-    /** What a batch of sends asks the UI to do. */
+    /** What a batch of sends asks the UI to do. Every list is unmodifiable. */
     public static final class Outcome {
         /** Distinct messages to show, in first-seen order; never contains NONE. */
         public final List<ReplyMessage> messages;
@@ -31,11 +36,22 @@ public final class PurchaseSender {
          * the automatic resync skips them for the rest of the process.
          */
         public final List<String> rejectedTokens;
+        /**
+         * Tokens the server answered "success", "success:renewal", "success:known" (or another
+         * "success:" variant) or "success:refunded" for, in send order: the server has dealt with
+         * them, so the automatic resync skips them for the rest of the process.
+         */
+        public final List<String> handledTokens;
+        /** Tokens whose send failed ({@link PurchaseReply#FAILED}), in send order; a later resync retries them. */
+        public final List<String> failedTokens;
 
-        Outcome(List<ReplyMessage> messages, boolean reloadPlayer, List<String> rejectedTokens) {
-            this.messages = messages;
+        Outcome(List<ReplyMessage> messages, boolean reloadPlayer, List<String> rejectedTokens,
+                List<String> handledTokens, List<String> failedTokens) {
+            this.messages = Collections.unmodifiableList(messages);
             this.reloadPlayer = reloadPlayer;
-            this.rejectedTokens = rejectedTokens;
+            this.rejectedTokens = Collections.unmodifiableList(rejectedTokens);
+            this.handledTokens = Collections.unmodifiableList(handledTokens);
+            this.failedTokens = Collections.unmodifiableList(failedTokens);
         }
     }
 
@@ -49,15 +65,19 @@ public final class PurchaseSender {
     public PurchaseReply send(String productId, String purchaseToken) {
         try {
             return PurchaseReply.fromServer(transport.post(productId, purchaseToken));
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException e) {
+            return PurchaseReply.FAILED;
+        } catch (RuntimeException e) {
+            LOG.log(Level.WARNING, "sending a purchase for " + productId + " failed", e);
             return PurchaseReply.FAILED;
         }
     }
 
     /**
      * Sends each purchase in order. With {@code explicit} ("Restore purchases") and no
-     * purchases, the outcome says there is nothing to restore; when no send reached the
-     * server, it says the restore failed.
+     * purchases, the outcome says there is nothing to restore; when every reply is
+     * {@link PurchaseReply#FAILED} (no reply, a network error, or an unrecognised reply body),
+     * it says the restore failed.
      *
      * @param fromPurchaseFlow true for purchases from onPurchasesUpdated (the player just paid):
      *                         KNOWN and RENEWAL also thank, because RTDN may have granted the
@@ -66,8 +86,9 @@ public final class PurchaseSender {
     public Outcome sendAll(List<PurchaseRecord> purchases, boolean explicit, boolean fromPurchaseFlow) {
         Set<ReplyMessage> messages = new LinkedHashSet<>();
         List<String> rejectedTokens = new ArrayList<>();
+        List<String> handledTokens = new ArrayList<>();
+        List<String> failedTokens = new ArrayList<>();
         boolean reload = false;
-        boolean anyAnswered = false;
         if (purchases.isEmpty() && explicit) {
             messages.add(ReplyMessage.NO_PURCHASES_TO_RESTORE);
         }
@@ -80,15 +101,23 @@ public final class PurchaseSender {
             if (message != ReplyMessage.NONE) {
                 messages.add(message);
             }
-            if (reply == PurchaseReply.SHARED || reply == PurchaseReply.INVALID) {
-                rejectedTokens.add(purchase.purchaseToken);
+            switch (reply) {
+                case SHARED:
+                case INVALID:
+                    rejectedTokens.add(purchase.purchaseToken);
+                    break;
+                case FAILED:
+                    failedTokens.add(purchase.purchaseToken);
+                    break;
+                default:
+                    handledTokens.add(purchase.purchaseToken);
+                    break;
             }
-            anyAnswered |= reply != PurchaseReply.FAILED;
             reload |= reply.reloadsPlayer();
         }
-        if (explicit && !purchases.isEmpty() && !anyAnswered) {
+        if (explicit && !purchases.isEmpty() && failedTokens.size() == purchases.size()) {
             messages.add(ReplyMessage.RESTORE_FAILED);
         }
-        return new Outcome(new ArrayList<>(messages), reload, rejectedTokens);
+        return new Outcome(new ArrayList<>(messages), reload, rejectedTokens, handledTokens, failedTokens);
     }
 }

@@ -21,7 +21,7 @@ public final class ResyncSelector {
         return select(purchases, true, Collections.<String>emptySet());
     }
 
-    /** {@link #forResync(List, boolean, Set)} with no rejected tokens. */
+    /** {@link #forResync(List, boolean, Set)} with no tokens to skip. */
     public static List<PurchaseRecord> forResync(List<PurchaseRecord> purchases, boolean explicit) {
         return forResync(purchases, explicit, Collections.<String>emptySet());
     }
@@ -33,13 +33,13 @@ public final class ResyncSelector {
      *                       the automatic resync: only purchases that still need server action,
      *                       i.e. subscriptions not yet acknowledged and one-time products still
      *                       returned by Play (not yet consumed).
-     * @param rejectedTokens tokens the server already answered "success:shared" or
-     *                       "invalid receipt" for in this process; the automatic resync skips
-     *                       them, "Restore purchases" sends them anyway.
+     * @param skipTokens     tokens the automatic resync skips: the server already rejected them
+     *                       ("success:shared", "invalid receipt") or dealt with them in this
+     *                       process. "Restore purchases" sends them anyway.
      */
     public static List<PurchaseRecord> forResync(List<PurchaseRecord> purchases, boolean explicit,
-                                                 Set<String> rejectedTokens) {
-        return select(purchases, explicit, explicit ? Collections.<String>emptySet() : rejectedTokens);
+                                                 Set<String> skipTokens) {
+        return select(purchases, explicit, explicit ? Collections.<String>emptySet() : skipTokens);
     }
 
     private static List<PurchaseRecord> select(List<PurchaseRecord> purchases, boolean includeAcknowledgedSubs,

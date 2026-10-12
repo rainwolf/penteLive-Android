@@ -41,6 +41,8 @@ public class StoreActivity extends AppCompatActivity {
     private boolean productsLoaded;
     private int productsCode = BillingCodes.OK;
     private Map<String, String> prices;
+    /** False until the first onResume; onCreate already loads the info for that one. */
+    private boolean resumedBefore;
     /** Reloads the server info after a grant; one instance so onDestroy removes only its own. */
     private final Runnable onEntitlementChanged = this::loadInfo;
 
@@ -83,6 +85,12 @@ public class StoreActivity extends AppCompatActivity {
         MyApplication.activityResumed(this);
         billing().attach(this);
         billing().setEntitlementListener(onEntitlementChanged);
+        if (resumedBefore) {
+            // Back from "Manage subscription" in the Play app (or elsewhere): the server may
+            // know of a cancellation or change, so the cards must not stay stale.
+            loadInfo();
+        }
+        resumedBefore = true;
     }
 
     @Override
@@ -204,10 +212,10 @@ public class StoreActivity extends AppCompatActivity {
         if (info == null) {
             return;
         }
-        int code = billing().launch(this, productId, info.accountId);
-        BillingCodes.Outcome outcome = BillingCodes.classify(code);
-        if (outcome != BillingCodes.Outcome.PROCEED) {
-            billing().showResponseError(outcome);
+        // When Play's sheet was requested, onPurchasesUpdated shows any error, including one
+        // launchBillingFlow returns at once; only a product that is not loaded is reported here.
+        if (!billing().launch(this, productId, info.accountId)) {
+            billing().showResponseError(BillingCodes.classify(BillingCodes.ITEM_UNAVAILABLE));
         }
     }
 

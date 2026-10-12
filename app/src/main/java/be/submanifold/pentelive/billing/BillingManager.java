@@ -71,8 +71,14 @@ public final class BillingManager implements PurchasesUpdatedListener {
     private boolean connecting;
     /** Tokens the server answered "success:shared" or "invalid receipt" for in this process. */
     private final Set<String> rejectedTokens = new HashSet<>();
-    private final Map<String, ProductDetails> productDetails = new HashMap<>();
-    private final Map<String, String> offerTokens = new HashMap<>();
+    /**
+     * Tokens the server has dealt with in this process (any "success" reply except shared),
+     * plus purchase-flow tokens whose send is queued; the automatic resync skips them.
+     */
+    private final Set<String> handledTokens = new HashSet<>();
+    /** Replaced as a whole by {@link #loadProducts} once both queries have finished. */
+    private Map<String, ProductDetails> productDetails = new HashMap<>();
+    private Map<String, String> offerTokens = new HashMap<>();
     private WeakReference<Activity> host = new WeakReference<>(null);
     private Runnable entitlementListener;
 
@@ -116,8 +122,10 @@ public final class BillingManager implements PurchasesUpdatedListener {
                 listener.onProducts(code, Collections.emptyMap());
                 return;
             }
-            productDetails.clear();
-            offerTokens.clear();
+            // Fresh maps, swapped in when both queries have finished, so a launch meanwhile
+            // still finds the products loaded before.
+            Map<String, ProductDetails> newDetails = new HashMap<>();
+            Map<String, String> newOfferTokens = new HashMap<>();
             Map<String, String> prices = new HashMap<>();
             int[] remaining = {2};
             int[] firstError = {BillingCodes.OK};
@@ -127,13 +135,15 @@ public final class BillingManager implements PurchasesUpdatedListener {
                 main.post(() -> {
                     if (resultCode == BillingCodes.OK && found != null) {
                         for (ProductDetails details : found) {
-                            addProduct(details, prices);
+                            addProduct(details, newDetails, newOfferTokens, prices);
                         }
                     } else if (firstError[0] == BillingCodes.OK) {
                         firstError[0] = resultCode;
                     }
                     remaining[0]--;
                     if (remaining[0] == 0) {
+                        productDetails = newDetails;
+                        offerTokens = newOfferTokens;
                         listener.onProducts(prices.isEmpty() ? firstError[0] : BillingCodes.OK, prices);
                     }
                 });
@@ -145,14 +155,16 @@ public final class BillingManager implements PurchasesUpdatedListener {
 
     /**
      * Opens Play's purchase sheet for a product {@link #loadProducts} returned, tagged with
-     * the server's account id. Returns a {@link BillingCodes} response code; OK means the
-     * sheet opened and the result arrives in {@link #onPurchasesUpdated}.
+     * the server's account id. Returns false, launching nothing, when that product is not
+     * loaded; the caller then reports it. Otherwise every result arrives in
+     * {@link #onPurchasesUpdated}, which also shows the error when launchBillingFlow fails at
+     * once (Play Billing posts that failure to the listener as well as returning it).
      */
-    public int launch(Activity activity, String productId, String accountId) {
+    public boolean launch(Activity activity, String productId, String accountId) {
         ProductDetails details = productDetails.get(productId);
         String offerToken = offerTokens.get(productId);
         if (details == null || (Products.isSubscription(productId) && offerToken == null)) {
-            return BillingCodes.ITEM_UNAVAILABLE;
+            return false;
         }
         BillingFlowParams.ProductDetailsParams.Builder product =
                 BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(details);
@@ -163,7 +175,8 @@ public final class BillingManager implements PurchasesUpdatedListener {
                 .setProductDetailsParamsList(Collections.singletonList(product.build()))
                 .setObfuscatedAccountId(accountId)
                 .build();
-        return client.launchBillingFlow(activity, params).getResponseCode();
+        client.launchBillingFlow(activity, params);
+        return true;
     }
 
     /**
@@ -194,7 +207,9 @@ public final class BillingManager implements PurchasesUpdatedListener {
                     if (remaining[0] > 0) {
                         return;
                     }
-                    List<PurchaseRecord> selected = ResyncSelector.forResync(all, explicit, rejectedTokens);
+                    Set<String> skip = new HashSet<>(rejectedTokens);
+                    skip.addAll(handledTokens);
+                    List<PurchaseRecord> selected = ResyncSelector.forResync(all, explicit, skip);
                     if (failed[0] && selected.isEmpty()) {
                         if (explicit) {
                             showResponseError(BillingCodes.Outcome.ERROR);
@@ -231,6 +246,11 @@ public final class BillingManager implements PurchasesUpdatedListener {
             }
             List<PurchaseRecord> selected = ResyncSelector.forUpdate(records);
             if (!selected.isEmpty()) {
+                // Skip these in the automatic resync from now on, even before the server
+                // answers (the player may go Back at once); present() undoes it on failure.
+                for (PurchaseRecord purchase : selected) {
+                    handledTokens.add(purchase.purchaseToken);
+                }
                 sendInBackground(selected, false, true);
             }
         });
@@ -319,7 +339,8 @@ public final class BillingManager implements PurchasesUpdatedListener {
         return QueryProductDetailsParams.newBuilder().setProductList(products).build();
     }
 
-    private void addProduct(ProductDetails details, Map<String, String> prices) {
+    private static void addProduct(ProductDetails details, Map<String, ProductDetails> productDetails,
+                                   Map<String, String> offerTokens, Map<String, String> prices) {
         String productId = details.getProductId();
         if (Products.isSubscription(productId)) {
             List<OfferPicker.OfferRef> offers = new ArrayList<>();
@@ -387,13 +408,18 @@ public final class BillingManager implements PurchasesUpdatedListener {
 
             @Override
             protected void onPostExecute(PurchaseSender.Outcome outcome) {
-                present(outcome);
+                present(outcome, fromPurchaseFlow);
             }
         }.execute();
     }
 
-    private void present(PurchaseSender.Outcome outcome) {
+    private void present(PurchaseSender.Outcome outcome, boolean fromPurchaseFlow) {
         rejectedTokens.addAll(outcome.rejectedTokens);
+        handledTokens.addAll(outcome.handledTokens);
+        if (fromPurchaseFlow) {
+            // onPurchasesUpdated marked these handled up front: let a later resync retry them.
+            handledTokens.removeAll(outcome.failedTokens);
+        }
         for (ReplyMessage message : outcome.messages) {
             int res = messageRes(message);
             if (res != 0) {

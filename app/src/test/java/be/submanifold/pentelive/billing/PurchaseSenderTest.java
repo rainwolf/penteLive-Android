@@ -3,6 +3,7 @@ package be.submanifold.pentelive.billing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +12,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -140,5 +144,129 @@ public class PurchaseSenderTest {
         assertTrue(sender.sendAll(failing, false, false).messages.isEmpty());
         assertTrue(sender.sendAll(Arrays.asList(record(Products.YEARLY, "io"), record(Products.MONTH_PASS, "k")),
                 true, false).messages.isEmpty());
+    }
+
+    @Test
+    public void handledAndFailedTokensAreReported() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("new", "success");
+        transport.replies.put("renewal", "success:renewal");
+        transport.replies.put("known", "success:known");
+        transport.replies.put("refunded", "success:refunded");
+        transport.replies.put("shared", "success:shared");
+        transport.replies.put("invalid", "invalid receipt");
+        transport.replies.put("io", "IOException");
+        transport.replies.put("garbage", "<html>maintenance</html>");
+        List<PurchaseRecord> purchases = new ArrayList<>();
+        for (String token : Arrays.asList("new", "renewal", "known", "refunded", "shared", "invalid", "io",
+                "non200", "garbage")) {
+            purchases.add(record(Products.VACATION_10, token));
+        }
+        PurchaseSender.Outcome outcome = new PurchaseSender(transport).sendAll(purchases, false, false);
+        assertEquals(Arrays.asList("new", "renewal", "known", "refunded"), outcome.handledTokens);
+        assertEquals(Arrays.asList("io", "non200", "garbage"), outcome.failedTokens);
+        assertEquals(Arrays.asList("shared", "invalid"), outcome.rejectedTokens);
+    }
+
+    @Test
+    public void outcomeListsAreUnmodifiable() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("a", "success");
+        PurchaseSender.Outcome outcome = new PurchaseSender(transport)
+                .sendAll(Collections.singletonList(record(Products.YEARLY, "a")), true, false);
+        assertUnmodifiable(outcome.messages, ReplyMessage.THANK_YOU);
+        assertUnmodifiable(outcome.rejectedTokens, "x");
+        assertUnmodifiable(outcome.handledTokens, "x");
+        assertUnmodifiable(outcome.failedTokens, "x");
+    }
+
+    private static <T> void assertUnmodifiable(List<T> list, T element) {
+        try {
+            list.add(element);
+            fail("list is modifiable");
+        } catch (UnsupportedOperationException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void explicitInvalidReceiptSaysNoValidPurchase() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("i", "invalid receipt");
+        PurchaseSender.Outcome outcome = new PurchaseSender(transport)
+                .sendAll(Collections.singletonList(record(Products.YEARLY, "i")), true, false);
+        assertEquals(Collections.singletonList(ReplyMessage.NO_VALID_PURCHASE), outcome.messages);
+        assertFalse(outcome.reloadPlayer);
+    }
+
+    @Test
+    public void messagesKeepFirstSeenOrder() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("i", "invalid receipt");
+        transport.replies.put("s", "success:shared");
+        transport.replies.put("i2", "invalid receipt");
+        PurchaseSender sender = new PurchaseSender(transport);
+        assertEquals(Arrays.asList(ReplyMessage.NO_VALID_PURCHASE, ReplyMessage.LINKED_TO_OTHER_ACCOUNT),
+                sender.sendAll(Arrays.asList(record(Products.YEARLY, "i"), record(Products.MONTH_PASS, "s"),
+                        record(Products.VACATION_10, "i2")), true, false).messages);
+        assertEquals(Arrays.asList(ReplyMessage.LINKED_TO_OTHER_ACCOUNT, ReplyMessage.NO_VALID_PURCHASE),
+                sender.sendAll(Arrays.asList(record(Products.MONTH_PASS, "s"), record(Products.YEARLY, "i")),
+                        true, false).messages);
+    }
+
+    @Test
+    public void noReloadWhenEveryReplyFailed() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("io", "IOException");
+        transport.replies.put("rt", "RuntimeException");
+        PurchaseSender.Outcome outcome = new PurchaseSender(transport).sendAll(Arrays.asList(
+                record(Products.YEARLY, "io"), record(Products.MONTH_PASS, "rt"),
+                record(Products.VACATION_10, "non200")), false, true);
+        assertFalse(outcome.reloadPlayer);
+        assertTrue(outcome.messages.isEmpty());
+        assertTrue(outcome.handledTokens.isEmpty());
+    }
+
+    @Test
+    public void explicitPurchaseFlowThanksForKnownAndExplainsShared() {
+        FakeTransport transport = new FakeTransport();
+        transport.replies.put("k", "success:known");
+        transport.replies.put("s", "success:shared");
+        PurchaseSender.Outcome outcome = new PurchaseSender(transport).sendAll(Arrays.asList(
+                record(Products.YEARLY, "k"), record(Products.MONTH_PASS, "s")), true, true);
+        assertEquals(Arrays.asList(ReplyMessage.THANK_YOU, ReplyMessage.LINKED_TO_OTHER_ACCOUNT), outcome.messages);
+        assertTrue(outcome.reloadPlayer);
+    }
+
+    @Test
+    public void runtimeFailuresAreLogged() {
+        Logger logger = Logger.getLogger(PurchaseSender.class.getName());
+        List<LogRecord> records = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        logger.addHandler(handler);
+        try {
+            FakeTransport transport = new FakeTransport();
+            transport.replies.put("tok-secret", "RuntimeException");
+            assertEquals(PurchaseReply.FAILED, new PurchaseSender(transport).send(Products.MONTH_PASS, "tok-secret"));
+        } finally {
+            logger.removeHandler(handler);
+        }
+        assertEquals(1, records.size());
+        assertTrue(records.get(0).getThrown() instanceof IllegalStateException);
+        assertFalse("the token stays out of the log",
+                String.valueOf(records.get(0).getMessage()).contains("tok-secret"));
     }
 }
