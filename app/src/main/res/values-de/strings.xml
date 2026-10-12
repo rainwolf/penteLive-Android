@@ -177,7 +177,7 @@ Weitere Benutzereinstellungen, wie z. B. E-Mail-Einstellungen, können auf pente
 </string>
     <string name="change_color">Farbe des Benutzernamens ändern</string>
     <string name="subscribers_only">Farbige Benutzernamen und Avatare sind Abonnenten-Features</string>
-    <string name="subscribe_pente_org">Abonnieren @ pente.org</string>
+    <string name="subscribe_pente_org">Abonnieren</string>
     <string name="subscribe_info">
 Abonniere um alle Einschränkungen aufzuheben, erhalte eine Bentzernamen-Farbe und einen Avatar sowie Zugang zur Datenbank.
 </string>

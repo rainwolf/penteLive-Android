@@ -98,12 +98,8 @@ public class SettingsActivity extends AppCompatActivity {
             intent.putExtra("url", url);
             startActivity(intent);
         });
-        findViewById(R.id.subscribeButton).setOnClickListener(v -> {
-            String url = PenteUrls.web("/gameServer/subscriptions");
-            Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
-            intent.putExtra("url", url);
-            startActivity(intent);
-        });
+        findViewById(R.id.subscribeButton).setOnClickListener(v ->
+                startActivity(new Intent(SettingsActivity.this, StoreActivity.class)));
         findViewById(R.id.colorButton).setOnClickListener(v -> {
             if (!PentePlayer.mSubscriber) {
                 return;

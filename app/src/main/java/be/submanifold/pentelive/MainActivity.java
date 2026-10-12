@@ -196,12 +196,8 @@ public class MainActivity extends AppCompatActivity {
                                             Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
                                             startActivity(intent);
                                         });
-                                        builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
-                                            String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
-                                            Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                                            intent.putExtra("url", url);
-                                            startActivity(intent);
-                                        });
+                                        builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) ->
+                                                startActivity(new Intent(MainActivity.this, StoreActivity.class)));
                                         AlertDialog dlg = builder.create();
                                         dlg.show();
                                         return;
@@ -328,10 +324,7 @@ public class MainActivity extends AppCompatActivity {
 //                        policyView.setBackgroundColor(Color.WHITE);
                     policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
                         popupWindow.dismiss();
-                        String url = PenteUrls.web("/gameServer/subscriptions"); // missing 'http://' will cause crashed
-                        Intent intent12 = new Intent(MainActivity.this, WebViewActivity.class);
-                        intent12.putExtra("url", url);
-                        startActivity(intent12);
+                        startActivity(new Intent(MainActivity.this, StoreActivity.class));
                     });
                     popupWindow = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                     popupWindow.setFocusable(true);

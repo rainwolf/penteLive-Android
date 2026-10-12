@@ -159,7 +159,7 @@
     <string name="more_prefs_label">More preferences, such as email settings, can be changed at pente.org.</string>
     <string name="change_color">Change name color</string>
     <string name="subscribers_only">Name color and avatar are subscriber-only features</string>
-    <string name="subscribe_pente_org">subscribe @ pente.org</string>
+    <string name="subscribe_pente_org">Subscribe</string>
     <string name="subscribe_info">Subscribe to lift all restrictions on play, get a name color and avatar, and get access to the database.</string>
     <string name="registered_for_notifications">Your device has been registered for push notifications.</string>
     <string name="is_your_move_against">It\'s your move against %1$s in a game of %2$s.</string>

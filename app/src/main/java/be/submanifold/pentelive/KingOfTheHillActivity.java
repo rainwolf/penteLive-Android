@@ -275,12 +275,8 @@ public class KingOfTheHillActivity extends AppCompatActivity {
                 builder.setMessage(getString(R.string.koth_limit));
                 builder.setPositiveButton(getString(R.string.dismiss), (dialog, which) -> {
                 });
-                builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) -> {
-                    String url1 = PenteUrls.web("/gameServer/subscriptions");
-                    Intent intent1 = new Intent(KingOfTheHillActivity.this, WebViewActivity.class);
-                    intent1.putExtra("url", url1);
-                    startActivity(intent1);
-                });
+                builder.setNeutralButton(getString(R.string.subscribe_now), (dialog, which) ->
+                        startActivity(new Intent(KingOfTheHillActivity.this, StoreActivity.class)));
                 AlertDialog dlg = builder.create();
                 dlg.show();
             } else if (kothSummary.canIchallenge()) {
