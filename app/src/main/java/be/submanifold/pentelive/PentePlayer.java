@@ -366,6 +366,37 @@ public class PentePlayer implements Parcelable {
         loadTask.execute((Void) null);
     }
 
+    /**
+     * Reloads only the static subscriber flags other screens read (mSubscriber, dbAccess,
+     * myColor) from the dashboard JSON, e.g. after the server granted a Play purchase.
+     * MainActivity's next onResume reloads the whole dashboard.
+     */
+    public static void reloadSubscriberFlags() {
+        final String name = mPlayerName;
+        if (name == null || name.isEmpty() || mPassword == null) {
+            return;
+        }
+        new BackgroundTask<Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    AuthedHttp http = AuthedHttp.shared();
+                    AuthedHttp.Reply reply = http.postForm("/gameServer/mobile/json/index.jsp",
+                            () -> Forms.encode("name", name, "password", http.passwordToken()));
+                    JsonModels.IndexResponse json = new Gson().fromJson(reply.body, JsonModels.IndexResponse.class);
+                    if (json != null && json.player != null) {
+                        mSubscriber = json.player.subscriber;
+                        dbAccess = json.player.dbAccess;
+                        myColor = json.player.color;
+                    }
+                } catch (IOException | RuntimeException e) {
+                    RedactingLog.e(TAG, "reloading subscriber flags failed", e);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     public void respondInvitation(String setID, boolean accept, DashboardListAdapter listAdapter) {
         AcceptDeclineInvitationTask responseTask = new AcceptDeclineInvitationTask(setID, accept, listAdapter);
         responseTask.execute((Void) null);

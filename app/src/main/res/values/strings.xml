@@ -590,4 +590,12 @@
     <string name="two_lines" translatable="false">%1$s\n%2$s</string>
     <string name="append_line" translatable="false">%1$s%2$s\n</string>
     <string name="name_with_count" translatable="false">%1$s (%2$s)</string>
+    <string name="billing_thank_you">Thank you for your purchase!</string>
+    <string name="billing_linked_other_account">This purchase is linked to another pente.org account.</string>
+    <string name="billing_vacation_refunded">Vacation days can\'t be bought while you play in a turn-based tournament. Your purchase has been refunded.</string>
+    <string name="billing_no_valid_purchase">No valid purchase to restore.</string>
+    <string name="billing_nothing_to_restore">No purchases to restore.</string>
+    <string name="billing_already_owned">This Google account already owns this item. It may be linked to another pente.org account. Use Restore purchases.</string>
+    <string name="billing_unavailable">Google Play purchases are not available on this device.</string>
+    <string name="billing_error">The purchase could not be completed. Please try again later.</string>
 </resources>

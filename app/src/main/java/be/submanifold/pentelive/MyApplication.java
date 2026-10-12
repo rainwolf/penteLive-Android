@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
 
+import be.submanifold.pentelive.billing.BillingManager;
 import be.submanifold.pentelive.net.SharedCookies;
 import be.submanifold.pentelive.net.WebkitCookieStorage;
 
@@ -14,6 +15,7 @@ public class MyApplication extends Application {
 
     private static Context mContext;
     private static boolean shouldQuit = false;
+    private static BillingManager billingManager;
 
     @Override
     public void onCreate() {
@@ -25,6 +27,14 @@ public class MyApplication extends Application {
 
     public static Context getContext() {
         return mContext;
+    }
+
+    /** The process's one Play Billing manager (spec 3.2), created on first use. Main thread only. */
+    public static BillingManager billing() {
+        if (billingManager == null) {
+            billingManager = new BillingManager(mContext);
+        }
+        return billingManager;
     }
 
     public static boolean isActivityVisible() {

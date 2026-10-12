@@ -339,5 +339,13 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="game_settings">Spieleinstellungen</string>
     <string name="fav">Fav</string>
     <string name="ai_settings">AI-Einstellungen</string>
+    <string name="billing_thank_you">Vielen Dank für Ihren Kauf!</string>
+    <string name="billing_linked_other_account">Dieser Kauf ist mit einem anderen pente.org-Konto verknüpft.</string>
+    <string name="billing_vacation_refunded">Urlaubstage können nicht gekauft werden, während Sie an einem rundenbasierten Turnier teilnehmen. Ihr Kauf wurde erstattet.</string>
+    <string name="billing_no_valid_purchase">Kein gültiger Kauf zum Wiederherstellen.</string>
+    <string name="billing_nothing_to_restore">Keine Käufe zum Wiederherstellen.</string>
+    <string name="billing_already_owned">Dieses Google-Konto besitzt diesen Artikel bereits. Er ist möglicherweise mit einem anderen pente.org-Konto verknüpft. Verwenden Sie „Käufe wiederherstellen“.</string>
+    <string name="billing_unavailable">Google Play-Käufe sind auf diesem Gerät nicht verfügbar.</string>
+    <string name="billing_error">Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.</string>
 
 </resources>
