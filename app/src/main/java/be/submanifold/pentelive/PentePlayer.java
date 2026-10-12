@@ -376,23 +376,29 @@ public class PentePlayer implements Parcelable {
         if (name == null || name.isEmpty() || mPassword == null) {
             return;
         }
-        new BackgroundTask<Void, Void>() {
+        new BackgroundTask<Void, JsonModels.IndexResponse.PlayerInfo>() {
             @Override
-            protected Void doInBackground(Void... params) {
+            protected JsonModels.IndexResponse.PlayerInfo doInBackground(Void... params) {
                 try {
                     AuthedHttp http = AuthedHttp.shared();
                     AuthedHttp.Reply reply = http.postForm("/gameServer/mobile/json/index.jsp",
                             () -> Forms.encode("name", name, "password", http.passwordToken()));
                     JsonModels.IndexResponse json = new Gson().fromJson(reply.body, JsonModels.IndexResponse.class);
-                    if (json != null && json.player != null) {
-                        mSubscriber = json.player.subscriber;
-                        dbAccess = json.player.dbAccess;
-                        myColor = json.player.color;
-                    }
+                    return json == null ? null : json.player;
                 } catch (IOException | RuntimeException e) {
                     RedactingLog.e(TAG, "reloading subscriber flags failed", e);
+                    return null;
                 }
-                return null;
+            }
+
+            @Override
+            protected void onPostExecute(JsonModels.IndexResponse.PlayerInfo player) {
+                // On the main thread, where the screens read these flags.
+                if (player != null) {
+                    mSubscriber = player.subscriber;
+                    dbAccess = player.dbAccess;
+                    myColor = player.color;
+                }
             }
         }.execute();
     }
