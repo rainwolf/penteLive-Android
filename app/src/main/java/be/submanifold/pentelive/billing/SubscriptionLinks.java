@@ -4,7 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 
-/** Recognises links to pente.org's PayPal subscription page, which the app replaces with StoreActivity. */
+/**
+ * Recognises links to pente.org's PayPal subscription page, which the app replaces with
+ * StoreActivity, and links to PayPal itself, which the app never opens.
+ */
 public final class SubscriptionLinks {
 
     private static final String SUBSCRIPTIONS_PATH = "/gameServer/subscriptions";
@@ -53,5 +56,23 @@ public final class SubscriptionLinks {
             path = path.substring(0, path.length() - 1);
         }
         return path.equals(SUBSCRIPTIONS_PATH) || path.equals(SUBSCRIBE_JSP_PATH);
+    }
+
+    /** Whether {@code url}'s host is paypal.com or a subdomain of it (case ignored). */
+    public static boolean isPayPal(String url) {
+        if (url == null) {
+            return false;
+        }
+        String host;
+        try {
+            host = new URI(url.trim()).getHost();
+        } catch (URISyntaxException e) {
+            return false;
+        }
+        if (host == null) {
+            return false;
+        }
+        host = host.toLowerCase(Locale.ROOT);
+        return host.equals("paypal.com") || host.endsWith(".paypal.com");
     }
 }

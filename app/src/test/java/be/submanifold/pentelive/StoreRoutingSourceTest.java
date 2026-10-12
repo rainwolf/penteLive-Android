@@ -49,8 +49,10 @@ public class StoreRoutingSourceTest {
     @Test
     public void webViewHandsSubscriptionLinksToStoreActivity() throws IOException {
         String source = read(JAVA + "WebViewActivity.java");
-        assertEquals(2, count(source, "SubscriptionLinks.isSubscriptionPage("));
-        assertEquals(2, count(source, "StoreActivity.class"));
+        // Initial url, shouldOverrideUrlLoading (GET links) and shouldInterceptRequest (POSTs).
+        assertEquals(3, count(source, "SubscriptionLinks.isSubscriptionPage("));
+        assertEquals(3, count(source, "StoreActivity.class"));
+        assertEquals(1, count(source, "SubscriptionLinks.isPayPal("));
     }
 
     @Test

@@ -42,4 +42,22 @@ public class SubscriptionLinksTest {
         assertFalse(SubscriptionLinks.isSubscriptionPage("", null));
         assertFalse(SubscriptionLinks.isSubscriptionPage(null, null));
     }
+
+    @Test
+    public void matchesPayPalAndItsSubdomains() {
+        assertTrue(SubscriptionLinks.isPayPal("https://paypal.com/"));
+        assertTrue(SubscriptionLinks.isPayPal("https://www.paypal.com/cgi-bin/webscr"));
+        assertTrue(SubscriptionLinks.isPayPal("https://sandbox.paypal.com/cgi-bin/webscr?cmd=_s-xclick"));
+        assertTrue(SubscriptionLinks.isPayPal("http://WWW.PayPal.COM/cgi-bin/webscr"));
+    }
+
+    @Test
+    public void rejectsLookalikePayPalHosts() {
+        assertFalse(SubscriptionLinks.isPayPal("https://notpaypal.com/cgi-bin/webscr"));
+        assertFalse(SubscriptionLinks.isPayPal("https://paypal.com.evil.org/cgi-bin/webscr"));
+        assertFalse(SubscriptionLinks.isPayPal("https://www.pente.org/gameServer/subscriptions"));
+        assertFalse(SubscriptionLinks.isPayPal("not a url"));
+        assertFalse(SubscriptionLinks.isPayPal(""));
+        assertFalse(SubscriptionLinks.isPayPal(null));
+    }
 }
