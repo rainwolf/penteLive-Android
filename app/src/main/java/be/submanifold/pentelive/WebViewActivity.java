@@ -14,6 +14,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.net.URI;
+
+import be.submanifold.pentelive.billing.SubscriptionLinks;
+import be.submanifold.pentelive.net.StaticBaseUrlProvider;
+
 public class WebViewActivity extends AppCompatActivity {
 
     private WebView webview;
@@ -31,6 +36,10 @@ public class WebViewActivity extends AppCompatActivity {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
+                    if (SubscriptionLinks.isSubscriptionPage(url, serverHost())) {
+                        startActivity(new Intent(WebViewActivity.this, StoreActivity.class));
+                        return true;
+                    }
                     if (url.contains("?mobile&g=") || url.contains("gameServer/tb/game?gid=")) {
                         if (url.contains("?mobile&g=")) {
                             while (!url.startsWith("?mobile&g=")) {
@@ -75,6 +84,11 @@ public class WebViewActivity extends AppCompatActivity {
                 urlStr = urlStr.replace("//pente.org", "//www.pente.org");
 //                System.out.println(urlStr);
             }
+            if (SubscriptionLinks.isSubscriptionPage(urlStr, serverHost())) {
+                startActivity(new Intent(this, StoreActivity.class));
+                finish();
+                return;
+            }
             webview.loadUrl(urlStr);
 //                    System.out.println("hello " + url);
 
@@ -100,6 +114,11 @@ public class WebViewActivity extends AppCompatActivity {
             setEnabled(true);
         }
     };
+
+    /** Host of the configured server: www.pente.org, or 10.0.2.2 in development builds. */
+    private static String serverHost() {
+        return URI.create(new StaticBaseUrlProvider(PentePlayer.development).baseUrl()).getHost();
+    }
 
     @Override
     protected void onResume() {

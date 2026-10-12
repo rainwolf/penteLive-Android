@@ -46,6 +46,13 @@ public class StoreRoutingSourceTest {
                 .contains("<string name=\"subscribe_pente_org\">Abonnieren</string>"));
     }
 
+    @Test
+    public void webViewHandsSubscriptionLinksToStoreActivity() throws IOException {
+        String source = read(JAVA + "WebViewActivity.java");
+        assertEquals(2, count(source, "SubscriptionLinks.isSubscriptionPage("));
+        assertEquals(2, count(source, "StoreActivity.class"));
+    }
+
     // ---- helpers ----
 
     private static String read(String path) throws IOException {
