@@ -98,12 +98,9 @@ public class SettingsActivity extends AppCompatActivity {
             intent.putExtra("url", url);
             startActivity(intent);
         });
-        findViewById(R.id.subscribeButton).setOnClickListener(v -> {
-            String url = PenteUrls.web("/gameServer/subscriptions");
-            Intent intent = new Intent(SettingsActivity.this, WebViewActivity.class);
-            intent.putExtra("url", url);
-            startActivity(intent);
-        });
+        findViewById(R.id.subscribeButton).setOnClickListener(v ->
+                startActivity(new Intent(SettingsActivity.this, StoreActivity.class)));
+        findViewById(R.id.restorePurchasesButton).setOnClickListener(v -> MyApplication.billing().resync(true));
         findViewById(R.id.colorButton).setOnClickListener(v -> {
             if (!PentePlayer.mSubscriber) {
                 return;
@@ -143,12 +140,19 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
+        MyApplication.billing().attach(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         MyApplication.activityPaused();
+    }
+
+    @Override
+    protected void onDestroy() {
+        MyApplication.billing().detach(this);
+        super.onDestroy();
     }
 
 

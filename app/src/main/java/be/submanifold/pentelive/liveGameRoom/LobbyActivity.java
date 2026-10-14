@@ -38,7 +38,7 @@ import be.submanifold.pentelive.PentePlayer;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.RedactingLog;
-import be.submanifold.pentelive.WebViewActivity;
+import be.submanifold.pentelive.StoreActivity;
 import be.submanifold.pentelive.net.AuthedHttp;
 
 public class LobbyActivity extends AppCompatActivity {
@@ -136,10 +136,7 @@ public class LobbyActivity extends AppCompatActivity {
                 final AlertDialog dlg = builder.create();
                 infoView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
                     dlg.dismiss();
-                    String url = "https://www.pente.org/gameServer/subscriptions"; // missing 'http://' will cause crashed
-                    Intent intent = new Intent(LobbyActivity.this, WebViewActivity.class);
-                    intent.putExtra("url", url);
-                    startActivity(intent);
+                    startActivity(new Intent(LobbyActivity.this, StoreActivity.class));
                 });
                 dlg.show();
 //                            ((TextView) policyView.findViewById(R.id.informationView)).setMovementMethod(new ScrollingMovementMethod());

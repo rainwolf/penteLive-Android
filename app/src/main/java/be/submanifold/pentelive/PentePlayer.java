@@ -366,6 +366,43 @@ public class PentePlayer implements Parcelable {
         loadTask.execute((Void) null);
     }
 
+    /**
+     * Reloads only the static subscriber flags other screens read (mSubscriber, dbAccess,
+     * myColor) from the dashboard JSON, e.g. after the server granted a Play purchase.
+     * MainActivity's next onResume reloads the whole dashboard.
+     */
+    public static void reloadSubscriberFlags() {
+        final String name = mPlayerName;
+        if (name == null || name.isEmpty() || mPassword == null) {
+            return;
+        }
+        new BackgroundTask<Void, JsonModels.IndexResponse.PlayerInfo>() {
+            @Override
+            protected JsonModels.IndexResponse.PlayerInfo doInBackground(Void... params) {
+                try {
+                    AuthedHttp http = AuthedHttp.shared();
+                    AuthedHttp.Reply reply = http.postForm("/gameServer/mobile/json/index.jsp",
+                            () -> Forms.encode("name", name, "password", http.passwordToken()));
+                    JsonModels.IndexResponse json = new Gson().fromJson(reply.body, JsonModels.IndexResponse.class);
+                    return json == null ? null : json.player;
+                } catch (IOException | RuntimeException e) {
+                    RedactingLog.e(TAG, "reloading subscriber flags failed", e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(JsonModels.IndexResponse.PlayerInfo player) {
+                // On the main thread, where the screens read these flags.
+                if (player != null) {
+                    mSubscriber = player.subscriber;
+                    dbAccess = player.dbAccess;
+                    myColor = player.color;
+                }
+            }
+        }.execute();
+    }
+
     public void respondInvitation(String setID, boolean accept, DashboardListAdapter listAdapter) {
         AcceptDeclineInvitationTask responseTask = new AcceptDeclineInvitationTask(setID, accept, listAdapter);
         responseTask.execute((Void) null);

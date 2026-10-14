@@ -8,15 +8,28 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import be.submanifold.pentelive.billing.SubscriptionLinks;
+import be.submanifold.pentelive.net.StaticBaseUrlProvider;
+
 public class WebViewActivity extends AppCompatActivity {
 
     private WebView webview;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    /** Set when a blocked request opened StoreActivity; cleared on resume so a later one opens it again. */
+    private final AtomicBoolean storeOpened = new AtomicBoolean();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +41,33 @@ public class WebViewActivity extends AppCompatActivity {
         if (extras != null) {
             webview = findViewById(R.id.webview);
             webview.setWebViewClient(new WebViewClient() {
+                /**
+                 * Also sees POST navigations, which skip shouldOverrideUrlLoading (the profile
+                 * page's gift form, PayPal's buy buttons). Runs on a WebView background thread.
+                 */
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                    String url = request.getUrl().toString();
+                    if (!SubscriptionLinks.isSubscriptionPage(url, serverHost()) && !SubscriptionLinks.isPayPal(url)) {
+                        return super.shouldInterceptRequest(view, request);
+                    }
+                    if (request.isForMainFrame() && storeOpened.compareAndSet(false, true)) {
+                        mainHandler.post(() -> {
+                            if (!isFinishing() && !isDestroyed()) {
+                                startActivity(new Intent(WebViewActivity.this, StoreActivity.class));
+                            }
+                        });
+                    }
+                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(new byte[0]));
+                }
+
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
+                    if (SubscriptionLinks.isSubscriptionPage(url, serverHost())) {
+                        startActivity(new Intent(WebViewActivity.this, StoreActivity.class));
+                        return true;
+                    }
                     if (url.contains("?mobile&g=") || url.contains("gameServer/tb/game?gid=")) {
                         if (url.contains("?mobile&g=")) {
                             while (!url.startsWith("?mobile&g=")) {
@@ -69,11 +106,17 @@ public class WebViewActivity extends AppCompatActivity {
 
             webview.getSettings().setLoadWithOverviewMode(true);
             webview.getSettings().setUseWideViewPort(true);
+            webview.getSettings().setUserAgentString(webview.getSettings().getUserAgentString() + " penteLive-Android");
             String urlStr = extras.getString("url");
             if (urlStr.contains("//pente.org")) {
 //                System.out.println(urlStr);
                 urlStr = urlStr.replace("//pente.org", "//www.pente.org");
 //                System.out.println(urlStr);
+            }
+            if (SubscriptionLinks.isSubscriptionPage(urlStr, serverHost())) {
+                startActivity(new Intent(this, StoreActivity.class));
+                finish();
+                return;
             }
             webview.loadUrl(urlStr);
 //                    System.out.println("hello " + url);
@@ -101,10 +144,16 @@ public class WebViewActivity extends AppCompatActivity {
         }
     };
 
+    /** Host of the configured server: www.pente.org, or 10.0.2.2 in development builds. */
+    private static String serverHost() {
+        return URI.create(new StaticBaseUrlProvider(PentePlayer.development).baseUrl()).getHost();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
+        storeOpened.set(false);
     }
 
     @Override

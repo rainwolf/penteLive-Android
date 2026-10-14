@@ -918,10 +918,7 @@ public class Game implements Parcelable {
 
                     builder.setMessage(host.getString(R.string.undo_subscribers_only));
                     builder.setPositiveButton(host.getString(R.string.subscribe_now), (dialog, id) -> {
-                        String url = PenteUrls.web("/gameServer/subscriptions"); // missing 'http://' will cause crashed
-                        Intent intent = new Intent(host, WebViewActivity.class);
-                        intent.putExtra("url", url);
-                        host.startActivity(intent);
+                        host.startActivity(new Intent(host, StoreActivity.class));
                         dialog.dismiss();
                     });
                     builder.setNegativeButton(host.getString(R.string.dismiss), (dialog, id) -> dialog.dismiss());

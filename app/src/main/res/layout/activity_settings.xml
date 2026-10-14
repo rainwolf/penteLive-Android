@@ -215,6 +215,13 @@
         android:layout_below="@id/infoLabel3"
         android:text="@string/subscribe_pente_org"
         android:layout_marginTop="5dp"/>
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/restorePurchasesButton"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/subscribeButton"
+        android:text="@string/restore_purchases"
+        android:layout_marginTop="5dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -223,7 +230,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/subscribe_info"
         android:id="@+id/infoLabel4"
-        android:layout_below="@id/subscribeButton"
+        android:layout_below="@id/restorePurchasesButton"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="20dp"/>
 
