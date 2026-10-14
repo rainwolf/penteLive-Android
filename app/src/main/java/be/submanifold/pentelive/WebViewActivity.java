@@ -106,6 +106,7 @@ public class WebViewActivity extends AppCompatActivity {
 
             webview.getSettings().setLoadWithOverviewMode(true);
             webview.getSettings().setUseWideViewPort(true);
+            webview.getSettings().setUserAgentString(webview.getSettings().getUserAgentString() + " penteLive-Android");
             String urlStr = extras.getString("url");
             if (urlStr.contains("//pente.org")) {
 //                System.out.println(urlStr);
