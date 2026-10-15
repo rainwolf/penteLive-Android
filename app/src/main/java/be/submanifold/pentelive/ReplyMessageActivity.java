@@ -70,8 +70,17 @@ public class ReplyMessageActivity extends AppCompatActivity {
             if (subject.indexOf("Re:") != 0) {
                 subject = "Re: " + subject;
             }
-            SendMessageTask submitTask = new SendMessageTask(recipient, subject, ((EditText) findViewById(R.id.reply)).getText().toString());
+            SendMessageTask submitTask = new SendMessageTask(recipient, subject, ((EditText) findViewById(R.id.reply)).getText().toString(), message.getMessageID());
             submitTask.execute((Void) null);
+        });
+
+        // reply input grows with its text up to half of the space it shares with the message
+        final EditText replyInput = findViewById(R.id.reply);
+        findViewById(R.id.messageArea).addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            int half = (bottom - top) / 2;
+            if (replyInput.getMaxHeight() != half) {
+                replyInput.setMaxHeight(half);
+            }
         });
 
         final TextView messageTextView = findViewById(R.id.message);
@@ -205,8 +214,10 @@ public class ReplyMessageActivity extends AppCompatActivity {
         private final String recipient;
         private String subject;
         private String message;
+        private final String replyToMid;
 
-        SendMessageTask(String recipient, String subject, String message) {
+        SendMessageTask(String recipient, String subject, String message, String replyToMid) {
+            this.replyToMid = replyToMid;
             this.recipient = recipient.toLowerCase(java.util.Locale.ROOT);
             try {
                 this.message = URLEncoder.encode(message, "UTF-8");
@@ -232,7 +243,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
-                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
+                String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=" + "&replyTo=" + replyToMid;
                 AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
                 String output = reply.body;
 
