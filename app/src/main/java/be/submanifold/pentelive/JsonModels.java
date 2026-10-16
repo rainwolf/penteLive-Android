@@ -191,4 +191,24 @@ public class JsonModels {
         public int tourneyWinner;
         public String lastGame;
     }
+
+    // ── gameServer/messageJson?mid=N (one private message + the message it replied to) ──
+
+    public static class MessageThreadResponse {
+        public boolean success;
+        public String error;
+        public MessageThreadEntry message;
+        public MessageThreadEntry replyTo;
+    }
+
+    public static class MessageThreadEntry {
+        public int mid;
+        public int replyToMid;
+        public String from;
+        public String to;
+        public String subject;
+        public String body;
+        public long date;
+        public boolean read;
+    }
 }

@@ -3,16 +3,25 @@ package be.submanifold.pentelive;
 import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.IntentCompat;
 
 import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
 
-import android.text.Html;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.content.res.TypedArray;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.LeadingMarginSpan;
+import android.text.style.QuoteSpan;
+import android.text.style.StyleSpan;
+import android.text.util.Linkify;
+import android.util.TypedValue;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
-import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.view.Menu;
@@ -28,11 +37,11 @@ import android.widget.Toast;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.util.Date;
 
 import be.submanifold.pentelive.net.AuthedHttp;
 
@@ -197,18 +206,6 @@ public class ReplyMessageActivity extends AppCompatActivity {
         strBuilder.removeSpan(span);
     }
 
-    protected void setTextViewHTML(TextView text, String html) {
-        CharSequence sequence = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
-        SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
-        URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
-        for (URLSpan span : urls) {
-            makeLinkClickable(strBuilder, span);
-        }
-        text.setText(strBuilder);
-        text.setMovementMethod(new ScrollingMovementMethod());
-        text.setMovementMethod(LinkMovementMethod.getInstance());
-    }
-
     private class SendMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String recipient;
@@ -284,7 +281,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
     private class LoadMessageTask extends BackgroundTask<Void, Boolean> {
 
         private final String messageID;
-        private String messageText = "";
+        private JsonModels.MessageThreadResponse thread;
 
         LoadMessageTask(String messageID) {
             this.messageID = messageID;
@@ -292,96 +289,76 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
-//                URL url = new URL("https://www.pente.org/gameServer/mymessages?command=view&mid=" + messageID);
-                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/mymessages?command=view&mid=" + messageID);
+                AuthedHttp.Reply reply = AuthedHttp.shared().get("/gameServer/messageJson?mid=" + messageID);
                 if (reply.code != 200) {
-                    System.out.println("response code for submit was " + reply.code);
+                    RedactingLog.e(TAG, "loading the message failed, response code " + reply.code, null);
                     return false;
                 }
-
-                // viewMessage.jsp has CRLF line ends; the parsing below expects lines joined by "\n".
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new StringReader(reply.body));
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
+                thread = MessageThread.parse(reply.body);
+                if (thread == null) {
+                    RedactingLog.e(TAG, "loading the message failed, unexpected response", null);
+                    return false;
                 }
-                br.close();
-
-//                System.out.println("submit output: " + output.toString());
-//
-//                byte[] postData       = new byte[0];
-//                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-//                    postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
-//                }
-//                int    postDataLength = postData.length;
-//                String request        = "https://www.pente.org/gameServer/mymessages";
-//                URL url            = new URL( request );
-//                HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();
-//                conn.setDoOutput( true );
-//                conn.setInstanceFollowRedirects( false );
-//                conn.setRequestMethod( "POST" );
-//                conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-//                conn.setRequestProperty( "charset", "utf-8");
-//                conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-//                conn.setUseCaches( false );
-//                try {
-//                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-//                    wr.write( postData );
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    return  false;
-//                }
-//
-//                StringBuilder output = new StringBuilder();
-//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                System.out.println("output===============" + br);
-//                String line = "";
-//                while((line = br.readLine()) != null ) {
-//                    output.append(line + System.getProperty("line.separator"));
-//                }
-//                br.close();
-//
-//                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator"));
-////                System.out.println(output);
-
-                String tmpStr1 = output.toString();
-
-                messageText = tmpStr1.substring(tmpStr1.indexOf("        <br>\n          ") + 23, tmpStr1.indexOf("          <br><br>"));
-
                 return true;
-
             } catch (IOException e1) {
-                RedactingLog.e(TAG, "loading the message failed", e1);
+                RedactingLog.e(TAG, "loading message failed", e1);
                 return false;
             }
-//            for (String credential : DUMMY_CREDENTIALS) {
-//                String[] pieces = credential.split(":");
-//                if (pieces[0].equals(mEmail)) {
-//                    // Account exists, return true if the password matches.
-//                    return pieces[1].equals(mPassword);
-//                }
-//            }
-
-
-            // TODO: register the new account here.
-//            return true;
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             if (success) {
-                TextView messageView = findViewById(R.id.message);
-                setTextViewHTML(messageView, filterMessage(messageText));
+                showThread(thread);
             }
         }
 
         @Override
         protected void onCancelled() {
         }
+    }
+
+    private void showThread(JsonModels.MessageThreadResponse thread) {
+        final TextView messageView = findViewById(R.id.message);
+        int secondary = Color.GRAY;
+        TypedArray ta = getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorSecondary});
+        try {
+            secondary = ta.getColor(0, secondary);
+        } finally {
+            ta.recycle();
+        }
+
+        int quoteIndentPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        for (JsonModels.MessageThreadEntry entry : MessageThread.entries(thread)) {
+            boolean quoted = entry != thread.message;
+            if (builder.length() > 0) {
+                builder.append("\n\n");
+            }
+            int entryStart = builder.length();
+            String header = entry.from + " \u00b7 " + dateFormat.format(new Date(entry.date));
+            builder.append(header);
+            builder.setSpan(new StyleSpan(Typeface.BOLD), entryStart, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // body is raw user text: appended as plain text (never HTML), newlines preserved
+            builder.append("\n").append(entry.body == null ? "" : entry.body);
+            if (quoted) {
+                builder.setSpan(new ForegroundColorSpan(secondary), entryStart, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                builder.setSpan(new LeadingMarginSpan.Standard(quoteIndentPx), entryStart, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                builder.setSpan(new QuoteSpan(secondary), entryStart, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                builder.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.message_text)), entryStart, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+        Linkify.addLinks(builder, Linkify.WEB_URLS);
+        for (URLSpan span : builder.getSpans(0, builder.length(), URLSpan.class)) {
+            makeLinkClickable(builder, span);
+        }
+        messageView.setText(builder);
+        messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        messageView.scrollTo(0, 0);
     }
 
     private class DeleteMessageTask extends BackgroundTask<Void, Boolean> {
@@ -440,27 +417,5 @@ public class ReplyMessageActivity extends AppCompatActivity {
         this.recipient = recipient;
     }
 
-    private String filterMessage(String msgStr) {
-//        return msgStr.replace("[host]", "pente.org");
-
-        String tmpStrComma = msgStr.replace("\\1", ",");
-        String tmpStrSmiley = tmpStrComma.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/happy.gif\" alt=\"\">", ":)");
-        String tmpStrWink = tmpStrSmiley.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/wink.gif\" alt=\"\">", ";)");
-        String tmpStrTongue = tmpStrWink.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/silly.gif\" alt=\"\">", ":p");
-        String tmpStrGrin = tmpStrTongue.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/grin.gif\" alt=\"\">", ":D");
-        String tmpStrSad = tmpStrGrin.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/sad.gif\" alt=\"\">", ":(");
-        String tmpStrLove = tmpStrSad.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/love.gif\" alt=\"\">", "<3");
-        String tmpStrMischief = tmpStrLove.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/mischief.gif\" alt=\"\">", ";\\");
-        String tmpStrCool = tmpStrMischief.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/cool.gif\" alt=\"\">", "B)");
-        String tmpStrDevil = tmpStrCool.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/devil.gif\" alt=\"\">", ">:)");
-        String tmpStrAngry = tmpStrDevil.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/angry.gif\" alt=\"\">", "X(");
-        String tmpStrLaugh = tmpStrAngry.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/laugh.gif\" alt=\"\">", ":^O");
-        String tmpStrBlush = tmpStrLaugh.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/blush.gif\" alt=\"\">", ":8)");
-        String tmpStrCry = tmpStrBlush.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/cry.gif\" alt=\"\">", ":\"(");
-        String tmpStrConfused = tmpStrCry.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/confused.gif\" alt=\"\">", "?:|");
-        String tmpStrShocked = tmpStrConfused.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/shocked.gif\" alt=\"\">", ":O");
-        String tmpStrPlain = tmpStrShocked.replace("<img border=\"0\" src=\"http://[host]/gameServer/forums/images/emoticons/plain.gif\" alt=\"\">", ":|");
-        return tmpStrPlain;
-    }
 
 }
