@@ -144,6 +144,7 @@ The username %1$s ist bereits vergeben, bitte wähle einen anderen Benutzernamen
     <string name="email">E-Mail</string>
     <string name="accept_rated_play_policy">Spielebewertungs-Regelung akzeptieren?</string>
     <string name="subject">Betreff</string>
+    <string name="enter_reply">Antwort eingeben…</string>
     <string name="recipient">Empfänger</string>
     <string name="whos_online">Wer ist online</string>
     <string name="total_games">Spiele insgesamt: %1$s</string>

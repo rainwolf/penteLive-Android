@@ -130,6 +130,7 @@
     <string name="email">email</string>
     <string name="accept_rated_play_policy">Accept the Rated Play Policy?</string>
     <string name="subject">subject</string>
+    <string name="enter_reply">Enter reply…</string>
     <string name="recipient">recipient</string>
     <string name="whos_online">who\'s online</string>
     <string name="total_games">Total games: %1$s</string>
