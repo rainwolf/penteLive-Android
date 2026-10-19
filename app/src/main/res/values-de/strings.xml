@@ -131,6 +131,8 @@ The username %1$s ist bereits vergeben, bitte wähle einen anderen Benutzernamen
 </string>
     <string name="enter_subject">Gib bitte einen Betreff ein.</string>
     <string name="no_such_user">Benutzername existiert nicht</string>
+    <string name="kid_not_approved_recipient">Du kannst nur Spielern schreiben, die deine Eltern freigegeben haben.</string>
+    <string name="player_ignoring_messages">Dieser Spieler ignoriert deine Nachrichten.</string>
     <string name="enter_recipient">Gib bitte einen Empfänger ein.</string>
     <string name="new_message">Neue Nachricht</string>
     <string name="settings">Einstellungen</string>

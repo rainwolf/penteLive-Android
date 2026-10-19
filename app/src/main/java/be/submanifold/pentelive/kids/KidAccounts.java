@@ -96,6 +96,26 @@ public final class KidAccounts {
         return null;
     }
 
+    /**
+     * Composer autocomplete suggestions for a kid: parent first, then the whitelist.
+     * Never used to refuse a send; the server decides.
+     */
+    public static List<String> allowedRecipients(Reply r) {
+        List<String> names = new ArrayList<>();
+        if (r == null || !r.isKid) {
+            return names;
+        }
+        if (r.parentName != null) {
+            names.add(r.parentName);
+        }
+        if (r.whitelist != null) {
+            for (Player p : r.whitelist) {
+                names.add(p.name);
+            }
+        }
+        return names;
+    }
+
     public static String createForm(String kidName, String kidPassword) {
         return form("action", "create", "kidName", kidName, "kidPassword", kidPassword);
     }

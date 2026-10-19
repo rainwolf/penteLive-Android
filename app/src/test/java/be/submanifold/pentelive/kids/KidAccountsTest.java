@@ -78,4 +78,20 @@ public class KidAccountsTest {
         assertEquals("Login required", KidAccounts.parseError("{\"success\":false,\"error\":\"Login required\"}"));
         assertNull(KidAccounts.parseError("<html>login</html>"));
     }
+
+    @Test
+    public void allowedRecipients_includesParentFirst() {
+        Reply r = KidAccounts.parse("{\"success\":true,\"isKid\":true,\"parentName\":\"iostest\",\"whitelist\":[{\"pid\":7,\"name\":\"graviton\"}]}");
+        assertEquals(java.util.Arrays.asList("iostest", "graviton"), KidAccounts.allowedRecipients(r));
+    }
+
+    @Test
+    public void allowedRecipients_parentView_isEmpty() {
+        assertTrue(KidAccounts.allowedRecipients(KidAccounts.parse("{\"success\":true,\"isKid\":false}")).isEmpty());
+    }
+
+    @Test
+    public void allowedRecipients_null_isEmpty() {
+        assertTrue(KidAccounts.allowedRecipients(null).isEmpty());
+    }
 }
