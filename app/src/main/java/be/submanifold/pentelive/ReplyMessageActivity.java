@@ -47,6 +47,7 @@ import java.util.List;
 
 import androidx.appcompat.app.AlertDialog;
 
+import be.submanifold.pentelive.blocked.BlockFlow;
 import be.submanifold.pentelive.blocked.BlockedPlayers;
 import be.submanifold.pentelive.blocked.BlockedPlayersClient;
 import be.submanifold.pentelive.net.AuthedHttp;
@@ -226,48 +227,8 @@ public class ReplyMessageActivity extends AppCompatActivity {
     }
 
     private void confirmBlock() {
-        final String author = recipient;
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.block_dialog_title, author))
-                .setMessage(getString(R.string.block_message_dialog_text, author))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.block, (d, w) -> block(author))
-                .create();
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-    }
-
-    private void block(final String author) {
-        new BackgroundTask<Void, IOException>() {
-            @Override
-            protected IOException doInBackground(Void... params) {
-                try {
-                    BlockedPlayersClient.block(author, false, true);
-                    return null;
-                } catch (IOException e) {
-                    return e;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(IOException error) {
-                if (isFinishing() || isDestroyed()) {
-                    return;
-                }
-                if (error == null) {
-                    applyBlockedState();
-                    return;
-                }
-                String text = (error instanceof BlockedPlayersClient.Failure)
-                        ? error.getMessage() : null;
-                new AlertDialog.Builder(ReplyMessageActivity.this)
-                        .setTitle(getString(R.string.block_error_title, author))
-                        .setMessage(text != null ? text : getString(R.string.try_again))
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show();
-            }
-        }.execute();
+        BlockFlow.confirmAndBlock(this, recipient, R.string.block_message_dialog_text,
+                false, true, this::applyBlockedState);
     }
 
     protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {

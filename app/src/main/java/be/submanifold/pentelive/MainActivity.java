@@ -36,13 +36,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.kobakei.ratethisapp.RateThisApp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import be.submanifold.pentelive.blocked.BlockedPlayersClient;
+import be.submanifold.pentelive.blocked.BlockFlow;
 import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 import be.submanifold.pentelive.net.BaseUrlProvider;
 import be.submanifold.pentelive.net.OkHttpPenteApi;
@@ -238,7 +237,10 @@ public class MainActivity extends AppCompatActivity {
                         v.findViewById(R.id.blockButton).setVisibility(View.VISIBLE);
                         v.findViewById(R.id.blockButton).setOnClickListener(v14 -> {
                             Game invitation = player.getInvitations().get(childPosition);
-                            confirmBlockInviter(invitation.getOpponentName(), invitation.getGameID());
+                            final String gameID = invitation.getGameID();
+                            BlockFlow.confirmAndBlock(MainActivity.this, invitation.getOpponentName(),
+                                    R.string.block_invitation_dialog_text, true, false,
+                                    () -> player.respondInvitation(gameID, false, listAdapter));
                         });
                     }
                 }
@@ -484,50 +486,6 @@ public class MainActivity extends AppCompatActivity {
         if (client != null) {
             client.shutdown();
         }
-    }
-
-    private void confirmBlockInviter(final String inviter, final String gameID) {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.block_dialog_title, inviter))
-                .setMessage(getString(R.string.block_invitation_dialog_text, inviter))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.block, (d, w) -> blockInviter(inviter, gameID))
-                .create();
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-    }
-
-    private void blockInviter(final String inviter, final String gameID) {
-        new BackgroundTask<Void, IOException>() {
-            @Override
-            protected IOException doInBackground(Void... params) {
-                try {
-                    BlockedPlayersClient.block(inviter, true, false);
-                    return null;
-                } catch (IOException e) {
-                    return e;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(IOException error) {
-                if (isFinishing() || isDestroyed()) {
-                    return;
-                }
-                if (error == null) {
-                    player.respondInvitation(gameID, false, listAdapter);
-                    return;
-                }
-                String text = (error instanceof BlockedPlayersClient.Failure)
-                        ? error.getMessage() : null;
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(getString(R.string.block_error_title, inviter))
-                        .setMessage(text != null ? text : getString(R.string.try_again))
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show();
-            }
-        }.execute();
     }
 
     private void refreshPlayer() {
