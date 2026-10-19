@@ -393,4 +393,27 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="block_messages">Nachrichten blockieren</string>
     <string name="block_invitations">Einladungen blockieren</string>
     <string name="block_both">Nachrichten und Einladungen blockieren</string>
+    <string name="kid_accounts">Kinderkonten</string>
+    <string name="kid_accounts_intro">Kinder können gegen alle spielen, aber nur mit Spielern schreiben, die du freigibst.</string>
+    <string name="kid_verify_email">Bestätige deine E-Mail-Adresse, bevor du Kinderkonten hinzufügst.</string>
+    <string name="kid_none">Noch keine Kinderkonten.</string>
+    <string name="kid_create">Kinderkonto erstellen</string>
+    <string name="kid_convert">Bestehendes Konto zum Kinderkonto machen</string>
+    <string name="kid_convert_hint">Wir schicken dem Konto eine Bestätigungs-E-Mail.</string>
+    <string name="kid_name">Benutzername</string>
+    <string name="kid_password">Passwort</string>
+    <string name="kid_managed_by">Dein Konto wird von %1$s verwaltet.</string>
+    <string name="kid_approved_players">Freigegebene Spieler</string>
+    <string name="kid_no_approved">Noch keine freigegebenen Spieler.</string>
+    <string name="kid_add_approved">Spieler freigeben</string>
+    <string name="kid_remove_approved_title">%1$s entfernen?</string>
+    <string name="kid_remove_approved_text">%1$s kann dann keine Nachrichten mehr mit %2$s austauschen.</string>
+    <string name="kid_remove">Entfernen</string>
+    <string name="kid_copy_messages">Kopien privater Nachrichten per E-Mail</string>
+    <string name="kid_copy_live_chat">Live-Chat per E-Mail, wenn mein Kind den Raum verlässt</string>
+    <string name="kid_copy_live_chat_note">Live-Chat-Kopien entfallen, wenn der Server den Chat nicht speichern kann.</string>
+    <string name="kid_set_password">Passwort setzen</string>
+    <string name="kid_password_set">Passwort geändert.</string>
+    <string name="kid_release">Kinderkonto freigeben</string>
+    <string name="kid_release_text">%1$s wird ein normales Konto. Freigegebene Spieler und Kopie-Einstellungen werden gelöscht.</string>
 </resources>
