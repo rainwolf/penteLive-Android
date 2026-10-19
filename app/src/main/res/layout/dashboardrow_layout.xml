@@ -103,6 +103,15 @@
             android:text="@string/accept"
             android:id="@+id/acceptButton"
             android:layout_gravity="end" />
+        <ImageButton
+            android:id="@+id/blockButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            android:focusable="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_block_player"
+            android:contentDescription="@string/block_dialog_title_generic" />
     </LinearLayout>
 
 </RelativeLayout>
