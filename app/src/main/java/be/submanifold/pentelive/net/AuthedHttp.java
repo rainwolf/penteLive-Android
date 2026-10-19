@@ -86,17 +86,38 @@ public final class AuthedHttp {
 
     /** GET {@code pathAndQuery} (e.g. "/gameServer/mobile/json/game.jsp?gid=1"), following redirects. */
     public Reply get(String pathAndQuery) throws IOException {
-        return send(pathAndQuery, () -> exchangeGet(pathAndQuery));
+        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, false));
+    }
+
+    /**
+     * As {@link #get(String)}, but a 4xx/5xx response is returned (code and error body) instead
+     * of thrown, for endpoints whose JSON error text the UI shows.
+     */
+    public Reply getAllowingErrors(String pathAndQuery) throws IOException {
+        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, true));
     }
 
     /** POST the form body {@code form} to {@code path}, without following a redirect. */
     public Reply postForm(String path, String form) throws IOException {
-        return send(path, () -> exchangePost(path, form, 0));
+        return send(path, () -> exchangePost(path, form, 0, false));
     }
 
     /** As {@link #postForm(String, String)}, with a body that is built again for the retry. */
     public Reply postForm(String path, FormSupplier form) throws IOException {
-        return send(path, () -> exchangePost(path, form.form(), 0));
+        return send(path, () -> exchangePost(path, form.form(), 0, false));
+    }
+
+    /**
+     * As {@link #postForm(String, String)}, but a 4xx/5xx response is returned (code and error
+     * body) instead of thrown. This is the app-auth path of /gameServer/kids: the server
+     * rejects a cookie-only POST without a same-host Origin/Referer with 403, so the stored
+     * credentials go along as the name2/password2 form parameters, rebuilt for every attempt
+     * so the retry after a re-login carries them too.
+     */
+    public Reply postFormAllowingErrors(String path, String form) throws IOException {
+        return send(path, () -> exchangePost(path,
+                form + "&" + Forms.encode("name2", session.name(), "password2", session.password()),
+                0, true));
     }
 
     /**
@@ -189,7 +210,7 @@ public final class AuthedHttp {
     /** POSTs the credentials to login.jsp; on success, checks that the login cookies were stored for {@code name}. */
     private LoginResponse.Outcome login(String name, String password) throws IOException {
         Reply reply = exchangePost(LOGIN_PATH,
-                Forms.encode("mobile", "", "name2", name, "password2", password), LOGIN_TIMEOUT_MS);
+                Forms.encode("mobile", "", "name2", name, "password2", password), LOGIN_TIMEOUT_MS, false);
         LoginResponse.Outcome outcome = LoginResponse.classify(reply.body);
         if (outcome == LoginResponse.Outcome.SUCCESS) {
             Map<String, String> stored = storedLoginCookies();
@@ -205,13 +226,16 @@ public final class AuthedHttp {
         return CookieHeader.parse(cookies.cookieHeader(urls.baseUrl() + "/gameServer/"));
     }
 
-    private Reply exchangeGet(String pathAndQuery) throws IOException {
+    private Reply exchangeGet(String pathAndQuery, boolean allowErrors) throws IOException {
         HttpURLConnection connection = open(pathAndQuery, 0);
-        return read(connection);
+        return allowErrors ? readAllowingErrors(connection) : read(connection);
     }
 
-    /** @param timeoutMs connect and read timeout; 0 keeps HttpURLConnection's default (none) */
-    private Reply exchangePost(String path, String form, int timeoutMs) throws IOException {
+    /**
+     * @param timeoutMs connect and read timeout; 0 keeps HttpURLConnection's default (none)
+     * @param allowErrors return a 4xx/5xx response instead of throwing
+     */
+    private Reply exchangePost(String path, String form, int timeoutMs, boolean allowErrors) throws IOException {
         HttpURLConnection connection = open(path, timeoutMs);
         byte[] body = form.getBytes(StandardCharsets.UTF_8);
         connection.setRequestMethod("POST");
@@ -223,7 +247,7 @@ public final class AuthedHttp {
         try (OutputStream out = connection.getOutputStream()) {
             out.write(body);
         }
-        return read(connection);
+        return allowErrors ? readAllowingErrors(connection) : read(connection);
     }
 
     private HttpURLConnection open(String pathAndQuery, int timeoutMs) throws IOException {
@@ -235,12 +259,25 @@ public final class AuthedHttp {
 
     /** getInputStream throws for 4xx/5xx, as the call sites' own reads did. */
     private static Reply read(HttpURLConnection connection) throws IOException {
+        return readFrom(connection, connection.getInputStream());
+    }
+
+    /** Reads the error stream of a 4xx/5xx response (none: empty body) instead of throwing. */
+    private static Reply readAllowingErrors(HttpURLConnection connection) throws IOException {
+        InputStream in = connection.getResponseCode() >= 400
+                ? connection.getErrorStream() : connection.getInputStream();
+        return readFrom(connection, in);
+    }
+
+    private static Reply readFrom(HttpURLConnection connection, InputStream stream) throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (InputStream in = connection.getInputStream()) {
-            byte[] buffer = new byte[8192];
-            int n;
-            while ((n = in.read(buffer)) != -1) {
-                bytes.write(buffer, 0, n);
+        if (stream != null) {
+            try (InputStream in = stream) {
+                byte[] buffer = new byte[8192];
+                int n;
+                while ((n = in.read(buffer)) != -1) {
+                    bytes.write(buffer, 0, n);
+                }
             }
         }
         return new Reply(connection.getResponseCode(), connection.getURL().getPath(),
