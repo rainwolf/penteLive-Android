@@ -13,6 +13,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class RedactingLogTest {
@@ -236,6 +237,13 @@ public class RedactingLogTest {
         assertEquals("java.io.IOException: " + LOGIN_URL, original.toString());
         assertEquals(cause, original.getCause());
         assertEquals(0, original.getSuppressed().length);
+    }
+
+    @Test
+    public void nullThrowable_isLoggedWithoutACause_insteadOfThrowing() {
+        assertNull(RedactingLog.redacted(null));
+        // KidAccountsClient logs a non-200 reply with no exception.
+        RedactingLog.e("RedactingLogTest", "no cause given", null);
     }
 
     @Test

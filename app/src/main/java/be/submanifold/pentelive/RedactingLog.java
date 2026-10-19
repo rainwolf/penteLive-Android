@@ -41,8 +41,12 @@ public final class RedactingLog {
      * A copy of {@code tr} whose messages, and those of its causes and suppressed exceptions,
      * have every URL query string and password parameter removed. The copies print as the
      * original class name and keep the original stack frames; {@code tr} is not modified.
+     * A null {@code tr} gives null, as Log.e takes it.
      */
     public static Throwable redacted(Throwable tr) {
+        if (tr == null) {
+            return null;
+        }
         return copy(tr, new IdentityHashMap<>());
     }
 
