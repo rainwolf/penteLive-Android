@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                             Game invitation = player.getInvitations().get(childPosition);
                             final String gameID = invitation.getGameID();
                             BlockFlow.confirmAndBlock(MainActivity.this, invitation.getOpponentName(),
-                                    R.string.block_invitation_dialog_text, true, false,
+                                    true,
                                     () -> player.respondInvitation(gameID, false, listAdapter));
                         });
                     }

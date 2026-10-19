@@ -45,7 +45,6 @@ import java.util.Date;
 
 import java.util.List;
 
-import androidx.appcompat.app.AlertDialog;
 
 import be.submanifold.pentelive.blocked.BlockFlow;
 import be.submanifold.pentelive.blocked.BlockedPlayers;
@@ -227,8 +226,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
     }
 
     private void confirmBlock() {
-        BlockFlow.confirmAndBlock(this, recipient, R.string.block_message_dialog_text,
-                false, true, this::applyBlockedState);
+        BlockFlow.confirmAndBlock(this, recipient, false, this::applyBlockedState);
     }
 
     protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {

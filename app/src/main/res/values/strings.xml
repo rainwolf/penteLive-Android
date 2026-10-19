@@ -639,4 +639,7 @@
     <string name="block_error_title">Couldn\'t block %1$s</string>
     <string name="unblock_error_title">Couldn\'t unblock %1$s</string>
     <string name="try_again">Please try again.</string>
+    <string name="block_messages">Block messages</string>
+    <string name="block_invitations">Block invitations</string>
+    <string name="block_both">Block messages and invitations</string>
 </resources>

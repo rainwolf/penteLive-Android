@@ -389,4 +389,7 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="block_error_title">%1$s konnte nicht blockiert werden</string>
     <string name="unblock_error_title">%1$s konnte nicht entsperrt werden</string>
     <string name="try_again">Bitte versuche es erneut.</string>
+    <string name="block_messages">Nachrichten blockieren</string>
+    <string name="block_invitations">Einladungen blockieren</string>
+    <string name="block_both">Nachrichten und Einladungen blockieren</string>
 </resources>
