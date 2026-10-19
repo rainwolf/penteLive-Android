@@ -264,7 +264,7 @@ public class BlockedPlayersActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull Holder h, int position) {
             IgnoreEntry e = shown.get(position);
-            SpannableStringBuilder styledName = NameStyle.colored(e.name, e.nameColor);
+            SpannableStringBuilder styledName = NameStyle.colored(e.name == null ? "" : e.name, e.nameColor);
             NameStyle.appendCrown(BlockedPlayersActivity.this, styledName, e.tourneyWinner, h.name);
             h.name.setText(styledName);
             if (currentFilter() == Filter.BOTH) {
