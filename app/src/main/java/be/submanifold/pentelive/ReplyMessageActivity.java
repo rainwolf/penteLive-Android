@@ -43,6 +43,12 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Date;
 
+import java.util.List;
+
+
+import be.submanifold.pentelive.blocked.BlockFlow;
+import be.submanifold.pentelive.blocked.BlockedPlayers;
+import be.submanifold.pentelive.blocked.BlockedPlayersClient;
 import be.submanifold.pentelive.net.AuthedHttp;
 
 public class ReplyMessageActivity extends AppCompatActivity {
@@ -51,6 +57,8 @@ public class ReplyMessageActivity extends AppCompatActivity {
 
     private String recipient;
     private String subject;
+    /** True once the sender is known to be chat-blocked; hides reply UI and the block item. */
+    private boolean senderBlocked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +126,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
 //            }
 //        });
 //        messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        loadSenderBlocked(recipient);
         LoadMessageTask loadTask = new LoadMessageTask(message.getMessageID());
         loadTask.execute((Void) null);
 
@@ -131,6 +140,9 @@ public class ReplyMessageActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
                 intent.putExtra("opponent", recipient);
                 startActivity(intent);
+                return true;
+            } else if (id == R.id.action_block) {
+                confirmBlock();
                 return true;
             }
 
@@ -147,7 +159,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                         if (PentePlayer.mShowAds) {
 //                                ((AdView) findViewById(R.id.adView)).setVisibility(View.GONE);
                         }
-                    } else {
+                    } else if (!senderBlocked) {
                         findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
                     }
                 });
@@ -171,6 +183,50 @@ public class ReplyMessageActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.message_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem block = menu.findItem(R.id.action_block);
+        if (block != null) {
+            block.setVisible(!senderBlocked);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void applyBlockedState() {
+        senderBlocked = true;
+        findViewById(R.id.reply).setVisibility(View.GONE);
+        findViewById(R.id.sendButton).setVisibility(View.GONE);
+        invalidateOptionsMenu();
+    }
+
+    /** Loads the block list; on failure senderBlocked stays false. */
+    private void loadSenderBlocked(final String author) {
+        new BackgroundTask<Void, List<BlockedPlayers.IgnoreEntry>>() {
+            @Override
+            protected List<BlockedPlayers.IgnoreEntry> doInBackground(Void... params) {
+                try {
+                    return BlockedPlayersClient.load();
+                } catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(List<BlockedPlayers.IgnoreEntry> entries) {
+                if (isFinishing() || isDestroyed() || entries == null) {
+                    return;
+                }
+                if (BlockedPlayers.isChatBlocked(author, entries)) {
+                    applyBlockedState();
+                }
+            }
+        }.execute();
+    }
+
+    private void confirmBlock() {
+        BlockFlow.confirmAndBlock(this, recipient, false, this::applyBlockedState);
     }
 
     protected void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {

@@ -79,6 +79,9 @@
             android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".blocked.BlockedPlayersActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".DatabaseActivity"
             android:screenOrientation="portrait" />
 

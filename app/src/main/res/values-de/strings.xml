@@ -370,4 +370,25 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="store_buy_vacation">Zusätzliche Urlaubstage (%1$d): %2$s</string>
     <string name="restore_purchases">Käufe wiederherstellen</string>
 
+    <string name="blocked_players">Blockierte Spieler</string>
+    <string name="blocked_filter_messages">Nachrichten</string>
+    <string name="blocked_filter_invitations">Einladungen</string>
+    <string name="blocked_filter_both">Beides</string>
+    <string name="blocked_kind_messages">Nachrichten</string>
+    <string name="blocked_kind_invitations">Einladungen</string>
+    <string name="blocked_kind_both">Nachrichten und Einladungen</string>
+    <string name="blocked_empty">Keine blockierten Spieler</string>
+    <string name="unblock">Entsperren</string>
+    <string name="unblock_dialog_title">%1$s entsperren?</string>
+    <string name="unblock_dialog_text">%1$s kann dir wieder %2$s senden.</string>
+    <string name="block_dialog_title">%1$s blockieren?</string>
+    <string name="block_dialog_title_generic">Spieler blockieren</string>
+    <string name="block_message_dialog_text">Du erhältst keine Nachrichten mehr von %1$s.\nDu kannst Spieler in den Einstellungen entsperren.</string>
+    <string name="block_invitation_dialog_text">Dies lehnt die Einladung ab und du erhältst keine Einladungen mehr von %1$s.\nDu kannst Spieler in den Einstellungen entsperren.</string>
+    <string name="block_error_title">%1$s konnte nicht blockiert werden</string>
+    <string name="unblock_error_title">%1$s konnte nicht entsperrt werden</string>
+    <string name="try_again">Bitte versuche es erneut.</string>
+    <string name="block_messages">Nachrichten blockieren</string>
+    <string name="block_invitations">Einladungen blockieren</string>
+    <string name="block_both">Nachrichten und Einladungen blockieren</string>
 </resources>

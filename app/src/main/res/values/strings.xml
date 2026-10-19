@@ -620,4 +620,25 @@
     <string name="store_vacation_note">These vacation days do not roll over to %1$d.</string>
     <string name="store_buy_vacation">Extra vacation days (%1$d): %2$s</string>
     <string name="restore_purchases">Restore purchases</string>
+    <string name="blocked_players">Blocked players</string>
+    <string name="blocked_filter_messages">Messages</string>
+    <string name="blocked_filter_invitations">Invitations</string>
+    <string name="blocked_filter_both">Both</string>
+    <string name="blocked_kind_messages">messages</string>
+    <string name="blocked_kind_invitations">invitations</string>
+    <string name="blocked_kind_both">messages and invitations</string>
+    <string name="blocked_empty">No blocked players</string>
+    <string name="unblock">Unblock</string>
+    <string name="unblock_dialog_title">Unblock %1$s?</string>
+    <string name="unblock_dialog_text">%1$s will be able to send you %2$s again.</string>
+    <string name="block_dialog_title">Block %1$s?</string>
+    <string name="block_dialog_title_generic">Block player</string>
+    <string name="block_message_dialog_text">You will no longer receive messages from %1$s.\nYou can unblock players in Settings.</string>
+    <string name="block_invitation_dialog_text">This declines the invitation and you will no longer receive invitations from %1$s.\nYou can unblock players in Settings.</string>
+    <string name="block_error_title">Couldn\'t block %1$s</string>
+    <string name="unblock_error_title">Couldn\'t unblock %1$s</string>
+    <string name="try_again">Please try again.</string>
+    <string name="block_messages">Block messages</string>
+    <string name="block_invitations">Block invitations</string>
+    <string name="block_both">Block messages and invitations</string>
 </resources>

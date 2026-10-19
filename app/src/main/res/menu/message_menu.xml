@@ -10,6 +10,11 @@
         style="@android:style/Widget.ActionButton"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/action_block"
+        android:icon="@drawable/ic_block_player"
+        android:title="@string/block_dialog_title_generic"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_trash"
         android:icon="@drawable/ic_action_trash"
         app:iconTint="@color/toolbar_icon_tint"

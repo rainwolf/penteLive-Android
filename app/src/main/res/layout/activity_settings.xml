@@ -190,6 +190,13 @@
         android:layout_below="@id/colorButton"
         android:text="@string/change_avatar"
         android:layout_marginTop="5dp"/>
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/blockedPlayersButton"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/avatarButton"
+        android:text="@string/blocked_players"
+        android:layout_marginTop="5dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="45dp"
@@ -198,7 +205,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/subscribers_only"
         android:id="@+id/infoLabel3"
-        android:layout_below="@id/avatarButton"
+        android:layout_below="@id/blockedPlayersButton"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="20dp"/>
 
@@ -207,7 +214,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/avatarView"
         android:importantForAccessibility="no"
-        android:layout_below="@id/avatarButton"/>
+        android:layout_below="@id/blockedPlayersButton"/>
     <Button
         android:layout_width="match_parent"
         android:id="@+id/subscribeButton"

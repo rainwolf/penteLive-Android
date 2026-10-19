@@ -150,6 +150,7 @@ public class KingOfTheHillListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.acceptButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.dismissButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.declineButton).setVisibility(View.GONE);
+        convertView.findViewById(R.id.blockButton).setVisibility(View.GONE);
         convertView.findViewById(R.id.imageView).setVisibility(View.GONE);
         TextView nameTextView = convertView.findViewById(R.id.nameText);
         TextView detailTextView = convertView.findViewById(R.id.detailText);

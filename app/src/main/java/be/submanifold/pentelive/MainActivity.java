@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import be.submanifold.pentelive.blocked.BlockFlow;
 import be.submanifold.pentelive.liveGameRoom.LobbyActivity;
 import be.submanifold.pentelive.net.BaseUrlProvider;
 import be.submanifold.pentelive.net.OkHttpPenteApi;
@@ -138,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                 viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                 viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                viewWithOpenButtons.findViewById(R.id.blockButton).setVisibility(View.GONE);
                 viewWithOpenButtons = null;
             }
             if (groupPosition == DashboardListAdapter.INVITATIONSGROUP ||
@@ -174,12 +176,14 @@ public class MainActivity extends AppCompatActivity {
                                             viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.blockButton).setVisibility(View.GONE);
                                         });
                                         builder.setNeutralButton(getString(R.string.dismiss), (dialog, which) -> {
                                             viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                                             viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                                            viewWithOpenButtons.findViewById(R.id.blockButton).setVisibility(View.GONE);
                                         });
                                         AlertDialog dlg = builder.create();
                                         dlg.show();
@@ -214,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                             viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                             viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                             viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                            viewWithOpenButtons.findViewById(R.id.blockButton).setVisibility(View.GONE);
                         });
                         viewWithOpenButtons = v;
                     }
@@ -225,6 +230,18 @@ public class MainActivity extends AppCompatActivity {
                         v.findViewById(R.id.declineButton).setVisibility(View.VISIBLE);
                         Button button = v.findViewById(R.id.declineButton);
                         button.setOnClickListener(v12 -> player.respondInvitation(player.getInvitations().get(childPosition).getGameID(), false, listAdapter));
+                    }
+                    if (v.findViewById(R.id.blockButton).getVisibility() == View.VISIBLE) {
+                        v.findViewById(R.id.blockButton).setVisibility(View.GONE);
+                    } else {
+                        v.findViewById(R.id.blockButton).setVisibility(View.VISIBLE);
+                        v.findViewById(R.id.blockButton).setOnClickListener(v14 -> {
+                            Game invitation = player.getInvitations().get(childPosition);
+                            final String gameID = invitation.getGameID();
+                            BlockFlow.confirmAndBlock(MainActivity.this, invitation.getOpponentName(),
+                                    true,
+                                    () -> player.respondInvitation(gameID, false, listAdapter));
+                        });
                     }
                 }
                 if (groupPosition == DashboardListAdapter.SENTINVITATIONSGROUP) {
@@ -246,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
                         viewWithOpenButtons.findViewById(R.id.acceptButton).setVisibility(View.GONE);
                         viewWithOpenButtons.findViewById(R.id.cancelButton).setVisibility(View.GONE);
                         viewWithOpenButtons.findViewById(R.id.declineButton).setVisibility(View.GONE);
+                        viewWithOpenButtons.findViewById(R.id.blockButton).setVisibility(View.GONE);
                         viewWithOpenButtons.findViewById(R.id.dismissButton).setVisibility(View.GONE);
                     });
                 }
