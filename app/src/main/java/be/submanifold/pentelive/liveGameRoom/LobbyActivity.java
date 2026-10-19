@@ -90,6 +90,7 @@ public class LobbyActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.lobby_menu, menu);
+        menu.findItem(R.id.broadcast).setVisible(!PentePlayer.isKid());
         return true;
     }
 
@@ -276,7 +277,10 @@ public class LobbyActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
 
             if (success) {
-                if (dashboardString.contains("Broadcasting to followers or friends is only available to subscribers")) {
+                if (dashboardString.contains("Kid accounts can't broadcast.")) {
+                    Toast.makeText(LobbyActivity.this, getString(R.string.kid_broadcast_refused),
+                            Toast.LENGTH_LONG).show();
+                } else if (dashboardString.contains("Broadcasting to followers or friends is only available to subscribers")) {
                     Toast.makeText(LobbyActivity.this, getString(R.string.broadcasting_subscribers_only),
                             Toast.LENGTH_LONG).show();
                 } else if (dashboardString.contains("database error, try again later")) {

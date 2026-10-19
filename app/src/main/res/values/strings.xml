@@ -666,4 +666,6 @@
     <string name="kid_password_set">Password changed.</string>
     <string name="kid_release">Release kid account</string>
     <string name="kid_release_text">%1$s becomes a normal account. Approved players and copy settings are deleted.</string>
+    <string name="kid_broadcast_refused">Kid accounts can\'t broadcast.</string>
+    <string name="kid_chat_hint">Only players your parent approved will see your messages.</string>
 </resources>

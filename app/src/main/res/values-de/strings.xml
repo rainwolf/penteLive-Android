@@ -416,4 +416,6 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="kid_password_set">Passwort geändert.</string>
     <string name="kid_release">Kinderkonto freigeben</string>
     <string name="kid_release_text">%1$s wird ein normales Konto. Freigegebene Spieler und Kopie-Einstellungen werden gelöscht.</string>
+    <string name="kid_broadcast_refused">Kinderkonten können nicht rundsenden.</string>
+    <string name="kid_chat_hint">Nur von deinen Eltern freigegebene Spieler sehen deine Nachrichten.</string>
 </resources>
