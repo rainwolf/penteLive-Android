@@ -45,6 +45,7 @@ public class BlockedPlayersActivity extends AppCompatActivity {
     private AppCompatSpinner spinner;
     private TextView emptyText;
     private RowAdapter adapter;
+    private boolean loaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,10 +118,19 @@ public class BlockedPlayersActivity extends AppCompatActivity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                // A failed load keeps whatever is already shown.
                 if (o.entries != null) {
+                    loaded = true;
                     setEntries(o.entries);
+                    return;
                 }
+                // A failed load keeps whatever is already shown and never claims "empty".
+                String message = (o.error instanceof BlockedPlayersClient.Failure)
+                        ? o.error.getMessage() : null;
+                new AlertDialog.Builder(BlockedPlayersActivity.this)
+                        .setTitle(getString(R.string.blocked_players))
+                        .setMessage(message != null ? message : getString(R.string.try_again))
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
             }
         }.execute();
     }
@@ -145,7 +155,7 @@ public class BlockedPlayersActivity extends AppCompatActivity {
         shown.clear();
         shown.addAll(BlockedPlayers.filter(allEntries, currentFilter()));
         adapter.notifyDataSetChanged();
-        emptyText.setVisibility(shown.isEmpty() ? View.VISIBLE : View.GONE);
+        emptyText.setVisibility(loaded && shown.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private String kindText(Kind kind) {
@@ -182,7 +192,7 @@ public class BlockedPlayersActivity extends AppCompatActivity {
                 .setTitle(getString(R.string.unblock_dialog_title, entry.name))
                 .setMessage(getString(R.string.unblock_dialog_text, entry.name,
                         removedKindText(entry, filter)))
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.unblock, (d, w) -> {
                     confirmed[0] = true;
                     unblock(entry, filter, position);
