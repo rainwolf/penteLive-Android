@@ -123,6 +123,8 @@ public class TablesAndPlayers {
         players.put(playerName, player);
     }
 
+    private boolean kid;
+
     public void login(Map<String, ?> data) {
         Map<String, ?> serverData = (Map<String, ?>) data.get("serverData");
         List<String> messages = (List<String>) serverData.get("loginMessages");
@@ -132,6 +134,11 @@ public class TablesAndPlayers {
             }
         }
         this.me = (String) data.get("player");
+        this.kid = KidLiveRoom.isKidLogin(data);
+    }
+
+    public boolean isKid() {
+        return kid;
     }
 
     public int changeTableState(Map<String, Object> data) {
