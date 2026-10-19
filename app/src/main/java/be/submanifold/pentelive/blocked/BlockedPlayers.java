@@ -24,6 +24,10 @@ public final class BlockedPlayers {
         public String name;
         public boolean ignoreInvite;
         public boolean ignoreChat;
+        /** Donor name color as the dashboard decodes it; 0 = none (also when an older server omits it). */
+        public int nameColor;
+        /** 0 none, 1-3 tournament crowns, above 3 King of the Hill crown; 0 when omitted. */
+        public int tourneyWinner;
     }
 
     /** Which list the user is looking at. */

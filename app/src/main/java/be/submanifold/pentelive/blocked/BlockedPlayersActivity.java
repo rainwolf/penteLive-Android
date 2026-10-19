@@ -2,6 +2,7 @@ package be.submanifold.pentelive.blocked;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import be.submanifold.pentelive.BackgroundTask;
 import be.submanifold.pentelive.MyApplication;
+import be.submanifold.pentelive.NameStyle;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.blocked.BlockedPlayers.Filter;
 import be.submanifold.pentelive.blocked.BlockedPlayers.IgnoreEntry;
@@ -262,7 +264,9 @@ public class BlockedPlayersActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull Holder h, int position) {
             IgnoreEntry e = shown.get(position);
-            h.name.setText(e.name);
+            SpannableStringBuilder styledName = NameStyle.colored(e.name, e.nameColor);
+            NameStyle.appendCrown(BlockedPlayersActivity.this, styledName, e.tourneyWinner, h.name);
+            h.name.setText(styledName);
             if (currentFilter() == Filter.BOTH) {
                 h.kind.setText(kindText(BlockedPlayers.kind(e.ignoreInvite, e.ignoreChat)));
                 h.kind.setVisibility(View.VISIBLE);

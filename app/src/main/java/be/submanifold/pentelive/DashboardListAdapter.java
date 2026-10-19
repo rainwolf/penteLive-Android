@@ -400,13 +400,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
-        SpannableStringBuilder sb = new SpannableStringBuilder(mainText);
-        if (color != 0) {
-            ForegroundColorSpan fcs = new ForegroundColorSpan(color);
-            StyleSpan bss = new StyleSpan(android.graphics.Typeface.BOLD);
-            sb.setSpan(fcs, 0, mainText.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            sb.setSpan(bss, 0, mainText.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        }
+        SpannableStringBuilder sb = NameStyle.colored(mainText, color);
         if (groupPosition == TOURNAMENTGROUP) {
             ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
             if (tournament.getTournamentState().equals("2")) {
@@ -440,35 +434,14 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
                 useDarkColor(nameTextView, detailTextView, ratingTextView);
             }
         }
-        Drawable crownIcon = null;
-        switch (crown) {
-            case 1:
-                crownIcon = ContextCompat.getDrawable(activity, R.drawable.crown);
-                break;
-            case 2:
-                crownIcon = ContextCompat.getDrawable(activity, R.drawable.scrown);
-                break;
-            case 3:
-                crownIcon = ContextCompat.getDrawable(activity, R.drawable.bcrown);
-                break;
-            default:
-                if (crown > 3) {
-                    int resourceId = KothCrownDrawables.IDS[crown - 4];
-                    crownIcon = ContextCompat.getDrawable(ctx, resourceId);
-                }
-                break;
-        }
-        if (crownIcon != null && crown > 0) {
-            crownIcon.setBounds(0, 0, nameTextView.getLineHeight() * 2 / 3, nameTextView.getLineHeight() * 2 / 3);
-            sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
-        }
+        NameStyle.appendCrown(activity, sb, crown, nameTextView);
         detailTextView.setText(detailText);
 
         PentePlayer.markIfOnline(mainText, sb);
         nameTextView.setText(sb);
         if (groupPosition == KOTHGROUP && hill.getCurrentKing().length() > 1) {
             sb = new SpannableStringBuilder(detailText);
-            crownIcon = ContextCompat.getDrawable(activity, R.drawable.kothcrown);
+            Drawable crownIcon = ContextCompat.getDrawable(activity, R.drawable.kothcrown);
             crownIcon.setBounds(0, 0, detailTextView.getLineHeight() * 2 / 3, detailTextView.getLineHeight() * 2 / 3);
             sb.append("   ").setSpan(new ImageSpan(crownIcon, ImageSpan.ALIGN_BASELINE), sb.length() - 1, sb.length(), 0);
             detailTextView.setText(sb);

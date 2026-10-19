@@ -38,6 +38,22 @@ public class BlockedPlayersTest {
     }
 
     @Test
+    public void parseNameColorAndCrown() {
+        Reply r = BlockedPlayers.parse("{\"success\":true,\"ignores\":[{\"ignorePid\":5,\"name\":\"graviton\",\"ignoreInvite\":true,\"ignoreChat\":false,\"nameColor\":-16777215,\"tourneyWinner\":5}]}");
+        assertNotNull(r);
+        assertEquals(-16777215, r.ignores.get(0).nameColor);
+        assertEquals(5, r.ignores.get(0).tourneyWinner);
+    }
+
+    @Test
+    public void parseWithoutStyleFieldsDefaultsZero() {
+        Reply r = BlockedPlayers.parse("{\"success\":true,\"ignores\":[{\"ignorePid\":5,\"name\":\"graviton\",\"ignoreInvite\":true,\"ignoreChat\":false}]}");
+        assertNotNull(r);
+        assertEquals(0, r.ignores.get(0).nameColor);
+        assertEquals(0, r.ignores.get(0).tourneyWinner);
+    }
+
+    @Test
     public void parseHtmlLoginPageIsNull() {
         assertNull(BlockedPlayers.parse("<html>login</html>"));
         assertNull(BlockedPlayers.parse(null));
