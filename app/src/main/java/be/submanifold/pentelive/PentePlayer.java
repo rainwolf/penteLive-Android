@@ -40,6 +40,8 @@ public class PentePlayer implements Parcelable {
 
     public static Boolean mShowAds = true;
     public static Boolean mSubscriber = false;
+    public static Long parentPid = null;
+    public static boolean isKid() { return parentPid != null; }
     public static Boolean dbAccess = false;
     private List<Game> mInvitations;
     private List<Game> mSentInvitations;
@@ -99,6 +101,7 @@ public class PentePlayer implements Parcelable {
         mShowAds = true;
         emailMe = true;
         personalizeAds = false;
+        parentPid = null;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
@@ -191,6 +194,7 @@ public class PentePlayer implements Parcelable {
         emailMe = json.player.emailMe;
         this.onlineFollowingers = json.player.onlineFollowing;
         personalizeAds = json.player.personalizeAds;
+        parentPid = json.player.parentPid;
         PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
 
         // King of the Hill
@@ -496,6 +500,8 @@ public class PentePlayer implements Parcelable {
         onlineFollowingers = in.readInt();
         tbRatings = in.readInt();
         tbHills = in.readInt();
+        long kidParent = in.readLong();
+        parentPid = kidParent == 0L ? null : kidParent;
     }
 
     @Override
@@ -603,6 +609,7 @@ public class PentePlayer implements Parcelable {
         dest.writeInt(onlineFollowingers);
         dest.writeInt(tbRatings);
         dest.writeInt(tbHills);
+        dest.writeLong(parentPid == null ? 0L : parentPid);
     }
 
     @SuppressWarnings("unused")
