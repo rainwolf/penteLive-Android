@@ -60,4 +60,11 @@ public class KidDetailSourceTest {
         assertTrue(src.contains("R.string.kid_release_text"));
         assertTrue(src.contains("R.string.try_again"));
     }
+
+    /** German "freigeben" means approve (kid_add_approved); release must use a different verb. */
+    @Test
+    public void germanReleaseDoesNotReuseTheApproveVerb() throws IOException {
+        String de = read("src/main/res/values-de/strings.xml");
+        assertTrue(de.contains("<string name=\"kid_release\">Kinderkonto auflösen</string>"));
+    }
 }
