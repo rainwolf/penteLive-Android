@@ -36,6 +36,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import be.submanifold.pentelive.blocked.BlockedPlayersActivity;
 import be.submanifold.pentelive.net.PenteUrls;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -101,6 +102,8 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.subscribeButton).setOnClickListener(v ->
                 startActivity(new Intent(SettingsActivity.this, StoreActivity.class)));
         findViewById(R.id.restorePurchasesButton).setOnClickListener(v -> MyApplication.billing().resync(true));
+        findViewById(R.id.blockedPlayersButton).setOnClickListener(v ->
+                startActivity(new Intent(SettingsActivity.this, BlockedPlayersActivity.class)));
         findViewById(R.id.colorButton).setOnClickListener(v -> {
             if (!PentePlayer.mSubscriber) {
                 return;
