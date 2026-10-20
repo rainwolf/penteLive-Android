@@ -401,4 +401,74 @@ public class AuthedHttpTest {
 
         assertEquals(1, logins.size());
     }
+
+    // kids: error bodies stay readable
+    @Test
+    public void getAllowingErrors_returnsErrorBodyAndCode() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(404)
+                .setBody("{\"success\":false,\"error\":\"Kid not found\"}"));
+
+        AuthedHttp.Reply r = http.getAllowingErrors("/gameServer/kids");
+
+        assertEquals(404, r.code);
+        assertEquals("{\"success\":false,\"error\":\"Kid not found\"}", r.body);
+    }
+
+    @Test
+    public void postFormAllowingErrors_returnsErrorBodyAndCode() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(409)
+                .setBody("{\"success\":false,\"error\":\"Requested name kid_one is already taken, please choose another.\"}"));
+
+        AuthedHttp.Reply r = http.postFormAllowingErrors("/gameServer/kids", "action=create&kidName=kid_one&kidPassword=pw_1");
+
+        assertEquals(409, r.code);
+        assertTrue(r.body.contains("already taken"));
+        String sent = data.get(0).getBody().readUtf8();
+        assertTrue(sent, sent.startsWith("action=create&kidName=kid_one&kidPassword=pw_1"));
+        assertTrue(sent, sent.contains("name2=alice"));
+        assertTrue(sent, sent.contains("password2=secret"));
+    }
+
+    @Test
+    public void postFormAllowingErrors_carriesTheCredentialsAgainAfterReLogin() throws Exception {
+        loggedIn("old");
+        serve(loginSuccess("new"), (r, loginsSoFar) -> loginsSoFar == 0
+                ? new MockResponse().setResponseCode(200)
+                        .setBody("{\"error\":\"Invalid name or password, please try again.\"}")
+                : new MockResponse().setResponseCode(200).setBody("{\"success\":true}"));
+
+        AuthedHttp.Reply r = http.postFormAllowingErrors("/gameServer/kids", "action=release&kidPid=5");
+
+        assertEquals(200, r.code);
+        assertEquals(2, data.size());
+        String retry = data.get(1).getBody().readUtf8();
+        assertTrue(retry, retry.contains("name2=alice&password2=secret"));
+    }
+
+    @Test
+    public void getAllowingErrors_emptyErrorBodyIsEmptyString() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(500));
+
+        AuthedHttp.Reply r = http.getAllowingErrors("/gameServer/kids");
+
+        assertEquals(500, r.code);
+        assertEquals("", r.body);
+    }
+
+    @Test
+    public void get_stillThrowsOnErrorStatus() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(404)
+                .setBody("{\"success\":false,\"error\":\"Kid not found\"}"));
+
+        try {
+            http.get("/gameServer/kids");
+            fail("expected IOException");
+        } catch (java.io.IOException expected) {
+            // existing behaviour kept for other callers
+        }
+    }
 }

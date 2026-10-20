@@ -323,6 +323,9 @@ public class LiveTableFragment extends Fragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             final EditText input = new EditText(activity);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
+            if (activity.tablesAndPlayers.isKid()) {
+                input.setHint(R.string.kid_chat_hint);
+            }
             builder.setView(input);
             builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
                 String m_Text = input.getText().toString();
@@ -1588,10 +1591,13 @@ public class LiveTableFragment extends Fragment {
             final EditText invitationText = new EditText(activity);
             invitationText.setHint("(" + getString(R.string.optional_message) + ")");
             invitationText.setInputType(InputType.TYPE_CLASS_TEXT);
-            builder.setView(invitationText);
+            final boolean kidMode = activity.tablesAndPlayers.isKid();
+            if (!kidMode) {
+                builder.setView(invitationText);
+            }
             builder.setTitle(getString(R.string.invite_player_to_table, player.coloredNameString(invitationText.getLineHeight())));
             builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
-                String m_Text = invitationText.getText().toString();
+                String m_Text = kidMode ? "" : invitationText.getText().toString();
                 String event = "{\"dsgInviteTableEvent\":{\"toInvite\":\"" + player.getName() + "\",\"inviteText\":\"" + m_Text + "\",\"player\":\"" + me + "\",\"table\":" + table.getId() + ",\"time\":0}}";
                 if (mListener != null) {
                     mListener.sendEvent(event);

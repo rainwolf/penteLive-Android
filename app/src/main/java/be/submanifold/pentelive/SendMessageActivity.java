@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import be.submanifold.pentelive.kids.KidAccounts;
+import be.submanifold.pentelive.kids.KidAccountsClient;
 import be.submanifold.pentelive.net.AuthedHttp;
 
 
@@ -38,8 +40,13 @@ public class SendMessageActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final AutoCompleteTextView actv = findViewById(R.id.recipient);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>(PrefUtils.getPlayers(SendMessageActivity.this)));
+        boolean kid = PentePlayer.isKid();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                kid ? new ArrayList<String>() : new ArrayList<String>(PrefUtils.getPlayers(SendMessageActivity.this)));
         actv.setAdapter(adapter);
+        if (kid) {
+            new LoadKidRecipientsTask(adapter).execute((Void) null);
+        }
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) findViewById(R.id.sendButton).getLayoutParams();
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -90,7 +97,39 @@ public class SendMessageActivity extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
-    private class SendMessageTask extends BackgroundTask<Void, Boolean> {
+    private class LoadKidRecipientsTask extends BackgroundTask<Void, KidAccounts.Reply> {
+
+        private final ArrayAdapter<String> adapter;
+
+        LoadKidRecipientsTask(ArrayAdapter<String> adapter) {
+            this.adapter = adapter;
+        }
+
+        @Override
+        protected KidAccounts.Reply doInBackground(Void... params) {
+            try {
+                return KidAccountsClient.load();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final KidAccounts.Reply reply) {
+            if (reply == null || isFinishing() || isDestroyed()) {
+                return;
+            }
+            adapter.clear();
+            adapter.addAll(KidAccounts.allowedRecipients(reply));
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
+    }
+
+    private class SendMessageTask extends BackgroundTask<Void, MessageSendReply.Outcome> {
 
         private final String recipient;
         private String subject;
@@ -117,20 +156,18 @@ public class SendMessageActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected MessageSendReply.Outcome doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
                 String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
                 AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
-                String output = reply.body;
-
-                return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
+                return MessageSendReply.classify(reply.body, recipient);
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return false;
+                return MessageSendReply.Outcome.NO_SUCH_USER;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -146,12 +183,18 @@ public class SendMessageActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            if (success) {
+        protected void onPostExecute(final MessageSendReply.Outcome outcome) {
+            if (outcome == MessageSendReply.Outcome.SENT) {
                 PrefUtils.savePlayerToPrefs(SendMessageActivity.this, recipient);
                 finish();
             } else {
-                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(R.string.no_such_user));
+                int error = R.string.no_such_user;
+                if (outcome == MessageSendReply.Outcome.NOT_APPROVED) {
+                    error = R.string.kid_not_approved_recipient;
+                } else if (outcome == MessageSendReply.Outcome.IGNORED) {
+                    error = R.string.player_ignoring_messages;
+                }
+                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(error));
             }
         }
 

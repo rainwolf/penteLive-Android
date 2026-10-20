@@ -82,6 +82,12 @@
             android:name=".blocked.BlockedPlayersActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".kids.KidAccountsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".kids.KidDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".DatabaseActivity"
             android:screenOrientation="portrait" />
 

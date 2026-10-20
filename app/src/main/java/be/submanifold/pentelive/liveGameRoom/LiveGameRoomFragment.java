@@ -136,6 +136,9 @@ public class LiveGameRoomFragment extends Fragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             final EditText input = new EditText(activity);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
+            if (activity.tablesAndPlayers.isKid()) {
+                input.setHint(R.string.kid_chat_hint);
+            }
             builder.setView(input);
             builder.setPositiveButton(activity.getString(R.string.send), (dialog, which) -> {
                 String m_Text = input.getText().toString();

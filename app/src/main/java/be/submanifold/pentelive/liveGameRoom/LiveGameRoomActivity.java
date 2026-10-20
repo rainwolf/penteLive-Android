@@ -484,11 +484,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     boolean ignore = (boolean) data.get("ignore");
                                     if (toPlayer.equals(me)) {
                                         if (accepted) {
-                                            addTableMessage(tableId, "* " + getString(R.string.accepted_your_invitation, player) + ": \"" + responseText + "\"");
+                                            addTableMessage(tableId, "* " + getString(R.string.accepted_your_invitation, player) + KidLiveRoom.quotedSuffix(responseText));
                                         } else {
-                                            addTableMessage(tableId, "* " + getString(R.string.declined_your_invitation, player) + ": \"" + responseText + "\"");
+                                            addTableMessage(tableId, "* " + getString(R.string.declined_your_invitation, player) + KidLiveRoom.quotedSuffix(responseText));
                                             if (ignore) {
-                                                addTableMessage(tableId, "* " + getString(R.string.is_ignoring_your_invitation, player) + ": \"" + responseText + "\"");
+                                                addTableMessage(tableId, "* " + getString(R.string.is_ignoring_your_invitation, player) + KidLiveRoom.quotedSuffix(responseText));
                                             }
                                         }
                                     }
@@ -801,13 +801,21 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
             tableText.setText(getString(R.string.invites_you, gameStr));
 
             TextView invitationText = view.findViewById(R.id.invitationText);
-            invitationText.setText(getString(R.string.label_quoted, getString(R.string.message), inviteText));
+            if (inviteText == null || inviteText.isEmpty()) {
+                invitationText.setVisibility(View.GONE);
+            } else {
+                invitationText.setText(getString(R.string.label_quoted, getString(R.string.message), inviteText));
+            }
             final EditText replyText = view.findViewById(R.id.replyText);
             replyText.setInputType(InputType.TYPE_CLASS_TEXT);
+            final boolean kidMode = tablesAndPlayers.isKid();
+            if (kidMode) {
+                replyText.setVisibility(View.GONE);
+            }
 
             builder.setView(view);
             builder.setPositiveButton(getString(R.string.accept), (dialog, which) -> {
-                replyInvitation(player, replyText.getText().toString(), tableId, true, false);
+                replyInvitation(player, kidMode ? "" : replyText.getText().toString(), tableId, true, false);
                 LiveTableFragment fragment1 = (LiveTableFragment)
                         getSupportFragmentManager().findFragmentByTag("liveTable");
                 if (fragment1 != null) {
@@ -817,8 +825,8 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 }
                 sendEvent("{\"dsgJoinTableEvent\":{\"table\":" + tableId + ",\"time\":0}}");
             });
-            builder.setNeutralButton(getString(R.string.decline), (dialog, which) -> replyInvitation(player, replyText.getText().toString(), tableId, false, false));
-            builder.setNegativeButton(getString(R.string.ignore_invitations), (dialog, which) -> replyInvitation(player, replyText.getText().toString(), tableId, false, true));
+            builder.setNeutralButton(getString(R.string.decline), (dialog, which) -> replyInvitation(player, kidMode ? "" : replyText.getText().toString(), tableId, false, false));
+            builder.setNegativeButton(getString(R.string.ignore_invitations), (dialog, which) -> replyInvitation(player, kidMode ? "" : replyText.getText().toString(), tableId, false, true));
             AlertDialog dlg = builder.create();
             dlg.setCanceledOnTouchOutside(false);
             dlg.show();

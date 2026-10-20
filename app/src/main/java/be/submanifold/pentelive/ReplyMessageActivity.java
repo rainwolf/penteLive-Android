@@ -262,7 +262,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
         strBuilder.removeSpan(span);
     }
 
-    private class SendMessageTask extends BackgroundTask<Void, Boolean> {
+    private class SendMessageTask extends BackgroundTask<Void, MessageSendReply.Outcome> {
 
         private final String recipient;
         private String subject;
@@ -291,20 +291,18 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected MessageSendReply.Outcome doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
             try {
 //                String urlParameters  = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=";
                 String urlParameters = "command=create&to=" + recipient + "&subject=" + subject + "&body=" + message + "&mobile=" + "&replyTo=" + replyToMid;
                 AuthedHttp.Reply reply = AuthedHttp.shared().postForm("/gameServer/mymessages", urlParameters);
-                String output = reply.body;
-
-                return output.indexOf("Error: Player " + recipient + " not found.") <= -1;
+                return MessageSendReply.classify(reply.body, recipient);
 
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return false;
+                return MessageSendReply.Outcome.NO_SUCH_USER;
             }
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
@@ -320,12 +318,18 @@ public class ReplyMessageActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            if (success) {
+        protected void onPostExecute(final MessageSendReply.Outcome outcome) {
+            if (outcome == MessageSendReply.Outcome.SENT) {
                 PrefUtils.savePlayerToPrefs(ReplyMessageActivity.this, recipient);
                 finish();
             } else {
-                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(R.string.no_such_user));
+                int error = R.string.no_such_user;
+                if (outcome == MessageSendReply.Outcome.NOT_APPROVED) {
+                    error = R.string.kid_not_approved_recipient;
+                } else if (outcome == MessageSendReply.Outcome.IGNORED) {
+                    error = R.string.player_ignoring_messages;
+                }
+                ((AutoCompleteTextView) findViewById(R.id.recipient)).setError(getString(error));
             }
         }
 

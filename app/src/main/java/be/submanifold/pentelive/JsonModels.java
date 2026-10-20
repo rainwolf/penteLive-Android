@@ -38,7 +38,7 @@ public class JsonModels {
             public boolean dbAccess;
             public boolean emailMe;
             public int onlineFollowing;
-            public boolean personalizeAds;
+            public boolean personalizeAds; public Long parentPid;
         }
 
         public static class KothEntry {

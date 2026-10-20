@@ -74,6 +74,9 @@ public class BoardActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         messageView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.in_game_message, null, false);
+        if (PentePlayer.isKid()) {
+            ((EditText) messageView.findViewById(R.id.messageInput)).setHint(R.string.kid_chat_hint);
+        }
         messageIcon = (ImageView) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.message_icon, null);
         messageIcon.setImageTintList(Helpers.tintList(this));
         rotation = AnimationUtils.loadAnimation(BoardActivity.this, R.anim.rotation_animation);
