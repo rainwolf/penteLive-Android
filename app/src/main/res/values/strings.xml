@@ -662,6 +662,13 @@
     <string name="kid_copy_messages">Email me copies of private messages</string>
     <string name="kid_copy_live_chat">Email me live-room chat when my kid leaves</string>
     <string name="kid_copy_live_chat_note">Live-chat copies are skipped if the server can\'t store the chat.</string>
+    <string name="kid_copy_tb_messages">Turn-based game messages</string>
+    <string name="kid_tb_games">Active turn-based games</string>
+    <string name="kid_tb_games_none">No active turn-based games.</string>
+    <string name="kid_tb_games_error">Could not load games.</string>
+    <string name="kid_tb_game_title">%1$s against %2$s</string>
+    <string name="kid_tb_turn">%1$s\'s turn</string>
+    <string name="kid_tb_private">private</string>
     <string name="kid_set_password">Set password</string>
     <string name="kid_password_set">Password changed.</string>
     <string name="kid_release">Release kid account</string>
