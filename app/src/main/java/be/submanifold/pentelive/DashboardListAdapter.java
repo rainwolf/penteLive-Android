@@ -402,7 +402,7 @@ public class DashboardListAdapter extends BaseExpandableListAdapter {
         SpannableStringBuilder sb = NameStyle.colored(mainText, color);
         if (groupPosition == TOURNAMENTGROUP) {
             ForegroundColorSpan fcs = new ForegroundColorSpan(Color.GREEN);
-            if (tournament.getTournamentState().equals("2")) {
+            if (tournament.getTournamentState().equals("1") || tournament.getTournamentState().equals("2")) {
                 fcs = new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.orange));
             }
             sb.setSpan(fcs, 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
