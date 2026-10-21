@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import be.submanifold.pentelive.kids.KidAccounts.ActiveGame;
+import be.submanifold.pentelive.kids.KidAccounts.ActiveGamesReply;
 import be.submanifold.pentelive.kids.KidAccounts.Reply;
 
 import org.junit.Test;
@@ -93,5 +95,46 @@ public class KidAccountsTest {
     @Test
     public void allowedRecipients_null_isEmpty() {
         assertTrue(KidAccounts.allowedRecipients(null).isEmpty());
+    }
+
+    @Test public void parse_copyTbMessages() {
+        Reply r = KidAccounts.parse("{\"success\":true,\"kids\":[{\"kidPid\":5,\"name\":\"k\",\"copyMessages\":false,\"copyLiveChat\":false,\"copyTbMessages\":true}]}");
+        assertEquals(Boolean.TRUE, r.kids.get(0).copyTbMessages);
+    }
+    @Test public void parse_missingCopyTbMessages_isNull() {
+        Reply r = KidAccounts.parse("{\"success\":true,\"kids\":[{\"kidPid\":5,\"name\":\"k\"}]}");
+        assertNull(r.kids.get(0).copyTbMessages);
+    }
+    @Test public void settingsForm_tbOnly() {
+        assertEquals("action=settings&kidPid=5&copyTbMessages=Y", KidAccounts.settingsForm(5L, null, null, true));
+        assertEquals("action=settings&kidPid=5&copyTbMessages=N", KidAccounts.settingsForm(5L, null, null, false));
+        assertEquals("action=settings&kidPid=5&copyMessages=Y", KidAccounts.settingsForm(5L, true, null));
+    }
+    @Test public void parseActiveGames_contractSample() {
+        ActiveGamesReply r = KidAccounts.parseActiveGames("{\"success\":true,\"kidPid\":23000000012345,\"games\":[{\"gid\":50000000001234,\"game\":51,\"gameName\":\"Pente\",\"opponentPid\":23000000000777,\"opponentName\":\"graviton\",\"kidsTurn\":true,\"lastMoveDate\":1760882580000,\"privateGame\":true},{\"gid\":50000000001235,\"game\":53,\"gameName\":\"Keryo-Pente\",\"opponentPid\":23000000000777,\"opponentName\":\"graviton\",\"kidsTurn\":false,\"lastMoveDate\":0,\"privateGame\":false}]}");
+        assertEquals(23000000012345L, r.kidPid);
+        assertEquals(2, r.games.size());
+        ActiveGame g = r.games.get(0);
+        assertEquals(50000000001234L, g.gid); assertEquals(51, g.game); assertEquals("Pente", g.gameName);
+        assertEquals("graviton", g.opponentName); assertTrue(g.kidsTurn); assertEquals(1760882580000L, g.lastMoveDate); assertTrue(g.privateGame);
+        assertEquals(50000000001235L, r.games.get(1).gid); // server order kept
+    }
+    @Test public void parseActiveGames_emptyAndFailures() {
+        assertTrue(KidAccounts.parseActiveGames("{\"success\":true,\"kidPid\":5,\"games\":[]}").games.isEmpty());
+        assertNull(KidAccounts.parseActiveGames("{\"success\":false,\"error\":\"Kid not found\"}"));
+        assertNull(KidAccounts.parseActiveGames("<html>login</html>"));
+        assertNull(KidAccounts.parseActiveGames(null));
+    }
+    @Test public void parseActiveGames_missingGames_isEmpty() {
+        // an old server ignores action=activeGames and returns the plain GET body
+        assertTrue(KidAccounts.parseActiveGames("{\"success\":true,\"isKid\":false,\"kids\":[]}").games.isEmpty());
+    }
+    @Test public void activeGamesPath() {
+        assertEquals("/gameServer/kids?action=activeGames&kidPid=5", KidAccounts.activeGamesPath(5L));
+    }
+    @Test public void turnName() {
+        ActiveGame g = new ActiveGame(); g.opponentName = "graviton";
+        g.kidsTurn = true; assertEquals("kidstb1", KidAccounts.turnName(g, "kidstb1"));
+        g.kidsTurn = false; assertEquals("graviton", KidAccounts.turnName(g, "kidstb1"));
     }
 }

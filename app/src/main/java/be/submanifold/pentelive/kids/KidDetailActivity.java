@@ -1,9 +1,11 @@
 package be.submanifold.pentelive.kids;
 
 import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.submanifold.pentelive.BackgroundTask;
+import be.submanifold.pentelive.BoardActivity;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.NameStyle;
 import be.submanifold.pentelive.R;
@@ -55,10 +58,19 @@ public class KidDetailActivity extends AppCompatActivity {
     private SwitchCompat copyMessages;
     private SwitchCompat copyLiveChat;
     private TextView emptyText;
+    private SwitchCompat copyTbMessages;
+    private TextView activeGamesHeading;
+    private TextView activeGamesEmpty;
+    private RecyclerView activeGamesList;
     private RowAdapter adapter;
+    private final List<KidAccounts.ActiveGame> games = new ArrayList<>();
+    private GameAdapter gameAdapter;
+    private int loadSeq;
+    private boolean gamesPending;
 
     private CompoundButton.OnCheckedChangeListener messagesListener;
     private CompoundButton.OnCheckedChangeListener liveChatListener;
+    private CompoundButton.OnCheckedChangeListener tbListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +84,23 @@ public class KidDetailActivity extends AppCompatActivity {
         copyMessages = findViewById(R.id.copyMessagesSwitch);
         copyLiveChat = findViewById(R.id.copyLiveChatSwitch);
         emptyText = findViewById(R.id.emptyText);
-        messagesListener = (b, flag) -> toggle(copyMessages, messagesListener, flag, true);
-        liveChatListener = (b, flag) -> toggle(copyLiveChat, liveChatListener, flag, false);
+        copyTbMessages = findViewById(R.id.copyTbMessagesSwitch);
+        activeGamesHeading = findViewById(R.id.activeGamesHeading);
+        activeGamesEmpty = findViewById(R.id.activeGamesEmpty);
+        activeGamesList = findViewById(R.id.activeGamesList);
+        messagesListener = (b, flag) -> toggle(copyMessages, messagesListener, flag,
+                () -> KidAccountsClient.settings(kidPid, flag, null));
+        liveChatListener = (b, flag) -> toggle(copyLiveChat, liveChatListener, flag,
+                () -> KidAccountsClient.settings(kidPid, null, flag));
+        tbListener = (b, flag) -> toggle(copyTbMessages, tbListener, flag,
+                () -> KidAccountsClient.settings(kidPid, null, null, flag));
         copyMessages.setOnCheckedChangeListener(messagesListener);
         copyLiveChat.setOnCheckedChangeListener(liveChatListener);
+        copyTbMessages.setOnCheckedChangeListener(tbListener);
+
+        gameAdapter = new GameAdapter();
+        activeGamesList.setLayoutManager(new LinearLayoutManager(this));
+        activeGamesList.setAdapter(gameAdapter);
 
         findViewById(R.id.addApprovedButton).setOnClickListener(v -> showAddDialog());
         findViewById(R.id.setPasswordButton).setOnClickListener(v -> showPasswordDialog());
@@ -104,6 +129,7 @@ public class KidDetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
+        gamesPending = true;
         run(KidAccountsClient::load, false, null, 0);
     }
 
@@ -172,6 +198,19 @@ public class KidDetailActivity extends AppCompatActivity {
         toolbar.setTitle(kidName);
         setChecked(copyMessages, messagesListener, kid.copyMessages);
         setChecked(copyLiveChat, liveChatListener, kid.copyLiveChat);
+        if (kid.copyTbMessages == null) {
+            // Old server: no turn-based feature, and activeGames would read as an empty list.
+            copyTbMessages.setVisibility(View.GONE);
+            setGamesVisible(false);
+        } else {
+            copyTbMessages.setVisibility(View.VISIBLE);
+            setChecked(copyTbMessages, tbListener, kid.copyTbMessages);
+            setGamesVisible(true);
+            if (gamesPending) {
+                gamesPending = false;
+                loadActiveGames();
+            }
+        }
         approved.clear();
         if (kid.whitelist != null) {
             approved.addAll(kid.whitelist);
@@ -189,11 +228,56 @@ public class KidDetailActivity extends AppCompatActivity {
     }
 
     private void toggle(SwitchCompat s, CompoundButton.OnCheckedChangeListener l, boolean flag,
-                        boolean messages) {
-        run(() -> messages
-                        ? KidAccountsClient.settings(kidPid, flag, null)
-                        : KidAccountsClient.settings(kidPid, null, flag),
-                false, () -> setChecked(s, l, !flag), 0);
+                        Call call) {
+        run(call, false, () -> setChecked(s, l, !flag), 0);
+    }
+
+    private void setGamesVisible(boolean visible) {
+        int v = visible ? View.VISIBLE : View.GONE;
+        activeGamesHeading.setVisibility(v);
+        activeGamesList.setVisibility(v);
+        if (!visible) {
+            activeGamesEmpty.setVisibility(View.GONE);
+        }
+    }
+
+    /** Loads the kid's active turn-based games; a slower, older reply never overwrites a newer one. */
+    private void loadActiveGames() {
+        final int seq = ++loadSeq;
+        new BackgroundTask<Void, KidAccounts.ActiveGamesReply>() {
+            @Override
+            protected KidAccounts.ActiveGamesReply doInBackground(Void... params) {
+                try {
+                    return KidAccountsClient.activeGames(kidPid);
+                } catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(KidAccounts.ActiveGamesReply r) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                if (seq != loadSeq) {
+                    return;
+                }
+                games.clear();
+                if (r != null && r.games != null) {
+                    games.addAll(r.games);
+                }
+                gameAdapter.notifyDataSetChanged();
+                if (r == null || r.games == null) {
+                    activeGamesEmpty.setText(R.string.kid_tb_games_error);
+                    activeGamesEmpty.setVisibility(View.VISIBLE);
+                } else if (games.isEmpty()) {
+                    activeGamesEmpty.setText(R.string.kid_tb_games_none);
+                    activeGamesEmpty.setVisibility(View.VISIBLE);
+                } else {
+                    activeGamesEmpty.setVisibility(View.GONE);
+                }
+            }
+        }.execute();
     }
 
     private EditText field(int hintRes, boolean password) {
@@ -304,6 +388,49 @@ public class KidDetailActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return approved.size();
+        }
+    }
+
+    private final class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
+        final class Holder extends RecyclerView.ViewHolder {
+            final TextView title;
+            final TextView detail;
+
+            Holder(View v) {
+                super(v);
+                title = v.findViewById(R.id.gameTitle);
+                detail = v.findViewById(R.id.gameDetail);
+            }
+        }
+
+        @NonNull
+        @Override
+        public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new Holder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.kid_game_row, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull Holder h, int position) {
+            final KidAccounts.ActiveGame g = games.get(position);
+            h.title.setText(getString(R.string.kid_tb_game_title, g.gameName, g.opponentName));
+            StringBuilder detail = new StringBuilder(
+                    getString(R.string.kid_tb_turn, KidAccounts.turnName(g, kidName)));
+            if (g.lastMoveDate > 0) {
+                detail.append(" \u00b7 ").append(DateUtils.getRelativeTimeSpanString(g.lastMoveDate));
+            }
+            if (g.privateGame) {
+                detail.append(" \u00b7 ").append(getString(R.string.kid_tb_private));
+            }
+            h.detail.setText(detail);
+            h.itemView.setOnClickListener(v -> startActivity(
+                    new Intent(KidDetailActivity.this, BoardActivity.class)
+                            .putExtra("game", KidGames.readOnlyGame(g))));
+        }
+
+        @Override
+        public int getItemCount() {
+            return games.size();
         }
     }
 }

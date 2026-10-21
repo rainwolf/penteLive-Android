@@ -51,6 +51,40 @@
                 android:text="@string/kid_copy_live_chat_note"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/copyTbMessagesSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/kid_copy_tb_messages"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/activeGamesHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/kid_tb_games"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/activeGamesEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/kid_tb_games_none"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activeGamesList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

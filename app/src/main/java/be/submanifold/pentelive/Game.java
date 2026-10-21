@@ -378,16 +378,17 @@ public class Game implements Parcelable {
             String ratingStr = ctx.getString(R.string.rating),
                     timeStr = ctx.getString(R.string.remainingtime),
                     privateStr = mPrivateGame.contains("non") ? ctx.getString(R.string.non_private) : ctx.getString(R.string.private_str),
-                    thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
+                    thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr),
+                    timeSeg = getLocalizedTime() != null ? "<br>" + timeStr + " " + getLocalizedTime() : "";
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
                 String[] players = mOpponentName.split(" vs ");
                 mBoardString = "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[0]) + "\">" + players[0] + "</a> vs " +
                         "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[1]) + "\">" + players[1] + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
+                        + ", " + ratingStr + " " + mOpponentRating + timeSeg
                         + "<br>" + thisGame + "<br><br>";
             } else {
                 mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + mOpponentName) + "\">" + mOpponentName + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
+                        + ", " + ratingStr + " " + mOpponentRating + timeSeg
                         + "<br>" + thisGame + "<br><br>";
             }
         }
@@ -736,6 +737,14 @@ public class Game implements Parcelable {
         return 19;
     }
 
+    /** True only when {@code me} is one of the two players and the cancel request came from the other one. */
+    static boolean isCancelPromptFor(String cancelName, String p1Name, String p2Name, String me) {
+        if (cancelName == null || me == null) return false;
+        if (p1Name != null && p1Name.equalsIgnoreCase(me)) return cancelName.equals(p2Name);
+        if (p2Name != null && p2Name.equalsIgnoreCase(me)) return cancelName.equals(p1Name);
+        return false;
+    }
+
     public void parseGame(BoardView boardView) {
         if (mGameJson == null) {
             RetrieveGame getGameTask = new RetrieveGame(getGameID(), boardView);
@@ -846,7 +855,7 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (mGameJson.cancel != null && getOpponentName().equals(mGameJson.cancel.name)) {
+        if (mGameJson.cancel != null && isCancelPromptFor(mGameJson.cancel.name, p1Name, p2Name, PentePlayer.mPlayerName)) {
             final Activity host = (Activity) boardView.getContext();
             AlertDialog.Builder builder = new AlertDialog.Builder(host);
             builder.setTitle(host.getString(R.string.cancellation_requested));

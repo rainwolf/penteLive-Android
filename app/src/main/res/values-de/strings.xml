@@ -412,6 +412,13 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="kid_copy_messages">Kopien privater Nachrichten per E-Mail</string>
     <string name="kid_copy_live_chat">Live-Chat per E-Mail, wenn mein Kind den Raum verlässt</string>
     <string name="kid_copy_live_chat_note">Live-Chat-Kopien entfallen, wenn der Server den Chat nicht speichern kann.</string>
+    <string name="kid_copy_tb_messages">Nachrichten aus rundenbasierten Spielen</string>
+    <string name="kid_tb_games">Laufende rundenbasierte Spiele</string>
+    <string name="kid_tb_games_none">Keine laufenden rundenbasierten Spiele.</string>
+    <string name="kid_tb_games_error">Spiele konnten nicht geladen werden.</string>
+    <string name="kid_tb_game_title">%1$s gegen %2$s</string>
+    <string name="kid_tb_turn">%1$s ist am Zug</string>
+    <string name="kid_tb_private">privat</string>
     <string name="kid_set_password">Passwort setzen</string>
     <string name="kid_password_set">Passwort geändert.</string>
     <string name="kid_release">Kinderkonto auflösen</string>

@@ -34,11 +34,14 @@ public class KidDetailSourceTest {
         String layout = read(LAYOUT);
         for (String id : new String[] {"my_toolbar", "copyMessagesSwitch", "copyLiveChatSwitch",
                 "approvedList", "emptyText", "addApprovedButton", "setPasswordButton",
-                "releaseButton"}) {
+                "releaseButton", "copyTbMessagesSwitch", "activeGamesHeading", "activeGamesList",
+                "activeGamesEmpty"}) {
             assertTrue("missing id " + id, layout.contains("@+id/" + id + "\""));
         }
-        assertEquals(2, count(layout, "<androidx.appcompat.widget.SwitchCompat"));
+        assertEquals(3, count(layout, "<androidx.appcompat.widget.SwitchCompat"));
         assertTrue(layout.contains("@string/kid_copy_live_chat_note"));
+        assertTrue(layout.contains("@string/kid_copy_tb_messages"));
+        assertTrue(layout.contains("@string/kid_tb_games"));
     }
 
     @Test
@@ -59,6 +62,38 @@ public class KidDetailSourceTest {
         assertTrue(src.contains("R.string.kid_remove_approved_text"));
         assertTrue(src.contains("R.string.kid_release_text"));
         assertTrue(src.contains("R.string.try_again"));
+        assertTrue(src.contains("KidAccountsClient.settings(kidPid, null, null, flag)"));
+        assertTrue(src.contains("KidAccountsClient.activeGames(kidPid)"));
+        assertTrue(src.contains("KidGames.readOnlyGame("));
+        assertTrue(src.contains("BoardActivity.class"));
+        assertTrue(src.contains("kid.copyTbMessages == null"));
+        assertTrue(src.contains("seq != loadSeq"));
+    }
+
+    @Test
+    public void activeGamesHiddenWithoutServerSupport() throws IOException {
+        String src = read(ACTIVITY);
+        int i = src.indexOf("kid.copyTbMessages == null");
+        assertTrue(i >= 0);
+        String branch = src.substring(i, src.indexOf("} else {", i));
+        assertTrue(branch.contains("setGamesVisible(false)"));
+        assertTrue(!branch.contains("loadActiveGames()"));
+        assertEquals(5, count(read(LAYOUT), "android:visibility=\"gone\""));
+    }
+
+    @Test
+    public void activeGamesFailureShowsInlineError() throws IOException {
+        String src = read(ACTIVITY);
+        assertTrue(src.contains("R.string.kid_tb_games_error"));
+        assertTrue(src.contains("R.string.kid_tb_games_none"));
+    }
+
+    @Test
+    public void tbToggleLabelIsVerbatim() throws IOException {
+        assertTrue(read("src/main/res/values/strings.xml").contains(
+                "<string name=\"kid_copy_tb_messages\">Turn-based game messages</string>"));
+        assertTrue(read("src/main/res/values-de/strings.xml").contains(
+                "name=\"kid_copy_tb_messages\""));
     }
 
     /** German "freigeben" means approve (kid_add_approved); release must use a different verb. */

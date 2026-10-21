@@ -47,7 +47,22 @@ public final class KidAccountsClient {
 
     public static KidAccounts.Reply settings(long kidPid, Boolean copyMessages, Boolean copyLiveChat)
             throws IOException {
-        return result(post(KidAccounts.settingsForm(kidPid, copyMessages, copyLiveChat)));
+        return settings(kidPid, copyMessages, copyLiveChat, null);
+    }
+
+    public static KidAccounts.Reply settings(long kidPid, Boolean copyMessages, Boolean copyLiveChat,
+            Boolean copyTbMessages) throws IOException {
+        return result(post(KidAccounts.settingsForm(kidPid, copyMessages, copyLiveChat, copyTbMessages)));
+    }
+
+    public static KidAccounts.ActiveGamesReply activeGames(long kidPid) throws IOException {
+        AuthedHttp.Reply reply = AuthedHttp.shared().getAllowingErrors(KidAccounts.activeGamesPath(kidPid));
+        KidAccounts.ActiveGamesReply parsed = reply.code == 200 ? KidAccounts.parseActiveGames(reply.body) : null;
+        if (parsed == null) {
+            RedactingLog.e(TAG, "kids activeGames failed, response code " + reply.code, null);
+            throw new Failure(KidAccounts.parseError(reply.body));
+        }
+        return parsed;
     }
 
     public static KidAccounts.Reply release(long kidPid) throws IOException {
