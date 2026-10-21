@@ -32,7 +32,27 @@ public final class KidAccounts {
         public String name;
         public boolean copyMessages;
         public boolean copyLiveChat;
+        /** Boxed: a missing field stays null, meaning the server lacks the feature (switch hidden). */
+        public Boolean copyTbMessages;
         public List<Player> whitelist;
+    }
+
+    public static final class ActiveGame {
+        public long gid;
+        public int game;
+        public String gameName;
+        public long opponentPid;
+        public String opponentName;
+        public boolean kidsTurn;
+        public long lastMoveDate;
+        public boolean privateGame;
+    }
+
+    public static final class ActiveGamesReply {
+        public boolean success;
+        public String error;
+        public long kidPid;
+        public List<ActiveGame> games;
     }
 
     public static final class Reply {
@@ -75,6 +95,38 @@ public final class KidAccounts {
             }
         }
         return r;
+    }
+
+    /**
+     * The active-games reply, or null for null, non-JSON or success:false bodies.
+     * A missing games list becomes empty; the server's order is kept.
+     */
+    public static ActiveGamesReply parseActiveGames(String body) {
+        if (body == null) {
+            return null;
+        }
+        ActiveGamesReply r;
+        try {
+            r = Json.GSON.fromJson(body, ActiveGamesReply.class);
+        } catch (JsonParseException e) {
+            return null;
+        }
+        if (r == null || !r.success) {
+            return null;
+        }
+        if (r.games == null) {
+            r.games = new ArrayList<>();
+        }
+        return r;
+    }
+
+    public static String activeGamesPath(long kidPid) {
+        return "/gameServer/kids?action=activeGames&kidPid=" + kidPid;
+    }
+
+    /** Whose turn it is: the kid's name when it is the kid's turn, else the opponent's. */
+    public static String turnName(ActiveGame g, String kidName) {
+        return g.kidsTurn ? kidName : g.opponentName;
     }
 
     /** The server's error message, or null when absent or the body is not JSON. */
@@ -139,6 +191,12 @@ public final class KidAccounts {
 
     /** A null flag is omitted; true and false become Y and N. */
     public static String settingsForm(long kidPid, Boolean copyMessages, Boolean copyLiveChat) {
+        return settingsForm(kidPid, copyMessages, copyLiveChat, null);
+    }
+
+    /** As the 3-arg form, plus copyTbMessages after the other two when non-null. */
+    public static String settingsForm(long kidPid, Boolean copyMessages, Boolean copyLiveChat,
+            Boolean copyTbMessages) {
         List<String> kv = new ArrayList<>();
         kv.add("action");
         kv.add("settings");
@@ -151,6 +209,10 @@ public final class KidAccounts {
         if (copyLiveChat != null) {
             kv.add("copyLiveChat");
             kv.add(copyLiveChat ? "Y" : "N");
+        }
+        if (copyTbMessages != null) {
+            kv.add("copyTbMessages");
+            kv.add(copyTbMessages ? "Y" : "N");
         }
         return form(kv.toArray(new String[0]));
     }
