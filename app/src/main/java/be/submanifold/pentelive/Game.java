@@ -378,16 +378,17 @@ public class Game implements Parcelable {
             String ratingStr = ctx.getString(R.string.rating),
                     timeStr = ctx.getString(R.string.remainingtime),
                     privateStr = mPrivateGame.contains("non") ? ctx.getString(R.string.non_private) : ctx.getString(R.string.private_str),
-                    thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr);
+                    thisGame = ctx.getString(R.string.this_is_a_rated_and_private_game, getLocalizedRatedNot(), privateStr),
+                    timeSeg = getLocalizedTime() != null ? "<br>" + timeStr + " " + getLocalizedTime() : "";
             if (mOpponentName != null && mOpponentName.contains(" vs ")) {
                 String[] players = mOpponentName.split(" vs ");
                 mBoardString = "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[0]) + "\">" + players[0] + "</a> vs " +
                         "<a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + players[1]) + "\">" + players[1] + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
+                        + ", " + ratingStr + " " + mOpponentRating + timeSeg
                         + "<br>" + thisGame + "<br><br>";
             } else {
                 mBoardString = ctx.getString(R.string.opponent) + ": <a href=\"" + PenteUrls.web("/gameServer/profile?viewName=" + mOpponentName) + "\">" + mOpponentName + "</a>"
-                        + ", " + ratingStr + " " + mOpponentRating + "<br>" + timeStr + " " + getLocalizedTime()
+                        + ", " + ratingStr + " " + mOpponentRating + timeSeg
                         + "<br>" + thisGame + "<br><br>";
             }
         }
