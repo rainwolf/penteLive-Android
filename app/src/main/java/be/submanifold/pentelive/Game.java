@@ -736,6 +736,14 @@ public class Game implements Parcelable {
         return 19;
     }
 
+    /** True only when {@code me} is one of the two players and the cancel request came from the other one. */
+    static boolean isCancelPromptFor(String cancelName, String p1Name, String p2Name, String me) {
+        if (cancelName == null || me == null) return false;
+        if (p1Name != null && p1Name.equalsIgnoreCase(me)) return cancelName.equals(p2Name);
+        if (p2Name != null && p2Name.equalsIgnoreCase(me)) return cancelName.equals(p1Name);
+        return false;
+    }
+
     public void parseGame(BoardView boardView) {
         if (mGameJson == null) {
             RetrieveGame getGameTask = new RetrieveGame(getGameID(), boardView);
@@ -846,7 +854,7 @@ public class Game implements Parcelable {
                 }
             }
         }
-        if (mGameJson.cancel != null && getOpponentName().equals(mGameJson.cancel.name)) {
+        if (mGameJson.cancel != null && isCancelPromptFor(mGameJson.cancel.name, p1Name, p2Name, PentePlayer.mPlayerName)) {
             final Activity host = (Activity) boardView.getContext();
             AlertDialog.Builder builder = new AlertDialog.Builder(host);
             builder.setTitle(host.getString(R.string.cancellation_requested));
