@@ -94,6 +94,9 @@ public class LoginActivity extends AppCompatActivity
 
         findViewById(R.id.facebookButton).setOnClickListener(v -> {
             Uri uri = Uri.parse("https://www.facebook.com/pente.org");
+            if (!LinkOpener.allowExternal(this, uri.toString())) {
+                return;
+            }
             try {
                 ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo("com.facebook.katana", 0);
                 if (applicationInfo.enabled) {
@@ -107,19 +110,13 @@ public class LoginActivity extends AppCompatActivity
         });
 
         findViewById(R.id.rulesButton).setOnClickListener(v -> {
-            Uri uri = Uri.parse("https://www.pente.org/help/playGameRulesMobile.jsp"); // missing 'http://' will cause crashed
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
+            LinkOpener.openExternal(this, "https://www.pente.org/help/playGameRulesMobile.jsp");
         });
         findViewById(R.id.privacyButton).setOnClickListener(v -> {
-            Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
+            LinkOpener.openExternal(this, "https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
         });
         findViewById(R.id.forgot_password_button).setOnClickListener(v -> {
-            Uri uri = Uri.parse("https://www.pente.org/gameServer/forgotpassword.jsp");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
+            LinkOpener.openExternal(this, "https://www.pente.org/gameServer/forgotpassword.jsp");
         });
 
 
@@ -176,6 +173,9 @@ public class LoginActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        // The login screen always counts as "not known non-kid" for outside-link gating,
+        // even when reached by back navigation with a session still set.
+        PentePlayer.kidStatusKnown = false;
         MyApplication.activityResumed(this);
         if (PrefUtils.getBooleanFromPrefs(LoginActivity.this, PrefUtils.PREFS_REGISTRATIONSUCCESSFUL_KEY, false)) {
             findViewById(R.id.registerLayout).setVisibility(View.GONE);

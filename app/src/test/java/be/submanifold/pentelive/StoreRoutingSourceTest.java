@@ -51,8 +51,8 @@ public class StoreRoutingSourceTest {
         String source = read(JAVA + "WebViewActivity.java");
         // Initial url, shouldOverrideUrlLoading (GET links) and shouldInterceptRequest (POSTs).
         assertEquals(3, count(source, "SubscriptionLinks.isSubscriptionPage("));
-        assertEquals(3, count(source, "StoreActivity.class"));
-        assertEquals(1, count(source, "SubscriptionLinks.isPayPal("));
+        assertEquals(4, count(source, "StoreActivity.class")); // +1: PayPal GET link in shouldOverrideUrlLoading
+        assertEquals(3, count(source, "SubscriptionLinks.isPayPal(")); // intercept check, skip-policy guard, GET link
     }
 
     @Test

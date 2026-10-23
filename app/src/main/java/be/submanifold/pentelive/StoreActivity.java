@@ -220,16 +220,10 @@ public class StoreActivity extends AppCompatActivity {
     }
 
     private void openExternal(String url) {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-        } catch (ActivityNotFoundException e) {
-            RedactingLog.e(TAG, "no app opens " + url, e);
-        }
+        LinkOpener.openExternal(this, url);
     }
 
     private void openInApp(String url) {
-        Intent intent = new Intent(this, WebViewActivity.class);
-        intent.putExtra("url", url);
-        startActivity(intent);
+        LinkOpener.open(this, url);
     }
 }

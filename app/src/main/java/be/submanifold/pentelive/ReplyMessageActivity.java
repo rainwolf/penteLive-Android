@@ -252,9 +252,7 @@ public class ReplyMessageActivity extends AppCompatActivity {
                     intent.putExtra("gameType", url.substring(url.indexOf("game=") + 5, url.indexOf("game=") + 7));
                     startActivity(intent);
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                    intent.putExtra("url", url);
-                    startActivity(intent);
+                    LinkOpener.open(ReplyMessageActivity.this, url);
                 }
             }
         };
