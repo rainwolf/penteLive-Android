@@ -48,6 +48,13 @@ public class WebViewActivity extends AppCompatActivity {
                 @Override
                 public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
+                    if (request.isForMainFrame() && !SubscriptionLinks.isPayPal(url)
+                            && LinkOpener.decide(url) != LinkPolicy.Action.IN_APP) {
+                        // PayPal falls through to the StoreActivity path below, never the browser.
+                        // Covers POST/form navigations that skip shouldOverrideUrlLoading.
+                        handOff(url);
+                        return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(new byte[0]));
+                    }
                     if (!SubscriptionLinks.isSubscriptionPage(url, serverHost()) && !SubscriptionLinks.isPayPal(url)) {
                         return super.shouldInterceptRequest(view, request);
                     }
@@ -64,6 +71,19 @@ public class WebViewActivity extends AppCompatActivity {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
+                    if (SubscriptionLinks.isPayPal(url)) {
+                        // The app never opens PayPal; send the user to Play Billing instead.
+                        startActivity(new Intent(WebViewActivity.this, StoreActivity.class));
+                        return true;
+                    }
+                    if (LinkOpener.decide(url) != LinkPolicy.Action.IN_APP) {
+                        // Subframes (ad iframes) only count when the user tapped; else let them load.
+                        if (!request.isForMainFrame() && !request.hasGesture()) {
+                            return false;
+                        }
+                        handOff(url);
+                        return true;
+                    }
                     if (SubscriptionLinks.isSubscriptionPage(url, serverHost())) {
                         startActivity(new Intent(WebViewActivity.this, StoreActivity.class));
                         return true;
@@ -99,6 +119,8 @@ public class WebViewActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            webview.getSettings().setAllowFileAccess(false);
+            webview.getSettings().setAllowContentAccess(false);
             webview.getSettings().setJavaScriptEnabled(true);
             webview.getSettings().setBuiltInZoomControls(true);
             webview.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
@@ -115,6 +137,11 @@ public class WebViewActivity extends AppCompatActivity {
             }
             if (SubscriptionLinks.isSubscriptionPage(urlStr, serverHost())) {
                 startActivity(new Intent(this, StoreActivity.class));
+                finish();
+                return;
+            }
+            if (LinkOpener.decide(urlStr) != LinkPolicy.Action.IN_APP) {
+                LinkOpener.openExternal(this, urlStr);
                 finish();
                 return;
             }
@@ -143,6 +170,15 @@ public class WebViewActivity extends AppCompatActivity {
             setEnabled(true);
         }
     };
+
+    /** A navigation the web view may not make: system browser, or blocked (kids, bad scheme). Any thread. */
+    private void handOff(String url) {
+        mainHandler.post(() -> {
+            if (!isFinishing() && !isDestroyed() && LinkOpener.decide(url) != LinkPolicy.Action.BLOCKED) {
+                LinkOpener.openExternal(this, url);
+            }
+        });
+    }
 
     /** Host of the configured server: www.pente.org, or 10.0.2.2 in development builds. */
     private static String serverHost() {

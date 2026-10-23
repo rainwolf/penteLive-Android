@@ -626,9 +626,7 @@ public class DBBoardView extends View {
                     getContext().startActivity(intent);
                     return;
                 }
-                Intent intent = new Intent(getContext(), WebViewActivity.class);
-                intent.putExtra("url", url);
-                getContext().startActivity(intent);
+                LinkOpener.open(getContext(), url);
             }
         };
         strBuilder.setSpan(clickable, start, end, flags);

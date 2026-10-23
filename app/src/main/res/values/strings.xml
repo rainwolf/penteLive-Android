@@ -117,6 +117,7 @@
     <string name="username_taken">The username %1$s is already taken, please choose another.</string>
     <string name="enter_subject">Please enter a subject.</string>
     <string name="no_such_user">username does not exist</string>
+    <string name="links_blocked_kid">Links outside pente.org are not available on kid accounts.</string>
     <string name="kid_not_approved_recipient">You can only send messages to players your parent approved.</string>
     <string name="player_ignoring_messages">Player is ignoring your messages.</string>
     <string name="enter_recipient">Please enter a recipient.</string>

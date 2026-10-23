@@ -21,9 +21,7 @@ public class GDPRActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
 
         findViewById(R.id.privacyButton).setOnClickListener(view -> {
-            Uri uri = Uri.parse("https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
+            LinkOpener.openExternal(this, "https://www.pente.org/help/helpWindow.jsp?file=privacyPolicy");
         });
         findViewById(R.id.acceptTermsButton).setOnClickListener(view -> {
             PrefUtils.saveBooleanToPrefs(GDPRActivity.this, PrefUtils.PREFS_GDPR_KEY, true);

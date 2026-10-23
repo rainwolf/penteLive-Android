@@ -42,6 +42,18 @@ public class PentePlayer implements Parcelable {
     public static Boolean mSubscriber = false;
     public static Long parentPid = null;
     public static boolean isKid() { return parentPid != null; }
+    /** True once the dashboard JSON for the current login has set {@link #parentPid} (or null for adults). */
+    public static boolean kidStatusKnown = false;
+
+    /**
+     * Single source for outside-link gating: anyone not positively known to be a logged-in
+     * non-kid (logged out, login screen, or status not loaded yet) is treated as a kid.
+     */
+    public static boolean shouldTreatAsKid() {
+        boolean loggedIn = mPlayerName != null && !mPlayerName.isEmpty()
+                && mPassword != null && !mPassword.isEmpty();
+        return LinkPolicy.shouldTreatAsKid(loggedIn, kidStatusKnown, isKid());
+    }
     public static Boolean dbAccess = false;
     private List<Game> mInvitations;
     private List<Game> mSentInvitations;
@@ -102,6 +114,7 @@ public class PentePlayer implements Parcelable {
         emailMe = true;
         personalizeAds = false;
         parentPid = null;
+        kidStatusKnown = false;
         pendingAvatarChecks = new ArrayList<String>();
         avatars = new HashMap<String, Bitmap>();
         myColor = 0;
@@ -195,6 +208,7 @@ public class PentePlayer implements Parcelable {
         this.onlineFollowingers = json.player.onlineFollowing;
         personalizeAds = json.player.personalizeAds;
         parentPid = json.player.parentPid;
+        kidStatusKnown = true;
         PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
 
         // King of the Hill
@@ -502,6 +516,7 @@ public class PentePlayer implements Parcelable {
         tbHills = in.readInt();
         long kidParent = in.readLong();
         parentPid = kidParent == 0L ? null : kidParent;
+        kidStatusKnown = in.readByte() == 0x01;
     }
 
     @Override
@@ -610,6 +625,7 @@ public class PentePlayer implements Parcelable {
         dest.writeInt(tbRatings);
         dest.writeInt(tbHills);
         dest.writeLong(parentPid == null ? 0L : parentPid);
+        dest.writeByte((byte) (kidStatusKnown ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")
@@ -707,6 +723,10 @@ public class PentePlayer implements Parcelable {
                     return false;
                 }
 
+                // A late response for a previous account must not overwrite the current login's state.
+                if (!mUsername.equals(mPlayerName)) {
+                    return false;
+                }
                 populateFromJson(json);
 
             } catch (IOException e1) {

@@ -1106,9 +1106,7 @@ public class BoardView extends View {
             public void onClick(View view) {
 
                 String url = span.getURL();
-                Intent intent = new Intent(getContext(), WebViewActivity.class);
-                intent.putExtra("url", url);
-                getContext().startActivity(intent);
+                LinkOpener.open(getContext(), url);
             }
         };
         strBuilder.setSpan(clickable, start, end, flags);
