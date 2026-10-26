@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.kids;
 
+import be.submanifold.pente.rules.Variants;
 import be.submanifold.pentelive.net.Forms;
 import be.submanifold.pentelive.net.Json;
 
@@ -117,6 +118,18 @@ public final class KidAccounts {
         if (r.games == null) {
             r.games = new ArrayList<>();
         }
+        // Skip games this app does not know (e.g. experimental ids): prefer the integer id, else the name.
+        List<ActiveGame> known = new ArrayList<>();
+        for (ActiveGame g : r.games) {
+            if (g == null) {
+                continue;
+            }
+            boolean ok = g.game != 0 ? Variants.isKnownGameId(g.game) : Variants.isKnownGameType(g.gameName);
+            if (ok) {
+                known.add(g);
+            }
+        }
+        r.games = known;
         return r;
     }
 

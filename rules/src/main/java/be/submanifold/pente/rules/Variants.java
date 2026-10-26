@@ -93,6 +93,53 @@ public final class Variants {
         return BY_CANONICAL_ID.get(canonical);
     }
 
+    /**
+     * True when the app knows this server game id: live ids 1..32 (even = Speed
+     * sibling) and turn-based ids 51..82 (live id + 50). Anything else (0, new
+     * experimental ids such as 33/34 or 83/84) is unknown and callers skip it.
+     */
+    public static boolean isKnownGameId(int gameId) {
+        int live = gameId > 50 ? gameId - 50 : gameId;
+        if (live < 1) {
+            return false;
+        }
+        int canonical = (live % 2 == 0) ? live - 1 : live;
+        return BY_CANONICAL_ID.containsKey(canonical);
+    }
+
+    /**
+     * True when the label is exactly a known server game name, optionally with
+     * the "Speed " prefix. Unlike {@link #fromGameType} this is strict: it does
+     * not substring-match, so an unknown "Foo-Pente" is not treated as Pente.
+     */
+    public static boolean isKnownGameType(String gameType) {
+        if (gameType == null) {
+            return false;
+        }
+        String base = gameType.startsWith("Speed ") ? gameType.substring(6) : gameType;
+        switch (base) {
+            case "Pente":
+            case "Keryo-Pente":
+            case "Gomoku":
+            case "D-Pente":
+            case "G-Pente":
+            case "Poof-Pente":
+            case "Connect6":
+            case "Boat-Pente":
+            case "DK-Pente":
+            case "Go":
+            case "Go (9x9)":
+            case "Go (13x13)":
+            case "O-Pente":
+            case "Swap2-Pente":
+            case "Swap2-Keryo":
+            case "Renju":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static int gridSize(Variant v) {
         if (v == null) throw new IllegalArgumentException("Variant must not be null");
         return v.gridSize;

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import be.submanifold.pente.rules.Variants;
 import be.submanifold.pentelive.net.AuthedHttp;
 import be.submanifold.pentelive.net.Forms;
 
@@ -191,6 +192,141 @@ public class PentePlayer implements Parcelable {
         return serverColor != null ? serverColor : "";
     }
 
+    // package-private for unit tests; items with an unknown game id/name are skipped
+    void populateGameLists(JsonModels.IndexResponse json) {
+        // King of the Hill
+        List<KingOfTheHill> newKOTH = new ArrayList<>();
+        tbHills = 0;
+        if (json.kingOfTheHill != null) {
+            for (JsonModels.IndexResponse.KothEntry entry : json.kingOfTheHill) {
+                if (!Variants.isKnownGameId(entry.gameId)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                KingOfTheHill hill = new KingOfTheHill("", String.valueOf(entry.numPlayers),
+                        entry.kingName, entry.amIMember, entry.iAmKing, entry.canChallenge,
+                        String.valueOf(entry.gameId));
+                if (hill.getGameId() > 50) {
+                    tbHills += 1;
+                }
+                newKOTH.add(hill);
+            }
+        }
+        this.mHills = newKOTH;
+
+        // Rating Stats
+        this.mRatingStats.clear();
+        tbRatings = 0;
+        if (json.ratingStats != null) {
+            for (JsonModels.IndexResponse.RatingStatEntry entry : json.ratingStats) {
+                if (!Variants.isKnownGameId(entry.gameId)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                RatingStat ratingStat = new RatingStat(entry.gameName, String.valueOf(entry.rating),
+                        entry.lastGameDate, String.valueOf(entry.totalGames),
+                        String.valueOf(entry.tourneyWinner), String.valueOf(entry.gameId));
+                if (ratingStat.getGameId() > 50) {
+                    tbRatings += 1;
+                }
+                this.mRatingStats.add(ratingStat);
+            }
+        }
+
+        // Invitations received
+        List<Game> newInvitations = new ArrayList<>();
+        if (json.invitationsReceived != null) {
+            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsReceived) {
+                if (!Variants.isKnownGameType(entry.gameName)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
+                newInvitations.add(game);
+            }
+        }
+        this.mInvitations = newInvitations;
+
+        // Invitations sent
+        List<Game> newSentInvitations = new ArrayList<>();
+        if (json.invitationsSent != null) {
+            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsSent) {
+                if (!Variants.isKnownGameType(entry.gameName)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
+                newSentInvitations.add(game);
+            }
+        }
+        this.mSentInvitations = newSentInvitations;
+
+        // Active games - my turn
+        List<Game> newActive = new ArrayList<>();
+        if (json.activeGamesMyTurn != null) {
+            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesMyTurn) {
+                if (!Variants.isKnownGameType(entry.gameName)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
+                        entry.timeLeft, entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
+                newActive.add(game);
+            }
+        }
+        this.mActiveGames = newActive;
+
+        // Active games - opponent's turn
+        List<Game> newNonActive = new ArrayList<>();
+        if (json.activeGamesOpponentTurn != null) {
+            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesOpponentTurn) {
+                if (!Variants.isKnownGameType(entry.gameName)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
+                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
+                        entry.timeLeft, entry.rated, null,
+                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
+                newNonActive.add(game);
+            }
+        }
+        this.mNonActiveGames = newNonActive;
+
+        // Open invitation games
+        List<Game> newPublic = new ArrayList<>();
+        if (json.openInvitationGames != null) {
+            for (JsonModels.IndexResponse.OpenInvitationEntry entry : json.openInvitationGames) {
+                if (!Variants.isKnownGameType(entry.gameName)) {
+                    continue; // unknown/experimental game: skip, keep the rest
+                }
+                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
+                        entry.inviterName, String.valueOf(entry.inviterRating), parseStoneColor(entry.color),
+                        String.valueOf(entry.daysPerMove), entry.rated, null,
+                        String.valueOf(entry.inviterColor), String.valueOf(entry.inviterTourneyWinner));
+                if (loadAvatars && game.getNameColor() != 0) {
+                    addUserAvatar(game.getOpponentName());
+                }
+                newPublic.add(game);
+            }
+        }
+        this.mPublicInvitations = newPublic;
+    }
+
     private void populateFromJson(JsonModels.IndexResponse json) {
         if (json == null || json.player == null) {
             return;
@@ -211,116 +347,7 @@ public class PentePlayer implements Parcelable {
         kidStatusKnown = true;
         PrefUtils.saveBooleanToPrefs(MyApplication.getContext(), PrefUtils.PREFS_PERSONALIZEDADS_KEY, personalizeAds);
 
-        // King of the Hill
-        List<KingOfTheHill> newKOTH = new ArrayList<>();
-        tbHills = 0;
-        if (json.kingOfTheHill != null) {
-            for (JsonModels.IndexResponse.KothEntry entry : json.kingOfTheHill) {
-                KingOfTheHill hill = new KingOfTheHill("", String.valueOf(entry.numPlayers),
-                        entry.kingName, entry.amIMember, entry.iAmKing, entry.canChallenge,
-                        String.valueOf(entry.gameId));
-                if (hill.getGameId() > 50) {
-                    tbHills += 1;
-                }
-                newKOTH.add(hill);
-            }
-        }
-        this.mHills = newKOTH;
-
-        // Rating Stats
-        this.mRatingStats.clear();
-        tbRatings = 0;
-        if (json.ratingStats != null) {
-            for (JsonModels.IndexResponse.RatingStatEntry entry : json.ratingStats) {
-                RatingStat ratingStat = new RatingStat(entry.gameName, String.valueOf(entry.rating),
-                        entry.lastGameDate, String.valueOf(entry.totalGames),
-                        String.valueOf(entry.tourneyWinner), String.valueOf(entry.gameId));
-                if (ratingStat.getGameId() > 50) {
-                    tbRatings += 1;
-                }
-                this.mRatingStats.add(ratingStat);
-            }
-        }
-
-        // Invitations received
-        List<Game> newInvitations = new ArrayList<>();
-        if (json.invitationsReceived != null) {
-            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsReceived) {
-                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
-                        String.valueOf(entry.daysPerMove), entry.rated, null,
-                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
-                if (loadAvatars && game.getNameColor() != 0) {
-                    addUserAvatar(game.getOpponentName());
-                }
-                newInvitations.add(game);
-            }
-        }
-        this.mInvitations = newInvitations;
-
-        // Invitations sent
-        List<Game> newSentInvitations = new ArrayList<>();
-        if (json.invitationsSent != null) {
-            for (JsonModels.IndexResponse.InvitationEntry entry : json.invitationsSent) {
-                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
-                        String.valueOf(entry.daysPerMove), entry.rated, null,
-                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
-                if (loadAvatars && game.getNameColor() != 0) {
-                    addUserAvatar(game.getOpponentName());
-                }
-                newSentInvitations.add(game);
-            }
-        }
-        this.mSentInvitations = newSentInvitations;
-
-        // Active games - my turn
-        List<Game> newActive = new ArrayList<>();
-        if (json.activeGamesMyTurn != null) {
-            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesMyTurn) {
-                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
-                        entry.timeLeft, entry.rated, null,
-                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
-                if (loadAvatars && game.getNameColor() != 0) {
-                    addUserAvatar(game.getOpponentName());
-                }
-                newActive.add(game);
-            }
-        }
-        this.mActiveGames = newActive;
-
-        // Active games - opponent's turn
-        List<Game> newNonActive = new ArrayList<>();
-        if (json.activeGamesOpponentTurn != null) {
-            for (JsonModels.IndexResponse.GameEntry entry : json.activeGamesOpponentTurn) {
-                Game game = new Game(String.valueOf(entry.gid), null, entry.gameName,
-                        entry.opponentName, String.valueOf(entry.opponentRating), parseStoneColor(entry.color),
-                        entry.timeLeft, entry.rated, null,
-                        String.valueOf(entry.opponentColor), String.valueOf(entry.opponentTourneyWinner));
-                if (loadAvatars && game.getNameColor() != 0) {
-                    addUserAvatar(game.getOpponentName());
-                }
-                newNonActive.add(game);
-            }
-        }
-        this.mNonActiveGames = newNonActive;
-
-        // Open invitation games
-        List<Game> newPublic = new ArrayList<>();
-        if (json.openInvitationGames != null) {
-            for (JsonModels.IndexResponse.OpenInvitationEntry entry : json.openInvitationGames) {
-                Game game = new Game(String.valueOf(entry.setId), null, entry.gameName,
-                        entry.inviterName, String.valueOf(entry.inviterRating), parseStoneColor(entry.color),
-                        String.valueOf(entry.daysPerMove), entry.rated, null,
-                        String.valueOf(entry.inviterColor), String.valueOf(entry.inviterTourneyWinner));
-                if (loadAvatars && game.getNameColor() != 0) {
-                    addUserAvatar(game.getOpponentName());
-                }
-                newPublic.add(game);
-            }
-        }
-        this.mPublicInvitations = newPublic;
+        populateGameLists(json);
 
         // Messages
         List<Message> newMessages = new ArrayList<>();

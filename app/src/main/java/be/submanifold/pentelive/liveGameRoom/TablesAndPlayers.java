@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import be.submanifold.pente.rules.Variants;
 import be.submanifold.pentelive.MyApplication;
 import be.submanifold.pentelive.PrefUtils;
 import be.submanifold.pentelive.R;
@@ -19,10 +20,23 @@ import be.submanifold.pentelive.R;
 public class TablesAndPlayers {
     public Map<String, LivePlayer> players = new HashMap<>();
     public Map<Integer, Table> tables = new HashMap<>();
+    // Tables whose game this app does not know (e.g. beta-only games). They are kept out of
+    // {@link #tables} (so lists, moves, timers etc. never see them) but their membership (players,
+    // owner, seats) is still tracked, so the table is complete again if it returns to a known game.
+    private final Map<Integer, Table> hiddenTables = new HashMap<>();
     public String mainRoomText = "";
     private final Context ctx = MyApplication.getContext();
 
-    private String me = PrefUtils.getFromPrefs(ctx, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT);
+    private String me;
+
+    public TablesAndPlayers() {
+        this(PrefUtils.getFromPrefs(MyApplication.getContext(), PrefUtils.PREFS_LOGIN_USERNAME_KEY, "guest").toLowerCase(java.util.Locale.ROOT));
+    }
+
+    // package-private for unit tests (no Android prefs available there)
+    TablesAndPlayers(String me) {
+        this.me = me;
+    }
 
     public String getMe() {
         return me;
@@ -149,7 +163,26 @@ public class TablesAndPlayers {
         int game = (Integer) data.get("game");
         boolean open = data.get("tableType").equals(1);
         int tableId = (Integer) data.get("table");
+        if (!Variants.isKnownGameId(game)) {
+            // Unknown/experimental game: hide the table (moves it out of the visible tables).
+            Table hidden = tables.remove(tableId);
+            if (hidden == null) {
+                hidden = hiddenTables.get(tableId);
+            }
+            if (hidden == null) {
+                hidden = new Table();
+                hidden.setId(tableId);
+            }
+            hiddenTables.put(tableId, hidden);
+            return tableId;
+        }
         Table table = tables.get(tableId);
+        if (table == null) {
+            table = hiddenTables.remove(tableId); // back to a known game: keep its players and seats
+            if (table != null) {
+                tables.put(tableId, table);
+            }
+        }
         if (table == null) {
             table = new Table();
             tables.put(tableId, table);
@@ -165,9 +198,19 @@ public class TablesAndPlayers {
         return tableId;
     }
 
+    /** True when the last state we saw for this table was an unknown game, so the table is hidden. */
+    public boolean isHidden(int tableId) {
+        return hiddenTables.containsKey(tableId);
+    }
+
     public Table tableJoin(int tableId, String player) {
         LivePlayer livePlayer = players.get(player);
         Table table = tables.get(tableId);
+        boolean hidden = false;
+        if (table == null) {
+            table = hiddenTables.get(tableId);
+            hidden = table != null;
+        }
         if (table == null) {
             table = new Table();
             table.setId(tableId);
@@ -179,14 +222,20 @@ public class TablesAndPlayers {
         if (table.getPlayers().size() == 1) {
             table.setOwner(player);
         }
-        if (me.equals(player)) {
+        if (!hidden && me.equals(player)) {
             return table;
         }
         return null;
     }
 
-    public void tableOwner(int tableId, String player) {
+    /** The table, visible or hidden (unknown game); membership events apply to both. */
+    private Table findTable(int tableId) {
         Table table = tables.get(tableId);
+        return table != null ? table : hiddenTables.get(tableId);
+    }
+
+    public void tableOwner(int tableId, String player) {
+        Table table = findTable(tableId);
         if (table != null) {
             table.setOwner(player);
         }
@@ -196,7 +245,7 @@ public class TablesAndPlayers {
         String player = (String) data.get("player");
         int tableId = (Integer) data.get("table");
         int seat = (Integer) data.get("seat");
-        Table table = tables.get(tableId);
+        Table table = findTable(tableId);
         if (table != null) {
             table.sit(seat, player);
         }
@@ -206,7 +255,7 @@ public class TablesAndPlayers {
     public int tableStand(Map<String, Object> data) {
         String player = (String) data.get("player");
         int tableId = (Integer) data.get("table");
-        Table table = tables.get(tableId);
+        Table table = findTable(tableId);
         if (table != null) {
             table.stand(player);
         }
@@ -214,11 +263,12 @@ public class TablesAndPlayers {
     }
 
     public boolean tableExit(int tableId, String player) {
-        Table table = tables.get(tableId);
+        Table table = findTable(tableId);
         if (table != null) {
             table.exit(player);
             if (table.getPlayers().isEmpty()) {
                 tables.remove(tableId);
+                hiddenTables.remove(tableId);
             }
         }
         return me.equals(player);

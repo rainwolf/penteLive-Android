@@ -885,7 +885,10 @@ public class LiveTableFragment extends Fragment {
             tableSettingsWindow.setCanceledOnTouchOutside(true);
             tableSettingsWindow.setOnDismissListener(dialogInterface -> sendTableChange());
         }
-        gameSpinner.setSelection((table.getGame() - 1) / 2);
+        int gameIndex = (table.getGame() - 1) / 2;
+        if (gameIndex >= 0 && gameIndex < gameSpinner.getCount()) { // unknown game id: keep the default selection
+            gameSpinner.setSelection(gameIndex);
+        }
         if (table.isTimed()) {
             timedChoice.setText(getString(R.string.yes));
         } else {

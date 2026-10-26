@@ -51,6 +51,9 @@ public class TableListAdapter extends BaseExpandableListAdapter {
                 && activity.getMe().toLowerCase(java.util.Locale.ROOT).startsWith("guest");
         List<Table> filtered = new ArrayList<>();
         for (Table t : tables.values()) {
+            if (!t.isKnownGame()) {   // unknown/experimental game: not shown, not counted
+                continue;
+            }
             if (isGuest && t.isRated()) {
                 continue;
             }

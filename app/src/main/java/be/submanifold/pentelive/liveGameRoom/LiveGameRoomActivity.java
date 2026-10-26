@@ -96,10 +96,20 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
         }
     }
 
+    // a table view pop requested while the fragment state was saved (app in background)
+    private boolean popTableViewOnResume = false;
+
     @Override
     protected void onResume() {
         super.onResume();
         MyApplication.activityResumed(this);
+        if (popTableViewOnResume) {
+            popTableViewOnResume = false;
+            int index = getSupportFragmentManager().getBackStackEntryCount() - 1;
+            if (index >= 0 && "liveTable".equals(getSupportFragmentManager().getBackStackEntryAt(index).getName())) {
+                getSupportFragmentManager().popBackStack();
+            }
+        }
     }
 
     @Override
@@ -288,7 +298,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                 } else if (jsonEvent.get("dsgChangeStateTableEvent") != null) {
                                     int tableId = tablesAndPlayers.changeTableState((Map<String, Object>) jsonEvent.get("dsgChangeStateTableEvent"));
                                     updateMainRoom();
-                                    updateTable(tableId);
+                                    if (tablesAndPlayers.isHidden(tableId)) {
+                                        leaveTableIfShown(tableId);
+                                    } else {
+                                        updateTable(tableId);
+                                    }
                                 } else if (jsonEvent.get("dsgArenaJoinRequestsEvent") != null) {
                                     Map<String, Object> data =
                                             (Map<String, Object>) jsonEvent.get("dsgArenaJoinRequestsEvent");
@@ -338,7 +352,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                                 .add(R.id.activity_live_game_room, tableFragment, "liveTable").addToBackStack("liveTable")
                                                 .commit();
                                     } else {
-                                        addTableMessage(tableId, getString(R.string.join_table, player));
+                                        if (tablesAndPlayers.isHidden(tableId) && tablesAndPlayers.getMe().equals(player)) {
+                                        // server seated us at a table whose game we cannot show: leave it again
+                                        sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + tableId + ",\"booted\":false,\"time\":0}}");
+                                    }
+                                    addTableMessage(tableId, getString(R.string.join_table, player));
                                     }
                                 } else if (jsonEvent.get("dsgOwnerTableEvent") != null) {
                                     Map<String, Object> data = (Map<String, Object>) jsonEvent.get("dsgOwnerTableEvent");
@@ -362,10 +380,13 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                                     int tableId = (Integer) data.get("table");
                                     if (tablesAndPlayers.tableExit(tableId, player)) {
                                         int index = getSupportFragmentManager().getBackStackEntryCount() - 1;
-                                        FragmentManager.BackStackEntry backEntry = getSupportFragmentManager().getBackStackEntryAt(index);
-                                        String tag = backEntry.getName();
-                                        if ("liveTable".equals(tag)) {
-                                            getSupportFragmentManager().popBackStack();
+                                        // index < 0: the table view was already closed (e.g. table became an unknown game)
+                                        if (index >= 0) {
+                                            FragmentManager.BackStackEntry backEntry = getSupportFragmentManager().getBackStackEntryAt(index);
+                                            String tag = backEntry.getName();
+                                            if ("liveTable".equals(tag)) {
+                                                popTableView();
+                                            }
                                         }
                                     } else {
                                         addTableMessage(tableId, getString(R.string.leave_table, player));
@@ -564,6 +585,28 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
                 getSupportFragmentManager().findFragmentByTag("liveGameRoomFragment");
         if (fragment != null) {
             fragment.updateMainRoom();
+        }
+    }
+
+    /**
+     * The table we are in changed to a game this app does not know: close the table view and
+     * tell the server we left, so the user is never left on a table the app cannot render.
+     */
+    /** Pops the table view; after onSaveInstanceState (app in background) it waits for onResume. */
+    private void popTableView() {
+        if (getSupportFragmentManager().isStateSaved()) {
+            popTableViewOnResume = true;
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
+    }
+
+    private void leaveTableIfShown(final int tableId) {
+        LiveTableFragment fragment = (LiveTableFragment)
+                getSupportFragmentManager().findFragmentByTag("liveTable");
+        if (fragment != null && fragment.table != null && fragment.table.getId() == tableId) {
+            popTableView();
+            sendEvent("{\"dsgExitTableEvent\":{\"forced\":false,\"table\":" + tableId + ",\"booted\":false,\"time\":0}}");
         }
     }
 
@@ -771,8 +814,11 @@ public class LiveGameRoomActivity extends AppCompatActivity implements DSGEventL
     }
 
     private void receivedInvitation(Map<String, Object> data) {
-        playSound(NEW_INVITE_SOUND);
         final int tableId = (int) data.get("table");
+        if (tablesAndPlayers.isHidden(tableId)) {
+            return; // invitation to a table with a game this app does not know: ignore
+        }
+        playSound(NEW_INVITE_SOUND);
         final String player = (String) data.get("player");
         String toInvite = (String) data.get("toInvite");
         String inviteText = (String) data.get("inviteText");
