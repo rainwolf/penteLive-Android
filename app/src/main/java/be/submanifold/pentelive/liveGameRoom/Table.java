@@ -166,6 +166,9 @@ public class Table {
         if (timed) {
             if (moves.isEmpty()) {
                 String gameName = gameNames.get(game);
+                if (gameName == null) {
+                    return false; // unknown game: no timer
+                }
                 if (gameName.contains("D-") || gameName.contains("DK-") || gameName.contains("Go") || gameName.contains("Swap2")) {
                     return true;
                 }
@@ -1006,6 +1009,11 @@ public class Table {
         } else {
             return swap2KeryoColor;
         }
+    }
+
+    /** True when this app knows the table's game id (see {@link Variants#isKnownGameId}). */
+    public boolean isKnownGame() {
+        return Variants.isKnownGameId(game);
     }
 
     public String getGameName() {

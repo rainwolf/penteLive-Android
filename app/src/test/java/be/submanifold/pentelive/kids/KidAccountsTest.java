@@ -119,6 +119,16 @@ public class KidAccountsTest {
         assertEquals("graviton", g.opponentName); assertTrue(g.kidsTurn); assertEquals(1760882580000L, g.lastMoveDate); assertTrue(g.privateGame);
         assertEquals(50000000001235L, r.games.get(1).gid); // server order kept
     }
+    @Test public void parseActiveGames_skipsUnknownGames() {
+        ActiveGamesReply r = KidAccounts.parseActiveGames("{\"success\":true,\"kidPid\":5,\"games\":["
+                + "{\"gid\":1,\"game\":51,\"gameName\":\"Pente\"},"
+                + "{\"gid\":2,\"game\":83,\"gameName\":\"New Game\"},"
+                + "{\"gid\":3,\"gameName\":\"Keryo-Pente\"},"
+                + "{\"gid\":4,\"gameName\":\"Foo\"}]}");
+        assertEquals(2, r.games.size());
+        assertEquals(1L, r.games.get(0).gid);
+        assertEquals(3L, r.games.get(1).gid); // no integer id: falls back to the name
+    }
     @Test public void parseActiveGames_emptyAndFailures() {
         assertTrue(KidAccounts.parseActiveGames("{\"success\":true,\"kidPid\":5,\"games\":[]}").games.isEmpty());
         assertNull(KidAccounts.parseActiveGames("{\"success\":false,\"error\":\"Kid not found\"}"));
