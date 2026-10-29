@@ -138,6 +138,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
                 restoreState(created, savedInstanceState);
             }
             dbModel.setController(created, extraLabel != null ? extraLabel : gameTypeLabel(created.gameId()));
+            created.loadFeatures(); // one GET /ping per ViewModel
         }
         controller = dbModel.controller();
         board.setGame(dbModel.gameLabel());
@@ -567,6 +568,15 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     }
 
     @Override
+    public void showServerFilters(boolean enabled) {
+        updateFilterChip();
+        androidx.fragment.app.Fragment sheet = getSupportFragmentManager().findFragmentByTag(DbFiltersSheet.TAG);
+        if (sheet instanceof DbFiltersSheet) {
+            ((DbFiltersSheet) sheet).setServerFilters(enabled);
+        }
+    }
+
+    @Override
     public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
         gamesAdapter.submit(games, hasMore,
                 GameRowFormat.listHeader(controller.scope(), controller.moves().size()));
@@ -604,7 +614,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     }
 
     private void updateFilterChip() {
-        ((TextView) findViewById(R.id.dbFilterText)).setText(FilterSummary.text(controller.appliedFilters()));
+        ((TextView) findViewById(R.id.dbFilterText)).setText(FilterSummary.text(controller.appliedFilters(), controller.serverFilters()));
     }
 
     private void showAISettings() {

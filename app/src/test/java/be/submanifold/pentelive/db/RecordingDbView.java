@@ -69,6 +69,14 @@ final class RecordingDbView implements DbView {
         errors.add(e);
     }
 
+    final List<Boolean> serverFilters = new ArrayList<>();
+
+    @Override
+    public void showServerFilters(boolean enabled) {
+        log.add("showServerFilters");
+        serverFilters.add(enabled);
+    }
+
     @Override
     public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
         log.add("showGames");

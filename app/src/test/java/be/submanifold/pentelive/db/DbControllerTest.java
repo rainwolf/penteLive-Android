@@ -583,7 +583,7 @@ public class DbControllerTest {
         assertEquals(games + 1, fake.gamesCalls.size());
         assertEquals(0, fake.lastGamesOffset());
         assertEquals(Arrays.asList(180), fake.lastStatsMoves());
-        JsonObject expected = c.appliedFilters().toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
+        JsonObject expected = c.appliedFilters().toWire(c.serverFilters());
         assertEquals(expected, fake.statsFilters.get(fake.statsFilters.size() - 1));
         assertEquals(expected, fake.gamesFilters.get(fake.gamesFilters.size() - 1));
         assertEquals(c.appliedFilters(), store.load());
@@ -662,5 +662,125 @@ public class DbControllerTest {
         assertEquals(Arrays.asList(180, 181), view.positions.get(0));
         assertTrue(c.forward());
         assertEquals(Arrays.asList(180, 181, 182), c.moves());
+    }
+
+    // Server filters (B3/B4) gated at runtime on /ping features
+
+    private static final String PING_NO_FEATURES = "{\"ok\":true,\"auth\":\"bob\",\"dbAccess\":true}";
+    private static final String PING_B3_B4 =
+            "{\"ok\":true,\"auth\":\"bob\",\"dbAccess\":true,\"features\":[\"excludeTimeouts\",\"liveOrTurnBased\",\"badges\"]}";
+
+    /** Stored filters as a legacy migration leaves them: timeouts excluded, live games only. */
+    private void storeMigrated() {
+        store.save(DbFilters.defaults().toBuilder().excludeTimeouts(true).liveOrTurnBased(DbFilters.LIVE_ONLY).build());
+    }
+
+    private static boolean sendsServerFilters(com.google.gson.JsonElement wire) {
+        if (wire == null || wire.isJsonNull()) return false;
+        JsonObject o = wire.getAsJsonObject();
+        return o.get("excludeTimeouts").getAsBoolean() || !"all".equals(o.get("liveOrTurnBased").getAsString());
+    }
+
+    @Test
+    public void featuresAbsentHidesAndDoesNotSendServerFilters() {
+        storeMigrated();
+        fake.pingReply = new FakeDbApi.Reply(200, PING_NO_FEATURES);
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        c.attach(view);
+        settle();
+        assertFalse(c.serverFilters());
+        assertFalse(sendsServerFilters(fake.statsFilters.get(fake.statsFilters.size() - 1)));
+        assertFalse(sendsServerFilters(fake.gamesFilters.get(fake.gamesFilters.size() - 1)));
+        assertEquals("Pente", FilterSummary.text(c.appliedFilters(), c.serverFilters()));
+        assertFalse(view.serverFilters.contains(true));
+        assertTrue(c.appliedFilters().excludeTimeouts); // the stored value is kept, only gated
+    }
+
+    @Test
+    public void featuresPresentSendsServerFiltersAndRerenders() {
+        storeMigrated();
+        fake.pingReply = new FakeDbApi.Reply(200, PING_B3_B4);
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        c.attach(view);
+        settle();
+        assertTrue(c.serverFilters());
+        assertEquals(Collections.singletonList(true), view.serverFilters);
+        JsonObject stats = fake.statsFilters.get(fake.statsFilters.size() - 1).getAsJsonObject();
+        assertTrue(stats.get("excludeTimeouts").getAsBoolean());
+        assertEquals("live", stats.get("liveOrTurnBased").getAsString());
+        JsonObject games = fake.gamesFilters.get(fake.gamesFilters.size() - 1).getAsJsonObject();
+        assertTrue(games.get("excludeTimeouts").getAsBoolean());
+        assertEquals("Pente · no timeouts · live only", FilterSummary.text(c.appliedFilters(), c.serverFilters()));
+    }
+
+    @Test
+    public void featuresArrivingWithDefaultFiltersDoNotRefetch() {
+        fake.pingReply = new FakeDbApi.Reply(200, PING_B3_B4);
+        DbController c = controller(1, Arrays.asList(180));
+        c.attach(view);
+        settle();
+        int stats = fake.statsCalls.size();
+        c.loadFeatures();
+        settle();
+        assertTrue(c.serverFilters());
+        assertEquals(stats, fake.statsCalls.size());
+    }
+
+    @Test
+    public void oneFeatureAloneIsNotEnough() {
+        fake.pingReply = new FakeDbApi.Reply(200, "{\"ok\":true,\"features\":[\"excludeTimeouts\"]}");
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        settle();
+        assertFalse(c.serverFilters());
+    }
+
+    @Test
+    public void pingFailureMeansNoServerFilters() {
+        fake.pingReply = null;
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        settle();
+        assertFalse(c.serverFilters());
+    }
+
+    @Test
+    public void pingIsSentOncePerController() {
+        fake.pingReply = new FakeDbApi.Reply(200, PING_B3_B4);
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        c.loadFeatures();
+        settle();
+        c.loadFeatures();
+        settle();
+        assertEquals(1, fake.pingCalls);
+    }
+
+    @Test
+    public void migratedValueSurvivesApplyWhileFeaturesAbsent() {
+        storeMigrated();
+        fake.pingReply = new FakeDbApi.Reply(200, PING_NO_FEATURES);
+        DbController c = controller(1, Arrays.asList(180));
+        c.loadFeatures();
+        c.attach(view);
+        settle();
+        // The sheet with hidden controls reads its draft with the B3/B4 fields at their defaults.
+        DbFilters draft = DbFilters.defaults().toBuilder().winner(1).build();
+        c.applyFilters(draft.keepServerFiltersFrom(c.appliedFilters(), c.serverFilters()));
+        settle();
+        DbFilters saved = store.load();
+        assertEquals(1, saved.winner);
+        assertTrue(saved.excludeTimeouts);
+        assertEquals(DbFilters.LIVE_ONLY, saved.liveOrTurnBased);
+        assertFalse(sendsServerFilters(fake.statsFilters.get(fake.statsFilters.size() - 1)));
+    }
+
+    @Test
+    public void visibleControlsWinWhenFeaturesPresent() {
+        DbFilters original = DbFilters.defaults().toBuilder().excludeTimeouts(true).build();
+        DbFilters draft = DbFilters.defaults();
+        assertFalse(draft.keepServerFiltersFrom(original, true).excludeTimeouts);
     }
 }

@@ -40,6 +40,13 @@ public final class DbApi {
         return r;
     }
 
+    /** Server liveness, auth and {@code features}; {@code features} is never null on OK. */
+    public DbResult<DbDtos.Ping> ping() {
+        DbResult<DbDtos.Ping> r = exec(() -> transport.get("/ping"), DbDtos.Ping.class);
+        if (r.kind == DbResult.Kind.OK && r.value.features == null) r.value.features = new ArrayList<>();
+        return r;
+    }
+
     public DbResult<DbDtos.GameDetail> game(long gid) {
         return detail("/games/" + gid);
     }

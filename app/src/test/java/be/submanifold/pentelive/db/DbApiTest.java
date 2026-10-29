@@ -186,4 +186,22 @@ public class DbApiTest {
         assertTrue(r.value.isEmpty());
         assertEquals(0, f.calls.size());
     }
+
+    @Test
+    public void pingParsesFeatures() {
+        Fake f = new Fake(200, "{\"ok\":true,\"auth\":\"bob\",\"dbAccess\":true,\"features\":[\"excludeTimeouts\",\"liveOrTurnBased\"]}");
+        DbResult<DbDtos.Ping> r = api(f).ping();
+        assertEquals(DbResult.Kind.OK, r.kind);
+        assertEquals(Arrays.asList("excludeTimeouts", "liveOrTurnBased"), r.value.features);
+        assertEquals("GET /ping", f.calls.get(0));
+    }
+
+    @Test
+    public void pingMissingFeaturesMeansNone() {
+        Fake f = new Fake(200, "{\"ok\":true,\"auth\":null,\"dbAccess\":false}");
+        DbResult<DbDtos.Ping> r = api(f).ping();
+        assertEquals(DbResult.Kind.OK, r.kind);
+        assertNotNull(r.value.features);
+        assertTrue(r.value.features.isEmpty());
+    }
 }

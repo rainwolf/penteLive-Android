@@ -109,6 +109,15 @@ public final class DbFilters {
     }
 
     /** Wire {@code filters} object, or null when everything sent would be at its default. */
+    /**
+     * This draft, with the B3/B4 values taken from {@code original} when their controls were hidden
+     * ({@code serverFiltersB3B4} false), so a stored (e.g. migrated) value is never reset by an Apply.
+     */
+    public DbFilters keepServerFiltersFrom(DbFilters original, boolean serverFiltersB3B4) {
+        if (serverFiltersB3B4) return this;
+        return toBuilder().excludeTimeouts(original.excludeTimeouts).liveOrTurnBased(original.liveOrTurnBased).build();
+    }
+
     public JsonObject toWire(boolean serverFiltersB3B4) {
         if (wireIsDefault(serverFiltersB3B4)) return null;
         JsonObject o = new JsonObject();

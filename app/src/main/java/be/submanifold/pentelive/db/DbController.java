@@ -65,6 +65,9 @@ public final class DbController {
     private RedoHistory history;
     private DbView view;
     private boolean started;
+    /** B3/B4 filters (exclude timeouts, live/turn-based) are sent only when /ping lists both features. */
+    private boolean serverFilters = DbCapabilities.SERVER_FILTERS_DEFAULT;
+    private boolean featuresRequested;
 
     // render state
     private CaptureIcons.Counts caps;
@@ -112,6 +115,47 @@ public final class DbController {
     /** The filters in force for this session (stored ones, or stored plus the extras game). */
     public DbFilters appliedFilters() {
         return applied;
+    }
+
+    /** Whether the server takes the B3/B4 filters; gates the wire, the chip row and the sheet controls. */
+    public boolean serverFilters() {
+        return serverFilters;
+    }
+
+    /**
+     * One {@code GET /ping} per controller (the controller lives in the ViewModel). When both B3/B4 features
+     * are listed, the flag flips, the view re-renders its filter UI, and results are refetched if the stored
+     * filters carry B3/B4 values that were held back until now.
+     */
+    public void loadFeatures() {
+        if (featuresRequested) return;
+        featuresRequested = true;
+        io.execute(new Runnable() {
+            @Override
+            public void run() {
+                final DbResult<DbDtos.Ping> r = api.ping();
+                main.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        onPing(r);
+                    }
+                });
+            }
+        });
+    }
+
+    private void onPing(DbResult<DbDtos.Ping> r) {
+        boolean enabled = r.kind == DbResult.Kind.OK && r.value.features != null
+                && r.value.features.contains("excludeTimeouts") && r.value.features.contains("liveOrTurnBased");
+        if (enabled == serverFilters) return;
+        boolean wireChanged = !equalWire(applied.toWire(serverFilters), applied.toWire(enabled));
+        serverFilters = enabled;
+        if (view != null) view.showServerFilters(enabled);
+        if (wireChanged && started && supported) positionChanged();
+    }
+
+    private static boolean equalWire(JsonObject a, JsonObject b) {
+        return a == null ? b == null : a.equals(b);
     }
 
     /** Scope sent with every request, for the list label. */
@@ -231,7 +275,7 @@ public final class DbController {
         final int game = gameId;
         final int id = gamesGuard.next();
         final String scope = applied.scope;
-        final JsonObject filters = applied.toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
+        final JsonObject filters = applied.toWire(serverFilters);
         pendingOffset = offset;
         gamesInFlight = true;
         gamesState = GamesState.LOADING;
@@ -330,7 +374,7 @@ public final class DbController {
         final int id = statsGuard.next();
         final int game = gameId;
         final String scope = applied.scope;
-        final JsonObject filters = applied.toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
+        final JsonObject filters = applied.toWire(serverFilters);
         io.execute(new Runnable() {
             @Override
             public void run() {

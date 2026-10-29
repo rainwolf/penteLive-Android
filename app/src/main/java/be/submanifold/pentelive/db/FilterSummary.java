@@ -8,7 +8,7 @@ public final class FilterSummary {
     private FilterSummary() {}
 
     public static String text(DbFilters f) {
-        return text(f, DbCapabilities.SERVER_FILTERS_B3_B4);
+        return text(f, DbCapabilities.SERVER_FILTERS_DEFAULT);
     }
 
     /** {@code serverFiltersB3B4} false leaves out exclude-timeouts and live/turn-based, which are then not sent. */

@@ -64,8 +64,19 @@ final class FakeDbApi implements DbTransport {
         return sb.append("]}").toString();
     }
 
+    /** Reply to GET /ping; null makes the ping fail like a network error. */
+    Reply pingReply;
+    int pingCalls;
+
     @Override
     public Reply get(String path) throws IOException {
+        if ("/ping".equals(path)) {
+            synchronized (this) {
+                pingCalls++;
+            }
+            if (pingReply == null) throw new IOException("ping failed");
+            return pingReply;
+        }
         throw new IOException("unexpected GET " + path);
     }
 

@@ -24,6 +24,9 @@ public interface DbView {
 
     void showError(DbController.Endpoint e);
 
+    /** The server-filter capability changed: re-render the filter chip row and an open filters sheet. */
+    void showServerFilters(boolean enabled);
+
     /** All games loaded so far for the position, the server total, and whether more pages remain. */
     void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore);
 }

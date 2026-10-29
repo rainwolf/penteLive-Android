@@ -68,6 +68,14 @@ public final class DbDtos {
         public boolean blocked;
     }
 
+    /** {@code GET /ping}; a missing {@code features} field means none. */
+    public static class Ping {
+        public boolean ok;
+        public String auth;
+        public boolean dbAccess;
+        public List<String> features = new ArrayList<>();
+    }
+
     public static class PlayersReply {
         public List<String> players = new ArrayList<>();
     }

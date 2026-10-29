@@ -69,6 +69,8 @@ public class DbFiltersSheet extends BottomSheetDialogFragment {
     private MaterialSwitch speed, eitherSeat, excludeTimeouts;
     private MaterialAutoCompleteTextView p1Name, p2Name, p1Rating, p2Rating;
     private MaterialButtonToggleGroup winner, live, source;
+    private View liveLabel;
+    private boolean serverFilters = DbCapabilities.SERVER_FILTERS_DEFAULT;
     private TextInputEditText after, before;
     private int[] ratingValues;
     private int p1RatingIndex, p2RatingIndex;
@@ -125,12 +127,10 @@ public class DbFiltersSheet extends BottomSheetDialogFragment {
         after = v.findViewById(R.id.filterAfter);
         before = v.findViewById(R.id.filterBefore);
 
-        // The timeout and live/turn-based filters are not on the server yet (B3/B4): hide the controls.
-        if (!DbCapabilities.SERVER_FILTERS_B3_B4) {
-            excludeTimeouts.setVisibility(View.GONE);
-            v.findViewById(R.id.filterLiveLabel).setVisibility(View.GONE);
-            live.setVisibility(View.GONE);
-        }
+        liveLabel = v.findViewById(R.id.filterLiveLabel);
+        // Timeout and live/turn-based (B3/B4) show only once /ping lists both features.
+        setServerFilters(model.hasController() ? model.controller().serverFilters()
+                : DbCapabilities.SERVER_FILTERS_DEFAULT);
 
         for (int i = 0; i < DbGames.BASE_NAMES.size(); i++) {
             String name = DbGames.BASE_NAMES.get(i);
@@ -154,6 +154,16 @@ public class DbFiltersSheet extends BottomSheetDialogFragment {
         String json = savedInstanceState != null ? savedInstanceState.getString(STATE_DRAFT) : null;
         if (json == null) json = requireArguments().getString(ARG_APPLIED);
         populate(DbFilters.fromJson(json));
+    }
+
+    /** Shows or hides the B3/B4 controls; hidden values are kept from the applied filters on Apply. */
+    public void setServerFilters(boolean enabled) {
+        serverFilters = enabled;
+        if (excludeTimeouts == null) return;
+        int visibility = enabled ? View.VISIBLE : View.GONE;
+        excludeTimeouts.setVisibility(visibility);
+        liveLabel.setVisibility(visibility);
+        live.setVisibility(visibility);
     }
 
     @Override
@@ -212,16 +222,16 @@ public class DbFiltersSheet extends BottomSheetDialogFragment {
                 .player1MinRating(ratingValues[p1RatingIndex])
                 .player2MinRating(ratingValues[p2RatingIndex])
                 .eitherSeat(eitherSeat.isChecked())
-                .excludeTimeouts(DbCapabilities.SERVER_FILTERS_B3_B4 && excludeTimeouts.isChecked())
+                .excludeTimeouts(excludeTimeouts.isChecked())
                 .winner(w == R.id.filterWinnerP1 ? 1 : w == R.id.filterWinnerP2 ? 2 : 0)
-                .liveOrTurnBased(!DbCapabilities.SERVER_FILTERS_B3_B4 ? DbFilters.LIVE_ALL
-                        : l == R.id.filterLiveLive ? DbFilters.LIVE_ONLY
+                .liveOrTurnBased(l == R.id.filterLiveLive ? DbFilters.LIVE_ONLY
                         : l == R.id.filterLiveTb ? DbFilters.TURN_BASED_ONLY : DbFilters.LIVE_ALL)
                 .afterDate(emptyToNull(text(after)))
                 .beforeDate(emptyToNull(text(before)))
                 .scope(s == R.id.filterSourceMine ? DbFilters.SCOPE_MINE
                         : s == R.id.filterSourceBoth ? DbFilters.SCOPE_BOTH : DbFilters.SCOPE_ARCHIVE)
-                .build();
+                .build()
+                .keepServerFiltersFrom(DbFilters.fromJson(requireArguments().getString(ARG_APPLIED)), serverFilters);
     }
 
     private void apply() {
