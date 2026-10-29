@@ -81,6 +81,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private TextView dbStatus;
     private PopupWindow subscribePopup;
     private Snackbar errorSnackbar;
+    /** The position the pending AI request was made for; null when none is pending. */
+    private List<Integer> aiRequestMoves;
     private AlertDialog loginDialog;
     private TabLayout dbTabs;
     private RecyclerView dbList;
@@ -285,9 +287,12 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             }
             ai.setLevel(((Spinner) aiSettingsView.findViewById(R.id.difficultySpinner)).getSelectedItemPosition() + 1);
             ai.setDbBoard(board);
-            int[] moves = new int[board.getMovesList().size()];
-            for (int i = 0; i < board.getMovesList().size(); ++i) {
-                moves[i] = board.getMovesList().get(i).intValue();
+            // Tag the request with the position it is for; a reply for another position is dropped.
+            List<Integer> position = new ArrayList<>(controller.moves());
+            aiRequestMoves = position;
+            int[] moves = new int[position.size()];
+            for (int i = 0; i < position.size(); ++i) {
+                moves[i] = position.get(i);
             }
             ai.getMove(moves);
         });
@@ -455,7 +460,9 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     @Override
     public void onAiMove(int cell) {
         aiStopped();
-        controller.onBoardMove(cell);
+        List<Integer> askedFor = aiRequestMoves;
+        aiRequestMoves = null;
+        controller.playAiMove(cell, askedFor); // dropped if the position changed while the engine thought
     }
 
     // DbView

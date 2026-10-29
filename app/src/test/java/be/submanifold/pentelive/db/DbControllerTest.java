@@ -837,4 +837,54 @@ public class DbControllerTest {
         assertEquals(0, view.count("clearResults"));
         assertEquals(1, view.count("showDots"));
     }
+
+    // Board input guards
+
+    @Test
+    public void occupiedCellIsIgnored() {
+        DbController c = started();
+        int stats = fake.statsCalls.size();
+        c.onBoardMove(180);
+        settle();
+        assertEquals(Arrays.asList(180), c.moves());
+        assertEquals(stats, fake.statsCalls.size());
+        assertEquals(0, view.count("clearResults"));
+    }
+
+    @Test
+    public void offBoardCellIsIgnored() {
+        DbController c = started();
+        c.onBoardMove(-1);
+        c.onBoardMove(19 * 19);
+        assertEquals(Arrays.asList(180), c.moves());
+    }
+
+    @Test
+    public void aiMoveForCurrentPositionIsPlayed() {
+        DbController c = started();
+        List<Integer> askedFor = c.moves();
+        assertTrue(c.playAiMove(181, askedFor));
+        assertEquals(Arrays.asList(180, 181), c.moves());
+    }
+
+    @Test
+    public void staleAiMoveIsDropped() {
+        DbController c = started();
+        c.onBoardMove(181);
+        settle();
+        List<Integer> askedFor = c.moves();
+        c.back(); // the position changes while the engine thinks
+        settle();
+        int stats = fake.statsCalls.size();
+        assertFalse(c.playAiMove(182, askedFor));
+        assertEquals(Arrays.asList(180), c.moves());
+        assertEquals(stats, fake.statsCalls.size());
+    }
+
+    @Test
+    public void aiMoveWithoutRequestIsDropped() {
+        DbController c = started();
+        assertFalse(c.playAiMove(181, null));
+        assertEquals(Arrays.asList(180), c.moves());
+    }
 }

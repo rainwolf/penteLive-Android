@@ -214,10 +214,25 @@ public final class DbController {
         view = null;
     }
 
+    /** Plays cell; an off-board or occupied cell is ignored (results stay as they are). */
     public void onBoardMove(int cell) {
         if (!supported) return;
+        int size = DbGames.gridSize(gameId);
+        if (cell < 0 || cell >= size * size) return;
+        if (CaptureIcons.occupied(gameId, history.moves()).contains(cell)) return;
         history.play(cell);
         positionChanged();
+    }
+
+    /**
+     * An engine reply for the position {@code askedFor} (the moves sent to the engine). Dropped, returning
+     * false, when the position has changed since (swipe, tap, filters) or the cell is not playable.
+     */
+    public boolean playAiMove(int cell, List<Integer> askedFor) {
+        if (!supported || askedFor == null || !askedFor.equals(history.moves())) return false;
+        int before = history.moves().size();
+        onBoardMove(cell);
+        return history.moves().size() == before + 1;
     }
 
     public boolean back() {
