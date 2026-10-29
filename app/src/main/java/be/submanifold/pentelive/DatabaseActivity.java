@@ -48,6 +48,7 @@ import be.submanifold.pentelive.db.DbDtos;
 import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.GameRowFormat;
+import be.submanifold.pentelive.db.ui.DbGameViewerActivity;
 import be.submanifold.pentelive.db.ui.GamesAdapter;
 import be.submanifold.pentelive.db.ui.CaptureSpans;
 import be.submanifold.pentelive.db.ui.DbViewModel;
@@ -545,7 +546,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         RecyclerView list = findViewById(R.id.dbMovesList);
         list.setLayoutManager(new LinearLayoutManager(this));
         gamesAdapter = new GamesAdapter(
-                h -> { /* the native viewer (DbGameViewerActivity) opens the row in Task 17 */ },
+                h -> DbGameViewerActivity.start(this, h.gid, h.isMine()),
                 () -> controller.loadMoreGames());
         list.setAdapter(movesAdapter);
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

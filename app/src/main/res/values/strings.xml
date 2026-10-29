@@ -593,6 +593,8 @@
     <string name="db_newest_first">Newest first</string>
     <string name="db_retry">Retry</string>
     <string name="db_error">Could not load database results</string>
+    <string name="db_game_error">Could not load this game</string>
+    <string name="db_game_title">Game</string>
     <string name="timer_zero" translatable="false">0:0</string>
     <string name="live_table_settings_placeholder">Timer: 0/0\nnot rated</string>
     <string name="challenge_label">challenge</string>

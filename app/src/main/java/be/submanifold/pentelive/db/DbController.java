@@ -211,6 +211,9 @@ public final class DbController {
             case SUBSCRIPTION_REQUIRED:
                 gamesState = GamesState.SUBSCRIPTION_REQUIRED;
                 break;
+            case BLOCKED:
+                gamesState = GamesState.BLOCKED;
+                break;
             default:
                 gamesState = GamesState.ERROR;
                 break;
@@ -236,6 +239,8 @@ public final class DbController {
                 view.showSubscribeGate();
                 break;
             case ERROR:
+                // A later page failed: keep the loaded rows (a re-attach starts from clearResults).
+                if (!loadedGames.isEmpty()) view.showGames(new ArrayList<>(loadedGames), gamesTotal, false);
                 view.showError(Endpoint.GAMES);
                 break;
             default:
@@ -346,6 +351,9 @@ public final class DbController {
                 break;
             case SUBSCRIPTION_REQUIRED:
                 statsState = StatsState.SUBSCRIPTION_REQUIRED;
+                break;
+            case BLOCKED:
+                statsState = StatsState.BLOCKED;
                 break;
             default:
                 statsState = StatsState.ERROR;

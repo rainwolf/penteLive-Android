@@ -74,9 +74,10 @@ public final class DbApi {
         }
         if (reply.code == 401) return DbResult.of(DbResult.Kind.UNAUTHORIZED);
         if (reply.code == 403) {
-            return "subscription_required".equals(errorCode(reply.body))
-                    ? DbResult.<T>of(DbResult.Kind.SUBSCRIPTION_REQUIRED)
-                    : DbResult.<T>of(DbResult.Kind.FAILED);
+            String code = errorCode(reply.body);
+            if ("subscription_required".equals(code)) return DbResult.of(DbResult.Kind.SUBSCRIPTION_REQUIRED);
+            if ("blocked".equals(code)) return DbResult.of(DbResult.Kind.BLOCKED); // same state as blocked:true
+            return DbResult.of(DbResult.Kind.FAILED);
         }
         if (reply.code < 200 || reply.code >= 300) return DbResult.of(DbResult.Kind.FAILED);
         try {

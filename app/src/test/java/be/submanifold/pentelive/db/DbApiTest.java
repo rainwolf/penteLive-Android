@@ -151,6 +151,14 @@ public class DbApiTest {
     }
 
     @Test
+    public void blocked403IsBlocked() {
+        String body = "{\"error\":{\"code\":\"blocked\",\"message\":\"m\"}}";
+        assertEquals(DbResult.Kind.BLOCKED, api(new Fake(403, body)).game(9).kind);
+        assertEquals(DbResult.Kind.BLOCKED, api(new Fake(403, body)).collectionGame(9).kind);
+        assertEquals(DbResult.Kind.BLOCKED, stats(new Fake(403, body)).kind);
+    }
+
+    @Test
     public void other403AndServerErrorFail() {
         assertEquals(DbResult.Kind.FAILED, stats(new Fake(403, "{\"error\":{\"code\":\"other\"}}")).kind);
         assertEquals(DbResult.Kind.FAILED, stats(new Fake(403, "not json")).kind);

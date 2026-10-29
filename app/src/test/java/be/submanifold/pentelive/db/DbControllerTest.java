@@ -521,6 +521,36 @@ public class DbControllerTest {
     }
 
     @Test
+    public void reattachAfterPage2FailureKeepsLoadedRows() {
+        DbController c = withGames(60, 25);
+        fake.gamesReply(m180(), 25, 500, "{}");
+        c.loadMoreGames();
+        settle();
+        c.detach();
+        RecordingDbView v2 = new RecordingDbView();
+        c.attach(v2);
+        assertEquals(1, v2.count("showGames"));
+        assertEquals(25, v2.games.get(0).size());
+        assertEquals(Integer.valueOf(60), v2.totals.get(0));
+        assertFalse(v2.hasMores.get(0));
+        assertEquals(Collections.singletonList(DbController.Endpoint.GAMES), v2.errors);
+        assertTrue(v2.log.indexOf("showGames") < v2.log.indexOf("showError"));
+        assertEquals(0, io.size());
+    }
+
+    @Test
+    public void blocked403ShowsBlockedForStatsAndGames() {
+        String body = "{\"error\":{\"code\":\"blocked\",\"message\":\"m\"}}";
+        fake.reply(m180(), 403, body);
+        fake.gamesReply(m180(), 0, 403, body);
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        assertEquals(2, view.count("showBlocked"));
+        assertEquals(0, view.count("showError"));
+    }
+
+    @Test
     public void gamesRenderedOnReattach() {
         DbController c = withGames(60, 25);
         c.detach();

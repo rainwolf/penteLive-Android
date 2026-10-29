@@ -306,6 +306,13 @@ public class DBBoardView extends View {
         swipeListener = listener;
     }
 
+    private boolean placementEnabled = true;
+
+    /** False makes taps do nothing (no zoom, no placement); swipes still reach the listener. */
+    public void setPlacementEnabled(boolean enabled) {
+        placementEnabled = enabled;
+    }
+
     /**
      * Detects a fast, mostly horizontal swipe. A slow drag to aim a stone is not a swipe (too slow),
      * so placement is unaffected. Returns true when the gesture ended as a swipe: the zoom and
@@ -375,6 +382,10 @@ public class DBBoardView extends View {
             translateY = 0;
             invalidate();
             return false;
+        }
+        // Read-only board (the game viewer): keep the gesture for swipe detection, no aim or placement.
+        if (!placementEnabled) {
+            return true;
         }
 
         float x, y;

@@ -1,7 +1,7 @@
 package be.submanifold.pentelive.db;
 
 public final class DbResult<T> {
-    public enum Kind { OK, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, FAILED }
+    public enum Kind { OK, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, BLOCKED, FAILED }
 
     public final Kind kind;
     public final T value;
