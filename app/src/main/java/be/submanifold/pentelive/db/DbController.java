@@ -302,17 +302,6 @@ public final class DbController {
         return gameId;
     }
 
-    /** Legacy spinner path (removed with the legacy dialog). */
-    public void setGame(int newGameId) {
-        if (newGameId == 0 || !DbGames.isSupported(newGameId)) {
-            resetGame(newGameId, null);
-            started = true;
-            if (view != null) view.showUnsupported();
-            return;
-        }
-        applyFilters(applied.withGame(newGameId));
-    }
-
     /** clearResults, showPosition, then stats and games requests, each with a fresh id. */
     private void positionChanged() {
         final List<Integer> moves = history.moves();

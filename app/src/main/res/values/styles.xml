@@ -10,6 +10,10 @@
         <item name="viewInflaterClass">be.submanifold.pentelive.OutlineViewInflater</item>
     </style>
 
+    <!-- The app theme is AppCompat; the Material 3 chips, switches and toggle groups in the DB filters
+         sheet need a Material theme. DayNight keeps the sheet legible in night mode. -->
+    <style name="Theme.PenteDb.FiltersSheet" parent="Theme.Material3.DayNight.BottomSheetDialog" />
+
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>

@@ -269,18 +269,18 @@ public class DbControllerTest {
     }
 
     @Test
-    public void setGameResetsToSeedAndRefetches() {
+    public void changingGameResetsToSeedAndRefetches() {
         DbController c = started();
         c.onBoardMove(181);
         settle();
-        c.setGame(7); // D-Pente: empty seed
+        c.applyFilters(c.appliedFilters().withGame(7)); // D-Pente: empty seed
         settle();
         assertEquals(7, c.gameId());
         assertEquals(Collections.<Integer>emptyList(), c.moves());
         assertEquals(Collections.<Integer>emptyList(), fake.lastStatsMoves());
         c.onBoardMove(180);
         assertEquals(Arrays.asList(180), c.moves());
-        c.setGame(1);
+        c.applyFilters(c.appliedFilters().withGame(1));
         assertEquals(Arrays.asList(180), c.moves());
         c.onBoardMove(181); // seed list must be mutable through the history
         assertEquals(Arrays.asList(180, 181), c.moves());
