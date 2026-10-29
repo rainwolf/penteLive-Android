@@ -2,26 +2,33 @@ package be.submanifold.pentelive.db.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import be.submanifold.pentelive.DBBoardView;
+import be.submanifold.pentelive.LoginActivity;
 import be.submanifold.pentelive.R;
 import be.submanifold.pentelive.db.AuthedDbTransport;
+import be.submanifold.pentelive.db.CaptureIcons;
 import be.submanifold.pentelive.db.DbApi;
 import be.submanifold.pentelive.db.DbDtos;
 import be.submanifold.pentelive.db.DbGames;
@@ -29,11 +36,13 @@ import be.submanifold.pentelive.db.DbResult;
 import be.submanifold.pentelive.db.GameRowFormat;
 import be.submanifold.pentelive.db.GameViewerModel;
 import be.submanifold.pentelive.db.LatestRequest;
+import be.submanifold.pentelive.db.MoveGrid;
 
 /** Read-only replay of one DB game: {@code GET /games/{gid}}, or {@code /collection/{wgid}} for "mine" rows. */
 public class DbGameViewerActivity extends AppCompatActivity {
     private static final String EXTRA_GID = "gid";
     private static final String EXTRA_MINE = "mine";
+    private static final int GRID_COLUMNS = 4;
 
     public static void start(Context c, long id, boolean mine) {
         c.startActivity(new Intent(c, DbGameViewerActivity.class)
@@ -41,7 +50,7 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 .putExtra(EXTRA_MINE, mine));
     }
 
-    enum State { NONE, LOADING, OK, BLOCKED, FAILED }
+    enum State { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, FAILED }
 
     /** Keeps the model (cursor), the load state and the IO executor across rotation. */
     public static class ViewerViewModel extends ViewModel {
@@ -78,6 +87,8 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 state = State.OK;
             } else if (GameViewerModel.isBlocked(r)) {
                 state = State.BLOCKED;
+            } else if (r != null && r.kind == DbResult.Kind.UNAUTHORIZED) {
+                state = State.UNAUTHORIZED;
             } else {
                 state = State.FAILED;
             }
@@ -94,8 +105,9 @@ public class DbGameViewerActivity extends AppCompatActivity {
     private ViewerViewModel vm;
     private DBBoardView board;
     private Toolbar toolbar;
-    private TextView players;
-    private TextView moves;
+    private TextView p1Name, p1Rating, p2Name, p2Rating, score, captures, date;
+    private MoveGridAdapter gridAdapter;
+    private AlertDialog loginDialog;
     private TextView status;
     private View retry;
     private View progress;
@@ -114,8 +126,25 @@ public class DbGameViewerActivity extends AppCompatActivity {
         board.setActivity(this);
         board.setPlacementEnabled(false);
         board.setDotsVisible(false);
-        players = findViewById(R.id.viewerPlayers);
-        moves = findViewById(R.id.viewerMoves);
+        p1Name = findViewById(R.id.viewerP1Name);
+        p1Rating = findViewById(R.id.viewerP1Rating);
+        p2Name = findViewById(R.id.viewerP2Name);
+        p2Rating = findViewById(R.id.viewerP2Rating);
+        score = findViewById(R.id.viewerScore);
+        captures = findViewById(R.id.viewerCaptures);
+        date = findViewById(R.id.viewerDate);
+        findViewById(R.id.viewerBack).setOnClickListener(v -> finish());
+        gridAdapter = new MoveGridAdapter(index -> {
+            if (vm.state == State.OK) {
+                vm.model.jumpTo(index + 1);
+                showPosition();
+            }
+        });
+        RecyclerView grid = findViewById(R.id.viewerMoveGrid);
+        grid.setLayoutManager(new GridLayoutManager(this, GRID_COLUMNS));
+        grid.setAdapter(gridAdapter);
+        // Never show the board's constructor centre stone while there is no game to show.
+        showEmptyBoard();
         status = findViewById(R.id.viewerStatus);
         retry = findViewById(R.id.viewerRetry);
         progress = findViewById(R.id.viewerProgress);
@@ -147,6 +176,7 @@ public class DbGameViewerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         if (vm != null) vm.onChange = null;
+        if (loginDialog != null) loginDialog.dismiss();
         super.onDestroy();
     }
 
@@ -164,21 +194,56 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 renderGame();
                 break;
             case BLOCKED:
+                showEmptyBoard();
                 setStatus(getString(R.string.db_blocked));
                 break;
+            case UNAUTHORIZED:
+                showEmptyBoard();
+                setStatus(getString(R.string.db_login_required));
+                showLoginPrompt();
+                break;
             case FAILED:
+                showEmptyBoard();
                 setStatus(getString(R.string.db_game_error));
                 break;
             default:
+                showEmptyBoard();
                 setStatus(null);
                 break;
         }
     }
 
+    /** Clears the board and the header/grid, so nothing stale or default (centre stone) shows. */
+    private void showEmptyBoard() {
+        if (boardGame == null) board.setGame("Pente"); // gives showPosition a replay target; stays empty
+        board.showPosition(Collections.<Integer>emptyList());
+        boardGame = null;
+        p1Name.setText("");
+        p1Rating.setText("");
+        p2Name.setText("");
+        p2Rating.setText("");
+        score.setText("");
+        captures.setText("");
+        date.setText("");
+        gridAdapter.submit(Collections.<MoveGrid.Cell>emptyList());
+    }
+
+    private void showLoginPrompt() {
+        if (loginDialog != null && loginDialog.isShowing()) return;
+        loginDialog = new AlertDialog.Builder(this)
+                .setMessage(R.string.db_login_required)
+                .setPositiveButton(R.string.login, (DialogInterface d, int w) ->
+                        startActivity(new Intent(this, LoginActivity.class)))
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        loginDialog.show();
+    }
+
     private void renderGame() {
         DbDtos.GameHeader h = vm.model.header();
         if (!DbGames.isSupported(h.game)) {
-            players.setText(playersLine(h));
+            showEmptyBoard();
+            bindHeader(h, null);
             setStatus(getString(R.string.db_unsupported_game));
             return;
         }
@@ -186,29 +251,28 @@ public class DbGameViewerActivity extends AppCompatActivity {
         boardGame = DbGames.baseName(h.game);
         board.setGame(boardGame);
         toolbar.setSubtitle((DbGames.isSpeed(h.game) ? "Speed " : "") + boardGame);
-        players.setText(playersLine(h));
         showPosition();
     }
 
     private void showPosition() {
         if (boardGame == null) return;
+        DbDtos.GameHeader h = vm.model.header();
         board.showPosition(vm.model.movesUpTo());
-        board.setTextViewHTML(moves, "");
+        bindHeader(h, CaptureIcons.of(h.game, vm.model.movesUpTo()));
+        gridAdapter.submit(MoveGrid.cells(h.game, vm.model.allMoves(), vm.model.cursor()));
+    }
+
+    private void bindHeader(DbDtos.GameHeader h, CaptureIcons.Counts caps) {
+        GamesAdapter.bindPlayer(this, p1Name, p1Rating, h.player1);
+        GamesAdapter.bindPlayer(this, p2Name, p2Rating, h.player2);
+        score.setText(GameRowFormat.score(h.winner));
+        date.setText(GameRowFormat.date(h.playDate, ZonedDateTime.now(), Locale.getDefault()));
+        int lineHeight = (int) (18 * getResources().getDisplayMetrics().scaledDensity);
+        captures.setText(CaptureSpans.build(this, "", caps, lineHeight));
     }
 
     private void setStatus(String text) {
         status.setText(text);
         status.setVisibility(text == null ? View.GONE : View.VISIBLE);
-    }
-
-    private String playersLine(DbDtos.GameHeader h) {
-        String date = GameRowFormat.date(h.playDate, ZonedDateTime.now(), Locale.getDefault());
-        String line = player(h.player1) + "   " + GameRowFormat.score(h.winner) + "   " + player(h.player2);
-        return date == null || date.isEmpty() ? line : line + "\n" + date;
-    }
-
-    private static String player(DbDtos.Player p) {
-        if (p == null || p.name == null) return "?";
-        return p.rating > 0 ? p.name + " (" + p.rating + ")" : p.name;
     }
 }

@@ -649,4 +649,18 @@ public class DbControllerTest {
         c.attach(view);
         assertEquals("both", c.scope());
     }
+
+    @Test
+    public void restoreFetchesRestoredPosition() {
+        DbController c = started();
+        int before = fake.statsCalls.size();
+        c.restore(Arrays.asList(180, 181), Arrays.asList(182));
+        assertEquals(Arrays.asList(180, 181), c.moves());
+        settle();
+        assertEquals(before + 1, fake.statsCalls.size());
+        assertEquals(Arrays.asList(180, 181), fake.lastStatsMoves());
+        assertEquals(Arrays.asList(180, 181), view.positions.get(0));
+        assertTrue(c.forward());
+        assertEquals(Arrays.asList(180, 181, 182), c.moves());
+    }
 }

@@ -78,4 +78,21 @@ public class RedoHistoryTest {
         assertEquals(Arrays.asList(7, 8), h.moves());
         assertTrue(h.redo().isEmpty());
     }
+
+    @Test
+    public void restoreRoundTrip() {
+        RedoHistory a = new RedoHistory(Collections.singletonList(180), 1, false);
+        a.play(181);
+        a.play(182);
+        a.back();
+        a.back();
+        RedoHistory b = new RedoHistory(Collections.singletonList(180), 1, false);
+        b.restore(a.moves(), a.redo());
+        assertEquals(a.moves(), b.moves());
+        assertEquals(a.redo(), b.redo());
+        assertTrue(b.forward());
+        assertEquals(Arrays.asList(180, 181), b.moves());
+        assertTrue(b.forward());
+        assertEquals(Arrays.asList(180, 181, 182), b.moves());
+    }
 }

@@ -121,4 +121,13 @@ public class GameViewerModelTest {
         assertTrue(m.back());
         assertEquals(1, m.cursor());
     }
+
+    @Test
+    public void allMovesIgnoresCursor() {
+        GameViewerModel m = new GameViewerModel(7);
+        m.accept(detail(7, 1, 180, 181, 182));
+        m.jumpTo(1);
+        assertEquals(java.util.Arrays.asList(180, 181, 182), m.allMoves());
+        assertEquals(java.util.Arrays.asList(180), m.movesUpTo());
+    }
 }

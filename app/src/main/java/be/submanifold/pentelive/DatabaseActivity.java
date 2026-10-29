@@ -79,6 +79,14 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private TextView dbStatus;
     private PopupWindow subscribePopup;
     private AlertDialog loginDialog;
+    private TabLayout dbTabs;
+    private RecyclerView dbList;
+    private android.os.Parcelable pendingListState;
+
+    private static final String STATE_MOVES = "db_moves";
+    private static final String STATE_REDO = "db_redo";
+    private static final String STATE_TAB = "db_tab";
+    private static final String STATE_LIST = "db_list";
 
 //    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
@@ -126,10 +134,14 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
                             getString(R.string.live_only), getString(R.string.turn_based_only)));
             DbController created = new DbController(new DbApi(new AuthedDbTransport()), dbModel.io(), dbModel.main(),
                     filterStore, override, extraMoves);
+            if (savedInstanceState != null) {
+                restoreState(created, savedInstanceState);
+            }
             dbModel.setController(created, extraLabel != null ? extraLabel : gameTypeLabel(created.gameId()));
         }
         controller = dbModel.controller();
         board.setGame(dbModel.gameLabel());
+
         updateAiButton();
 
         toolbar.setTitle(getString(R.string.db_title));
@@ -283,6 +295,48 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         controller.attach(this);
     }
 
+    /**
+     * Process death only (the ViewModel is new): puts back the saved position and redo stack, the selected
+     * tab, and the list scroll position, which is applied once the first results for that tab render.
+     */
+    private void restoreState(DbController created, Bundle state) {
+        ArrayList<Integer> moves = state.getIntegerArrayList(STATE_MOVES);
+        if (moves != null) {
+            ArrayList<Integer> redo = state.getIntegerArrayList(STATE_REDO);
+            created.restore(moves, redo == null ? new ArrayList<Integer>() : redo);
+        }
+        int tab = state.getInt(STATE_TAB, 0);
+        TabLayout.Tab t = dbTabs.getTabAt(tab);
+        if (t != null && tab != 0) {
+            t.select();
+        }
+        pendingListState = state.getParcelable(STATE_LIST);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        if (controller == null) return;
+        out.putIntegerArrayList(STATE_MOVES, new ArrayList<>(controller.moves()));
+        out.putIntegerArrayList(STATE_REDO, new ArrayList<>(controller.redoMoves()));
+        out.putInt(STATE_TAB, gamesSelected ? 1 : 0);
+        RecyclerView.LayoutManager lm = dbList.getLayoutManager();
+        if (lm != null) {
+            out.putParcelable(STATE_LIST, lm.onSaveInstanceState());
+        }
+    }
+
+    /** Applies the saved scroll state once, after the matching tab has rows to scroll. */
+    private void applyPendingListState(boolean forGames) {
+        if (pendingListState == null || gamesSelected != forGames) return;
+        RecyclerView.LayoutManager lm = dbList.getLayoutManager();
+        android.os.Parcelable state = pendingListState;
+        pendingListState = null;
+        if (lm != null) {
+            dbList.post(() -> lm.onRestoreInstanceState(state));
+        }
+    }
+
     @Override
     protected void onDestroy() {
         if (controller != null) {
@@ -307,12 +361,14 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
         TabLayout tabs = findViewById(R.id.dbTabs);
+        dbTabs = tabs;
         tabs.addTab(tabs.newTab().setText(R.string.db_moves));
         tabs.addTab(tabs.newTab().setText(R.string.db_games));
         gamesTab = tabs.getTabAt(1);
 
         movesAdapter = new MovesAdapter(cell -> controller.playCandidate(cell));
         RecyclerView list = findViewById(R.id.dbMovesList);
+        dbList = list;
         list.setLayoutManager(new LinearLayoutManager(this));
         gamesAdapter = new GamesAdapter(
                 h -> DbGameViewerActivity.start(this, h.gid, h.isMine()),
@@ -428,6 +484,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         movesAdapter.submit(rows);
         movesStatus = rows.isEmpty() ? getString(R.string.db_no_moves) : null;
         refreshStatus();
+        applyPendingListState(false);
     }
 
     @Override
@@ -516,6 +573,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         setGamesTotal(total);
         gamesStatus = games.isEmpty() ? getString(R.string.db_no_games) : null;
         refreshStatus();
+        applyPendingListState(true);
     }
 
     /** The database_game_types_array label whose DB id is gameId (first entry when none matches). */

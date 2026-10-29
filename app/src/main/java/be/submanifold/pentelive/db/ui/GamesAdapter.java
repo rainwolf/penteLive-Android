@@ -97,7 +97,7 @@ public final class GamesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         h.itemView.setOnClickListener(v -> onGameTap.accept(g));
     }
 
-    private static void bindPlayer(Context c, TextView nameView, TextView ratingView, DbDtos.Player p) {
+    static void bindPlayer(Context c, TextView nameView, TextView ratingView, DbDtos.Player p) {
         if (p == null || p.name == null) {
             nameView.setText("?");
             ratingView.setText("");

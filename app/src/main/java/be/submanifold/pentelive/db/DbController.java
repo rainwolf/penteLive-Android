@@ -188,6 +188,19 @@ public final class DbController {
         return true;
     }
 
+    /** Process-death restore: puts back the saved moves and redo stack, then fetches that position. */
+    public void restore(List<Integer> savedMoves, List<Integer> savedRedo) {
+        if (!supported) return;
+        history.restore(savedMoves, savedRedo);
+        started = true;
+        positionChanged();
+    }
+
+    /** Redo stack, next move first (for saving across process death). */
+    public List<Integer> redoMoves() {
+        return history.redo();
+    }
+
     public void retry(Endpoint e) {
         if (!supported) return;
         if (e == Endpoint.STATS) {

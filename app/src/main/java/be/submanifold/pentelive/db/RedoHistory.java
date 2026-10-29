@@ -68,6 +68,14 @@ public final class RedoHistory {
         return Collections.unmodifiableList(new ArrayList<>(redo));
     }
 
+    /** Restores a saved position: moves plus redo stack (next move to redo first). */
+    public void restore(List<Integer> savedMoves, List<Integer> savedRedo) {
+        moves.clear();
+        moves.addAll(savedMoves);
+        redo.clear();
+        for (Integer c : savedRedo) redo.addLast(c);
+    }
+
     public void reset(List<Integer> initial) {
         moves.clear();
         moves.addAll(initial);

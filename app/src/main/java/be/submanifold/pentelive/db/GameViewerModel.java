@@ -41,6 +41,13 @@ public final class GameViewerModel {
         return r.kind == DbResult.Kind.OK && r.value != null && r.value.blocked;
     }
 
+    /** Every move of the loaded game, regardless of the cursor. */
+    public List<Integer> allMoves() {
+        List<Integer> out = new ArrayList<>(moves.length);
+        for (int m : moves) out.add(m);
+        return Collections.unmodifiableList(out);
+    }
+
     public List<Integer> movesUpTo() {
         List<Integer> out = new ArrayList<>(cursor);
         for (int i = 0; i < cursor; i++) out.add(moves[i]);
