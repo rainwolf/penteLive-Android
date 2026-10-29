@@ -22,11 +22,14 @@ public class BoardReplayTest {
 
     @Test
     public void connect6HasNoCaptures() {
-        BoardReplay.Result r = BoardReplay.replay(13, Arrays.asList(180, 181, 0, 182, 1, 183));
+        // Connect6 colours: moves 180..183 -> 1,2,2,1, a real X-O-O-X line on row 9
+        BoardReplay.Result r = BoardReplay.replay(13, Arrays.asList(180, 181, 182, 183));
         assertEquals(0, r.whiteCaptures);
         assertEquals(0, r.blackCaptures);
+        assertEquals(1, at(r, 180));
         assertEquals(2, at(r, 181));
-        assertEquals(1, at(r, 182));
+        assertEquals(2, at(r, 182));
+        assertEquals(1, at(r, 183));
     }
 
     @Test
