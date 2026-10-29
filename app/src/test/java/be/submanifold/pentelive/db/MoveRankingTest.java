@@ -36,6 +36,12 @@ public class MoveRankingTest {
     public void tieBrokenByGames() {
         List<NextMove> s = MoveRanking.sorted(Arrays.asList(m(1, 5, 0), m(2, 8, 0)));
         assertEquals(2, s.get(0).move);
+        assertEquals(0.0, MoveRanking.wilsonLowerBound(0, 5), 0.0);
+        assertEquals(0.0, MoveRanking.wilsonLowerBound(0, 11), 0.0);
+        List<NextMove> t = MoveRanking.sorted(Arrays.asList(m(10, 10, 0), m(11, 11, 0), m(12, 12, 0)));
+        assertEquals(12, t.get(0).move);
+        assertEquals(11, t.get(1).move);
+        assertEquals(10, t.get(2).move);
     }
 
     @Test

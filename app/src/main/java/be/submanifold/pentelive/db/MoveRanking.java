@@ -13,11 +13,11 @@ public final class MoveRanking {
     private MoveRanking() {}
 
     public static double wilsonLowerBound(int wins, int games) {
-        if (games <= 0) return 0;
+        if (games <= 0 || wins <= 0) return 0; // exact: p=0 gives 0 mathematically; avoids +-1e-17 noise
         double n = games;
-        double p = (double) wins / n;
+        double p = Math.min(1.0, Math.max(0.0, (double) wins / n));
         double z2 = Z * Z;
-        return (p + z2 / (2 * n) - Z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))) / (1 + z2 / n);
+        return Math.max(0.0, (p + z2 / (2 * n) - Z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))) / (1 + z2 / n));
     }
 
     public static List<NextMove> sorted(List<NextMove> moves) {
