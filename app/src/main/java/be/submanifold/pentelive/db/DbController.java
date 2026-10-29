@@ -30,7 +30,7 @@ public final class DbController {
     }
 
     static final int DEFAULT_SHOW = 20;
-    static final String SCOPE = "archive";
+    public static final String SCOPE = "archive";
     static final int GAMES_PAGE = 25;
 
     private enum GamesState { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, ERROR }

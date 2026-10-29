@@ -585,6 +585,12 @@
     <string name="db_no_moves">No moves</string>
     <string name="db_unsupported_game">The database is not available for this game</string>
     <string name="db_login_required">Please log in to use the database</string>
+    <string name="db_games">Games</string>
+    <string name="db_no_games">No games</string>
+    <string name="db_show_more">Show more</string>
+    <string name="db_player1">Player 1</string>
+    <string name="db_player2">Player 2</string>
+    <string name="db_newest_first">Newest first</string>
     <string name="db_retry">Retry</string>
     <string name="db_error">Could not load database results</string>
     <string name="timer_zero" translatable="false">0:0</string>

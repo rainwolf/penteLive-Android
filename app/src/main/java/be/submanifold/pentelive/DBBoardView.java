@@ -669,16 +669,6 @@ public class DBBoardView extends View {
             public void onClick(View view) {
 
                 String url = span.getURL();
-                if (url.indexOf("viewLiveGame?mobile&g=") > 0 && url.substring(url.indexOf("g=") + 2).length() == 14) {
-                    String gameID = url.substring(url.indexOf("g=") + 2);
-//                    System.out.println(gameID);
-                    Game game = new Game(gameID, null, null, null, null, null, null, null, null, null, null);
-                    game.setActive(false);
-                    Intent intent = new Intent(getContext(), BoardActivity.class);
-                    intent.putExtra("game", game);
-                    getContext().startActivity(intent);
-                    return;
-                }
                 LinkOpener.open(getContext(), url);
             }
         };

@@ -47,6 +47,8 @@ import be.submanifold.pentelive.db.DbController;
 import be.submanifold.pentelive.db.DbDtos;
 import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbView;
+import be.submanifold.pentelive.db.GameRowFormat;
+import be.submanifold.pentelive.db.ui.GamesAdapter;
 import be.submanifold.pentelive.db.ui.CaptureSpans;
 import be.submanifold.pentelive.db.ui.DbViewModel;
 import be.submanifold.pentelive.db.ui.MovesAdapter;
@@ -81,6 +83,11 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private DbViewModel dbModel;
     private DbController controller;
     private MovesAdapter movesAdapter;
+    private GamesAdapter gamesAdapter;
+    private TabLayout.Tab gamesTab;
+    private boolean gamesSelected;
+    private CharSequence movesStatus;
+    private CharSequence gamesStatus;
     private TextView dbStatus;
     private PopupWindow subscribePopup;
     private AlertDialog loginDialog;
@@ -105,6 +112,15 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         helpBuilder.setTitle(getString(R.string.search_parameters));
         helpBuilder.setView(settingsView);
         searchPrmtrsWindow = helpBuilder.create();
+        // Only the game spinner still means something; the rest fed the removed legacy search.
+        for (int id : new int[]{R.id.sortLabel, R.id.sortChoice, R.id.player1Label, R.id.player1,
+                R.id.player2Label, R.id.player2, R.id.winnerLabel, R.id.winner, R.id.afterLabel,
+                R.id.afterDate, R.id.beforeLabel, R.id.beforeDate, R.id.p1RatingLabel,
+                R.id.p1RatingSpinner, R.id.p2RatingLabel, R.id.p2RatingSpinner,
+                R.id.eitherOrBothLabel, R.id.eitherOrBoth, R.id.excludeTimeoutsLabel,
+                R.id.excludeTimeouts, R.id.liveOrTBLabel, R.id.liveOrTB}) {
+            settingsView.findViewById(id).setVisibility(View.GONE);
+        }
         searchPrmtrsWindow.setOnDismissListener(dialogInterface -> {
             board.setAlpha(1.0f);
         });
@@ -279,8 +295,6 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 //            }
 
 
-        Button button = findViewById(R.id.searchButton);
-        if (button != null) button.setOnClickListener(v -> doSearch());
         // Swipe left goes back, swipe right redoes (the controller owns the position).
         board.setOnSwipeListener(new DBBoardView.OnSwipeListener() {
             @Override
@@ -493,8 +507,6 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             board.post(() -> {
                 if (board.getMovesList().size() <= 1) {
                     showDBSettings();
-                } else {
-                    doSearch();
                 }
             });
         }
@@ -526,12 +538,33 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         TabLayout tabs = findViewById(R.id.dbTabs);
         tabs.addTab(tabs.newTab().setText(R.string.db_moves));
-        // The Games tab arrives with the games list.
+        tabs.addTab(tabs.newTab().setText(R.string.db_games));
+        gamesTab = tabs.getTabAt(1);
 
         movesAdapter = new MovesAdapter(cell -> controller.playCandidate(cell));
         RecyclerView list = findViewById(R.id.dbMovesList);
         list.setLayoutManager(new LinearLayoutManager(this));
+        gamesAdapter = new GamesAdapter(
+                h -> { /* the native viewer (DbGameViewerActivity) opens the row in Task 17 */ },
+                () -> controller.loadMoreGames());
         list.setAdapter(movesAdapter);
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                gamesSelected = tab.getPosition() == 1;
+                list.setAdapter(gamesSelected ? gamesAdapter : movesAdapter);
+                findViewById(R.id.dbShowRow).setVisibility(gamesSelected ? View.GONE : View.VISIBLE);
+                refreshStatus();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
 
         Spinner show = findViewById(R.id.dbShowSpinner);
         String[] labels = new String[SHOW_COUNTS.length];
@@ -555,8 +588,19 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     }
 
     private void setStatus(CharSequence text) {
+        movesStatus = text;
+        gamesStatus = text;
+        refreshStatus();
+    }
+
+    private void refreshStatus() {
+        CharSequence text = gamesSelected ? gamesStatus : movesStatus;
         dbStatus.setText(text);
         dbStatus.setVisibility(text == null || text.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void setGamesTotal(int total) {
+        gamesTab.setText(total > 0 ? getString(R.string.db_games_count, total) : getString(R.string.db_games));
     }
 
     private void updateAiButton() {
@@ -612,7 +656,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         progressBar.setVisibility(View.GONE);
         movesAdapter.setGridSize(DbGames.gridSize(controller.gameId()));
         movesAdapter.submit(rows);
-        setStatus(rows.isEmpty() ? getString(R.string.db_no_moves) : null);
+        movesStatus = rows.isEmpty() ? getString(R.string.db_no_moves) : null;
+        refreshStatus();
     }
 
     @Override
@@ -620,6 +665,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         board.setCandidateDots(null);
         board.setTextViewHTML(findViewById(R.id.playerInfo), "");
         movesAdapter.submit(java.util.Collections.emptyList());
+        gamesAdapter.submit(java.util.Collections.emptyList(), false, "");
+        setGamesTotal(0);
         setStatus(null);
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -629,6 +676,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         progressBar.setVisibility(View.GONE);
         board.setCandidateDots(null);
         movesAdapter.submit(java.util.Collections.emptyList());
+        gamesAdapter.submit(java.util.Collections.emptyList(), false, "");
+        setGamesTotal(0);
         setStatus(getString(R.string.db_blocked));
     }
 
@@ -638,6 +687,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         board.setCandidateDots(null);
         ((Toolbar) findViewById(R.id.toolbar)).setSubtitle(gameName());
         movesAdapter.submit(java.util.Collections.emptyList());
+        gamesAdapter.submit(java.util.Collections.emptyList(), false, "");
+        setGamesTotal(0);
         setStatus(getString(R.string.db_unsupported_game));
         updateAiButton();
     }
@@ -690,55 +741,11 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
     @Override
     public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
-        // Games list arrives with its own task.
-    }
-
-    private void doSearch() {
-        board.setRedDot(-1);
-        progressBar.setVisibility(View.VISIBLE);
-        String player1 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player1)).getText().toString().toLowerCase(java.util.Locale.ROOT);
-        String player2 = ((AutoCompleteTextView) settingsView.findViewById(R.id.player2)).getText().toString().toLowerCase(java.util.Locale.ROOT);
-        int winner = 0;
-        if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(getString(R.string.player1))) {
-            winner = 1;
-        } else if (((TextView) settingsView.findViewById(R.id.winner)).getText().equals(getString(R.string.player2))) {
-            winner = 2;
-        }
-        String afterDate = ((TextView) settingsView.findViewById(R.id.afterDate)).getText().toString();
-        if (!"".equals(afterDate)) {
-            afterDate = "&after_date=" + afterDate;
-        }
-        String beforeDate = ((TextView) settingsView.findViewById(R.id.beforeDate)).getText().toString();
-        if (!"".equals(beforeDate)) {
-            beforeDate = "&before_date=" + beforeDate;
-        }
-        String str = ((TextView) (settingsView.findViewById(R.id.eitherOrBoth))).getText().toString();
-        String eitherOrBoth = "";
-        if (getString(R.string.either).equals(str)) {
-            eitherOrBoth = "&p1_or_p2=true";
-        }
-        str = ((TextView) (settingsView.findViewById(R.id.excludeTimeouts))).getText().toString();
-        String excludeTimeouts = "";
-        if (getString(R.string.yes).equals(str)) {
-            excludeTimeouts = "&exclude_timeout=true";
-        }
-        str = ((TextView) (settingsView.findViewById(R.id.liveOrTB))).getText().toString();
-        String liveOrTB = be.submanifold.pentelive.db.LegacyDbQuery.liveOrTbParam(str,
-                getString(R.string.live_only), getString(R.string.turn_based_only));
-        SearchTask searchTask = new SearchTask(board.getMovesString(),
-                board.getGame(),
-                (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity") ? 1 : 2),
-                player1,
-                player2,
-                winner,
-                afterDate,
-                beforeDate,
-                dbP1Rating,
-                dbP2Rating,
-                eitherOrBoth,
-                excludeTimeouts,
-                liveOrTB);
-        searchTask.execute((Void) null);
+        gamesAdapter.submit(games, hasMore,
+                GameRowFormat.listHeader(DbController.SCOPE, controller.moves().size()));
+        setGamesTotal(total);
+        gamesStatus = games.isEmpty() ? getString(R.string.db_no_games) : null;
+        refreshStatus();
     }
 
     // database_game_types_array gained Swap2-Pente/Swap2-Keryo after O-Pente, which
@@ -854,171 +861,5 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         return true;
     }
-
-
-    public class SearchTask extends BackgroundTask<Void, Boolean> {
-
-        private final String moves;
-        private final String game;
-        private final String player1;
-        private final String player2;
-        private final String afterDate;
-        private final String beforeDate;
-        private final String p1Rating;
-        private final String p2Rating;
-        private final String eitherOrBoth;
-        private final String excludeTimeouts;
-        private final String liveOrTB;
-        private final int sortOrder;
-        private final int winner;
-        private String searchResult;
-
-        SearchTask(String moves, String game, int sortOrder, String player1, String player2, int winner,
-                   String afterDate, String beforeDate, String p1Rating, String p2Rating, String eitherOrBoth,
-                   String excludeTimeouts, String liveOrTB) {
-            this.moves = moves;
-            this.game = game;
-            this.sortOrder = sortOrder;
-            this.player1 = player1.toLowerCase(java.util.Locale.ROOT);
-            this.player2 = player2.toLowerCase(java.util.Locale.ROOT);
-            this.winner = winner;
-            this.afterDate = afterDate;
-            this.beforeDate = beforeDate;
-            this.p1Rating = p1Rating;
-            this.p2Rating = p2Rating;
-            this.eitherOrBoth = eitherOrBoth;
-            this.excludeTimeouts = excludeTimeouts;
-            this.liveOrTB = liveOrTB;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            try {
-                String tmpStr, getStr = "moves=";
-                try {
-                    tmpStr = URLEncoder.encode(moves, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    tmpStr = "";
-                }
-//                System.out.println("moves: " + tmpStr);
-                getStr = getStr + tmpStr + "&response_format=org.pente.gameDatabase.SimpleHtmlGameStorerSearchResponseFormat&response_params=";
-                try {
-                    tmpStr = URLEncoder.encode("zippedPartNumParam=1", "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    tmpStr = "";
-                }
-//                System.out.println("getstr: " + tmpStr);
-                getStr = getStr + tmpStr + "&results_order=" + sortOrder + "&filter_data=";
-                try {
-                    tmpStr = URLEncoder.encode("start_game_num=0&end_game_num=100&player_1_name=" + player1 +
-                            "&player_2_name=" + player2 + "&game=" + game +
-                            "&site=All%20Sites&event=All%20Events&round=All%20Rounds&section=All%20Sections&winner=" +
-                            winner + afterDate + beforeDate + "&p1_rating_above=" + p1Rating + "&p2_rating_above=" + p2Rating
-                            + eitherOrBoth + excludeTimeouts + liveOrTB + "&android=yes", "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    tmpStr = "";
-                }
-//                System.out.println("filter data: " + tmpStr);
-                getStr = getStr + tmpStr;
-                try {
-                    tmpStr = URLEncoder.encode(getStr, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    tmpStr = "";
-                }
-//                System.out.println("format data: " + tmpStr);
-                URL url = new URL("https://www.pente.org/gameServer/mobileController/search?json=&format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
-                if (PentePlayer.development) {
-                    url = new URL("https://10.0.2.2/gameServer/mobileController/search?json=&format_name=org.pente.gameDatabase.SimpleGameStorerSearchRequestFormat&format_data=" + tmpStr);
-                }
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(200000);
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    System.out.println("response code for submit was " + responseCode);
-                    return false;
-                }
-
-                StringBuilder output = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//                System.out.println("output===============" + br);
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    output.append(line + "\n");
-                }
-                br.close();
-
-                searchResult = output.toString();
-//                System.out.println("search output: " + searchResult);
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            if (!success || searchResult == null) {
-                board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
-                progressBar.setVisibility(View.GONE);
-                return;
-            }
-            try {
-                JSONObject json = new JSONObject(searchResult);
-
-                if (!json.getBoolean("access") || json.getBoolean("blocked")) {
-                    board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
-                    progressBar.setVisibility(View.GONE);
-                    return;
-                }
-
-                // Heat dots now come from /api/db position-stats (DbController); this task lists legacy game links only.
-                JSONArray games = json.getJSONArray("games");
-                if (games.length() == 0) {
-                    board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
-                } else {
-                    if (!player1.isEmpty()) {
-                        for (String name : player1.replace(" ", "").split(",")) {
-                            if (!name.contains("*"))
-                                PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
-                        }
-                    }
-                    if (!player2.isEmpty()) {
-                        for (String name : player2.replace(" ", "").split(",")) {
-                            if (!name.contains("*"))
-                                PrefUtils.savePlayerToPrefs(DatabaseActivity.this, name);
-                        }
-                    }
-                    StringBuilder html = new StringBuilder();
-                    for (int i = 0; i < games.length(); i++) {
-                        JSONObject game = games.getJSONObject(i);
-                        JSONObject p1 = game.getJSONObject("player1");
-                        JSONObject p2 = game.getJSONObject("player2");
-                        String viewUrl = game.getString("viewUrl");
-                        String date = game.getString("date");
-                        String p1Name = p1.getString("name");
-                        String p2Name = p2.getString("name");
-                        String winner = p1.getBoolean("winner") ? p1Name : p2Name;
-                        html.append("<br><br><a href=\"https://www.pente.org").append(viewUrl).append("\">")
-                                .append(p1Name).append(" vs ").append(p2Name).append("</a>")
-                                .append(" &bull; ").append(date)
-                                .append(" &bull; W: ").append(winner);
-                    }
-                    board.setTextViewHTML(findViewById(R.id.playerInfo), html.toString());
-                }
-            } catch (Exception e) {
-                board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
-            }
-            progressBar.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected void onCancelled() {
-        }
-    }
-
 
 }
