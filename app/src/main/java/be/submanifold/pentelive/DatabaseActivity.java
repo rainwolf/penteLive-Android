@@ -488,12 +488,8 @@ public class DatabaseActivity extends AppCompatActivity {
             excludeTimeouts = "&exclude_timeout=true";
         }
         str = ((TextView) (settingsView.findViewById(R.id.liveOrTB))).getText().toString();
-        String liveOrTB = "";
-        if (getString(R.string.live_only).equals(str)) {
-            liveOrTB = "&only_live=yes";
-        } else if (getString(R.string.live_only).equals(str)) {
-            liveOrTB = "&only_turn_based=yes";
-        }
+        String liveOrTB = be.submanifold.pentelive.db.LegacyDbQuery.liveOrTbParam(str,
+                getString(R.string.live_only), getString(R.string.turn_based_only));
         SearchTask searchTask = new SearchTask(board.getMovesString(),
                 board.getGame(),
                 (PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity").equals("popularity") ? 1 : 2),
@@ -552,7 +548,7 @@ public class DatabaseActivity extends AppCompatActivity {
         position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP2RATING_KEY, 0);
         spinner.setSelection(position);
         String[] p2RatingArray = getResources().getStringArray(R.array.db_ratings_array);
-        dbP1Rating = p2RatingArray[position];
+        dbP2Rating = p2RatingArray[position];
         TextView sortOrder = settingsView.findViewById(R.id.sortChoice);
         sortOrder.setText(PrefUtils.getFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBSORT_KEY, "popularity"));
         AutoCompleteTextView actv = settingsView.findViewById(R.id.player1);
