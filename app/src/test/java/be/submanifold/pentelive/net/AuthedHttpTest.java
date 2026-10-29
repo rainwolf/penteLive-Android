@@ -471,4 +471,57 @@ public class AuthedHttpTest {
             // existing behaviour kept for other callers
         }
     }
+
+    @Test
+    public void postJsonSendsJsonBodyAndCookies() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(200).setBody("{}"));
+
+        http.postJsonAllowingErrors("/api/db/position-stats", "{\"game\":1}");
+
+        assertEquals(1, data.size());
+        RecordedRequest req = data.get(0);
+        assertEquals("POST", req.getMethod());
+        assertTrue(req.getHeader("Content-Type"), req.getHeader("Content-Type").startsWith("application/json"));
+        assertEquals("{\"game\":1}", req.getBody().readUtf8());
+        assertTrue(req.getHeader("Cookie"), req.getHeader("Cookie").contains("name2="));
+    }
+
+    @Test
+    public void postJsonReturns403Body() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(403)
+                .setBody("{\"error\":{\"code\":\"subscription_required\"}}"));
+
+        AuthedHttp.Reply reply = http.postJsonAllowingErrors("/api/db/games/search", "{}");
+
+        assertEquals(403, reply.code);
+        assertTrue(reply.body, reply.body.contains("subscription_required"));
+    }
+
+    @Test
+    public void getWithTimeoutTimesOut() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(200).setBody("{}")
+                .setHeadersDelay(2, TimeUnit.SECONDS));
+
+        try {
+            http.getAllowingErrors("/api/db/games/1", 500);
+            fail("expected SocketTimeoutException");
+        } catch (java.net.SocketTimeoutException expected) {
+            // read timeout applied
+        }
+    }
+
+    @Test
+    public void getWithTimeoutReturns404Body() throws Exception {
+        loggedIn("tok");
+        serve(loginSuccess("tok"), (r, n) -> new MockResponse().setResponseCode(404)
+                .setBody("{\"error\":{\"code\":\"not_found\"}}"));
+
+        AuthedHttp.Reply reply = http.getAllowingErrors("/api/db/games/1", 30_000);
+
+        assertEquals(404, reply.code);
+        assertTrue(reply.body, reply.body.contains("not_found"));
+    }
 }

@@ -86,7 +86,7 @@ public final class AuthedHttp {
 
     /** GET {@code pathAndQuery} (e.g. "/gameServer/mobile/json/game.jsp?gid=1"), following redirects. */
     public Reply get(String pathAndQuery) throws IOException {
-        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, false));
+        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, false, 0));
     }
 
     /**
@@ -94,17 +94,30 @@ public final class AuthedHttp {
      * of thrown, for endpoints whose JSON error text the UI shows.
      */
     public Reply getAllowingErrors(String pathAndQuery) throws IOException {
-        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, true));
+        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, true, 0));
+    }
+
+    /** As {@link #getAllowingErrors(String)}, with a connect and read timeout of {@code timeoutMs} (0 = none). */
+    public Reply getAllowingErrors(String pathAndQuery, int timeoutMs) throws IOException {
+        return send(pathAndQuery, () -> exchangeGet(pathAndQuery, true, timeoutMs));
+    }
+
+    /**
+     * POST a JSON body to {@code path} with a 30 s connect and read timeout; a 4xx/5xx response is returned
+     * (code and error body) instead of thrown.
+     */
+    public Reply postJsonAllowingErrors(String path, String json) throws IOException {
+        return send(path, () -> exchangePost(path, json, JSON_TIMEOUT_MS, true, JSON_TYPE));
     }
 
     /** POST the form body {@code form} to {@code path}, without following a redirect. */
     public Reply postForm(String path, String form) throws IOException {
-        return send(path, () -> exchangePost(path, form, 0, false));
+        return send(path, () -> exchangePost(path, form, 0, false, FORM_TYPE));
     }
 
     /** As {@link #postForm(String, String)}, with a body that is built again for the retry. */
     public Reply postForm(String path, FormSupplier form) throws IOException {
-        return send(path, () -> exchangePost(path, form.form(), 0, false));
+        return send(path, () -> exchangePost(path, form.form(), 0, false, FORM_TYPE));
     }
 
     /**
@@ -117,7 +130,7 @@ public final class AuthedHttp {
     public Reply postFormAllowingErrors(String path, String form) throws IOException {
         return send(path, () -> exchangePost(path,
                 form + "&" + Forms.encode("name2", session.name(), "password2", session.password()),
-                0, true));
+                0, true, FORM_TYPE));
     }
 
     /**
@@ -210,7 +223,7 @@ public final class AuthedHttp {
     /** POSTs the credentials to login.jsp; on success, checks that the login cookies were stored for {@code name}. */
     private LoginResponse.Outcome login(String name, String password) throws IOException {
         Reply reply = exchangePost(LOGIN_PATH,
-                Forms.encode("mobile", "", "name2", name, "password2", password), LOGIN_TIMEOUT_MS, false);
+                Forms.encode("mobile", "", "name2", name, "password2", password), LOGIN_TIMEOUT_MS, false, FORM_TYPE);
         LoginResponse.Outcome outcome = LoginResponse.classify(reply.body);
         if (outcome == LoginResponse.Outcome.SUCCESS) {
             Map<String, String> stored = storedLoginCookies();
@@ -226,8 +239,12 @@ public final class AuthedHttp {
         return CookieHeader.parse(cookies.cookieHeader(urls.baseUrl() + "/gameServer/"));
     }
 
-    private Reply exchangeGet(String pathAndQuery, boolean allowErrors) throws IOException {
-        HttpURLConnection connection = open(pathAndQuery, 0);
+    private static final String FORM_TYPE = "application/x-www-form-urlencoded; charset=UTF-8";
+    private static final String JSON_TYPE = "application/json; charset=UTF-8";
+    private static final int JSON_TIMEOUT_MS = 30_000;
+
+    private Reply exchangeGet(String pathAndQuery, boolean allowErrors, int timeoutMs) throws IOException {
+        HttpURLConnection connection = open(pathAndQuery, timeoutMs);
         return allowErrors ? readAllowingErrors(connection) : read(connection);
     }
 
@@ -235,14 +252,15 @@ public final class AuthedHttp {
      * @param timeoutMs connect and read timeout; 0 keeps HttpURLConnection's default (none)
      * @param allowErrors return a 4xx/5xx response instead of throwing
      */
-    private Reply exchangePost(String path, String form, int timeoutMs, boolean allowErrors) throws IOException {
+    private Reply exchangePost(String path, String form, int timeoutMs, boolean allowErrors,
+            String contentType) throws IOException {
         HttpURLConnection connection = open(path, timeoutMs);
         byte[] body = form.getBytes(StandardCharsets.UTF_8);
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setInstanceFollowRedirects(false);
         connection.setUseCaches(false);
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        connection.setRequestProperty("Content-Type", contentType);
         connection.setFixedLengthStreamingMode(body.length);
         try (OutputStream out = connection.getOutputStream()) {
             out.write(body);
