@@ -478,7 +478,9 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             ai.getMove(moves);
         });
 
-        if (savedInstanceState == null) {
+        // Unsupported (Go/Renju) keeps its static state; don't let the settings
+        // spinner or a search replace it.
+        if (savedInstanceState == null && DbGames.isSupported(controller.gameId())) {
             board.post(() -> {
                 if (board.getMovesList().size() <= 1) {
                     showDBSettings();
