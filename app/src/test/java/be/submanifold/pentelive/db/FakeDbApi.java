@@ -15,6 +15,11 @@ import java.util.Map;
 final class FakeDbApi implements DbTransport {
     final List<List<Integer>> statsCalls = new ArrayList<>();
     final List<Integer> statsGames = new ArrayList<>();
+    final List<String> statsScopes = new ArrayList<>();
+    final List<String> gamesScopes = new ArrayList<>();
+    final List<JsonElement> statsFilters = new ArrayList<>();
+    final List<JsonElement> gamesFilters = new ArrayList<>();
+    final List<Integer> gamesGames = new ArrayList<>();
     final Map<List<Integer>, Reply> statsReplies = new HashMap<>();
     Reply defaultReply = new Reply(200, "{\"totalGames\":0,\"nextMoves\":[]}");
     final List<List<Integer>> gamesCalls = new ArrayList<>();
@@ -77,6 +82,9 @@ final class FakeDbApi implements DbTransport {
             synchronized (this) {
                 gamesCalls.add(moves);
                 gamesOffsets.add(offset);
+                gamesScopes.add(o.get("scope").getAsString());
+                gamesFilters.add(o.get("filters"));
+                gamesGames.add(o.get("game").getAsInt());
             }
             Reply g = gamesReplies.get(moves + "@" + offset);
             return g != null ? g : defaultGamesReply;
@@ -84,6 +92,8 @@ final class FakeDbApi implements DbTransport {
         synchronized (this) {
             statsCalls.add(moves);
             statsGames.add(o.get("game").getAsInt());
+            statsScopes.add(o.get("scope").getAsString());
+            statsFilters.add(o.get("filters"));
         }
         Reply r = statsReplies.get(moves);
         return r != null ? r : defaultReply;

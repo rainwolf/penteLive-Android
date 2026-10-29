@@ -45,9 +45,11 @@ import be.submanifold.pentelive.db.CaptureIcons;
 import be.submanifold.pentelive.db.DbApi;
 import be.submanifold.pentelive.db.DbController;
 import be.submanifold.pentelive.db.DbDtos;
+import be.submanifold.pentelive.db.DbFilterStore;
 import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.GameRowFormat;
+import be.submanifold.pentelive.db.SharedPrefsKeyValueStore;
 import be.submanifold.pentelive.db.ui.DbGameViewerActivity;
 import be.submanifold.pentelive.db.ui.GamesAdapter;
 import be.submanifold.pentelive.db.ui.CaptureSpans;
@@ -147,18 +149,22 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         if (!dbModel.hasController()) {
             // The extras game and moves win for this session and are not persisted.
             Bundle extras = getIntent().getExtras();
-            String label = extras != null ? extras.getString("game") : null;
+            String extraLabel = extras != null ? extras.getString("game") : null;
             ArrayList<Integer> extraMoves = extras != null ? extras.getIntegerArrayList("moves") : null;
-            if (label == null) {
+            Integer override = null;
+            if (extraLabel != null) {
+                Integer gameId = DbGames.fromGameType(extraLabel);
+                override = gameId == null ? 0 : gameId;
+            } else {
                 migrateDbGameIndexForSwap2();
-                String[] types = getResources().getStringArray(R.array.database_game_types_array);
-                int idx = PrefUtils.getIntFromPrefs(this, PrefUtils.PREFS_DBGAME_KEY, 0);
-                label = types[Math.max(0, Math.min(idx, types.length - 1))];
                 extraMoves = null;
             }
-            Integer gameId = DbGames.fromGameType(label);
-            dbModel.setController(new DbController(new DbApi(new AuthedDbTransport()), dbModel.io(), dbModel.main(),
-                    gameId == null ? 0 : gameId, extraMoves), label);
+            DbFilterStore filterStore = new DbFilterStore(new SharedPrefsKeyValueStore(this),
+                    new DbFilterStore.LegacyLabels(getString(R.string.both), getString(R.string.yes),
+                            getString(R.string.live_only), getString(R.string.turn_based_only)));
+            DbController created = new DbController(new DbApi(new AuthedDbTransport()), dbModel.io(), dbModel.main(),
+                    filterStore, override, extraMoves);
+            dbModel.setController(created, extraLabel != null ? extraLabel : gameTypeLabel(created.gameId()));
         }
         controller = dbModel.controller();
         board.setGame(dbModel.gameLabel());
@@ -743,7 +749,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     @Override
     public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
         gamesAdapter.submit(games, hasMore,
-                GameRowFormat.listHeader(DbController.SCOPE, controller.moves().size()));
+                GameRowFormat.listHeader(controller.scope(), controller.moves().size()));
         setGamesTotal(total);
         gamesStatus = games.isEmpty() ? getString(R.string.db_no_games) : null;
         refreshStatus();
@@ -764,6 +770,16 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, shifted);
         }
         PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_SWAP2SHIFT_KEY, true);
+    }
+
+    /** The database_game_types_array label whose DB id is gameId (first entry when none matches). */
+    private String gameTypeLabel(int gameId) {
+        String[] types = getResources().getStringArray(R.array.database_game_types_array);
+        for (String t : types) {
+            Integer id = DbGames.fromGameType(t);
+            if (id != null && id == gameId) return t;
+        }
+        return types[0];
     }
 
     private void showDBSettings() {

@@ -2,6 +2,7 @@ package be.submanifold.pentelive.db;
 
 import be.submanifold.pentelive.db.DbDtos.GameHeader;
 import be.submanifold.pentelive.db.DbDtos.NextMove;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,7 +31,6 @@ public final class DbController {
     }
 
     static final int DEFAULT_SHOW = 20;
-    public static final String SCOPE = "archive";
     static final int GAMES_PAGE = 25;
 
     private enum GamesState { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, ERROR }
@@ -58,6 +58,8 @@ public final class DbController {
     private final LatestRequest statsGuard = new LatestRequest();
     private final LatestRequest gamesGuard = new LatestRequest();
 
+    private final DbFilterStore store;
+    private DbFilters applied;
     private int gameId;
     private boolean supported;
     private RedoHistory history;
@@ -81,12 +83,54 @@ public final class DbController {
     private int pendingOffset; // offset of the in-flight (or last failed) request
     private boolean gamesInFlight;
 
-    public DbController(DbApi api, Executor io, Executor main, int gameId, List<Integer> initialMoves) {
+    /**
+     * @param gameOverride the extras game (not saved); null = take the game from the stored filters;
+     *                     0 = an unsupported game (shows the unsupported state)
+     */
+    public DbController(DbApi api, Executor io, Executor main, DbFilterStore store, Integer gameOverride,
+                        List<Integer> initialMoves) {
         this.api = api;
         this.io = io;
         this.main = main;
+        this.store = store;
+        DbFilters stored = store.load();
+        int game;
+        if (gameOverride == null) {
+            game = stored.gameId();
+            applied = stored;
+        } else if (gameOverride != 0 && DbGames.isSupported(gameOverride)) {
+            game = gameOverride;
+            applied = stored.withGame(gameOverride);
+        } else {
+            game = gameOverride;
+            applied = stored;
+        }
         List<Integer> initial = initialMoves == null || initialMoves.isEmpty() ? null : initialMoves;
-        resetGame(gameId, initial);
+        resetGame(game, initial);
+    }
+
+    /** The filters in force for this session (stored ones, or stored plus the extras game). */
+    public DbFilters appliedFilters() {
+        return applied;
+    }
+
+    /** Scope sent with every request, for the list label. */
+    public String scope() {
+        return applied.scope;
+    }
+
+    /** Saves f, clears results once, resets the position if the game changed, refetches stats and games. */
+    public void applyFilters(DbFilters f) {
+        store.save(f);
+        boolean gameChanged = f.gameId() != gameId;
+        applied = f;
+        if (gameChanged) resetGame(f.gameId(), null);
+        started = true;
+        if (!supported) {
+            if (view != null) view.showUnsupported();
+            return;
+        }
+        positionChanged();
     }
 
     private void resetGame(int newGameId, List<Integer> initialOrNull) {
@@ -173,13 +217,15 @@ public final class DbController {
         final List<Integer> moves = history.moves();
         final int game = gameId;
         final int id = gamesGuard.next();
+        final String scope = applied.scope;
+        final JsonObject filters = applied.toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
         pendingOffset = offset;
         gamesInFlight = true;
         gamesState = GamesState.LOADING;
         io.execute(new Runnable() {
             @Override
             public void run() {
-                final DbResult<DbDtos.GamePage> r = api.searchGames(game, moves, SCOPE, null, offset, GAMES_PAGE);
+                final DbResult<DbDtos.GamePage> r = api.searchGames(game, moves, scope, filters, offset, GAMES_PAGE);
                 main.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -256,14 +302,15 @@ public final class DbController {
         return gameId;
     }
 
+    /** Legacy spinner path (removed with the legacy dialog). */
     public void setGame(int newGameId) {
-        resetGame(newGameId, null);
-        started = true;
-        if (!supported) {
+        if (newGameId == 0 || !DbGames.isSupported(newGameId)) {
+            resetGame(newGameId, null);
+            started = true;
             if (view != null) view.showUnsupported();
             return;
         }
-        positionChanged();
+        applyFilters(applied.withGame(newGameId));
     }
 
     /** clearResults, showPosition, then stats and games requests, each with a fresh id. */
@@ -280,10 +327,12 @@ public final class DbController {
         }
         final int id = statsGuard.next();
         final int game = gameId;
+        final String scope = applied.scope;
+        final JsonObject filters = applied.toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
         io.execute(new Runnable() {
             @Override
             public void run() {
-                final StatsOutcome out = fetchStats(game, moves);
+                final StatsOutcome out = fetchStats(game, moves, scope, filters);
                 main.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -296,8 +345,8 @@ public final class DbController {
     }
 
     /** IO side: request plus pure derivation (ranking, top N, heat). No state is touched. */
-    private StatsOutcome fetchStats(int game, List<Integer> moves) {
-        DbResult<DbDtos.PositionStats> r = api.positionStats(game, moves, SCOPE, null);
+    private StatsOutcome fetchStats(int game, List<Integer> moves, String scope, JsonObject filters) {
+        DbResult<DbDtos.PositionStats> r = api.positionStats(game, moves, scope, filters);
         if (r.kind != DbResult.Kind.OK) return new StatsOutcome(r.kind, false, null, null);
         if (r.value.blocked) return new StatsOutcome(DbResult.Kind.OK, true, null, null);
         Set<Integer> occupied = CaptureIcons.occupied(game, moves);

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.gson.JsonObject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,6 +22,8 @@ public class DbControllerTest {
     private ManualExecutor io;
     private ManualExecutor main;
     private RecordingDbView view;
+    private InMemoryKeyValueStore kv;
+    private DbFilterStore store;
 
     @Before
     public void setUp() {
@@ -28,12 +31,15 @@ public class DbControllerTest {
         io = new ManualExecutor();
         main = new ManualExecutor();
         view = new RecordingDbView();
+        kv = new InMemoryKeyValueStore();
+        store = new DbFilterStore(kv, new DbFilterStore.LegacyLabels("Both", "Yes", "Live only", "Turn-based only"));
+        store.save(DbFilters.defaults());
         fake.reply(Arrays.asList(180), 200, FakeDbApi.stats(181, 40, 200, 80));
         fake.reply(Arrays.asList(180, 181), 200, FakeDbApi.stats(182, 30, 183, 90));
     }
 
     private DbController controller(int gameId, List<Integer> initial) {
-        return new DbController(fake.api, io, main, gameId, initial);
+        return new DbController(fake.api, io, main, store, gameId, initial);
     }
 
     /** Pente at [180], attached, initial load settled, view log cleared. */
@@ -559,5 +565,88 @@ public class DbControllerTest {
         assertEquals(1, v2.count("showGames"));
         assertEquals(25, v2.games.get(0).size());
         assertEquals(0, io.size());
+    }
+
+    private DbFilters scopeFilters(String scope) {
+        return DbFilters.defaults().toBuilder().scope(scope).build();
+    }
+
+    @Test
+    public void applyClearsOnceThenRefetchesBoth() {
+        DbController c = started();
+        int stats = fake.statsCalls.size();
+        int games = fake.gamesCalls.size();
+        c.applyFilters(DbFilters.defaults().toBuilder().winner(1).player1MinRating(1800).build());
+        assertEquals(1, view.count("clearResults"));
+        settle();
+        assertEquals(stats + 1, fake.statsCalls.size());
+        assertEquals(games + 1, fake.gamesCalls.size());
+        assertEquals(0, fake.lastGamesOffset());
+        assertEquals(Arrays.asList(180), fake.lastStatsMoves());
+        JsonObject expected = c.appliedFilters().toWire(DbCapabilities.SERVER_FILTERS_B3_B4);
+        assertEquals(expected, fake.statsFilters.get(fake.statsFilters.size() - 1));
+        assertEquals(expected, fake.gamesFilters.get(fake.gamesFilters.size() - 1));
+        assertEquals(c.appliedFilters(), store.load());
+    }
+
+    @Test
+    public void applyUsesScope() {
+        DbController c = started();
+        c.applyFilters(scopeFilters("mine"));
+        settle();
+        assertEquals("mine", fake.statsScopes.get(fake.statsScopes.size() - 1));
+        assertEquals("mine", fake.gamesScopes.get(fake.gamesScopes.size() - 1));
+        assertEquals("mine", c.scope());
+    }
+
+    @Test
+    public void mine401ShowsLogin() {
+        DbController c = started();
+        fake.reply(Arrays.asList(180), 401, "{\"error\":{\"code\":\"unauthorized\",\"message\":\"x\"}}");
+        fake.gamesReply(Arrays.asList(180), 0, 401, "{\"error\":{\"code\":\"unauthorized\",\"message\":\"x\"}}");
+        c.applyFilters(scopeFilters("mine"));
+        settle();
+        assertTrue(view.count("showLoginPrompt") >= 1);
+        assertEquals(0, view.count("showDots"));
+        assertEquals(0, view.count("showGames"));
+    }
+
+    @Test
+    public void gameChangeResetsPosition() {
+        DbController c = started();
+        c.onBoardMove(181);
+        settle();
+        c.applyFilters(DbFilters.defaults().toBuilder().baseGameId(7).build());
+        settle();
+        assertEquals(7, c.gameId());
+        assertEquals(Collections.<Integer>emptyList(), c.moves());
+        assertEquals(Collections.<Integer>emptyList(), fake.lastStatsMoves());
+        assertEquals(7, (int) fake.statsGames.get(fake.statsGames.size() - 1));
+        // same game, new filters: the position is kept
+        c.onBoardMove(180);
+        c.applyFilters(c.appliedFilters().toBuilder().winner(2).build());
+        assertEquals(Arrays.asList(180), c.moves());
+    }
+
+    @Test
+    public void extrasGameOverridesStoredGameWithoutSaving() {
+        DbController c = controller(2, Arrays.asList(180, 181));
+        c.attach(view);
+        settle();
+        assertEquals(2, (int) fake.statsGames.get(0));
+        assertEquals(2, (int) fake.gamesGames.get(0));
+        assertEquals(Arrays.asList(180, 181), fake.statsCalls.get(0));
+        assertEquals(2, c.gameId());
+        assertEquals(1, store.load().gameId());
+    }
+
+    @Test
+    public void reattachAfterApplyKeepsAppliedFilters() {
+        DbController c = started();
+        c.applyFilters(scopeFilters("both"));
+        settle();
+        c.detach();
+        c.attach(view);
+        assertEquals("both", c.scope());
     }
 }
