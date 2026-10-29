@@ -20,6 +20,8 @@ import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.ViewConfiguration;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -133,6 +135,91 @@ public class BoardView extends View {
         submitStr = context.getString(R.string.submit);
         passStr = context.getString(R.string.pass);
 //        mDetector = new GestureDetectorCompat(context, new MyGestureListener());
+    }
+
+    /** Horizontal fling on the board; finger moving left = onSwipeLeft, right = onSwipeRight. */
+    public interface OnSwipeListener {
+        void onSwipeLeft();
+
+        void onSwipeRight();
+    }
+
+    private OnSwipeListener swipeListener;
+    private VelocityTracker velocityTracker;
+    private float swipeDownX, swipeDownY;
+    // Board state at finger-down; the normal ACTION_DOWN code (replay to end, opening-pick resets)
+    // runs before we know it is a swipe, so a detected swipe restores this first.
+    private int downUntilMove, downDPenteMove4, downSwap2Move2, downSwap2Move3;
+    private boolean downReplayed;
+    private java.util.List<Integer> downRenjuPicks;
+
+    public void setOnSwipeListener(OnSwipeListener listener) {
+        swipeListener = listener;
+    }
+
+    /**
+     * Detects a fast, mostly horizontal swipe. A slow drag to aim a stone is not a swipe (too slow),
+     * so placement is unaffected. Returns true when the gesture ended as a swipe: the zoom and
+     * tracking stone are cleared, nothing is placed, and the listener is called.
+     */
+    private boolean handleSwipe(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (velocityTracker != null) velocityTracker.recycle();
+                velocityTracker = VelocityTracker.obtain();
+                velocityTracker.addMovement(event);
+                swipeDownX = event.getX();
+                swipeDownY = event.getY();
+                downReplayed = replayed;
+                downDPenteMove4 = dPenteMove4;
+                downSwap2Move2 = swap2Move2;
+                downSwap2Move3 = swap2Move3;
+                downRenjuPicks = renjuPicks == null ? null : new java.util.ArrayList<>(renjuPicks);
+                if (game != null) downUntilMove = game.getUntilMove();
+                return false;
+            case MotionEvent.ACTION_MOVE:
+                if (velocityTracker != null) velocityTracker.addMovement(event);
+                return false;
+            case MotionEvent.ACTION_CANCEL:
+                if (velocityTracker != null) {
+                    velocityTracker.recycle();
+                    velocityTracker = null;
+                }
+                return false;
+            case MotionEvent.ACTION_UP:
+                if (velocityTracker == null) return false;
+                velocityTracker.addMovement(event);
+                velocityTracker.computeCurrentVelocity(1000);
+                float vx = velocityTracker.getXVelocity();
+                velocityTracker.recycle();
+                velocityTracker = null;
+                ViewConfiguration vc = ViewConfiguration.get(getContext());
+                float dx = event.getX() - swipeDownX;
+                float dy = event.getY() - swipeDownY;
+                if (Math.abs(dx) < vc.getScaledTouchSlop() * 8
+                        || Math.abs(dx) < 2 * Math.abs(dy)
+                        || Math.abs(vx) < vc.getScaledMinimumFlingVelocity() * 8) {
+                    return false;
+                }
+                playedMove = -1;
+                scaling = 1;
+                translateX = 0;
+                translateY = 0;
+                if (game != null) {
+                    game.setUntilMove(downUntilMove);
+                    game.replayGameUntilMove(this);
+                }
+                replayed = downReplayed;
+                dPenteMove4 = downDPenteMove4;
+                swap2Move2 = downSwap2Move2;
+                swap2Move3 = downSwap2Move3;
+                renjuPicks = downRenjuPicks;
+                invalidate();
+                if (dx < 0) swipeListener.onSwipeLeft();
+                else swipeListener.onSwipeRight();
+                return true;
+        }
+        return false;
     }
 
 
@@ -361,6 +448,10 @@ public class BoardView extends View {
         if (game != null && game.isRenju() && game.isActive()
                 && "SWAP".equals(game.renjuPhase) && !renjuChosen) {
             return false;
+        }
+
+        if (swipeListener != null && handleSwipe(event)) {
+            return true;
         }
 
         float x, y;

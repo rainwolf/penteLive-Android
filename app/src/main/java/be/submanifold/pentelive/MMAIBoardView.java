@@ -18,7 +18,9 @@ import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -221,11 +223,80 @@ public class MMAIBoardView extends View {
 
     }
 
+    /** Horizontal fling on the board; finger moving left = onSwipeLeft, right = onSwipeRight. */
+    public interface OnSwipeListener {
+        void onSwipeLeft();
+
+        void onSwipeRight();
+    }
+
+    private OnSwipeListener swipeListener;
+    private VelocityTracker velocityTracker;
+    private float swipeDownX, swipeDownY;
+
+    public void setOnSwipeListener(OnSwipeListener listener) {
+        swipeListener = listener;
+    }
+
+    /**
+     * Detects a fast, mostly horizontal swipe. A slow drag to aim a stone is not a swipe (too slow),
+     * so placement is unaffected. Returns true when the gesture ended as a swipe: the zoom and
+     * tracking stone are cleared, nothing is placed, and the listener is called.
+     */
+    private boolean handleSwipe(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (velocityTracker != null) velocityTracker.recycle();
+                velocityTracker = VelocityTracker.obtain();
+                velocityTracker.addMovement(event);
+                swipeDownX = event.getX();
+                swipeDownY = event.getY();
+                return false;
+            case MotionEvent.ACTION_MOVE:
+                if (velocityTracker != null) velocityTracker.addMovement(event);
+                return false;
+            case MotionEvent.ACTION_CANCEL:
+                if (velocityTracker != null) {
+                    velocityTracker.recycle();
+                    velocityTracker = null;
+                }
+                return false;
+            case MotionEvent.ACTION_UP:
+                if (velocityTracker == null) return false;
+                velocityTracker.addMovement(event);
+                velocityTracker.computeCurrentVelocity(1000);
+                float vx = velocityTracker.getXVelocity();
+                velocityTracker.recycle();
+                velocityTracker = null;
+                ViewConfiguration vc = ViewConfiguration.get(getContext());
+                float dx = event.getX() - swipeDownX;
+                float dy = event.getY() - swipeDownY;
+                if (Math.abs(dx) < vc.getScaledTouchSlop() * 8
+                        || Math.abs(dx) < 2 * Math.abs(dy)
+                        || Math.abs(vx) < vc.getScaledMinimumFlingVelocity() * 8) {
+                    return false;
+                }
+                playedMove = -1;
+                scaling = 1;
+                translateX = 0;
+                translateY = 0;
+                invalidate();
+                if (dx < 0) swipeListener.onSwipeLeft();
+                else swipeListener.onSwipeRight();
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // TODO Auto-generated method stub
 
 //        active = myColor == (1 + movesList.size()%2);
+        if (swipeListener != null && handleSwipe(event)) {
+            return true;
+        }
+
         float x, y;
         x = event.getX();
         y = event.getY();
