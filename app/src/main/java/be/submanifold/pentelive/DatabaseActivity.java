@@ -410,7 +410,7 @@ public class DatabaseActivity extends AppCompatActivity {
         });
         ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener((compoundButton, b) -> PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b));
         aiSettingsView.findViewById(R.id.runAIbutton).setOnClickListener(view -> {
-            board.setSearchResults(null);
+            board.setCandidateDots(null);
             aiSearchPrmtrsWindow.dismiss();
             if (board.getAiPlayer() == null) {
                 InputStream tbl = null;
@@ -726,7 +726,7 @@ public class DatabaseActivity extends AppCompatActivity {
                 JSONObject json = new JSONObject(searchResult);
 
                 if (!json.getBoolean("access") || json.getBoolean("blocked")) {
-                    board.setSearchResults(null);
+                    board.setCandidateDots(null);
                     board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
                     progressBar.setVisibility(View.GONE);
                     return;
@@ -759,7 +759,7 @@ public class DatabaseActivity extends AppCompatActivity {
                     searchResults.put(movesArray.getInt(i), color);
                 }
 
-                board.setSearchResults(searchResults);
+                board.setCandidateDots(searchResults);
                 board.invalidate();
 
                 JSONArray games = json.getJSONArray("games");

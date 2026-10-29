@@ -21,13 +21,15 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import be.submanifold.pentelive.db.BoardReplay;
+import be.submanifold.pentelive.db.DbGames;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -93,17 +95,42 @@ public class DBBoardView extends View {
 
 
     private List<Integer> movesList = new ArrayList<>();
-    private Map<Integer, Integer> searchResults;
+    private Map<Integer, Integer> candidateDots;
+    private boolean dotsVisible = true;
+    /** DB game id for {@link #game}, resolved once per setGame; null for Go/Renju (no replay). */
+    private Integer dbGameId;
+
+    /** Reports user placements and AI moves; the controller owns the position. */
+    public interface BoardListener {
+        void onMovePlayed(int cell);
+
+        void onAiMove(int cell);
+    }
+
+    private BoardListener boardListener;
+
+    public void setBoardListener(BoardListener listener) {
+        boardListener = listener;
+    }
 
     public List<Integer> getMovesList() {
         return movesList;
     }
 
     public void setMovesList(List<Integer> movesList) {
-        this.movesList = movesList;
+        showPosition(movesList);
+    }
+
+    /**
+     * Shows a position. The list is copied (callers pass RedoHistory's unmodifiable list).
+     * Without a game the list is only stored; the replay runs on the next setGame-backed call.
+     */
+    public void showPosition(List<Integer> moves) {
+        this.movesList = new ArrayList<>(moves);
         if (game != null) {
             replayGame(abstractBoard);
         }
+        invalidate();
     }
 
     public Ai getAiPlayer() {
@@ -137,6 +164,7 @@ public class DBBoardView extends View {
 
     public void setGame(String game) {
         this.game = game;
+        this.dbGameId = DbGames.fromGameType(game);
         if (game.contains("Gomoku")) {
             setBackgroundColor(gomokuColor);
 //            if (parentLayout != null) {
@@ -175,8 +203,19 @@ public class DBBoardView extends View {
         }
     }
 
-    public void setSearchResults(Map<Integer, Integer> searchResults) {
-        this.searchResults = searchResults;
+    /** Candidate heat dots, cell to ARGB; null or empty clears them. */
+    public void setCandidateDots(Map<Integer, Integer> cellArgb) {
+        this.candidateDots = cellArgb;
+        invalidate();
+    }
+
+    public void setDotsVisible(boolean visible) {
+        this.dotsVisible = visible;
+        invalidate();
+    }
+
+    boolean drawsDots() {
+        return dotsVisible && candidateDots != null && !candidateDots.isEmpty();
     }
 //    public void setMyColor(byte myColor) {        this.myColor = myColor;    }
 //    public void setDifficulty(int difficulty) {        this.difficulty = difficulty;    }
@@ -201,8 +240,7 @@ public class DBBoardView extends View {
         super(context, attrs);
         setBackgroundColor(penteColor);
 //        resetAbstractBoard(abstractBoard);
-        movesList = new ArrayList<>();
-        movesList.add(180);
+        movesList = new ArrayList<>(Collections.singletonList(180));
         abstractBoard[9][9] = 1;
         whiteCaptures = 0;
         blackCaptures = 0;
@@ -359,7 +397,6 @@ public class DBBoardView extends View {
                 translateY = -y / 2;
                 break;
             case MotionEvent.ACTION_UP:
-                searchResults = null;
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
@@ -373,79 +410,7 @@ public class DBBoardView extends View {
             playedMove = 19 * stoneJ + stoneI;
         }
         if (scaling == 1 && playedMove > -1) {
-            byte color = (byte) (1 + (movesList.size() % 2));
-            if (game.contains("Connect6")) {
-                int i = movesList.size();
-                color = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-            }
-            abstractBoard[playedMove % 19][playedMove / 19] = color;
-            movesList.add(playedMove);
-            if (!(game.contains("Gomoku") || game.contains("Connect6"))) {
-//                int opponentColor = (color == 2) ? 1 : 2;
-                if (game.contains("Poof-Pente") || game.contains("O-Pente")) {
-                    detectPoof(abstractBoard, stoneI, stoneJ, color);
-                }
-                if (game.contains("O-Pente")) {
-                    detectKeryoPoof(abstractBoard, stoneI, stoneJ, color);
-                }
-                detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")
-                        || game.contains("Swap2-Keryo")) {
-                    detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                }
-                if (game.contains("G-Pente") && movesList.size() == 2) {
-                    for (int i = 7; i < 12; ++i) {
-                        for (int j = 7; j < 12; ++j) {
-                            if (abstractBoard[i][j] == 0) {
-                                abstractBoard[i][j] = -1;
-                            }
-                        }
-                    }
-                    for (int i = 1; i < 3; ++i) {
-                        if (abstractBoard[9][11 + i] == 0) {
-                            abstractBoard[9][11 + i] = -1;
-                        }
-                        if (abstractBoard[9][7 - i] == 0) {
-                            abstractBoard[9][7 - i] = -1;
-                        }
-                        if (abstractBoard[11 + i][9] == 0) {
-                            abstractBoard[11 + i][9] = -1;
-                        }
-                        if (abstractBoard[7 - i][9] == 0) {
-                            abstractBoard[7 - i][9] = -1;
-                        }
-                    }
-                } else if (game.contains("G-Pente") && movesList.size() == 3) {
-                    for (int i = 7; i < 12; ++i) {
-                        for (int j = 7; j < 12; ++j) {
-                            if (abstractBoard[i][j] == -1) {
-                                abstractBoard[i][j] = 0;
-                            }
-                        }
-                    }
-                    for (int i = 1; i < 3; ++i) {
-                        if (abstractBoard[9][11 + i] == -1) {
-                            abstractBoard[9][11 + i] = 0;
-                        }
-                        if (abstractBoard[9][7 - i] == -1) {
-                            abstractBoard[9][7 - i] = 0;
-                        }
-                        if (abstractBoard[11 + i][9] == -1) {
-                            abstractBoard[11 + i][9] = 0;
-                        }
-                        if (abstractBoard[7 - i][9] == -1) {
-                            abstractBoard[7 - i][9] = 0;
-                        }
-                    }
-                }
-                RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-                if (parentLayout != null) {
-                    ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
-                    capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
-                }
-                setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
-            }
+            reportPlacement(playedMove);
 //            if (playedMove > -1 && !gameOver){
 //                movesList.add(new Integer(playedMove));
 //                replayGame(abstractBoard);
@@ -463,6 +428,20 @@ public class DBBoardView extends View {
         }
         invalidate();
         return true;
+    }
+
+    /** A placement is reported, never applied: the controller answers with showPosition. */
+    void reportPlacement(int cell) {
+        playedMove = -1;
+        if (boardListener != null) {
+            boardListener.onMovePlayed(cell);
+        }
+    }
+
+    void reportAiMove(int cell) {
+        if (boardListener != null) {
+            boardListener.onAiMove(cell);
+        }
     }
 
     @Override
@@ -504,22 +483,9 @@ public class DBBoardView extends View {
 
     public void processAImove(final int move) {
         activity.runOnUiThread(() -> {
-            byte color = (byte) (1 + (movesList.size() % 2));
-            movesList.add(Integer.valueOf(move));
-            redDot = move;
-            stoneJ = (byte) (move / 19);
-            stoneI = (byte) (move % 19);
-            abstractBoard[stoneI][stoneJ] = color;
-            detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-            if (game.contains("Keryo-Pente")) {
-                detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
-            }
             playedMove = -1;
-            ((DatabaseActivity) activity).aiStopped();
-            invalidate();
-            RelativeLayout parentLayout = (RelativeLayout) getParent();
-            setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
-        });//        aiPlayer.destroy();
+            reportAiMove(move);
+        });
     }
 
     public void undoMove() {
@@ -531,7 +497,6 @@ public class DBBoardView extends View {
                         || game.contains("Swap2-")))) {
             movesList.remove(movesList.size() - 1);
             replayGame(abstractBoard);
-            searchResults = null;
             invalidate();
         }
     }
@@ -556,9 +521,9 @@ public class DBBoardView extends View {
                 drawStone(canvas, i, j, abstractBoard[i][j]);
             }
         }
-        if (searchResults != null) {
-            for (Integer move : searchResults.keySet()) {
-                drawStone(canvas, move, searchResults.get(move));
+        if (drawsDots()) {
+            for (Map.Entry<Integer, Integer> dot : candidateDots.entrySet()) {
+                drawStone(canvas, dot.getKey(), dot.getValue());
             }
         }
         if (redDot > -1) {
@@ -748,34 +713,17 @@ public class DBBoardView extends View {
     }
 
     private void replayGame(byte[][] abstractBoard) {
-        whiteCaptures = 0;
-        blackCaptures = 0;
         resetAbstractBoard(abstractBoard);
-        for (int i = 0; i < movesList.size(); i++) {
-            byte color = (byte) (1 + (i % 2));
-            int stoneI = movesList.get(i) % 19, stoneJ = (movesList.get(i) / 19);
-            abstractBoard[stoneI][stoneJ] = color;
-            if (!game.contains("Gomoku")) {
-//                int opponentColor = (color == 2) ? 1 : 2;
-                if (game.contains("Poof-Pente") || game.contains("O-Pente")) {
-                    detectPoof(abstractBoard, stoneI, stoneJ, color);
-                }
-                if (game.contains("O-Pente")) {
-                    detectKeryoPoof(abstractBoard, stoneI, stoneJ, color);
-                }
-                detectPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                if (game.contains("Keryo-Pente") || game.contains("DK-Pente") || game.contains("O-Pente")
-                        || game.contains("Swap2-Keryo")) {
-                    detectKeryoPenteCapture(abstractBoard, stoneI, stoneJ, color);
-                }
-                RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-                if (parentLayout != null) {
-                    ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-                    TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
-                    capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
-                }
-            }
+        if (dbGameId == null) {
+            return;
         }
+        BoardReplay.Result r = BoardReplay.replay(dbGameId, movesList);
+        for (int x = 0; x < 19; x++) {
+            System.arraycopy(r.boardXY[x], 0, abstractBoard[x], 0, 19);
+        }
+        whiteCaptures = r.whiteCaptures;
+        blackCaptures = r.blackCaptures;
+        // G-Pente tournament-rule restriction: block taps in the centre zone for the third stone.
         if (game.contains("G-Pente") && movesList.size() == 2) {
             for (int i = 7; i < 12; ++i) {
                 for (int j = 7; j < 12; ++j) {
@@ -822,17 +770,6 @@ public class DBBoardView extends View {
             }
         }
         invalidate();
-        String str = "";
-//        for (int i = 0; i < movesList.size(); i++) {
-//            if (i%2 == 0) {
-//                str = str + " <b>" + (i/2 + 1) + ".</b> ";
-//            } else {
-//                str = str+"-";
-//            }
-//            str = str + coordinateLetters[movesList.get(i)%19] + "" + (19 - (movesList.get(i)/19));
-//        }
-        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), str);
     }
 
 //    private void replayPenteGame(byte[][] abstractBoard) {
@@ -940,23 +877,11 @@ public class DBBoardView extends View {
     }
 
     public void resetState() {
-        resetAbstractBoard(abstractBoard);
-        movesList = new ArrayList<>();
+        List<Integer> seed = new ArrayList<>();
         if (!allowsOffCenterFirstStone(game)) {
-            movesList.add(180);
-            abstractBoard[9][9] = 1;
+            seed.add(180);
         }
-        whiteCaptures = 0;
-        blackCaptures = 0;
-        searchResults = null;
-        RelativeLayout parentLayout = (RelativeLayout) this.getParent();
-        if (parentLayout != null) {
-            ((Toolbar) parentLayout.findViewById(R.id.toolbar)).setSubtitle("\u2B24 x " + blackCaptures + " - \u25EF x " + whiteCaptures);
-            TextView capturesTextView = parentLayout.findViewById(R.id.capturesView);
-            capturesTextView.setText(getCapturesText(capturesTextView.getLineHeight()));
-        }
-        setTextViewHTML(parentLayout.findViewById(R.id.playerInfo), "");
-        invalidate();
+        showPosition(seed);
     }
 
     private void detectPenteCapture(byte[][] abstractBoard, int i, int j, byte myColor) {
