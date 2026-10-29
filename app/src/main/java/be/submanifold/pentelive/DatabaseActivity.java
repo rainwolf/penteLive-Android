@@ -8,19 +8,22 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,6 +32,19 @@ import android.widget.ToggleButton;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import be.submanifold.pentelive.db.AuthedDbTransport;
+import be.submanifold.pentelive.db.CaptureIcons;
+import be.submanifold.pentelive.db.DbApi;
+import be.submanifold.pentelive.db.DbController;
+import be.submanifold.pentelive.db.DbDtos;
+import be.submanifold.pentelive.db.DbGames;
+import be.submanifold.pentelive.db.DbView;
+import be.submanifold.pentelive.db.ui.CaptureSpans;
+import be.submanifold.pentelive.db.ui.DbViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,11 +61,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
-public class DatabaseActivity extends AppCompatActivity {
+public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoardView.BoardListener {
 
     private DBBoardView board;
     private View settingsView, aiSettingsView;
@@ -57,6 +73,10 @@ public class DatabaseActivity extends AppCompatActivity {
     private String dbP1Rating = "0", dbP2Rating = "0";
     private ProgressBar progressBar;
     private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
+    private DbViewModel dbModel;
+    private DbController controller;
+    private PopupWindow subscribePopup;
+    private AlertDialog loginDialog;
 
 //    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
@@ -71,8 +91,8 @@ public class DatabaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_database);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setSubtitle("\u2B24 x 0 - \u25EF x 0");
-        ((TextView) findViewById(R.id.capturesView)).setText("\u2B24 x 0\n\u25EF x 0");
+        // Capture counts now live in the toolbar subtitle (CaptureSpans); this view only keeps the layout.
+        findViewById(R.id.capturesView).setVisibility(View.INVISIBLE);
         settingsView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.database_options, null, false);
         AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
         helpBuilder.setTitle(getString(R.string.search_parameters));
@@ -80,11 +100,6 @@ public class DatabaseActivity extends AppCompatActivity {
         searchPrmtrsWindow = helpBuilder.create();
         searchPrmtrsWindow.setOnDismissListener(dialogInterface -> {
             board.setAlpha(1.0f);
-            if (board.getMovesList().isEmpty() || (!board.getMovesList().isEmpty() && board.getMovesList().get(0) != 180)) {
-                if (!DBBoardView.allowsOffCenterFirstStone(board.getGame())) {
-                    board.resetState();
-                }
-            }
         });
         searchPrmtrsWindow.setCanceledOnTouchOutside(true);
         aiSettingsView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_ai_settings, null, false);
@@ -99,18 +114,31 @@ public class DatabaseActivity extends AppCompatActivity {
 
         board = findViewById(R.id.boardView);
         board.setActivity(this);
+        board.setBoardListener(this);
+        board.setDotsVisible(PrefUtils.getBooleanFromPrefs(this, PrefUtils.PREFS_DBHEAT_KEY, true));
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String gameStr = extras.getString("game");
-            if (gameStr.equals("Pente") || gameStr.equals("Speed Pente") || gameStr.contains("Keryo-Pente")) {
-                findViewById(R.id.aiButton).setVisibility(VISIBLE);
+        dbModel = new ViewModelProvider(this).get(DbViewModel.class);
+        if (!dbModel.hasController()) {
+            // The extras game and moves win for this session and are not persisted.
+            Bundle extras = getIntent().getExtras();
+            String label = extras != null ? extras.getString("game") : null;
+            ArrayList<Integer> extraMoves = extras != null ? extras.getIntegerArrayList("moves") : null;
+            if (label == null) {
+                migrateDbGameIndexForSwap2();
+                String[] types = getResources().getStringArray(R.array.database_game_types_array);
+                int idx = PrefUtils.getIntFromPrefs(this, PrefUtils.PREFS_DBGAME_KEY, 0);
+                label = types[Math.max(0, Math.min(idx, types.length - 1))];
+                extraMoves = null;
             }
-            board.setGame(gameStr);
-            board.setMovesList(extras.getIntegerArrayList("moves"));
+            Integer gameId = DbGames.fromGameType(label);
+            dbModel.setController(new DbController(new DbApi(new AuthedDbTransport()), dbModel.io(), dbModel.main(),
+                    gameId == null ? 0 : gameId, extraMoves), label);
         }
+        controller = dbModel.controller();
+        board.setGame(dbModel.gameLabel());
+        updateAiButton();
 
-        toolbar.setTitle(getString(R.string.database));
+        toolbar.setTitle(getString(R.string.db_title));
         setSupportActionBar(toolbar);
 
 //            Display display = getWindowManager().getDefaultDisplay();
@@ -130,22 +158,16 @@ public class DatabaseActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, position);
                 String game = (String) parent.getItemAtPosition(position);
+                if (game.equals(dbModel.gameLabel())) {
+                    return; // no change (also the programmatic selection when the dialog opens)
+                }
+                PrefUtils.saveIntToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, position);
+                dbModel.setGameLabel(game);
                 board.setGame(game);
-                if (game.contains("Gomoku") || game.contains("Connect6")) {
-                    ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("");
-                    findViewById(R.id.capturesView).setVisibility(View.INVISIBLE);
-                } else {
-                    ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("\u2B24 x 0 - \u25EF x 0");
-                    findViewById(R.id.capturesView).setVisibility(VISIBLE);
-                }
-                if (game.equals("Pente") || game.equals("Speed Pente") || game.contains("Keryo-Pente")) {
-                    findViewById(R.id.aiButton).setVisibility(VISIBLE);
-                } else {
-                    findViewById(R.id.aiButton).setVisibility(View.GONE);
-                }
-                board.resetState();
+                Integer dbId = DbGames.fromGameType(game);
+                controller.setGame(dbId == null ? 0 : dbId);
+                updateAiButton();
             }
 
             @Override
@@ -250,15 +272,16 @@ public class DatabaseActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.searchButton);
         if (button != null) button.setOnClickListener(v -> doSearch());
-        // Swipe left on the board undoes a move, like iOS. Swipe right does nothing.
+        // Swipe left goes back, swipe right redoes (the controller owns the position).
         board.setOnSwipeListener(new DBBoardView.OnSwipeListener() {
             @Override
             public void onSwipeLeft() {
-                board.undoMove();
+                controller.back();
             }
 
             @Override
             public void onSwipeRight() {
+                controller.forward();
             }
         });
 
@@ -266,6 +289,13 @@ public class DatabaseActivity extends AppCompatActivity {
             if (menuItem.getItemId() == R.id.action_db_settings) {
                 showDBSettings();
 
+                return true;
+            }
+            if (menuItem.getItemId() == R.id.action_db_heat) {
+                boolean on = !menuItem.isChecked();
+                menuItem.setChecked(on);
+                PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBHEAT_KEY, on);
+                board.setDotsVisible(on);
                 return true;
             }
 
@@ -448,14 +478,157 @@ public class DatabaseActivity extends AppCompatActivity {
             ai.getMove(moves);
         });
 
-        board.post(() -> {
-            if (board.getMovesList().size() <= 1) {
-                showDBSettings();
-            } else {
-                doSearch();
-            }
-        });
+        if (savedInstanceState == null) {
+            board.post(() -> {
+                if (board.getMovesList().size() <= 1) {
+                    showDBSettings();
+                } else {
+                    doSearch();
+                }
+            });
+        }
+        controller.attach(this);
+    }
 
+    @Override
+    protected void onDestroy() {
+        if (controller != null) {
+            controller.detach();
+        }
+        if (subscribePopup != null) {
+            subscribePopup.dismiss();
+        }
+        if (loginDialog != null) {
+            loginDialog.dismiss();
+        }
+        super.onDestroy();
+    }
+
+    private void updateAiButton() {
+        int id = controller.gameId();
+        boolean pente = id != 0 && DbGames.isSupported(id) && isAiGame(DbGames.baseName(id));
+        findViewById(R.id.aiButton).setVisibility(pente ? VISIBLE : View.GONE);
+    }
+
+    private static boolean isAiGame(String baseName) {
+        return baseName.equals("Pente") || baseName.contains("Keryo-Pente");
+    }
+
+    // BoardListener
+
+    @Override
+    public void onMovePlayed(int cell) {
+        controller.onBoardMove(cell);
+    }
+
+    @Override
+    public void onAiMove(int cell) {
+        aiStopped();
+        controller.onBoardMove(cell);
+    }
+
+    // DbView
+
+    @Override
+    public void showPosition(List<Integer> moves, CaptureIcons.Counts caps) {
+        board.showPosition(moves);
+        board.setTextViewHTML(findViewById(R.id.playerInfo), "");
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        int lineHeight = (int) (18 * getResources().getDisplayMetrics().scaledDensity);
+        toolbar.setSubtitle(CaptureSpans.build(this, gameName(), caps, lineHeight));
+    }
+
+    private String gameName() {
+        int id = controller.gameId();
+        if (id == 0 || !DbGames.isSupported(id)) {
+            return dbModel.gameLabel() == null ? "" : dbModel.gameLabel();
+        }
+        return (DbGames.isSpeed(id) ? "Speed " : "") + DbGames.baseName(id);
+    }
+
+    @Override
+    public void showDots(Map<Integer, Integer> cellArgb) {
+        progressBar.setVisibility(View.GONE);
+        board.setCandidateDots(cellArgb);
+    }
+
+    @Override
+    public void showMoves(List<DbController.MoveRow> rows) {
+        progressBar.setVisibility(View.GONE);
+        // Moves sheet arrives with its own task.
+    }
+
+    @Override
+    public void clearResults() {
+        board.setCandidateDots(null);
+        board.setTextViewHTML(findViewById(R.id.playerInfo), "");
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showBlocked() {
+        progressBar.setVisibility(View.GONE);
+        board.setCandidateDots(null);
+        board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
+    }
+
+    @Override
+    public void showUnsupported() {
+        progressBar.setVisibility(View.GONE);
+        board.setCandidateDots(null);
+        ((Toolbar) findViewById(R.id.toolbar)).setSubtitle(gameName());
+        board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.db_unsupported_game));
+        updateAiButton();
+    }
+
+    @Override
+    public void showLoginPrompt() {
+        progressBar.setVisibility(View.GONE);
+        if (loginDialog != null && loginDialog.isShowing()) {
+            return;
+        }
+        loginDialog = new AlertDialog.Builder(this)
+                .setMessage(R.string.db_login_required)
+                .setPositiveButton(R.string.login, (d, w) -> startActivity(new Intent(this, LoginActivity.class)))
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        loginDialog.show();
+    }
+
+    @Override
+    @SuppressLint("InflateParams")
+    public void showSubscribeGate() {
+        progressBar.setVisibility(View.GONE);
+        if (subscribePopup != null && subscribePopup.isShowing()) {
+            return;
+        }
+        android.graphics.Point size = new android.graphics.Point(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDisplayMetrics().heightPixels);
+        View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
+        subscribePopup = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
+            subscribePopup.dismiss();
+            startActivity(new Intent(this, StoreActivity.class));
+        });
+        subscribePopup.setFocusable(true);
+        subscribePopup.setOutsideTouchable(true);
+        ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
+        subscribePopup.setOnDismissListener(() -> board.setAlpha(1.0f));
+        board.setAlpha(0.05f);
+        subscribePopup.showAtLocation(board, Gravity.TOP, 0, 260);
+    }
+
+    @Override
+    public void showError(DbController.Endpoint e) {
+        progressBar.setVisibility(View.GONE);
+        Snackbar.make(board, R.string.db_error, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.db_retry, v -> controller.retry(e))
+                .show();
+    }
+
+    @Override
+    public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
+        // Games list arrives with its own task.
     }
 
     private void doSearch() {
@@ -538,7 +711,15 @@ public class DatabaseActivity extends AppCompatActivity {
 
         Spinner spinner = settingsView.findViewById(R.id.gameSpinner);
         migrateDbGameIndexForSwap2();
-        spinner.setSelection(PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0));
+        int gameIdx = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBGAME_KEY, 0);
+        String[] gameTypes = getResources().getStringArray(R.array.database_game_types_array);
+        for (int i = 0; i < gameTypes.length; i++) {
+            if (gameTypes[i].equals(dbModel.gameLabel())) {
+                gameIdx = i; // show the game on screen (an extras game is not the saved one)
+                break;
+            }
+        }
+        spinner.setSelection(gameIdx);
         spinner = settingsView.findViewById(R.id.p1RatingSpinner);
         int position = PrefUtils.getIntFromPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBP1RATING_KEY, 0);
         spinner.setSelection(position);
@@ -607,6 +788,7 @@ public class DatabaseActivity extends AppCompatActivity {
         ColorStateList tintList = Helpers.tintList(this);
         MenuItem menuItem = menu.findItem(R.id.action_db_settings);
         menuItem.setIconTintList(tintList);
+        menu.findItem(R.id.action_db_heat).setChecked(PrefUtils.getBooleanFromPrefs(this, PrefUtils.PREFS_DBHEAT_KEY, true));
 
         return true;
     }
@@ -726,44 +908,14 @@ public class DatabaseActivity extends AppCompatActivity {
                 JSONObject json = new JSONObject(searchResult);
 
                 if (!json.getBoolean("access") || json.getBoolean("blocked")) {
-                    board.setCandidateDots(null);
                     board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
                     progressBar.setVisibility(View.GONE);
                     return;
                 }
 
-                JSONArray movesArray = json.getJSONArray("moves");
-                JSONArray occurrenceArray = json.getJSONArray("occurrence");
-
-                double max = 0, min = Double.MAX_VALUE;
-                double[] occValues = new double[occurrenceArray.length()];
-                for (int i = 0; i < occurrenceArray.length(); i++) {
-                    occValues[i] = Double.parseDouble(occurrenceArray.getString(i));
-                    if (occValues[i] > max) max = occValues[i];
-                    if (occValues[i] < min) min = occValues[i];
-                }
-                if (max == min) {
-                    max = 100.0;
-                    min = 0.0;
-                }
-
-                Map<Integer, Integer> searchResults = new HashMap<>();
-                for (int i = 0; i < movesArray.length(); i++) {
-                    double dblValue = (occValues[i] - min) / (max - min);
-                    int color;
-                    if (dblValue <= 0.5) {
-                        color = Color.rgb(255, (int) (dblValue * 511.0), 0);
-                    } else {
-                        color = Color.rgb((int) ((1.0 - dblValue) * 511.0), 255, 0);
-                    }
-                    searchResults.put(movesArray.getInt(i), color);
-                }
-
-                board.setCandidateDots(searchResults);
-                board.invalidate();
-
+                // Heat dots now come from /api/db position-stats (DbController); this task lists legacy game links only.
                 JSONArray games = json.getJSONArray("games");
-                if (searchResults.isEmpty() && games.length() == 0) {
+                if (games.length() == 0) {
                     board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
                 } else {
                     if (!player1.isEmpty()) {

@@ -574,6 +574,12 @@
     <string name="more">more</string>
     <string name="ask_the_ai">ask the AI</string>
     <string name="db_settings">DB settings</string>
+    <string name="db_title">Database</string>
+    <string name="db_heatmap">Heat map</string>
+    <string name="db_unsupported_game">The database is not available for this game</string>
+    <string name="db_login_required">Please log in to use the database</string>
+    <string name="db_retry">Retry</string>
+    <string name="db_error">Could not load database results</string>
     <string name="timer_zero" translatable="false">0:0</string>
     <string name="live_table_settings_placeholder">Timer: 0/0\nnot rated</string>
     <string name="challenge_label">challenge</string>
