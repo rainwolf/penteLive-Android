@@ -78,6 +78,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private CharSequence gamesStatus;
     private TextView dbStatus;
     private PopupWindow subscribePopup;
+    private Snackbar errorSnackbar;
     private AlertDialog loginDialog;
     private TabLayout dbTabs;
     private RecyclerView dbList;
@@ -558,13 +559,15 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         subscribePopup.showAtLocation(board, Gravity.TOP, 0, 260);
     }
 
+    /** One Snackbar for both endpoints: its Retry refetches whichever failed, so neither error hides the other. */
     @Override
     public void showError(DbController.Endpoint e) {
         progressBar.setVisibility(View.GONE);
-        Snackbar.make(board, R.string.db_error, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.db_retry, v -> controller.retry(e))
-                .setAnchorView(R.id.dbSheet)
-                .show();
+        if (errorSnackbar != null && errorSnackbar.isShownOrQueued()) return;
+        errorSnackbar = Snackbar.make(board, R.string.db_error, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.db_retry, v -> controller.retryFailed())
+                .setAnchorView(R.id.dbSheet);
+        errorSnackbar.show();
     }
 
     @Override

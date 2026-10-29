@@ -783,4 +783,58 @@ public class DbControllerTest {
         DbFilters draft = DbFilters.defaults();
         assertFalse(draft.keepServerFiltersFrom(original, true).excludeTimeouts);
     }
+
+    // One Retry for every failed endpoint
+
+    @Test
+    public void retryFailedRefetchesBothFailedEndpoints() {
+        fake.reply(m180(), 500, "{}");
+        fake.gamesReply(m180(), 0, 500, "{}");
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        assertEquals(Arrays.asList(DbController.Endpoint.STATS, DbController.Endpoint.GAMES), view.errors);
+        fake.reply(m180(), 200, FakeDbApi.stats(181, 40, 200, 80));
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(3, 1000, 3));
+        int stats = fake.statsCalls.size();
+        int games = fake.gamesCalls.size();
+        c.retryFailed();
+        settle();
+        assertEquals(stats + 1, fake.statsCalls.size());
+        assertEquals(games + 1, fake.gamesCalls.size());
+        assertEquals(0, fake.lastGamesOffset());
+        assertEquals(1, view.count("showDots"));
+        assertEquals(3, view.games.get(view.games.size() - 1).size());
+    }
+
+    @Test
+    public void retryFailedLeavesHealthyEndpointAlone() {
+        fake.gamesReply(m180(), 0, 500, "{}");
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(3, 1000, 3));
+        int stats = fake.statsCalls.size();
+        c.retryFailed();
+        settle();
+        assertEquals(stats, fake.statsCalls.size());
+        assertEquals(3, view.games.get(view.games.size() - 1).size());
+    }
+
+    @Test
+    public void retryFailedStatsOnlyKeepsLoadedGames() {
+        fake.reply(m180(), 500, "{}");
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(3, 1000, 3));
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        fake.reply(m180(), 200, FakeDbApi.stats(181, 40, 200, 80));
+        int games = fake.gamesCalls.size();
+        view.log.clear();
+        c.retryFailed();
+        settle();
+        assertEquals(games, fake.gamesCalls.size());
+        assertEquals(0, view.count("clearResults"));
+        assertEquals(1, view.count("showDots"));
+    }
 }

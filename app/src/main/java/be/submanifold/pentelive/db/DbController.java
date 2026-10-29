@@ -254,6 +254,16 @@ public final class DbController {
         }
     }
 
+    /**
+     * The single Retry: refetches every endpoint whose last request failed (stats, games or both),
+     * leaving a healthy endpoint's results in place.
+     */
+    public void retryFailed() {
+        if (!supported) return;
+        if (statsState == StatsState.ERROR) requestStats();
+        if (!gamesInFlight && gamesState == GamesState.ERROR) fetchGames(pendingOffset);
+    }
+
     /** Appends the next page. No-op while a request is in flight or once everything is loaded. */
     public void loadMoreGames() {
         if (!supported || gamesInFlight || gamesState != GamesState.OK) return;
@@ -371,6 +381,14 @@ public final class DbController {
             view.clearResults();
             view.showPosition(moves, caps);
         }
+        requestStats();
+        fetchGames(0);
+    }
+
+    /** Stats request for the current position with a fresh id; results render through onStats. */
+    private void requestStats() {
+        final List<Integer> moves = history.moves();
+        statsState = StatsState.LOADING;
         final int id = statsGuard.next();
         final int game = gameId;
         final String scope = applied.scope;
@@ -387,7 +405,6 @@ public final class DbController {
                 });
             }
         });
-        fetchGames(0);
     }
 
     /** IO side: request plus pure derivation (ranking, top N, heat). No state is touched. */
