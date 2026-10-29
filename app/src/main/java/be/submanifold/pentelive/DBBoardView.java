@@ -366,6 +366,16 @@ public class DBBoardView extends View {
         if (swipeListener != null && handleSwipe(event)) {
             return true;
         }
+        // A scrolling parent (the NestedScrollView in activity_database) took over the gesture:
+        // drop the aiming zoom and place nothing.
+        if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            playedMove = -1;
+            scaling = 1;
+            translateX = 0;
+            translateY = 0;
+            invalidate();
+            return false;
+        }
 
         float x, y;
         x = event.getX();
@@ -386,6 +396,9 @@ public class DBBoardView extends View {
         stoneJ = (byte) (19 * stoneY / size);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                // Keep the scrolling parent from stealing a vertical aim-drag (it would cancel
+                // the gesture). The flag resets automatically at the end of the gesture.
+                if (getParent() != null) getParent().requestDisallowInterceptTouchEvent(true);
                 redDot = -1;
                 scaling = 2;
                 translateX = -x / 2;
