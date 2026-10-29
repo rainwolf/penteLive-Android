@@ -296,6 +296,62 @@ public class DbControllerTest {
         assertEquals(sizeAtDetach, view.log.size());
     }
 
+    private static String bigStats() {
+        int[] kv = new int[50];
+        for (int i = 0; i < 25; i++) {
+            kv[2 * i] = 200 + i;
+            kv[2 * i + 1] = 10 + i * 3;
+        }
+        return FakeDbApi.stats(kv);
+    }
+
+    @Test
+    public void showCountChangesRowsAndDomain() {
+        fake.reply(Arrays.asList(180), 200, bigStats());
+        DbController c = controller(1, Arrays.asList(180));
+        c.attach(view);
+        settle();
+        assertEquals(20, view.rows.get(0).size());
+        assertTrue(view.dots.get(0).size() <= 20);
+        int calls = fake.statsCalls.size();
+        c.setShowCount(5);
+        assertEquals(0, io.size());
+        assertEquals(calls, fake.statsCalls.size());
+        List<DbController.MoveRow> last = view.rows.get(view.rows.size() - 1);
+        assertEquals(5, last.size());
+        Map<Integer, Integer> d = view.dots.get(view.dots.size() - 1);
+        assertEquals(5, d.size());
+        for (DbController.MoveRow r : last) assertEquals(Integer.valueOf(r.argb), d.get(r.move.move));
+        // domain recomputed over the 5 shown: lowest winPct is red, highest is green (heat uses raw winPct)
+        DbController.MoveRow lo = last.get(0);
+        DbController.MoveRow hi = last.get(0);
+        for (DbController.MoveRow r : last) {
+            if (r.move.winPct < lo.move.winPct) lo = r;
+            if (r.move.winPct > hi.move.winPct) hi = r;
+        }
+        assertEquals(RED, lo.argb);
+        assertEquals(GREEN, hi.argb);
+        c.setShowCount(0);
+        assertEquals(25, view.rows.get(view.rows.size() - 1).size());
+    }
+
+    @Test
+    public void rowAndDotColoursMatch() {
+        fake.reply(Arrays.asList(180), 200, bigStats());
+        DbController c = controller(1, Arrays.asList(180));
+        c.attach(view);
+        settle();
+        Map<Integer, Integer> d = view.dots.get(0);
+        for (DbController.MoveRow r : view.rows.get(0)) assertEquals(Integer.valueOf(r.argb), d.get(r.move.move));
+    }
+
+    @Test
+    public void rowTapPlaysMove() {
+        DbController c = started();
+        c.playCandidate(181);
+        assertEquals(181, (int) c.moves().get(c.moves().size() - 1));
+    }
+
     @Test
     public void resultWhileDetachedIsRenderedOnAttach() {
         DbController c = started();

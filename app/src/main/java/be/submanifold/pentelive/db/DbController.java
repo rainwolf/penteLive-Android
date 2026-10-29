@@ -37,14 +37,14 @@ public final class DbController {
     private static final class StatsOutcome {
         final DbResult.Kind kind;
         final boolean blocked;
-        final List<MoveRow> rows;
-        final Map<Integer, Integer> dots;
+        final List<NextMove> sorted; // usable (unoccupied), full ranked list
+        final Set<Integer> occupied;
 
-        StatsOutcome(DbResult.Kind kind, boolean blocked, List<MoveRow> rows, Map<Integer, Integer> dots) {
+        StatsOutcome(DbResult.Kind kind, boolean blocked, List<NextMove> sorted, Set<Integer> occupied) {
             this.kind = kind;
             this.blocked = blocked;
-            this.rows = rows;
-            this.dots = dots;
+            this.sorted = sorted;
+            this.occupied = occupied;
         }
     }
 
@@ -64,6 +64,9 @@ public final class DbController {
     private StatsState statsState = StatsState.NONE;
     private List<MoveRow> rows = Collections.emptyList();
     private Map<Integer, Integer> dots = Collections.emptyMap();
+    private int showCount = DEFAULT_SHOW;
+    private List<NextMove> sortedCache = Collections.emptyList();
+    private Set<Integer> occupiedCache = Collections.emptySet();
 
     public DbController(DbApi api, Executor io, Executor main, int gameId, List<Integer> initialMoves) {
         this.api = api;
@@ -186,12 +189,31 @@ public final class DbController {
         for (NextMove m : r.value.nextMoves) {
             if (m != null && !occupied.contains(m.move)) usable.add(m);
         }
-        List<NextMove> top = MoveRanking.top(MoveRanking.sorted(usable), DEFAULT_SHOW);
-        Map<Integer, Integer> colours = HeatScale.colours(top, occupied);
+        return new StatsOutcome(DbResult.Kind.OK, false,
+                Collections.unmodifiableList(MoveRanking.sorted(usable)), occupied);
+    }
+
+    /** Rows and dots over the top showCount of the cached ranked list (n <= 0 = all). */
+    private void derive() {
+        List<NextMove> top = MoveRanking.top(sortedCache, showCount <= 0 ? sortedCache.size() : showCount);
+        Map<Integer, Integer> colours = HeatScale.colours(top, occupiedCache);
         List<MoveRow> out = new ArrayList<>(top.size());
         for (NextMove m : top) out.add(new MoveRow(m, colours.get(m.move)));
-        return new StatsOutcome(DbResult.Kind.OK, false,
-                Collections.unmodifiableList(out), Collections.unmodifiableMap(new LinkedHashMap<>(colours)));
+        rows = Collections.unmodifiableList(out);
+        dots = Collections.unmodifiableMap(new LinkedHashMap<>(colours));
+    }
+
+    /** Re-renders rows and dots from the cached reply, no refetch. */
+    public void setShowCount(int n) {
+        showCount = n;
+        if (statsState != StatsState.OK) return;
+        derive();
+        if (view != null) renderStats();
+    }
+
+    /** Same path as a board tap. */
+    public void playCandidate(int cell) {
+        onBoardMove(cell);
     }
 
     /** Main side: stale check first, before any state change or view call. */
@@ -203,8 +225,9 @@ public final class DbController {
                     statsState = StatsState.BLOCKED;
                 } else {
                     statsState = StatsState.OK;
-                    rows = out.rows;
-                    dots = out.dots;
+                    sortedCache = out.sorted;
+                    occupiedCache = out.occupied;
+                    derive();
                 }
                 break;
             case UNAUTHORIZED:
