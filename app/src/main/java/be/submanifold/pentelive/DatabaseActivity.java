@@ -44,6 +44,7 @@ import be.submanifold.pentelive.db.DbFilterStore;
 import be.submanifold.pentelive.db.DbFilters;
 import be.submanifold.pentelive.db.FilterSummary;
 import be.submanifold.pentelive.db.DbGames;
+import be.submanifold.pentelive.db.DbStart;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.GameRowFormat;
 import be.submanifold.pentelive.db.SharedPrefsKeyValueStore;
@@ -89,6 +90,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private static final String STATE_REDO = "db_redo";
     private static final String STATE_TAB = "db_tab";
     private static final String STATE_LIST = "db_list";
+    private static final String STATE_GAME = "db_game";
+    private static final String STATE_GAME_LABEL = "db_game_label";
 
 //    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
@@ -120,26 +123,24 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         dbModel = new ViewModelProvider(this).get(DbViewModel.class);
         if (!dbModel.hasController()) {
-            // The extras game and moves win for this session and are not persisted.
+            // The extras game and moves win for this session and are not persisted. After process death the
+            // saved game wins instead, so the saved moves are never replayed on the extras game.
             Bundle extras = getIntent().getExtras();
-            String extraLabel = extras != null ? extras.getString("game") : null;
-            ArrayList<Integer> extraMoves = extras != null ? extras.getIntegerArrayList("moves") : null;
-            Integer override = null;
-            if (extraLabel != null) {
-                Integer gameId = DbGames.fromGameType(extraLabel);
-                override = gameId == null ? 0 : gameId;
-            } else {
-                extraMoves = null;
-            }
+            boolean restoring = savedInstanceState != null && savedInstanceState.containsKey(STATE_GAME);
+            DbStart start = DbStart.resolve(
+                    extras != null ? extras.getString("game") : null,
+                    extras != null ? extras.getIntegerArrayList("moves") : null,
+                    restoring ? savedInstanceState.getInt(STATE_GAME) : null,
+                    restoring ? savedInstanceState.getString(STATE_GAME_LABEL) : null);
             DbFilterStore filterStore = new DbFilterStore(new SharedPrefsKeyValueStore(this),
                     new DbFilterStore.LegacyLabels(getString(R.string.both), getString(R.string.yes),
                             getString(R.string.live_only), getString(R.string.turn_based_only)));
             DbController created = new DbController(new DbApi(new AuthedDbTransport()), dbModel.io(), dbModel.main(),
-                    filterStore, override, extraMoves);
+                    filterStore, start.gameOverride, start.initialMoves);
             if (savedInstanceState != null) {
                 restoreState(created, savedInstanceState);
             }
-            dbModel.setController(created, extraLabel != null ? extraLabel : gameTypeLabel(created.gameId()));
+            dbModel.setController(created, start.label != null ? start.label : gameTypeLabel(created.gameId()));
             created.loadFeatures(); // one GET /ping per ViewModel
         }
         controller = dbModel.controller();
@@ -320,6 +321,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     protected void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
         if (controller == null) return;
+        out.putInt(STATE_GAME, controller.gameId());
+        out.putString(STATE_GAME_LABEL, dbModel.gameLabel());
         out.putIntegerArrayList(STATE_MOVES, new ArrayList<>(controller.moves()));
         out.putIntegerArrayList(STATE_REDO, new ArrayList<>(controller.redoMoves()));
         out.putInt(STATE_TAB, gamesSelected ? 1 : 0);
