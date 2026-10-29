@@ -538,7 +538,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         for (int i = 0; i < SHOW_COUNTS.length; i++) {
             labels[i] = SHOW_COUNTS[i] == 0 ? getString(R.string.db_show_all) : getString(R.string.db_show_n, SHOW_COUNTS[i]);
         }
-        ArrayAdapter<String> showAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, labels);
+        ArrayAdapter<String> showAdapter = new ArrayAdapter<>(show.getContext(), android.R.layout.simple_spinner_item, labels);
         showAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         show.setAdapter(showAdapter);
         show.setSelection(1, false); // 20, the controller's default
@@ -684,6 +684,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         progressBar.setVisibility(View.GONE);
         Snackbar.make(board, R.string.db_error, Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.db_retry, v -> controller.retry(e))
+                .setAnchorView(R.id.dbSheet)
                 .show();
     }
 

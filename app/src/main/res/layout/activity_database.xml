@@ -7,10 +7,17 @@
     android:fitsSystemWindows="true"
     tools:context="be.submanifold.pentelive.MMAIActivity">
 
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/dbScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="120dp">
     <LinearLayout
         android:id="@+id/dbContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
@@ -80,6 +87,7 @@
         android:layout_height="wrap_content" />
 
     </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -97,6 +105,7 @@
         android:maxWidth="640dp"
         android:layout_gravity="center_horizontal"
         android:orientation="vertical"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
         android:background="@color/db_sheet_background"
         android:elevation="8dp"
         app:behavior_fitToContents="false"
