@@ -1,5 +1,8 @@
 package be.submanifold.pentelive.db;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Gson POJOs for /api/db responses. */
 public final class DbDtos {
     private DbDtos() {}
@@ -18,5 +21,54 @@ public final class DbDtos {
             this.wins = wins;
             this.winPct = winPct;
         }
+    }
+
+    public static class PositionStats {
+        public int totalGames;
+        public double totalWinPct;
+        public List<NextMove> nextMoves = new ArrayList<>();
+        public boolean blocked;
+    }
+
+    public static class Player {
+        public String name;
+        public int rating;
+        public int nameColor;
+        public int crown;
+    }
+
+    public static class GameHeader {
+        public long gid;
+        public String source;
+        public int game;
+        public Player player1;
+        public Player player2;
+        public int winner;
+        public String site;
+        public String event;
+        public String round;
+        public String section;
+        public String playDate;
+        public int moveCount;
+
+        public boolean isMine() {
+            return "mine".equals(source);
+        }
+    }
+
+    public static class GamePage {
+        public int total;
+        public List<GameHeader> games = new ArrayList<>();
+        public boolean blocked;
+    }
+
+    public static class GameDetail {
+        public GameHeader header;
+        public int[] moves = new int[0];
+        public boolean blocked;
+    }
+
+    public static class PlayersReply {
+        public List<String> players = new ArrayList<>();
     }
 }
