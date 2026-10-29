@@ -95,8 +95,6 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private static final String STATE_GAME = "db_game";
     private static final String STATE_GAME_LABEL = "db_game_label";
 
-//    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
-
     // InflateParams: aiSettingsView is AlertDialog content (setView), no parent at inflation time.
     @SuppressLint("InflateParams")
     @Override
@@ -152,61 +150,6 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         toolbar.setTitle(getString(R.string.db_title));
         setSupportActionBar(toolbar);
-
-//            InputStream tbl = null;
-//            InputStream scs = null;
-//            InputStream opnbk = null;
-//            try {
-//                Resources resources = getResources();
-//                tbl = resources.openRawResource(R.raw.pente_tbl);
-//                scs = resources.openRawResource(R.raw.pente_scs);
-//                opnbk = resources.openRawResource(R.raw.opngbk);
-//
-//                //computer.setSize(size);
-//
-//                Ai nativeComputer = new Ai(1, 1, 0, 1, 19);
-//                nativeComputer.init(scs, opnbk, tbl);
-////            nativeComputer.setVisualization(false);
-//
-//                board.setAiPlayer(nativeComputer);
-
-//            nativeComputer.addAiListener(new AiListener() {
-//                public void aiEvaluateCallBack() {}
-//                public void aiVisualizationCallBack(int[] bd) {};
-//
-//                public void moveReady(int[] moves, final int newMove) {
-//                    //Log.d("ai", "move ready " + newMove + " in " + (System.currentTimeMillis() - nativeStart));
-//                    // add move on UI thread
-//                    board.post(new Runnable() {
-//                        public void run() {
-//                            // just make sure its computer's turn, shouldn't be needed...
-//                            if (state.getCurrentPlayer() == (3 - seat)) {
-//                                addMove(newMove, true);
-//
-//                                updateCaps(true);
-//
-//                                if (state.isGameOver()) {
-//                                    status = STATUS_GAME_OVER;
-//                                    alertGameOver();
-//                                }
-//
-//                                board.setAiThinking(false);
-//                                if (nativeComputer.getLevel() > 2) {
-//                                    board.bringToFront();
-//                                    pb.setVisibility(ProgressBar.INVISIBLE);
-//                                }
-//                            }
-//                        }
-//                    });
-//                }
-//                public void startThinking() {};
-//
-//                public void stopThinking() {}
-//            });
-
-//            } catch (Throwable t) {
-//                Log.v("ai", "error init", t);
-//            }
 
 
         // Swipe left goes back, swipe right redoes (the controller owns the position).
@@ -645,13 +588,6 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         super.onPause();
         MyApplication.activityPaused();
     }
-
-//        public void showThinking() {
-//            progressBar.setVisibility(View.VISIBLE);
-//        }
-//        public void hideThinking() {
-//            progressBar.setVisibility(View.GONE);
-//        }
 
 
     @Override
