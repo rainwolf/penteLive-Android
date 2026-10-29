@@ -34,6 +34,17 @@ public final class GameViewerModel {
         return true;
     }
 
+    /** Why a result was not accepted; drives the viewer's state. */
+    public enum Rejection { BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, FAILED }
+
+    /** For a result {@link #accept} turned down: blocked, login, subscribe gate, or retry (anything else). */
+    public static Rejection rejection(DbResult<DbDtos.GameDetail> r) {
+        if (isBlocked(r)) return Rejection.BLOCKED;
+        if (r != null && r.kind == DbResult.Kind.UNAUTHORIZED) return Rejection.UNAUTHORIZED;
+        if (r != null && r.kind == DbResult.Kind.SUBSCRIPTION_REQUIRED) return Rejection.SUBSCRIPTION_REQUIRED;
+        return Rejection.FAILED;
+    }
+
     /** A 403 {@code blocked} or an OK reply with {@code blocked: true}. */
     public static boolean isBlocked(DbResult<DbDtos.GameDetail> r) {
         if (r == null) return false;

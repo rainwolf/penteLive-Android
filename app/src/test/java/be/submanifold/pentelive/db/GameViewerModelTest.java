@@ -130,4 +130,25 @@ public class GameViewerModelTest {
         assertEquals(java.util.Arrays.asList(180, 181, 182), m.allMoves());
         assertEquals(java.util.Arrays.asList(180), m.movesUpTo());
     }
+
+    @Test
+    public void rejectionMapsSubscriptionRequiredToItsOwnOutcome() {
+        assertEquals(GameViewerModel.Rejection.SUBSCRIPTION_REQUIRED, GameViewerModel.rejection(
+                DbResult.<DbDtos.GameDetail>of(DbResult.Kind.SUBSCRIPTION_REQUIRED)));
+        assertEquals(GameViewerModel.Rejection.BLOCKED,
+                GameViewerModel.rejection(DbResult.<DbDtos.GameDetail>of(DbResult.Kind.BLOCKED)));
+        assertEquals(GameViewerModel.Rejection.UNAUTHORIZED,
+                GameViewerModel.rejection(DbResult.<DbDtos.GameDetail>of(DbResult.Kind.UNAUTHORIZED)));
+        assertEquals(GameViewerModel.Rejection.FAILED,
+                GameViewerModel.rejection(DbResult.<DbDtos.GameDetail>of(DbResult.Kind.FAILED)));
+        assertEquals(GameViewerModel.Rejection.FAILED, GameViewerModel.rejection(detail(8, 1, 180)));
+    }
+
+    @Test
+    public void subscription403FromApiIsNotARetry() {
+        DbApiTest.Fake f = new DbApiTest.Fake(403, "{\"error\":{\"code\":\"subscription_required\"}}");
+        DbResult<DbDtos.GameDetail> r = new DbApi(f).game(7);
+        assertFalse(new GameViewerModel(7).accept(r));
+        assertEquals(GameViewerModel.Rejection.SUBSCRIPTION_REQUIRED, GameViewerModel.rejection(r));
+    }
 }

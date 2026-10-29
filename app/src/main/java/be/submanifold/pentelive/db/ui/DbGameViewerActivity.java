@@ -50,7 +50,7 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 .putExtra(EXTRA_MINE, mine));
     }
 
-    enum State { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, FAILED }
+    enum State { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, FAILED }
 
     /** Keeps the model (cursor), the load state and the IO executor across rotation. */
     public static class ViewerViewModel extends ViewModel {
@@ -85,12 +85,21 @@ public class DbGameViewerActivity extends AppCompatActivity {
             if (!guard.isLatest(reqId)) return;
             if (model.accept(r)) {
                 state = State.OK;
-            } else if (GameViewerModel.isBlocked(r)) {
-                state = State.BLOCKED;
-            } else if (r != null && r.kind == DbResult.Kind.UNAUTHORIZED) {
-                state = State.UNAUTHORIZED;
             } else {
-                state = State.FAILED;
+                switch (GameViewerModel.rejection(r)) {
+                    case BLOCKED:
+                        state = State.BLOCKED;
+                        break;
+                    case UNAUTHORIZED:
+                        state = State.UNAUTHORIZED;
+                        break;
+                    case SUBSCRIPTION_REQUIRED:
+                        state = State.SUBSCRIPTION_REQUIRED;
+                        break;
+                    default:
+                        state = State.FAILED;
+                        break;
+                }
             }
             if (onChange != null) onChange.run();
         }
@@ -108,6 +117,7 @@ public class DbGameViewerActivity extends AppCompatActivity {
     private TextView p1Name, p1Rating, p2Name, p2Rating, score, captures, date;
     private MoveGridAdapter gridAdapter;
     private AlertDialog loginDialog;
+    private android.widget.PopupWindow subscribePopup;
     private TextView status;
     private View retry;
     private View progress;
@@ -177,6 +187,10 @@ public class DbGameViewerActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (vm != null) vm.onChange = null;
         if (loginDialog != null) loginDialog.dismiss();
+        if (subscribePopup != null) {
+            subscribePopup.setOnDismissListener(null); // no finish() from a teardown dismiss
+            subscribePopup.dismiss();
+        }
         super.onDestroy();
     }
 
@@ -202,6 +216,12 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 setStatus(getString(R.string.db_login_required));
                 showLoginPrompt();
                 break;
+            case SUBSCRIPTION_REQUIRED:
+                // Same gate as the DB screen; closing it goes back there (nothing to show here).
+                showEmptyBoard();
+                setStatus(null);
+                showSubscribeGate();
+                break;
             case FAILED:
                 showEmptyBoard();
                 setStatus(getString(R.string.db_game_error));
@@ -226,6 +246,15 @@ public class DbGameViewerActivity extends AppCompatActivity {
         captures.setText("");
         date.setText("");
         gridAdapter.submit(Collections.<MoveGrid.Cell>emptyList());
+    }
+
+    private void showSubscribeGate() {
+        if (subscribePopup != null && subscribePopup.isShowing()) return;
+        // Posted: render() also runs from onCreate, before the window has a token.
+        board.post(() -> {
+            if (isFinishing() || isDestroyed() || (subscribePopup != null && subscribePopup.isShowing())) return;
+            subscribePopup = SubscribeGate.show(this, board, this::finish);
+        });
     }
 
     private void showLoginPrompt() {

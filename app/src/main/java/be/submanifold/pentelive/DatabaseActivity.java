@@ -53,6 +53,7 @@ import be.submanifold.pentelive.db.ui.GamesAdapter;
 import be.submanifold.pentelive.db.ui.CaptureSpans;
 import be.submanifold.pentelive.db.ui.DbViewModel;
 import be.submanifold.pentelive.db.ui.MovesAdapter;
+import be.submanifold.pentelive.db.ui.SubscribeGate;
 
 
 import java.io.InputStream;
@@ -537,26 +538,12 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     }
 
     @Override
-    @SuppressLint("InflateParams")
     public void showSubscribeGate() {
         progressBar.setVisibility(View.GONE);
         if (subscribePopup != null && subscribePopup.isShowing()) {
             return;
         }
-        android.graphics.Point size = new android.graphics.Point(getResources().getDisplayMetrics().widthPixels,
-                getResources().getDisplayMetrics().heightPixels);
-        View policyView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.db_subscribers_only, null, false);
-        subscribePopup = new PopupWindow(policyView, size.x * 9 / 10, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        policyView.findViewById(R.id.subscribeButton).setOnClickListener(view -> {
-            subscribePopup.dismiss();
-            startActivity(new Intent(this, StoreActivity.class));
-        });
-        subscribePopup.setFocusable(true);
-        subscribePopup.setOutsideTouchable(true);
-        ((TextView) policyView.findViewById(R.id.informationView)).setText(getString(R.string.level_up_your_game));
-        subscribePopup.setOnDismissListener(() -> board.setAlpha(1.0f));
-        board.setAlpha(0.05f);
-        subscribePopup.showAtLocation(board, Gravity.TOP, 0, 260);
+        subscribePopup = SubscribeGate.show(this, board, null);
     }
 
     /** One Snackbar for both endpoints: its Retry refetches whichever failed, so neither error hides the other. */
