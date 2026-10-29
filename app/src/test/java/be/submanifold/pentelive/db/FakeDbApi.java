@@ -17,7 +17,29 @@ final class FakeDbApi implements DbTransport {
     final List<Integer> statsGames = new ArrayList<>();
     final Map<List<Integer>, Reply> statsReplies = new HashMap<>();
     Reply defaultReply = new Reply(200, "{\"totalGames\":0,\"nextMoves\":[]}");
+    final List<List<Integer>> gamesCalls = new ArrayList<>();
+    final List<Integer> gamesOffsets = new ArrayList<>();
+    final Map<String, Reply> gamesReplies = new HashMap<>();
+    Reply defaultGamesReply = new Reply(200, "{\"total\":0,\"games\":[]}");
     final DbApi api = new DbApi(this);
+
+    void gamesReply(List<Integer> moves, int offset, int code, String body) {
+        gamesReplies.put(moves + "@" + offset, new Reply(code, body));
+    }
+
+    int lastGamesOffset() {
+        return gamesOffsets.get(gamesOffsets.size() - 1);
+    }
+
+    /** A games/search page body with {@code count} rows starting at gid {@code firstGid}. */
+    static String gamesPage(int total, int firstGid, int count) {
+        StringBuilder sb = new StringBuilder("{\"total\":").append(total).append(",\"blocked\":false,\"games\":[");
+        for (int i = 0; i < count; i++) {
+            if (i > 0) sb.append(',');
+            sb.append("{\"gid\":").append(firstGid + i).append(",\"source\":\"archive\",\"game\":1}");
+        }
+        return sb.append("]}").toString();
+    }
 
     void reply(List<Integer> moves, int code, String body) {
         statsReplies.put(new ArrayList<>(moves), new Reply(code, body));
@@ -44,11 +66,21 @@ final class FakeDbApi implements DbTransport {
 
     @Override
     public Reply postJson(String path, String json) throws IOException {
-        if (!"/position-stats".equals(path)) throw new IOException("unexpected POST " + path);
+        boolean games = "/games/search".equals(path);
+        if (!games && !"/position-stats".equals(path)) throw new IOException("unexpected POST " + path);
         JsonObject o = JsonParser.parseString(json).getAsJsonObject();
         List<Integer> moves = new ArrayList<>();
         JsonArray a = o.getAsJsonArray("moves");
         for (JsonElement e : a) moves.add(e.getAsInt());
+        if (games) {
+            int offset = o.get("offset").getAsInt();
+            synchronized (this) {
+                gamesCalls.add(moves);
+                gamesOffsets.add(offset);
+            }
+            Reply g = gamesReplies.get(moves + "@" + offset);
+            return g != null ? g : defaultGamesReply;
+        }
         synchronized (this) {
             statsCalls.add(moves);
             statsGames.add(o.get("game").getAsInt());

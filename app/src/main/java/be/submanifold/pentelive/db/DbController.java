@@ -1,5 +1,6 @@
 package be.submanifold.pentelive.db;
 
+import be.submanifold.pentelive.db.DbDtos.GameHeader;
 import be.submanifold.pentelive.db.DbDtos.NextMove;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +31,9 @@ public final class DbController {
 
     static final int DEFAULT_SHOW = 20;
     static final String SCOPE = "archive";
+    static final int GAMES_PAGE = 25;
+
+    private enum GamesState { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, ERROR }
 
     private enum StatsState { NONE, LOADING, OK, BLOCKED, UNAUTHORIZED, SUBSCRIPTION_REQUIRED, ERROR }
 
@@ -52,6 +56,7 @@ public final class DbController {
     private final Executor io;
     private final Executor main;
     private final LatestRequest statsGuard = new LatestRequest();
+    private final LatestRequest gamesGuard = new LatestRequest();
 
     private int gameId;
     private boolean supported;
@@ -68,6 +73,14 @@ public final class DbController {
     private List<NextMove> sortedCache = Collections.emptyList();
     private Set<Integer> occupiedCache = Collections.emptySet();
 
+    // games paging state
+    private GamesState gamesState = GamesState.NONE;
+    private List<GameHeader> loadedGames = new ArrayList<>();
+    private int gamesTotal;
+    private int nextOffset; // offset of the next page to request
+    private int pendingOffset; // offset of the in-flight (or last failed) request
+    private boolean gamesInFlight;
+
     public DbController(DbApi api, Executor io, Executor main, int gameId, List<Integer> initialMoves) {
         this.api = api;
         this.io = io;
@@ -80,6 +93,8 @@ public final class DbController {
         gameId = newGameId;
         supported = newGameId != 0 && DbGames.isSupported(newGameId);
         statsGuard.next(); // invalidate anything in flight for the previous game
+        gamesGuard.next();
+        resetGames();
         rows = Collections.emptyList();
         dots = Collections.emptyMap();
         statsState = StatsState.NONE;
@@ -130,8 +145,102 @@ public final class DbController {
     }
 
     public void retry(Endpoint e) {
-        if (e == Endpoint.STATS && supported) positionChanged();
-        // GAMES: added with the games list.
+        if (!supported) return;
+        if (e == Endpoint.STATS) {
+            positionChanged();
+        } else if (!gamesInFlight && gamesState == GamesState.ERROR) {
+            fetchGames(pendingOffset); // the failed offset; loaded rows are kept
+        }
+    }
+
+    /** Appends the next page. No-op while a request is in flight or once everything is loaded. */
+    public void loadMoreGames() {
+        if (!supported || gamesInFlight || gamesState != GamesState.OK) return;
+        if (loadedGames.size() >= gamesTotal) return;
+        fetchGames(nextOffset);
+    }
+
+    private void resetGames() {
+        gamesState = GamesState.NONE;
+        loadedGames = new ArrayList<>();
+        gamesTotal = 0;
+        nextOffset = 0;
+        pendingOffset = 0;
+        gamesInFlight = false;
+    }
+
+    private void fetchGames(final int offset) {
+        final List<Integer> moves = history.moves();
+        final int game = gameId;
+        final int id = gamesGuard.next();
+        pendingOffset = offset;
+        gamesInFlight = true;
+        gamesState = GamesState.LOADING;
+        io.execute(new Runnable() {
+            @Override
+            public void run() {
+                final DbResult<DbDtos.GamePage> r = api.searchGames(game, moves, SCOPE, null, offset, GAMES_PAGE);
+                main.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        onGames(id, offset, r);
+                    }
+                });
+            }
+        });
+    }
+
+    /** Main side: a page must match both the latest id and the offset asked for. */
+    private void onGames(int id, int offset, DbResult<DbDtos.GamePage> r) {
+        if (!gamesGuard.isLatest(id) || offset != pendingOffset) return;
+        gamesInFlight = false;
+        switch (r.kind) {
+            case OK:
+                if (r.value.blocked) {
+                    gamesState = GamesState.BLOCKED;
+                } else {
+                    gamesState = GamesState.OK;
+                    gamesTotal = r.value.total;
+                    if (r.value.games != null) loadedGames.addAll(r.value.games);
+                    nextOffset = offset + GAMES_PAGE;
+                }
+                break;
+            case UNAUTHORIZED:
+                gamesState = GamesState.UNAUTHORIZED;
+                break;
+            case SUBSCRIPTION_REQUIRED:
+                gamesState = GamesState.SUBSCRIPTION_REQUIRED;
+                break;
+            default:
+                gamesState = GamesState.ERROR;
+                break;
+        }
+        if (view != null) renderGames();
+    }
+
+    private void renderGames() {
+        switch (gamesState) {
+            case OK:
+                view.showGames(new ArrayList<>(loadedGames), gamesTotal, loadedGames.size() < gamesTotal);
+                break;
+            case LOADING:
+                if (!loadedGames.isEmpty()) view.showGames(new ArrayList<>(loadedGames), gamesTotal, false);
+                break;
+            case BLOCKED:
+                view.showBlocked();
+                break;
+            case UNAUTHORIZED:
+                view.showLoginPrompt();
+                break;
+            case SUBSCRIPTION_REQUIRED:
+                view.showSubscribeGate();
+                break;
+            case ERROR:
+                view.showError(Endpoint.GAMES);
+                break;
+            default:
+                break;
+        }
     }
 
     public List<Integer> moves() {
@@ -152,13 +261,14 @@ public final class DbController {
         positionChanged();
     }
 
-    /** clearResults, showPosition, then a stats request with a fresh id. */
+    /** clearResults, showPosition, then stats and games requests, each with a fresh id. */
     private void positionChanged() {
         final List<Integer> moves = history.moves();
         caps = CaptureIcons.of(gameId, moves);
         rows = Collections.emptyList();
         dots = Collections.emptyMap();
         statsState = StatsState.LOADING;
+        resetGames();
         if (view != null) {
             view.clearResults();
             view.showPosition(moves, caps);
@@ -177,6 +287,7 @@ public final class DbController {
                 });
             }
         });
+        fetchGames(0);
     }
 
     /** IO side: request plus pure derivation (ranking, top N, heat). No state is touched. */
@@ -252,6 +363,7 @@ public final class DbController {
         view.clearResults();
         view.showPosition(history.moves(), caps);
         renderStats();
+        renderGames();
     }
 
     private void renderStats() {

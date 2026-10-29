@@ -10,6 +10,9 @@ final class RecordingDbView implements DbView {
     final List<List<DbController.MoveRow>> rows = new ArrayList<>();
     final List<List<Integer>> positions = new ArrayList<>();
     final List<DbController.Endpoint> errors = new ArrayList<>();
+    final List<List<DbDtos.GameHeader>> games = new ArrayList<>();
+    final List<Integer> totals = new ArrayList<>();
+    final List<Boolean> hasMores = new ArrayList<>();
 
     int count(String name) {
         int n = 0;
@@ -69,5 +72,8 @@ final class RecordingDbView implements DbView {
     @Override
     public void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore) {
         log.add("showGames");
+        this.games.add(new ArrayList<>(games));
+        totals.add(total);
+        hasMores.add(hasMore);
     }
 }

@@ -24,6 +24,6 @@ public interface DbView {
 
     void showError(DbController.Endpoint e);
 
-    /** Unused until the games list lands. */
+    /** All games loaded so far for the position, the server total, and whether more pages remain. */
     void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore);
 }

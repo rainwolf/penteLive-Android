@@ -91,10 +91,10 @@ public class DbControllerTest {
         DbController c = started();
         c.onBoardMove(181); // A
         assertTrue(c.back()); // B
-        assertEquals(2, io.size());
-        io.run(1); // B io
+        assertEquals(4, io.size()); // stats + games per position
+        io.run(2); // B stats io
         main.runAll(); // B main
-        io.run(0); // A io
+        io.run(0); // A stats io
         main.runAll(); // A main
         assertEquals(1, view.count("showDots"));
         assertEquals(map(181, RED, 200, GREEN), view.dots.get(0));
@@ -107,7 +107,7 @@ public class DbControllerTest {
         DbController c = started();
         c.onBoardMove(181);
         c.back();
-        io.run(1);
+        io.run(2);
         main.runAll();
         io.run(0);
         main.runAll();
@@ -122,7 +122,7 @@ public class DbControllerTest {
         DbController c = started();
         c.onBoardMove(181);
         c.back();
-        io.run(1);
+        io.run(2);
         main.runAll();
         io.run(0);
         main.runAll();
@@ -366,6 +366,168 @@ public class DbControllerTest {
         assertEquals(1, newView.count("showDots"));
         assertEquals(map(182, RED, 183, GREEN), newView.dots.get(0));
         assertEquals(calls, fake.statsCalls.size());
+        assertEquals(0, io.size());
+    }
+
+    private static List<Integer> m180() {
+        return Arrays.asList(180);
+    }
+
+    private DbController withGames(int total, int firstPage) {
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(total, 1000, firstPage));
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        return c;
+    }
+
+    @Test
+    public void positionChangeFetchesGamesOffset0() {
+        withGames(60, 25);
+        assertEquals(Collections.singletonList(0), fake.gamesOffsets);
+        assertEquals(m180(), fake.gamesCalls.get(0));
+        assertEquals(1, view.games.size());
+        assertEquals(25, view.games.get(0).size());
+        assertEquals(Integer.valueOf(60), view.totals.get(0));
+        assertTrue(view.hasMores.get(0));
+        fake.gamesOffsets.clear();
+        view.games.clear();
+        DbController c = controller(13, m180()); // Connect6 fetches games too
+        c.attach(new RecordingDbView());
+        settle();
+        assertEquals(Collections.singletonList(0), fake.gamesOffsets);
+    }
+
+    @Test
+    public void loadMoreAppendsOffset25() {
+        DbController c = withGames(60, 25);
+        fake.gamesReply(m180(), 25, 200, FakeDbApi.gamesPage(60, 2000, 25));
+        c.loadMoreGames();
+        settle();
+        assertEquals(25, fake.lastGamesOffset());
+        List<DbDtos.GameHeader> shown = view.games.get(view.games.size() - 1);
+        assertEquals(50, shown.size());
+        assertEquals(1000, shown.get(0).gid);
+        assertEquals(2024, shown.get(49).gid);
+        assertTrue(view.hasMores.get(view.hasMores.size() - 1));
+    }
+
+    @Test
+    public void stopsAtTotal() {
+        DbController c = withGames(30, 25);
+        fake.gamesReply(m180(), 25, 200, FakeDbApi.gamesPage(30, 2000, 5));
+        c.loadMoreGames();
+        settle();
+        assertEquals(30, view.games.get(view.games.size() - 1).size());
+        assertFalse(view.hasMores.get(view.hasMores.size() - 1));
+        int calls = fake.gamesOffsets.size();
+        c.loadMoreGames();
+        settle();
+        assertEquals(calls, fake.gamesOffsets.size());
+    }
+
+    @Test
+    public void loadMoreWhileInFlightIsNoOp() {
+        DbController c = withGames(60, 25);
+        c.loadMoreGames();
+        c.loadMoreGames();
+        assertEquals(1, io.size());
+        settle();
+        assertEquals(2, fake.gamesOffsets.size());
+    }
+
+    @Test
+    public void staleGamesResponseIsDropped() {
+        DbController c = started(); // at [180]
+        fake.gamesReply(Arrays.asList(180, 181), 0, 200, FakeDbApi.gamesPage(5, 3000, 5));
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(7, 1000, 7));
+        c.onBoardMove(181); // A: stats, games
+        assertTrue(c.back()); // B: stats, games
+        assertEquals(4, io.size());
+        io.run(3); // B games io
+        main.runAll();
+        io.run(1); // A games io
+        main.runAll();
+        assertEquals(1, view.count("showGames"));
+        assertEquals(Integer.valueOf(7), view.totals.get(view.totals.size() - 1));
+    }
+
+    @Test
+    public void positionChangeDuringLoadMoreUnsticksShowMore() {
+        DbController c = withGames(60, 25);
+        fake.gamesReply(Arrays.asList(180, 181), 0, 200, FakeDbApi.gamesPage(60, 3000, 25));
+        c.loadMoreGames(); // io: [more]
+        c.onBoardMove(181); // io: [more, stats, games]
+        settle();
+        // the superseded page never rendered: shown lists are page 1 (25) then the new position's page (25)
+        assertEquals(2, view.games.size());
+        assertEquals(25, view.games.get(1).size());
+        assertEquals(3000, view.games.get(1).get(0).gid);
+        int calls = fake.gamesOffsets.size();
+        fake.gamesReply(Arrays.asList(180, 181), 25, 200, FakeDbApi.gamesPage(60, 4000, 25));
+        c.loadMoreGames();
+        settle();
+        assertEquals(calls + 1, fake.gamesOffsets.size());
+        assertEquals(50, view.games.get(view.games.size() - 1).size());
+    }
+
+    @Test
+    public void gamesErrorShowsRetryGames() {
+        fake.gamesReply(m180(), 0, 500, "{}");
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        assertEquals(Collections.singletonList(DbController.Endpoint.GAMES), view.errors);
+        assertEquals(0, view.count("showGames"));
+    }
+
+    @Test
+    public void retryGamesRefetchesFailedOffset() {
+        DbController c = withGames(60, 25);
+        fake.gamesReply(m180(), 25, 500, "{}");
+        c.loadMoreGames();
+        settle();
+        assertEquals(Collections.singletonList(DbController.Endpoint.GAMES), view.errors);
+        fake.gamesReply(m180(), 25, 200, FakeDbApi.gamesPage(60, 2000, 25));
+        int stats = fake.statsCalls.size();
+        c.retry(DbController.Endpoint.GAMES);
+        settle();
+        assertEquals(25, fake.lastGamesOffset());
+        assertEquals(stats, fake.statsCalls.size());
+        assertEquals(50, view.games.get(view.games.size() - 1).size());
+    }
+
+    @Test
+    public void retryGamesAfterFirstPageFailureUsesOffset0() {
+        fake.gamesReply(m180(), 0, 500, "{}");
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        fake.gamesReply(m180(), 0, 200, FakeDbApi.gamesPage(3, 1000, 3));
+        c.retry(DbController.Endpoint.GAMES);
+        settle();
+        assertEquals(0, fake.lastGamesOffset());
+        assertEquals(3, view.games.get(0).size());
+    }
+
+    @Test
+    public void gamesBlockedShowsBlocked() {
+        fake.gamesReply(m180(), 0, 200, "{\"total\":0,\"blocked\":true,\"games\":[]}");
+        DbController c = controller(1, m180());
+        c.attach(view);
+        settle();
+        assertEquals(1, view.count("showBlocked"));
+        assertEquals(0, view.count("showGames"));
+    }
+
+    @Test
+    public void gamesRenderedOnReattach() {
+        DbController c = withGames(60, 25);
+        c.detach();
+        RecordingDbView v2 = new RecordingDbView();
+        c.attach(v2);
+        assertEquals(1, v2.count("showGames"));
+        assertEquals(25, v2.games.get(0).size());
         assertEquals(0, io.size());
     }
 }
