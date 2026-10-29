@@ -33,8 +33,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import be.submanifold.pentelive.db.AuthedDbTransport;
 import be.submanifold.pentelive.db.CaptureIcons;
@@ -45,6 +49,7 @@ import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.ui.CaptureSpans;
 import be.submanifold.pentelive.db.ui.DbViewModel;
+import be.submanifold.pentelive.db.ui.MovesAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -75,6 +80,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     private AlertDialog searchPrmtrsWindow, aiSearchPrmtrsWindow;
     private DbViewModel dbModel;
     private DbController controller;
+    private MovesAdapter movesAdapter;
+    private TextView dbStatus;
     private PopupWindow subscribePopup;
     private AlertDialog loginDialog;
 
@@ -116,6 +123,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         board.setActivity(this);
         board.setBoardListener(this);
         board.setDotsVisible(PrefUtils.getBooleanFromPrefs(this, PrefUtils.PREFS_DBHEAT_KEY, true));
+
+        setUpMovesSheet();
 
         dbModel = new ViewModelProvider(this).get(DbViewModel.class);
         if (!dbModel.hasController()) {
@@ -506,6 +515,50 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         super.onDestroy();
     }
 
+    private static final int[] SHOW_COUNTS = {10, 20, 50, 0};
+
+    private void setUpMovesSheet() {
+        dbStatus = findViewById(R.id.dbStatus);
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(findViewById(R.id.dbSheet));
+        behavior.setFitToContents(false);
+        behavior.setHalfExpandedRatio(0.5f);
+        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        TabLayout tabs = findViewById(R.id.dbTabs);
+        tabs.addTab(tabs.newTab().setText(R.string.db_moves));
+        // The Games tab arrives with the games list.
+
+        movesAdapter = new MovesAdapter(cell -> controller.playCandidate(cell));
+        RecyclerView list = findViewById(R.id.dbMovesList);
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(movesAdapter);
+
+        Spinner show = findViewById(R.id.dbShowSpinner);
+        String[] labels = new String[SHOW_COUNTS.length];
+        for (int i = 0; i < SHOW_COUNTS.length; i++) {
+            labels[i] = SHOW_COUNTS[i] == 0 ? getString(R.string.db_show_all) : getString(R.string.db_show_n, SHOW_COUNTS[i]);
+        }
+        ArrayAdapter<String> showAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, labels);
+        showAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        show.setAdapter(showAdapter);
+        show.setSelection(1, false); // 20, the controller's default
+        show.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (controller != null) controller.setShowCount(SHOW_COUNTS[position]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    private void setStatus(CharSequence text) {
+        dbStatus.setText(text);
+        dbStatus.setVisibility(text == null || text.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
     private void updateAiButton() {
         int id = controller.gameId();
         boolean pente = id != 0 && DbGames.isSupported(id) && isAiGame(DbGames.baseName(id));
@@ -557,13 +610,17 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     @Override
     public void showMoves(List<DbController.MoveRow> rows) {
         progressBar.setVisibility(View.GONE);
-        // Moves sheet arrives with its own task.
+        movesAdapter.setGridSize(DbGames.gridSize(controller.gameId()));
+        movesAdapter.submit(rows);
+        setStatus(rows.isEmpty() ? getString(R.string.db_no_moves) : null);
     }
 
     @Override
     public void clearResults() {
         board.setCandidateDots(null);
         board.setTextViewHTML(findViewById(R.id.playerInfo), "");
+        movesAdapter.submit(java.util.Collections.emptyList());
+        setStatus(null);
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -571,7 +628,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     public void showBlocked() {
         progressBar.setVisibility(View.GONE);
         board.setCandidateDots(null);
-        board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.no_search_results));
+        movesAdapter.submit(java.util.Collections.emptyList());
+        setStatus(getString(R.string.db_blocked));
     }
 
     @Override
@@ -579,7 +637,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         progressBar.setVisibility(View.GONE);
         board.setCandidateDots(null);
         ((Toolbar) findViewById(R.id.toolbar)).setSubtitle(gameName());
-        board.setTextViewHTML(findViewById(R.id.playerInfo), "<br><br>" + getString(R.string.db_unsupported_game));
+        movesAdapter.submit(java.util.Collections.emptyList());
+        setStatus(getString(R.string.db_unsupported_game));
         updateAiButton();
     }
 

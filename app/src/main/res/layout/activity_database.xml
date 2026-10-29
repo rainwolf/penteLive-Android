@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="be.submanifold.pentelive.MMAIActivity">
+
+    <LinearLayout
+        android:id="@+id/dbContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -17,23 +23,13 @@
     <view
         class="be.submanifold.pentelive.DBBoardView"
         android:id="@+id/boardView"
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:alpha="0.5"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
 
     <LinearLayout
         android:id="@+id/submitLayout"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:layout_below="@id/boardView"
         android:layout_height="wrap_content">
         <Button
             android:layout_width="0dp"
@@ -81,9 +77,82 @@
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
         android:textSize="16sp"
-        android:layout_height="fill_parent"
-        android:layout_below="@id/submitLayout"/>
+        android:layout_height="wrap_content" />
 
+    </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:alpha="0.5"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/dbSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:maxWidth="640dp"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:background="@color/db_sheet_background"
+        android:elevation="8dp"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="120dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:background="@color/db_divider" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/dbTabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabTextColor="@color/db_secondary_text"
+            app:tabSelectedTextColor="@color/db_accent"
+            app:tabIndicatorColor="@color/db_accent" />
+
+        <LinearLayout
+            android:id="@+id/dbShowRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/db_show_n_moves"
+                android:textColor="@color/db_secondary_text" />
+            <Spinner
+                android:id="@+id/dbShowSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/dbStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/db_secondary_text"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dbMovesList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

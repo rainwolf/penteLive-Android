@@ -576,6 +576,13 @@
     <string name="db_settings">DB settings</string>
     <string name="db_title">Database</string>
     <string name="db_heatmap">Heat map</string>
+    <string name="db_moves">Moves</string>
+    <string name="db_games_count">Games · %1$d</string>
+    <string name="db_show_n_moves">Show N moves</string>
+    <string name="db_show_n">Show %1$d</string>
+    <string name="db_show_all">Show all</string>
+    <string name="db_blocked">Database unavailable during your rated game</string>
+    <string name="db_no_moves">No moves</string>
     <string name="db_unsupported_game">The database is not available for this game</string>
     <string name="db_login_required">Please log in to use the database</string>
     <string name="db_retry">Retry</string>

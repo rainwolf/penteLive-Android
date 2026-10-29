@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="db_ink">#16181D</color>
+    <color name="db_secondary_text">#4A4F5A</color>
+    <color name="db_secondary_text_alt">#5C616B</color>
+    <color name="db_accent">#1F5FD6</color>
+    <color name="db_divider">#E2E4E9</color>
+    <color name="db_chip_outline">#C8CCD4</color>
+    <color name="db_chip_selected">#E3ECFC</color>
+    <color name="db_sheet_background">#FFFFFF</color>
+</resources>
