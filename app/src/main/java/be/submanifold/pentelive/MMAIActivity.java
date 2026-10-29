@@ -253,8 +253,17 @@ public class MMAIActivity extends AppCompatActivity {
             board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
             board.startGame();
         });
-        button = findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(v -> board.undoMove());
+        // Swipe left on the board undoes a move, like iOS. Swipe right does nothing.
+        board.setOnSwipeListener(new MMAIBoardView.OnSwipeListener() {
+            @Override
+            public void onSwipeLeft() {
+                board.undoMove();
+            }
+
+            @Override
+            public void onSwipeRight() {
+            }
+        });
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.action_mmai_settings) {

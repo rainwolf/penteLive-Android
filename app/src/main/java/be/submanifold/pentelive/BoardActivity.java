@@ -199,10 +199,21 @@ public class BoardActivity extends AppCompatActivity {
                 }
             }
         });
-        button = findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(v -> goBack());
-        button = findViewById(R.id.forwardButton);
-        if (button != null) button.setOnClickListener(v -> goForward());
+        // Swipe on the board navigates moves like iOS: finger left = back, finger right = forward.
+        // Ignored while a swap2 / dPente choice or Go stone marking is in progress (as on iOS).
+        board.setOnSwipeListener(new BoardView.OnSwipeListener() {
+            @Override
+            public void onSwipeLeft() {
+                if (game.swap2Choice || game.dPenteChoice || game.isGoMarkStones()) return;
+                goBack();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                if (game.swap2Choice || game.dPenteChoice || game.isGoMarkStones()) return;
+                goForward();
+            }
+        });
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();

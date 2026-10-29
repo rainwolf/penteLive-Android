@@ -250,8 +250,17 @@ public class DatabaseActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.searchButton);
         if (button != null) button.setOnClickListener(v -> doSearch());
-        button = findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(v -> board.undoMove());
+        // Swipe left on the board undoes a move, like iOS. Swipe right does nothing.
+        board.setOnSwipeListener(new DBBoardView.OnSwipeListener() {
+            @Override
+            public void onSwipeLeft() {
+                board.undoMove();
+            }
+
+            @Override
+            public void onSwipeRight() {
+            }
+        });
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.action_db_settings) {
