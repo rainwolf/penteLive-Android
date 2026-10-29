@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 
 public class DbGamesTest {
@@ -78,6 +79,22 @@ public class DbGamesTest {
         assertEquals(1, DbGames.moveFloor(1));
         assertEquals(Collections.emptyList(), DbGames.seed(7));
         assertEquals(Arrays.asList(180), DbGames.seed(1));
+    }
+
+    @Test
+    public void seedIsMutable() {
+        List<Integer> s = DbGames.seed(1);
+        s.add(181);
+        assertEquals(Arrays.asList(180, 181), s);
+        assertEquals(Arrays.asList(180), DbGames.seed(1));
+    }
+
+    @Test
+    public void supportedExcludesGoRenjuAndUnknown() {
+        assertTrue(DbGames.isSupported(1));
+        assertTrue(DbGames.isSupported(14));
+        assertTrue(DbGames.isSupported(63));
+        for (int id : new int[] {0, 19, 21, 23, 31, 81, 99}) assertFalse(String.valueOf(id), DbGames.isSupported(id));
     }
 
     @Test

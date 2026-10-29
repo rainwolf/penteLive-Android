@@ -95,6 +95,12 @@ public final class DbGames {
         return id % 2 == 0;
     }
 
+    /** True for the 12 DB games and their Speed/turn-based ids; false for Go, Renju, 0 and unknown ids. */
+    public static boolean isSupported(int anyGameId) {
+        Variant v = variantOf(anyGameId);
+        return v != null && BOARD_ARGB.containsKey(v);
+    }
+
     public static int boardArgb(int anyGameId) {
         return BOARD_ARGB.get(required(anyGameId));
     }
@@ -114,7 +120,11 @@ public final class DbGames {
     }
 
     public static List<Integer> seed(int gameId) {
-        return moveFloor(gameId) == 1 ? Collections.singletonList(180) : new ArrayList<Integer>();
+        List<Integer> out = new ArrayList<>();
+        if (moveFloor(gameId) == 1) {
+            out.add(180);
+        }
+        return out;
     }
 
     public static boolean stepsByTurn(int gameId) {
