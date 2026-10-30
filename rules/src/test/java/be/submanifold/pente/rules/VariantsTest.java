@@ -150,6 +150,13 @@ public class VariantsTest {
     }
 
     @Test
+    public void canonicalGameIdMatchesEnum() {
+        assertEquals(1, Variants.canonicalGameId(Variant.PENTE));
+        assertEquals(13, Variants.canonicalGameId(Variant.CONNECT6));
+        assertEquals(29, Variants.canonicalGameId(Variant.SWAP2_KERYO));
+    }
+
+    @Test
     public void nullVariantThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> Variants.gridSize(null));
         assertThrows(IllegalArgumentException.class, () -> Variants.captureRule(null));

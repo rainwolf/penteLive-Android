@@ -35,7 +35,6 @@ public class PrefUtils {
     public static final String PREFS_KOTHRESTRICTION_KEY = "__KOTHRESTRICTION__";
     public static final String PREFS_LOADAVATARS_KEY = "__LOADAVATARS__";
     public static final String PREFS_REGISTRATIONSUCCESSFUL_KEY = "__REGISTRATIONSUCCESSFUL__";
-    public static final String PREFS_DBSORT_KEY = "__DBSORT__";
     public static final String PREFS_DBGAME_KEY = "__DBGAME__";
     // Set once the stored __DBGAME__ spinner index has been shifted for the two
     // Swap2 entries inserted after O-Pente (every Speed game moved by +2).
@@ -51,6 +50,7 @@ public class PrefUtils {
     public static final String PREFS_INAPPSOUNDSOFF_KEY = "__INAPPSOUNDSOFF__";
     public static final String PREFS_NOBEGINNERACCEPTREMIND_KEY = "__NOBEGINNERACCEPTREMIND__";
     public static final String PREFS_DBLIVEORTB_KEY = "__DBLIVEORTB__";
+    public static final String PREFS_DBHEAT_KEY = "__DBHEAT__";
     public static final String PREFS_DOUBLEPASSREMINDER_KEY = "__DOUBLEPASSREMINDER__";
     public static final String PREFS_INSTALLDATE_KEY = "__INSTALLDATE__";
     public static final String PREFS_LASTRATED_KEY = "__LASTRATED__";

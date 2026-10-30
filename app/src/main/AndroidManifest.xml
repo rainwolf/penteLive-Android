@@ -90,6 +90,9 @@
         <activity
             android:name=".DatabaseActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".db.ui.DbGameViewerActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".MyFcmListenerService"

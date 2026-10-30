@@ -333,7 +333,6 @@ An K.o.t.h.-Wettbewerben im Live-Spielmodus nimmt man automatisch teil, sobald m
     <string name="choose_play">Spielart wählen</string>
     <string name="more">mehr</string>
     <string name="ask_the_ai">Frag die AI</string>
-    <string name="db_settings">DB-Einstellungen</string>
     <string name="live_table_settings_placeholder">Timer: 0/0\nnicht gewertet</string>
     <string name="challenge_label">Herausfordern</string>
     <string name="post_open_invitation">offene Einladung posten</string>

@@ -3,9 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_db_settings"
-        android:icon="@drawable/ic_action_gear"
-        android:title="@string/db_settings"
+        android:id="@+id/action_db_heat"
+        android:checkable="true"
+        android:checked="true"
+        android:title="@string/db_heatmap"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_db_filters"
+        android:icon="@drawable/ic_filter_list"
+        android:title="@string/db_filters"
         style="@android:style/Widget.ActionButton"
         app:showAsAction="ifRoom"/>
 

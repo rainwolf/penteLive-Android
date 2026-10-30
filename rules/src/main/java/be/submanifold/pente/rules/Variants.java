@@ -145,6 +145,11 @@ public final class Variants {
         return v.gridSize;
     }
 
+    public static int canonicalGameId(Variant v) {
+        if (v == null) throw new IllegalArgumentException("Variant must not be null");
+        return v.canonicalGameId;
+    }
+
     public static CaptureRule captureRule(Variant v) {
         if (v == null) throw new IllegalArgumentException("Variant must not be null");
         return v.captureRule;
