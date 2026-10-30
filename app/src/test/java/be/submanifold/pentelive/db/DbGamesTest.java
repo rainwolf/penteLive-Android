@@ -187,4 +187,14 @@ public class DbGamesTest {
         assertTrue(DbGames.speedAllowed(23));
         assertTrue(DbGames.speedAllowed(31));
     }
+
+    @Test
+    public void filtersSheetChipsFollowBaseNames() throws java.io.IOException {
+        // One chip per BASE_NAMES entry, tagged with its base id: Go/Renju chips come from the catalog.
+        String src = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(
+                "src/main/java/be/submanifold/pentelive/db/ui/DbFiltersSheet.java")), java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(src.contains("for (int i = 0; i < DbGames.BASE_NAMES.size(); i++)"));
+        assertTrue(src.contains("chip.setTag(DbGames.baseId(name));"));
+        assertTrue(src.contains("DbGames.speedAllowed("));
+    }
 }

@@ -151,4 +151,37 @@ public class GameViewerModelTest {
         assertFalse(new GameViewerModel(7).accept(r));
         assertEquals(GameViewerModel.Rejection.SUBSCRIPTION_REQUIRED, GameViewerModel.rejection(r));
     }
+
+    // ---- Go / Renju games in the viewer (DbGameViewerActivity.renderGame/showPosition composition) ----
+
+    @Test
+    public void goNineByNineGameStepsThroughPassesWithCaptures() {
+        // B A9, W B9, B C9, W pass, B B8 captures W B9; then two passes.
+        GameViewerModel m = new GameViewerModel(9);
+        assertTrue(m.accept(detail(9, 21, 0, 1, 2, 81, 10, 81, 81)));
+        assertTrue(DbGames.isSupported(m.header().game));
+        assertEquals("Go (9x9)", DbGames.baseName(m.header().game));
+        assertEquals(7, m.moveCount());
+        m.jumpTo(5);
+        assertEquals(Arrays.asList(0, 1, 2, 81, 10), m.movesUpTo());
+        CaptureIcons.Counts caps = CaptureIcons.of(m.header().game, m.movesUpTo());
+        assertTrue(caps.visible);
+        assertEquals(1, caps.p1Count);
+        java.util.List<MoveGrid.Cell> cells = MoveGrid.cells(m.header().game, m.allMoves(), m.cursor());
+        assertEquals("PASS", cells.get(3).label);
+        assertEquals("B8", cells.get(4).label);
+        assertEquals("PASS", cells.get(6).label);
+        assertTrue(m.back());
+        assertEquals(0, CaptureIcons.of(m.header().game, m.movesUpTo()).p1Count);
+    }
+
+    @Test
+    public void turnBasedRenjuGameIsViewable() {
+        GameViewerModel m = new GameViewerModel(10);
+        assertTrue(m.accept(detail(10, 81, 112, 113, 98)));
+        assertTrue(DbGames.isSupported(81));
+        assertEquals("Renju", DbGames.baseName(81));
+        assertFalse(CaptureIcons.of(81, m.allMoves()).visible);
+        assertEquals("H8", MoveGrid.cells(81, m.allMoves(), 3).get(0).label);
+    }
 }

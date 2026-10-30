@@ -570,12 +570,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
     /** The database_game_types_array label whose DB id is gameId (first entry when none matches). */
     private String gameTypeLabel(int gameId) {
-        String[] types = getResources().getStringArray(R.array.database_game_types_array);
-        for (String t : types) {
-            Integer id = DbGames.fromGameType(t);
-            if (id != null && id == gameId) return t;
-        }
-        return types[0];
+        return DbTitle.boardLabel(gameId, getResources().getStringArray(R.array.database_game_types_array));
     }
 
     private void showFilters() {
