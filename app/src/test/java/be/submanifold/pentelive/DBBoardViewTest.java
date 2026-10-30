@@ -112,7 +112,7 @@ public class DBBoardViewTest {
     @Test
     public void unsupportedGameSkipsReplay() {
         DBBoardView b = newBoard();
-        b.setGame("Go");
+        b.setGame("Tombstone");
         b.showPosition(Arrays.asList(180, 0));
         assertEquals(Arrays.asList(180, 0), b.getMovesList());
         assertEquals(0, b.abstractBoard[0][0]);

@@ -15,7 +15,7 @@ public interface DbView {
 
     void showBlocked();
 
-    /** Go, Renju or an unknown game. */
+    /** An unknown game (id 0 or not in the DB catalog). */
     void showUnsupported();
 
     void showLoginPrompt();

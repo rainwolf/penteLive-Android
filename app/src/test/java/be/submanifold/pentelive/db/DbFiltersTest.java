@@ -92,4 +92,35 @@ public class DbFiltersTest {
         assertEquals(DbFilters.defaults(), DbFilters.fromJson("not json"));
         assertEquals(DbFilters.defaults(), DbFilters.fromJson(null));
     }
+
+    @Test public void withGoGameKeepsBaseAndSpeed() {
+        DbFilters f = DbFilters.defaults().withGame(22);
+        assertEquals(21, f.baseGameId);
+        assertTrue(f.speed);
+        assertEquals(22, f.gameId());
+        assertEquals(31, DbFilters.defaults().withGame(81).baseGameId);
+        assertEquals(23, DbFilters.defaults().withGame(73).gameId());
+    }
+
+    @Test public void fromJsonKeepsGoAndRenjuBases() {
+        DbFilters r = DbFilters.defaults().toBuilder().baseGameId(31).speed(true).build();
+        assertEquals(r, DbFilters.fromJson(r.toJson()));
+        DbFilters g = DbFilters.defaults().toBuilder().baseGameId(23).build();
+        assertEquals(23, DbFilters.fromJson(g.toJson()).baseGameId);
+        DbFilters unknown = DbFilters.defaults().toBuilder().baseGameId(33).build();
+        assertEquals(1, DbFilters.fromJson(unknown.toJson()).baseGameId);
+    }
+
+    @Test public void goWireGameIds() {
+        int g9 = DbFilters.defaults().toBuilder().baseGameId(21).build().gameId();
+        int g13s = DbFilters.defaults().toBuilder().baseGameId(23).speed(true).build().gameId();
+        int rs = DbFilters.defaults().toBuilder().baseGameId(31).speed(true).build().gameId();
+        assertEquals(21, wireGame(DbRequests.positionStats(g9, java.util.Arrays.asList(40), "archive", null)));
+        assertEquals(24, wireGame(DbRequests.gamesSearch(g13s, null, "archive", null, 0, 25)));
+        assertEquals(32, wireGame(DbRequests.positionStats(rs, java.util.Arrays.asList(112), "archive", null)));
+    }
+
+    private static int wireGame(String body) {
+        return com.google.gson.JsonParser.parseString(body).getAsJsonObject().get("game").getAsInt();
+    }
 }

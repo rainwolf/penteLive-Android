@@ -257,15 +257,20 @@ public class DbControllerTest {
     }
 
     @Test
-    public void goAndRenjuAreUnsupported() {
-        for (int id : new int[] {19, 21, 23, 31, 81}) { // Go 19x19/9x9/13x13, Renju, TB Renju
+    public void goAndRenjuAreSupported() {
+        int[] ids = {19, 21, 23, 31, 81}; // Go 19x19/9x9/13x13, Renju, TB Renju
+        for (int id : ids) {
             RecordingDbView v = new RecordingDbView();
-            DbController c = controller(id, Collections.<Integer>emptyList());
+            DbController c = controller(id, null);
             c.attach(v);
             settle();
-            assertEquals(Collections.singletonList("showUnsupported"), v.log);
+            assertFalse(String.valueOf(id), v.log.contains("showUnsupported"));
+            assertEquals(id, c.gameId());
         }
-        assertTrue(fake.statsCalls.isEmpty());
+        assertEquals(Arrays.asList(19, 21, 23, 31, 81), fake.statsGames);
+        assertEquals(Collections.<Integer>emptyList(), fake.statsCalls.get(0)); // Go starts empty
+        assertEquals(Arrays.asList(112), fake.statsCalls.get(3)); // Renju starts at its centre
+        assertEquals(Arrays.asList(112), fake.statsCalls.get(4));
     }
 
     @Test

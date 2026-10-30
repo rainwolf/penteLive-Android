@@ -26,8 +26,18 @@ public class DbStartTest {
 
     @Test
     public void unknownExtrasGameIsUnsupported() {
-        DbStart s = DbStart.resolve("Go", null, null, null);
+        DbStart s = DbStart.resolve("Tombstone", null, null, null);
         assertEquals(Integer.valueOf(0), s.gameOverride);
+    }
+
+    @Test
+    public void goAndRenjuExtrasResolve() {
+        DbStart go = DbStart.resolve("Go (9x9)", Arrays.asList(40, 81, 41), null, null);
+        assertEquals(Integer.valueOf(21), go.gameOverride);
+        assertEquals(Arrays.asList(40, 81, 41), go.initialMoves);
+        assertEquals("Go (9x9)", go.label);
+        assertEquals(Integer.valueOf(20), DbStart.resolve("Speed Go", null, null, null).gameOverride);
+        assertEquals(Integer.valueOf(32), DbStart.resolve("Speed Renju", null, null, null).gameOverride);
     }
 
     @Test
@@ -42,8 +52,8 @@ public class DbStartTest {
 
     @Test
     public void restoreKeepsSavedUnsupportedGame() {
-        DbStart s = DbStart.resolve("Pente", null, 0, "Go");
+        DbStart s = DbStart.resolve("Pente", null, 0, "Tombstone");
         assertEquals(Integer.valueOf(0), s.gameOverride);
-        assertEquals("Go", s.label);
+        assertEquals("Tombstone", s.label);
     }
 }

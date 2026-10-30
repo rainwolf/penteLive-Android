@@ -10,6 +10,6 @@ public final class DbTitle {
         if (gameId == 0 || !DbGames.isSupported(gameId)) {
             return fallbackLabel == null ? "" : fallbackLabel;
         }
-        return (DbGames.isSpeed(gameId) ? "Speed " : "") + DbGames.baseName(gameId);
+        return DbGames.label(gameId);
     }
 }

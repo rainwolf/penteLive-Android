@@ -36,10 +36,11 @@ public class CaptureIconsTest {
     }
 
     @Test
-    public void allTwelveGamesReplayWithoutError() {
+    public void allSixteenGamesReplayWithoutError() {
+        assertEquals(16, DbGames.BASE_NAMES.size());
         for (String name : DbGames.BASE_NAMES) {
             int id = DbGames.baseId(name);
-            CaptureIcons.Counts c = CaptureIcons.of(id, Arrays.asList(180));
+            CaptureIcons.Counts c = CaptureIcons.of(id, DbGames.seed(id));
             assertEquals(name, DbGames.showsCaptureIcons(id), c.visible);
         }
     }
@@ -59,5 +60,25 @@ public class CaptureIconsTest {
         assertTrue(occ.contains(183));
         assertFalse(occ.contains(181));
         assertFalse(occ.contains(182));
+    }
+
+    @Test
+    public void goShowsCapturedStonesRenjuHidesThem() {
+        // 9x9: B A9, W B9, B C9, W E5, B B8 captures the white B9 stone.
+        CaptureIcons.Counts go = CaptureIcons.of(21, Arrays.asList(0, 1, 2, 40, 10));
+        assertTrue(go.visible);
+        assertEquals(1, go.p1Count); // P1 slot = white stones lost
+        assertEquals(0, go.p2Count);
+        CaptureIcons.Counts withPass = CaptureIcons.of(21, Arrays.asList(40, 81, 41));
+        assertTrue(withPass.visible);
+        assertEquals(0, withPass.p1Count);
+        assertFalse(CaptureIcons.of(31, Arrays.asList(112, 113)).visible);
+        assertFalse(CaptureIcons.of(81, Arrays.asList(112)).visible);
+    }
+
+    @Test
+    public void goOccupiedUsesNineByNineCellsAndSkipsPasses() {
+        Set<Integer> occ = CaptureIcons.occupied(21, Arrays.asList(0, 1, 2, 40, 10, 81));
+        assertEquals(new java.util.HashSet<>(Arrays.asList(0, 2, 40, 10)), occ);
     }
 }

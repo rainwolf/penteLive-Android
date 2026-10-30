@@ -32,7 +32,8 @@ public final class CaptureIcons {
 
     public static Counts of(int gameId, List<Integer> moves) {
         Variant v = Variants.fromGameId(gameId);
-        boolean visible = v != null && !v.isGo() && !v.isRenju() && !v.isGomoku() && !v.isConnect6();
+        // Go shows captured stones; Renju, Gomoku and Connect6 have none (DbGames.showsCaptureIcons).
+        boolean visible = v != null && !v.isRenju() && !v.isGomoku() && !v.isConnect6();
         if (!visible) {
             return new Counts(false, 0, P1_FILL, 0, P2_FILL);
         }
