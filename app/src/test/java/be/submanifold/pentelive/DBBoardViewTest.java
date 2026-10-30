@@ -187,4 +187,95 @@ public class DBBoardViewTest {
         }
         assertEquals(Collections.emptyList(), offending);
     }
+
+    // ---- selected-move flash ----
+
+    /** Counts animator starts/stops instead of creating a real ValueAnimator (the stubs have none). */
+    private static final class FlashBoard extends DBBoardView {
+        int starts;
+        int stops;
+
+        FlashBoard() {
+            super(null, null);
+        }
+
+        @Override
+        void startFlash() {
+            starts++;
+        }
+
+        @Override
+        void stopFlash() {
+            stops++;
+            super.stopFlash();
+        }
+
+        void detach() {
+            onDetachedFromWindow();
+        }
+    }
+
+    private static FlashBoard flashBoard(boolean animationsOn) {
+        FlashBoard b = new FlashBoard();
+        b.setGame("Pente");
+        b.setAnimationsEnabledForTest(() -> animationsOn);
+        return b;
+    }
+
+    @Test
+    public void selectedCellFlashesWhenAnimationsAreOn() {
+        FlashBoard b = flashBoard(true);
+        b.setSelectedCell(200, 0xFFFF0000);
+        assertEquals(200, b.selectedCell());
+        assertTrue(b.isFlashing());
+        assertEquals(1, b.starts);
+    }
+
+    @Test
+    public void selectedCellIsAStaticRingWhenAnimationsAreOff() {
+        FlashBoard b = flashBoard(false);
+        b.setSelectedCell(200, 0xFFFF0000);
+        assertEquals(200, b.selectedCell());
+        assertFalse(b.isFlashing());
+        assertEquals(0, b.starts);
+    }
+
+    @Test
+    public void clearingTheSelectionStopsTheFlash() {
+        FlashBoard b = flashBoard(true);
+        b.setSelectedCell(200, 0xFFFF0000);
+        int stopsBefore = b.stops;
+        b.clearSelectedCell();
+        assertEquals(-1, b.selectedCell());
+        assertFalse(b.isFlashing());
+        assertEquals(stopsBefore + 1, b.stops);
+    }
+
+    @Test
+    public void onlyOneCellFlashesAtATime() {
+        FlashBoard b = flashBoard(true);
+        b.setSelectedCell(200, 0xFFFF0000);
+        b.setSelectedCell(201, 0xFF00FF00);
+        assertEquals(201, b.selectedCell());
+        assertEquals(2, b.starts);
+        assertTrue("the first flash was stopped before the second started", b.stops >= 2);
+    }
+
+    @Test
+    public void detachingFromTheWindowStopsTheFlash() {
+        FlashBoard b = flashBoard(true);
+        b.setSelectedCell(200, 0xFFFF0000);
+        int stopsBefore = b.stops;
+        b.detach();
+        assertEquals(-1, b.selectedCell());
+        assertFalse(b.isFlashing());
+        assertEquals(stopsBefore + 1, b.stops);
+    }
+
+    @Test
+    public void flashUsesTheSystemAnimatorScaleSetting() throws IOException {
+        String src = new String(Files.readAllBytes(Paths.get("src/main/java/be/submanifold/pentelive/DBBoardView.java")),
+                StandardCharsets.UTF_8);
+        assertTrue(src.contains("Settings.Global.ANIMATOR_DURATION_SCALE"));
+    }
 }

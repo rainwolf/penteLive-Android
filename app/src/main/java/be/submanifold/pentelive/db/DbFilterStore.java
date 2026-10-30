@@ -6,6 +6,7 @@ import be.submanifold.pentelive.PrefUtils;
 public final class DbFilterStore {
     static final String KEY_FILTERS = "__DBF_FILTERS__";
     static final String KEY_VERSION = "__DBF_VERSION__";
+    static final String KEY_SORT = "__DBF_SORT__";
     private static final int VERSION = 1;
 
     /** Legacy {@code db_ratings_array} (strings.xml), indexed by the stored spinner position. */
@@ -49,6 +50,15 @@ public final class DbFilterStore {
     public void save(DbFilters f) {
         kv.putString(KEY_FILTERS, f.toJson());
         kv.putInt(KEY_VERSION, VERSION);
+    }
+
+    /** The Moves sort (Win % by default). */
+    public MoveSort loadSort() {
+        return MoveSort.fromKey(kv.getString(KEY_SORT, null));
+    }
+
+    public void saveSort(MoveSort sort) {
+        kv.putString(KEY_SORT, sort.key);
     }
 
     private DbFilters migrateLegacy() {

@@ -75,6 +75,9 @@ public final class DbController {
     private List<MoveRow> rows = Collections.emptyList();
     private Map<Integer, Integer> dots = Collections.emptyMap();
     private int showCount = DEFAULT_SHOW;
+    private MoveSort sort;
+    /** The Moves row selected for the board flash; null = none. Cleared by every change of the results. */
+    private Integer selectedCell;
     private List<NextMove> sortedCache = Collections.emptyList();
     private Set<Integer> occupiedCache = Collections.emptySet();
 
@@ -96,6 +99,7 @@ public final class DbController {
         this.io = io;
         this.main = main;
         this.store = store;
+        this.sort = store.loadSort();
         DbFilters stored = store.load();
         int game;
         if (gameOverride == null) {
@@ -211,6 +215,7 @@ public final class DbController {
     }
 
     public void detach() {
+        selectedCell = null;
         view = null;
     }
 
@@ -392,6 +397,7 @@ public final class DbController {
         dots = Collections.emptyMap();
         statsState = StatsState.LOADING;
         resetGames();
+        clearSelection();
         if (view != null) {
             view.clearResults();
             view.showPosition(moves, caps);
@@ -404,6 +410,7 @@ public final class DbController {
     private void requestStats() {
         final List<Integer> moves = history.moves();
         statsState = StatsState.LOADING;
+        clearSelection();
         final int id = statsGuard.next();
         final int game = gameId;
         final String scope = applied.scope;
@@ -438,7 +445,8 @@ public final class DbController {
 
     /** Rows and dots over the top showCount of the cached ranked list (n <= 0 = all). */
     private void derive() {
-        List<NextMove> top = MoveRanking.top(sortedCache, showCount <= 0 ? sortedCache.size() : showCount);
+        List<NextMove> ordered = MoveRanking.sorted(sortedCache, sort);
+        List<NextMove> top = MoveRanking.top(ordered, showCount <= 0 ? ordered.size() : showCount);
         Map<Integer, Integer> colours = HeatScale.colours(top, occupiedCache);
         List<MoveRow> out = new ArrayList<>(top.size());
         for (NextMove m : top) out.add(new MoveRow(m, colours.get(m.move)));
@@ -449,19 +457,64 @@ public final class DbController {
     /** Re-renders rows and dots from the cached reply, no refetch. */
     public void setShowCount(int n) {
         showCount = n;
+        clearSelection();
         if (statsState != StatsState.OK) return;
         derive();
         if (view != null) renderStats();
     }
 
-    /** Same path as a board tap. */
-    public void playCandidate(int cell) {
-        onBoardMove(cell);
+    public MoveSort sort() {
+        return sort;
+    }
+
+    /** Persists the choice and re-sorts the cached reply (rows and heat), no refetch. */
+    public void setSort(MoveSort s) {
+        sort = s;
+        store.saveSort(s);
+        clearSelection();
+        if (statsState != StatsState.OK) return;
+        derive();
+        if (view != null) renderStats();
+    }
+
+    public Integer selectedCell() {
+        return selectedCell;
+    }
+
+    /**
+     * A Moves row tap: selects the row's cell (one at a time), or unselects it when it is already
+     * selected. Never plays the move; cells that are not in the list are ignored.
+     */
+    public void toggleSelection(int cell) {
+        if (selectedCell != null && selectedCell == cell) {
+            clearSelection();
+            return;
+        }
+        boolean listed = false;
+        for (MoveRow r : rows) {
+            if (r.move.move == cell) listed = true;
+        }
+        if (!listed) return;
+        selectedCell = cell;
+        if (view != null) view.showSelection(cell);
+    }
+
+    /** The engine is about to think: the selection no longer matches what the user is doing. */
+    public void aiStarting() {
+        clearSelection();
+    }
+
+    /** Drops the selection (and tells the view); a no-op when nothing is selected. */
+    public void clearSelection() {
+        if (selectedCell == null) return;
+        selectedCell = null;
+        if (view != null) view.showSelection(null);
     }
 
     /** Main side: stale check first, before any state change or view call. */
     private void onStats(int id, StatsOutcome out) {
         if (!statsGuard.isLatest(id)) return;
+        clearSelection();
         switch (out.kind) {
             case OK:
                 if (out.blocked) {

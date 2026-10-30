@@ -23,7 +23,9 @@ public final class CaptureSpans {
             return sb;
         }
         int size = lineHeight * 4 / 5;
-        sb.append("  ");
+        if (sb.length() > 0) {
+            sb.append("  ");
+        }
         append(sb, context, R.drawable.white_nobg, caps.p1Fill, size);
         sb.append(" x ").append(String.valueOf(caps.p1Count)).append("  ");
         append(sb, context, R.drawable.black_nobg, caps.p2Fill, size);

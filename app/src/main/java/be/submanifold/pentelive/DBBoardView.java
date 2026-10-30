@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat;
 
 import be.submanifold.pentelive.db.BoardReplay;
 import be.submanifold.pentelive.db.DbGames;
+import be.submanifold.pentelive.db.SelectionFlash;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -199,6 +200,110 @@ public class DBBoardView extends View {
     public void setCandidateDots(Map<Integer, Integer> cellArgb) {
         this.candidateDots = cellArgb;
         invalidate();
+    }
+
+    // ---- selected-move flash ----
+
+    private static final long FLASH_HALF_PERIOD_MS = 450;
+    private int selectedCell = -1;
+    private int selectedStoneArgb;
+    private int selectedHeatArgb;
+    private float flashPhase;
+    private boolean flashAnimated;
+    private android.animation.ValueAnimator flashAnimator;
+    /** Test seam; null = read Settings.Global.ANIMATOR_DURATION_SCALE. */
+    private java.util.function.BooleanSupplier animationsEnabledOverride;
+
+    /** The selected Moves row's cell, or -1. */
+    int selectedCell() {
+        return selectedCell;
+    }
+
+    /** True while the selection pulses; false for the static ring (animations off) or no selection. */
+    boolean isFlashing() {
+        return flashAnimated && selectedCell >= 0;
+    }
+
+    void setAnimationsEnabledForTest(java.util.function.BooleanSupplier s) {
+        animationsEnabledOverride = s;
+    }
+
+    private boolean animationsEnabled() {
+        if (animationsEnabledOverride != null) return animationsEnabledOverride.getAsBoolean();
+        float scale = android.provider.Settings.Global.getFloat(getContext().getContentResolver(),
+                android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f);
+        return SelectionFlash.animationsEnabled(scale);
+    }
+
+    /**
+     * Marks cell as selected: it flashes between the side-to-move stone and heatArgb, or shows a static
+     * ring when system animations are off. Replaces any earlier selection.
+     */
+    public void setSelectedCell(int cell, int heatArgb) {
+        stopFlash();
+        boolean connect6 = game != null && game.contains("Connect6");
+        selectedCell = cell;
+        selectedStoneArgb = SelectionFlash.stoneArgb(SelectionFlash.sideToMove(connect6, movesList.size()));
+        selectedHeatArgb = heatArgb;
+        flashPhase = 0f;
+        flashAnimated = animationsEnabled();
+        if (flashAnimated) startFlash();
+        invalidate();
+    }
+
+    public void clearSelectedCell() {
+        if (selectedCell < 0) return;
+        stopFlash();
+        selectedCell = -1;
+        flashAnimated = false;
+        invalidate();
+    }
+
+    /** Creates and starts the pulse. Overridden in tests (the android.jar stubs have no animator). */
+    void startFlash() {
+        flashAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
+        flashAnimator.setDuration(FLASH_HALF_PERIOD_MS);
+        flashAnimator.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        flashAnimator.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        flashAnimator.addUpdateListener(a -> {
+            flashPhase = (Float) a.getAnimatedValue();
+            invalidate();
+        });
+        flashAnimator.start();
+    }
+
+    /** Cancels the pulse and drops the animator (and with it the listener's reference to this view). */
+    void stopFlash() {
+        if (flashAnimator != null) {
+            flashAnimator.removeAllUpdateListeners();
+            flashAnimator.cancel();
+            flashAnimator = null;
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        stopFlash();
+        selectedCell = -1;
+        flashAnimated = false;
+        super.onDetachedFromWindow();
+    }
+
+    private void drawSelection(Canvas canvas) {
+        if (selectedCell < 0) return;
+        int i = selectedCell % 19, j = selectedCell / 19;
+        float cx = size * i / 19 + size / 38, cy = size * j / 19 + size / 38;
+        float radius = size / 39;
+        Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+        fill.setStyle(Paint.Style.FILL);
+        fill.setColor(flashAnimated ? SelectionFlash.colourAt(flashPhase, selectedStoneArgb, selectedHeatArgb)
+                : selectedHeatArgb);
+        canvas.drawCircle(cx, cy, radius, fill);
+        Paint outline = new Paint(Paint.ANTI_ALIAS_FLAG);
+        outline.setStyle(Paint.Style.STROKE);
+        outline.setColor(Color.BLACK);
+        outline.setStrokeWidth(flashAnimated ? 1 : Math.max(2f, radius / 4));
+        canvas.drawCircle(cx, cy, flashAnimated ? radius : radius * 1.35f, outline);
     }
 
     public void setDotsVisible(boolean visible) {
@@ -479,6 +584,7 @@ public class DBBoardView extends View {
                 drawStone(canvas, dot.getKey(), dot.getValue());
             }
         }
+        drawSelection(canvas);
         if (redDot > -1) {
             drawRedDot(canvas);
         }

@@ -129,7 +129,7 @@
         android:maxWidth="640dp"
         android:layout_gravity="center_horizontal"
         android:orientation="vertical"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.DayNight"
         android:background="@color/db_sheet_background"
         android:elevation="8dp"
         app:behavior_fitToContents="false"
@@ -171,6 +171,49 @@
                 android:id="@+id/dbShowSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dbSortRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/db_sort_label"
+                android:textColor="@color/db_secondary_text" />
+            <RadioGroup
+                android:id="@+id/dbSortGroup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/dbSortWinpct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="@string/db_sort_winpct"
+                    android:textColor="@color/db_ink" />
+                <RadioButton
+                    android:id="@+id/dbSortPopularity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/db_sort_popularity"
+                    android:textColor="@color/db_ink" />
+            </RadioGroup>
+            <ImageButton
+                android:id="@+id/dbSortInfo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/db_sort_info_description"
+                android:src="@drawable/ic_info_outline" />
         </LinearLayout>
 
         <TextView

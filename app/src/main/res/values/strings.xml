@@ -602,6 +602,11 @@
     <string name="db_heatmap">Heat map</string>
     <string name="db_moves">Moves</string>
     <string name="db_games_count">Games · %1$d</string>
+    <string name="db_sort_winpct">Win %</string>
+    <string name="db_sort_popularity">Popularity</string>
+    <string name="db_sort_label">Sort</string>
+    <string name="db_sort_info_description">About win %</string>
+    <string name="db_sort_info_message">Win % ranks moves by a confidence-adjusted win rate (Wilson lower bound), so a move with a high percentage from few games ranks below a slightly lower percentage from many games. That is why the percentages are not strictly descending.\n\nPopularity sorts by number of games.</string>
     <string name="db_show_n_moves">Show N moves</string>
     <string name="db_show_n">Show %1$d</string>
     <string name="db_show_all">Show all</string>

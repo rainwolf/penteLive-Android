@@ -36,6 +36,22 @@ public final class MoveRanking {
         return out;
     }
 
+    /**
+     * The Wilson ranking for WINRATE; for GAMES, most games first with the Wilson order kept for
+     * equal counts (stable sort over the Wilson ranking).
+     */
+    public static List<NextMove> sorted(List<NextMove> moves, MoveSort sort) {
+        List<NextMove> wilson = sorted(moves);
+        if (sort != MoveSort.GAMES) return wilson;
+        Collections.sort(wilson, new Comparator<NextMove>() {
+            @Override
+            public int compare(NextMove a, NextMove b) {
+                return Integer.compare(b.games, a.games);
+            }
+        }); // List.sort is stable, so equal counts keep the Wilson order
+        return wilson;
+    }
+
     /** First n rows; n &lt;= 0 means all. */
     public static List<NextMove> top(List<NextMove> sorted, int n) {
         if (n <= 0 || n >= sorted.size()) return new ArrayList<>(sorted);

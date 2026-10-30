@@ -84,4 +84,12 @@ final class RecordingDbView implements DbView {
         totals.add(total);
         hasMores.add(hasMore);
     }
+
+    final List<Integer> selections = new ArrayList<>();
+
+    @Override
+    public void showSelection(Integer cell) {
+        log.add("showSelection");
+        selections.add(cell);
+    }
 }
