@@ -6,10 +6,18 @@ import be.submanifold.pentelive.PrefUtils;
 public final class DbFilterStore {
     static final String KEY_FILTERS = "__DBF_FILTERS__";
     static final String KEY_VERSION = "__DBF_VERSION__";
+    static final String KEY_SORT = "__DBF_SORT__";
     private static final int VERSION = 1;
 
     /** Legacy {@code db_ratings_array} (strings.xml), indexed by the stored spinner position. */
     private static final int[] LEGACY_RATINGS = {0, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700};
+    /**
+     * Legacy spinner base-game order, frozen: {@link DbGames#BASE_NAMES} now follows the web picker
+     * (Go/Renju in between), so legacy indices must not go through it.
+     */
+    private static final String[] LEGACY_BASE_NAMES = {
+            "Pente", "Keryo-Pente", "Gomoku", "D-Pente", "G-Pente", "Poof-Pente",
+            "Connect6", "Boat-Pente", "DK-Pente", "O-Pente", "Swap2-Pente", "Swap2-Keryo"};
     /** Legacy {@code database_game_types_array} length. */
     private static final int LEGACY_GAME_COUNT = 24;
 
@@ -51,6 +59,15 @@ public final class DbFilterStore {
         kv.putInt(KEY_VERSION, VERSION);
     }
 
+    /** The Moves sort (Win % by default). */
+    public MoveSort loadSort() {
+        return MoveSort.fromKey(kv.getString(KEY_SORT, null));
+    }
+
+    public void saveSort(MoveSort sort) {
+        kv.putString(KEY_SORT, sort.key);
+    }
+
     private DbFilters migrateLegacy() {
         DbFilters.Builder b = new DbFilters.Builder();
 
@@ -69,7 +86,7 @@ public final class DbFilterStore {
         } else {
             baseIdx = 10 + (idx - 22); // Speed Swap2 has no DB ids; use the non-speed Swap2 base
         }
-        b.baseGameId(DbGames.baseId(DbGames.BASE_NAMES.get(baseIdx))).speed(speed);
+        b.baseGameId(DbGames.baseId(LEGACY_BASE_NAMES[baseIdx])).speed(speed);
 
         b.player1MinRating(legacyRating(kv.getInt(PrefUtils.PREFS_DBP1RATING_KEY, 0)));
         b.player2MinRating(legacyRating(kv.getInt(PrefUtils.PREFS_DBP2RATING_KEY, 0)));

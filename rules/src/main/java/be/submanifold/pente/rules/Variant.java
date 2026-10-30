@@ -7,8 +7,7 @@ package be.submanifold.pente.rules;
  * truth for the rules module: the canonical (non-speed) game id, the board grid
  * size, the capture rule, and the number of stones placed per turn.
  *
- * <p>Go variants are classified and sized here for completeness; their rules
- * are out of scope for v1.
+ * <p>Go variants replay through {@link GoReplay}; Go has no win detection here.
  */
 public enum Variant {
     PENTE(1, 19, CaptureRule.PENTE_PAIR, 1),
@@ -23,7 +22,7 @@ public enum Variant {
     SWAP2_KERYO(29, 19, CaptureRule.KERYO_TRIO, 1),
     GOMOKU(5, 19, CaptureRule.NONE, 1),
     CONNECT6(13, 19, CaptureRule.NONE, 2),
-    // TODO(rules): GoRules seam — Go is classified + sized only; no rule engine in v1.
+    // Go replay (captures, ko, passes) lives in GoReplay; CaptureRule.NONE is unused for Go.
     GO_9(21, 9, CaptureRule.NONE, 1),
     GO_13(23, 13, CaptureRule.NONE, 1),
     GO_19(19, 19, CaptureRule.NONE, 1), // gameId 19 coincidentally equals the 19x19 board size

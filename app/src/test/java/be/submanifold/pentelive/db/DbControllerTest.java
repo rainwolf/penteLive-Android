@@ -257,15 +257,129 @@ public class DbControllerTest {
     }
 
     @Test
-    public void goAndRenjuAreUnsupported() {
-        for (int id : new int[] {19, 21, 23, 31, 81}) { // Go 19x19/9x9/13x13, Renju, TB Renju
+    public void goAndRenjuAreSupported() {
+        int[] ids = {19, 21, 23, 31, 81}; // Go 19x19/9x9/13x13, Renju, TB Renju
+        for (int id : ids) {
             RecordingDbView v = new RecordingDbView();
-            DbController c = controller(id, Collections.<Integer>emptyList());
+            DbController c = controller(id, null);
             c.attach(v);
             settle();
-            assertEquals(Collections.singletonList("showUnsupported"), v.log);
+            assertFalse(String.valueOf(id), v.log.contains("showUnsupported"));
+            assertEquals(id, c.gameId());
         }
-        assertTrue(fake.statsCalls.isEmpty());
+        assertEquals(Arrays.asList(19, 21, 23, 31, 81), fake.statsGames);
+        assertEquals(Collections.<Integer>emptyList(), fake.statsCalls.get(0)); // Go starts empty
+        assertEquals(Arrays.asList(112), fake.statsCalls.get(3)); // Renju starts at its centre
+        assertEquals(Arrays.asList(112), fake.statsCalls.get(4));
+    }
+
+    @Test
+    public void goStartsEmptyAndTapsMapToNineByNine() {
+        DbController c = controller(21, null);
+        c.attach(view);
+        settle();
+        assertEquals(Collections.<Integer>emptyList(), c.moves());
+        c.onBoardMove(40);
+        assertEquals(Arrays.asList(40), c.moves());
+        c.onBoardMove(81);  // the pass sentinel is not a board cell
+        c.onBoardMove(-1);
+        c.onBoardMove(100); // a 19x19-only cell
+        assertEquals(Arrays.asList(40), c.moves());
+        settle();
+        assertEquals(Arrays.asList(40), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(21), fake.statsGames.get(fake.statsGames.size() - 1));
+        assertTrue(c.back());
+        assertEquals(Collections.<Integer>emptyList(), c.moves());
+    }
+
+    @Test
+    public void goCapturedCellIsPlayableAgain() {
+        // B A9, W B9, B C9, W E5, B B8 captures W B9; white may play B9 again.
+        DbController c = controller(21, Arrays.asList(0, 1, 2, 40, 10));
+        c.attach(view);
+        settle();
+        c.onBoardMove(40); // occupied: ignored
+        assertEquals(5, c.moves().size());
+        c.onBoardMove(1);
+        assertEquals(Arrays.asList(0, 1, 2, 40, 10, 1), c.moves());
+    }
+
+    @Test
+    public void goKoRetakeIsIgnored() {
+        // Black takes the ko at (1,1) = cell 10 by playing (1,2) = 11; white may not retake at once.
+        List<Integer> ko = Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11);
+        DbController c = controller(21, ko);
+        c.attach(view);
+        settle();
+        c.onBoardMove(10);
+        assertEquals(ko, c.moves());
+        c.onBoardMove(70); // elsewhere is fine, and clears the ko for the next turn
+        assertEquals(10, c.moves().size());
+    }
+
+    @Test
+    public void renjuStartsAtCentre112AndBlocksOccupied() {
+        DbController c = controller(31, null);
+        c.attach(view);
+        settle();
+        assertEquals(Arrays.asList(112), c.moves());
+        c.onBoardMove(112);
+        assertEquals(Arrays.asList(112), c.moves());
+        c.onBoardMove(224);
+        assertEquals(Arrays.asList(112, 224), c.moves());
+        c.onBoardMove(225); // off the 15x15 board
+        assertEquals(Arrays.asList(112, 224), c.moves());
+    }
+
+    @Test
+    public void goKoCellIsNotACandidate() {
+        List<Integer> ko = Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11);
+        fake.reply(ko, 200, FakeDbApi.stats(10, 60, 70, 50));
+        DbController c = controller(21, ko);
+        c.attach(view);
+        settle();
+        List<DbController.MoveRow> rows = view.rows.get(view.rows.size() - 1);
+        assertEquals(1, rows.size());
+        assertEquals(70, rows.get(0).move.move);
+        assertEquals(Collections.singleton(70), view.dots.get(view.dots.size() - 1).keySet());
+    }
+
+    @Test
+    public void smallBoardDropsOffBoardCandidates() {
+        fake.reply(Arrays.asList(40), 200, FakeDbApi.stats(30, 60, 81, 50, 90, 40, -3, 30, 40, 20));
+        DbController c = controller(21, Arrays.asList(40));
+        c.attach(view);
+        settle();
+        List<DbController.MoveRow> rows = view.rows.get(view.rows.size() - 1);
+        assertEquals(1, rows.size());
+        assertEquals(30, rows.get(0).move.move);
+        assertEquals(Collections.singleton(30), view.dots.get(view.dots.size() - 1).keySet());
+    }
+
+    @Test
+    public void injectedGoGameKeepsPassesInTheLine() {
+        // Live "to DB" with a Go (9x9) game: moves include a pass.
+        DbStart start = DbStart.resolve("Go (9x9)", Arrays.asList(40, 81, 41), null, null);
+        DbController c = controller(start.gameOverride, start.initialMoves);
+        c.attach(view);
+        settle();
+        assertEquals(Arrays.asList(40, 81, 41), c.moves());
+        assertEquals(Arrays.asList(40, 81, 41), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(21), fake.statsGames.get(0));
+        assertFalse(view.log.contains("showUnsupported"));
+        c.onBoardMove(42);
+        assertEquals(Arrays.asList(40, 81, 41, 42), c.moves());
+    }
+
+    @Test
+    public void injectedRenjuGameKeepsItsLine() {
+        DbStart start = DbStart.resolve("Speed Renju", Arrays.asList(112, 113), null, null);
+        DbController c = controller(start.gameOverride, start.initialMoves);
+        c.attach(view);
+        settle();
+        assertEquals(32, c.gameId());
+        assertEquals(Arrays.asList(112, 113), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(32), fake.statsGames.get(0));
     }
 
     @Test
@@ -352,10 +466,11 @@ public class DbControllerTest {
     }
 
     @Test
-    public void rowTapPlaysMove() {
+    public void rowTapDoesNotPlayTheMove() {
         DbController c = started();
-        c.playCandidate(181);
-        assertEquals(181, (int) c.moves().get(c.moves().size() - 1));
+        c.toggleSelection(181);
+        assertEquals(Arrays.asList(180), c.moves());
+        assertEquals(0, io.size());
     }
 
     @Test
@@ -886,5 +1001,189 @@ public class DbControllerTest {
         DbController c = started();
         assertFalse(c.playAiMove(181, null));
         assertEquals(Arrays.asList(180), c.moves());
+    }
+
+    // ---- sort ----
+
+    /** 3 moves: 400 (many games, 55%), 401 (12 games, 75%), 402 (200 games, 50%). */
+    private static String sortStats() {
+        return "{\"totalGames\":300,\"totalWinPct\":50,\"blocked\":false,\"nextMoves\":["
+                + "{\"move\":16,\"games\":100,\"wins\":55,\"winPct\":55},"
+                + "{\"move\":17,\"games\":12,\"wins\":9,\"winPct\":75},"
+                + "{\"move\":18,\"games\":200,\"wins\":100,\"winPct\":50}]}";
+    }
+
+    private static List<Integer> cells(List<DbController.MoveRow> rows) {
+        java.util.ArrayList<Integer> out = new java.util.ArrayList<>();
+        for (DbController.MoveRow r : rows) out.add(r.move.move);
+        return out;
+    }
+
+    private DbController startedWithSortStats() {
+        fake.reply(Arrays.asList(180), 200, sortStats());
+        return started();
+    }
+
+    @Test
+    public void sortDefaultsToWinrate() {
+        DbController c = startedWithSortStats();
+        assertEquals(MoveSort.WINRATE, c.sort());
+        c.setShowCount(20); // re-render: Wilson order 17 (9/12) > 16 (55/100) > 18 (100/200)
+        assertEquals(Arrays.asList(17, 16, 18), cells(view.rows.get(view.rows.size() - 1)));
+    }
+
+    @Test
+    public void setSortResortsLocallyWithoutARequest() {
+        DbController c = startedWithSortStats();
+        int calls = fake.statsCalls.size();
+        c.setSort(MoveSort.GAMES);
+        assertEquals(Arrays.asList(18, 16, 17), cells(view.rows.get(view.rows.size() - 1)));
+        assertEquals(calls, fake.statsCalls.size());
+        assertEquals(0, io.size());
+        c.setSort(MoveSort.WINRATE);
+        assertEquals(Arrays.asList(17, 16, 18), cells(view.rows.get(view.rows.size() - 1)));
+    }
+
+    @Test
+    public void heatFollowsTheSortAndTheShowSlice() {
+        DbController c = startedWithSortStats();
+        c.setSort(MoveSort.GAMES);
+        c.setShowCount(2); // games sort: 18 (50%) and 16 (55%) only
+        Map<Integer, Integer> d = view.dots.get(view.dots.size() - 1);
+        assertEquals(2, d.size());
+        assertEquals(Integer.valueOf(HeatScale.argb(0.0)), d.get(18));
+        assertEquals(Integer.valueOf(HeatScale.argb(1.0)), d.get(16));
+        c.setSort(MoveSort.WINRATE); // winrate slice 16, 17: 55% and 75%
+        d = view.dots.get(view.dots.size() - 1);
+        assertEquals(Integer.valueOf(HeatScale.argb(0.0)), d.get(16));
+        assertEquals(Integer.valueOf(HeatScale.argb(1.0)), d.get(17));
+    }
+
+    @Test
+    public void sortChoiceIsPersisted() {
+        DbController c = startedWithSortStats();
+        c.setSort(MoveSort.GAMES);
+        DbController again = new DbController(fake.api, io, main, store, 1, Arrays.asList(180));
+        assertEquals(MoveSort.GAMES, again.sort());
+    }
+
+    // ---- selection ----
+
+    @Test
+    public void tappingARowSelectsIt() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        assertEquals(Integer.valueOf(17), c.selectedCell());
+        assertEquals(Integer.valueOf(17), view.selections.get(view.selections.size() - 1));
+        assertEquals(Arrays.asList(180), c.moves());
+    }
+
+    @Test
+    public void tappingTheSelectedRowAgainUnselects() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.toggleSelection(17);
+        assertEquals(null, c.selectedCell());
+        assertEquals(null, view.selections.get(view.selections.size() - 1));
+    }
+
+    @Test
+    public void onlyOneRowIsSelected() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.toggleSelection(18);
+        assertEquals(Integer.valueOf(18), c.selectedCell());
+    }
+
+    @Test
+    public void aCellNotInTheListCannotBeSelected() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(99);
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void selectionClearsOnStonePlacement() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.onBoardMove(181);
+        assertEquals(null, c.selectedCell());
+        assertEquals(null, view.selections.get(view.selections.size() - 1));
+    }
+
+    @Test
+    public void selectionClearsOnBackAndForward() {
+        DbController c = startedWithSortStats();
+        fake.reply(Arrays.asList(180, 181), 200, sortStats());
+        c.onBoardMove(181);
+        settle();
+        c.toggleSelection(17);
+        assertEquals(Integer.valueOf(17), c.selectedCell());
+        c.back();
+        assertEquals(null, c.selectedCell());
+        settle();
+        c.toggleSelection(17);
+        assertEquals(Integer.valueOf(17), c.selectedCell());
+        c.forward();
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void selectionClearsOnNewStats() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.retry(DbController.Endpoint.STATS); // refetch: loading state
+        assertEquals(null, c.selectedCell());
+        settle();
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void selectionClearsOnSortAndShowChange() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.setSort(MoveSort.GAMES);
+        assertEquals(null, c.selectedCell());
+        c.toggleSelection(17);
+        c.setShowCount(10);
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void selectionClearsWhenTheAiStarts() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.aiStarting();
+        assertEquals(null, c.selectedCell());
+        assertEquals(null, view.selections.get(view.selections.size() - 1));
+    }
+
+    @Test
+    public void selectionClearsWhenLeavingTheScreen() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.detach();
+        assertEquals(null, c.selectedCell());
+        RecordingDbView again = new RecordingDbView();
+        c.attach(again);
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void selectionClearsOnFilterApply() {
+        DbController c = startedWithSortStats();
+        c.toggleSelection(17);
+        c.applyFilters(DbFilters.defaults());
+        assertEquals(null, c.selectedCell());
+    }
+
+    @Test
+    public void rowBarColourIsTheBoardHeatColour() {
+        DbController c = startedWithSortStats();
+        c.setShowCount(20); // re-render
+        Map<Integer, Integer> d = view.dots.get(view.dots.size() - 1);
+        for (DbController.MoveRow r : view.rows.get(view.rows.size() - 1)) {
+            assertEquals(d.get(r.move.move), Integer.valueOf(r.argb));
+        }
     }
 }

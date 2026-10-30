@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.PopupWindow;
+import android.widget.RadioGroup;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -45,6 +46,9 @@ import be.submanifold.pentelive.db.DbFilters;
 import be.submanifold.pentelive.db.FilterSummary;
 import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbStart;
+import be.submanifold.pentelive.db.DbTitle;
+import be.submanifold.pentelive.db.MoveRanking;
+import be.submanifold.pentelive.db.MoveSort;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.GameRowFormat;
 import be.submanifold.pentelive.db.SharedPrefsKeyValueStore;
@@ -84,6 +88,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     /** The position the pending AI request was made for; null when none is pending. */
     private List<Integer> aiRequestMoves;
     private AlertDialog loginDialog;
+    private AlertDialog sortInfoDialog;
     private TabLayout dbTabs;
     private RecyclerView dbList;
     private android.os.Parcelable pendingListState;
@@ -148,8 +153,9 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         updateAiButton();
 
-        toolbar.setTitle(getString(R.string.db_title));
+        toolbar.setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title)));
         setSupportActionBar(toolbar);
+        bindSortControls();
 
 
         // Swipe left goes back, swipe right redoes (the controller owns the position).
@@ -199,6 +205,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         });
         ((ToggleButton) aiSettingsView.findViewById(R.id.openingBookToggleButton)).setOnCheckedChangeListener((compoundButton, b) -> PrefUtils.saveBooleanToPrefs(DatabaseActivity.this, PrefUtils.PREFS_DBAIOPENINGBOOK_KEY, b));
         aiSettingsView.findViewById(R.id.runAIbutton).setOnClickListener(view -> {
+            controller.aiStarting();
             board.setCandidateDots(null);
             aiSearchPrmtrsWindow.dismiss();
             if (board.getAiPlayer() == null) {
@@ -302,6 +309,10 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         if (loginDialog != null) {
             loginDialog.dismiss();
         }
+        if (sortInfoDialog != null) {
+            sortInfoDialog.dismiss();
+        }
+        board.clearSelectedCell(); // stops the flash animator
         super.onDestroy();
     }
 
@@ -320,7 +331,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         tabs.addTab(tabs.newTab().setText(R.string.db_games));
         gamesTab = tabs.getTabAt(1);
 
-        movesAdapter = new MovesAdapter(cell -> controller.playCandidate(cell));
+        movesAdapter = new MovesAdapter(cell -> controller.toggleSelection(cell));
         RecyclerView list = findViewById(R.id.dbMovesList);
         dbList = list;
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -334,6 +345,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
                 gamesSelected = tab.getPosition() == 1;
                 list.setAdapter(gamesSelected ? gamesAdapter : movesAdapter);
                 findViewById(R.id.dbShowRow).setVisibility(gamesSelected ? View.GONE : View.VISIBLE);
+                findViewById(R.id.dbSortRow).setVisibility(gamesSelected ? View.GONE : View.VISIBLE);
                 refreshStatus();
             }
 
@@ -365,6 +377,27 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    /** Win % / Popularity toggle and its info icon; the controller owns (and persists) the choice. */
+    private void bindSortControls() {
+        RadioGroup group = findViewById(R.id.dbSortGroup);
+        group.check(controller.sort() == MoveSort.GAMES ? R.id.dbSortPopularity : R.id.dbSortWinpct);
+        group.setOnCheckedChangeListener((g, id) ->
+                controller.setSort(id == R.id.dbSortPopularity ? MoveSort.GAMES : MoveSort.WINRATE));
+        findViewById(R.id.dbSortInfo).setOnClickListener(v -> {
+            if (sortInfoDialog != null && sortInfoDialog.isShowing()) return;
+            sortInfoDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.db_sort_info_description)
+                    .setMessage(getString(R.string.db_sort_info_message, MoveRanking.LOW_SAMPLE_GAMES))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create();
+            sortInfoDialog.show();
+        });
+    }
+
+    private void updateTitle() {
+        ((Toolbar) findViewById(R.id.toolbar)).setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title)));
     }
 
     private void setStatus(CharSequence text) {
@@ -416,15 +449,19 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         board.setTextViewHTML(findViewById(R.id.playerInfo), "");
         Toolbar toolbar = findViewById(R.id.toolbar);
         int lineHeight = (int) (18 * getResources().getDisplayMetrics().scaledDensity);
-        toolbar.setSubtitle(CaptureSpans.build(this, gameName(), caps, lineHeight));
+        updateTitle();
+        toolbar.setSubtitle(CaptureSpans.build(this, "", caps, lineHeight));
     }
 
-    private String gameName() {
-        int id = controller.gameId();
-        if (id == 0 || !DbGames.isSupported(id)) {
-            return dbModel.gameLabel() == null ? "" : dbModel.gameLabel();
+    @Override
+    public void showSelection(Integer cell) {
+        movesAdapter.setSelected(cell);
+        Integer heat = cell == null ? null : movesAdapter.argbOf(cell);
+        if (cell == null || heat == null) {
+            board.clearSelectedCell();
+        } else {
+            board.setSelectedCell(cell, heat);
         }
-        return (DbGames.isSpeed(id) ? "Speed " : "") + DbGames.baseName(id);
     }
 
     @Override
@@ -445,6 +482,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
     @Override
     public void clearResults() {
+        movesAdapter.setSelected(null);
+        board.clearSelectedCell();
         board.setCandidateDots(null);
         board.setTextViewHTML(findViewById(R.id.playerInfo), "");
         movesAdapter.submit(java.util.Collections.emptyList());
@@ -468,7 +507,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     public void showUnsupported() {
         progressBar.setVisibility(View.GONE);
         board.setCandidateDots(null);
-        ((Toolbar) findViewById(R.id.toolbar)).setSubtitle(gameName());
+        updateTitle();
+        ((Toolbar) findViewById(R.id.toolbar)).setSubtitle("");
         movesAdapter.submit(java.util.Collections.emptyList());
         gamesAdapter.submit(java.util.Collections.emptyList(), false, "");
         setGamesTotal(0);
@@ -531,12 +571,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
     /** The database_game_types_array label whose DB id is gameId (first entry when none matches). */
     private String gameTypeLabel(int gameId) {
-        String[] types = getResources().getStringArray(R.array.database_game_types_array);
-        for (String t : types) {
-            Integer id = DbGames.fromGameType(t);
-            if (id != null && id == gameId) return t;
-        }
-        return types[0];
+        return DbTitle.boardLabel(gameId, getResources().getStringArray(R.array.database_game_types_array));
     }
 
     private void showFilters() {
@@ -552,6 +587,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             board.setGame(label);
         }
         controller.applyFilters(f);
+        updateTitle();
         updateAiButton();
         updateFilterChip();
     }
@@ -586,6 +622,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     @Override
     protected void onPause() {
         super.onPause();
+        if (controller != null) controller.clearSelection(); // leaving the screen stops the flash
         MyApplication.activityPaused();
     }
 

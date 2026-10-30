@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night counterparts of values/db_colors.xml: the DB sheet, lists, chips and viewer surface go dark. -->
+    <color name="db_ink">#ECEEF2</color>
+    <color name="db_secondary_text">#B5BAC4</color>
+    <color name="db_secondary_text_alt">#A5AAB5</color>
+    <color name="db_accent">#8DB1FF</color>
+    <color name="db_divider">#3A3E48</color>
+    <color name="db_chip_outline">#565B66</color>
+    <color name="db_chip_selected">#26344F</color>
+    <color name="db_sheet_background">#1B1D22</color>
+</resources>

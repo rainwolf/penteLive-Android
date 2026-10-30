@@ -15,7 +15,7 @@ public interface DbView {
 
     void showBlocked();
 
-    /** Go, Renju or an unknown game. */
+    /** An unknown game (id 0 or not in the DB catalog). */
     void showUnsupported();
 
     void showLoginPrompt();
@@ -29,4 +29,7 @@ public interface DbView {
 
     /** All games loaded so far for the position, the server total, and whether more pages remain. */
     void showGames(List<DbDtos.GameHeader> games, int total, boolean hasMore);
+
+    /** The selected Moves row's cell (flash it on the board), or null for no selection. */
+    void showSelection(Integer cell);
 }

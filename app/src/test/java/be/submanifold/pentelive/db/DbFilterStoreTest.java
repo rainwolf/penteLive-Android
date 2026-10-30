@@ -33,6 +33,28 @@ public class DbFilterStoreTest {
         assertEquals(0, f.player1MinRating);
     }
 
+    @Test public void legacyIndexesKeepTheirGame() {
+        // The legacy spinner order is a frozen contract: adding Go/Renju to the picker must not remap it.
+        String[] legacy = {"Pente", "Keryo-Pente", "Gomoku", "D-Pente", "G-Pente", "Poof-Pente",
+                "Connect6", "Boat-Pente", "DK-Pente", "O-Pente", "Swap2-Pente", "Swap2-Keryo"};
+        for (int i = 0; i < legacy.length; i++) {
+            DbFilters f = migrate(i);
+            assertEquals("index " + i, DbGames.baseId(legacy[i]), f.baseGameId);
+            assertFalse("index " + i, f.speed);
+        }
+        DbFilters speedO = migrate(21);
+        assertEquals(DbGames.baseId("O-Pente"), speedO.baseGameId);
+        assertTrue(speedO.speed);
+        assertEquals(DbGames.baseId("Swap2-Pente"), migrate(22).baseGameId);
+    }
+
+    private DbFilters migrate(int legacyIndex) {
+        InMemoryKeyValueStore fresh = new InMemoryKeyValueStore();
+        fresh.putBoolean(PrefUtils.PREFS_DBGAME_SWAP2SHIFT_KEY, true);
+        fresh.putInt(PrefUtils.PREFS_DBGAME_KEY, legacyIndex);
+        return new DbFilterStore(fresh, LABELS).load();
+    }
+
     @Test public void migrationAppliesSwap2ShiftWhenUnflagged() {
         kv.putInt(PrefUtils.PREFS_DBGAME_KEY, 10); // pre-Swap2 "Speed Pente"
         DbFilters f = store.load();

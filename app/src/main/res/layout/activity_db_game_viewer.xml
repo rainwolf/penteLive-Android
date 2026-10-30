@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:indeterminate="true" />
 
-        <!-- Fixed light surface: the db_ink / db_secondary_text colours are dark, so this stays legible in night mode. -->
+        <!-- db_sheet_background / db_ink / db_secondary_text all have values-night variants, so the surface and its text flip together. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
