@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import be.submanifold.pentelive.db.DbGames;
 import org.junit.Test;
 
 /**
@@ -164,6 +165,151 @@ public class DBBoardViewTest {
         assertTrue(b.drawsDots());
         b.setCandidateDots(null);
         assertFalse(b.drawsDots());
+    }
+
+    // ---- Go / Renju ----
+
+    @Test
+    public void goNineByNineReplaysWithCaptures() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Arrays.asList(0, 1, 2, 40, 10)); // B A9, W B9, B C9, W E5, B B8
+        assertEquals(9, b.grid());
+        assertEquals(0, b.abstractBoard[1][0]); // [x][y]: captured white B9
+        assertEquals(2, b.abstractBoard[0][0]);
+        assertEquals(2, b.abstractBoard[2][0]);
+        assertEquals(1, b.abstractBoard[4][4]);
+        assertEquals(2, b.abstractBoard[1][1]);
+        assertEquals(1, b.whiteCaptures);
+        assertEquals(0, b.blackCaptures);
+    }
+
+    @Test
+    public void goPassesReplayWithoutError() {
+        DBBoardView b = newBoard();
+        b.setGame("Speed Go (9x9)");
+        b.showPosition(Arrays.asList(40, 81, 41));
+        assertEquals(2, b.abstractBoard[4][4]);
+        assertEquals(2, b.abstractBoard[5][4]);
+        assertEquals(Arrays.asList(40, 81, 41), b.getMovesList());
+    }
+
+    @Test
+    public void go13AndGo19Sizes() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (13x13)");
+        assertEquals(13, b.grid());
+        b.showPosition(Arrays.asList(168));
+        assertEquals(2, b.abstractBoard[12][12]);
+        b.setGame("Go");
+        assertEquals(19, b.grid());
+        b.showPosition(Arrays.asList(360));
+        assertEquals(2, b.abstractBoard[18][18]);
+        assertEquals(0, b.abstractBoard[12][12]);
+    }
+
+    @Test
+    public void renjuFirstStoneIsBlack() {
+        DBBoardView b = newBoard();
+        b.setGame("Renju");
+        assertEquals(15, b.grid());
+        b.showPosition(Arrays.asList(112, 113, 224));
+        assertEquals(2, b.abstractBoard[7][7]);
+        assertEquals(1, b.abstractBoard[8][7]);
+        assertEquals(2, b.abstractBoard[14][14]);
+    }
+
+    @Test
+    public void switchingFromGoToPenteClearsTheBoard() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Arrays.asList(0, 80));
+        b.setGame("Pente");
+        b.showPosition(Arrays.asList(180));
+        assertEquals(19, b.grid());
+        assertEquals(0, b.abstractBoard[0][0]);
+        assertEquals(0, b.abstractBoard[8][8]);
+        assertEquals(1, b.abstractBoard[9][9]);
+    }
+
+    @Test
+    public void goPlacementMapsToNineByNineCell() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Collections.<Integer>emptyList());
+        assertEquals(40, b.placementCell(450, 450, 900));
+        assertEquals(0, b.placementCell(1, 1, 900));
+        assertEquals(80, b.placementCell(900, 900, 900));
+        assertEquals(-1, b.placementCell(901, 10, 900));
+        b.showPosition(Arrays.asList(40));
+        assertEquals(-1, b.placementCell(450, 450, 900)); // occupied
+        Recorder r = new Recorder();
+        b.setBoardListener(r);
+        b.reportPlacement(b.placementCell(150, 250, 900));
+        assertEquals(Collections.singletonList("played 19"), r.calls);
+    }
+
+    @Test
+    public void pentePlacementUnchanged() {
+        DBBoardView b = newBoard();
+        b.setGame("Pente");
+        b.showPosition(Collections.singletonList(180));
+        assertEquals(181, b.placementCell(390f * 10.5f / 19, 390f * 9.5f / 19, 390));
+        assertEquals(-1, b.placementCell(195, 195, 390)); // centre is occupied
+        assertEquals(0, b.placementCell(0, 0, 390));
+    }
+
+    @Test
+    public void goKoCellIsBlocked() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11));
+        assertEquals(-1, b.abstractBoard[1][1]); // cell 10 = x 1, y 1
+        assertEquals(-1, b.placementCell(150, 150, 900));
+        b.showPosition(Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11, 70));
+        assertEquals(0, b.abstractBoard[1][1]);
+    }
+
+    @Test
+    public void placementColourPerGame() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Collections.<Integer>emptyList());
+        assertEquals(2, b.placementColour());
+        b.showPosition(Arrays.asList(40));
+        assertEquals(1, b.placementColour());
+        b.setGame("Renju");
+        b.showPosition(Arrays.asList(112));
+        assertEquals(1, b.placementColour());
+        b.setGame("Pente");
+        b.showPosition(Arrays.asList(180));
+        assertEquals(2, b.placementColour());
+        b.setGame("Connect6");
+        b.showPosition(Arrays.asList(180, 181));
+        assertEquals(2, b.placementColour());
+        b.showPosition(Arrays.asList(180, 181, 182));
+        assertEquals(1, b.placementColour());
+    }
+
+    @Test
+    public void notationUsesBoardLabelsAndPass() {
+        DBBoardView b = newBoard();
+        b.setGame("Go (9x9)");
+        b.showPosition(Arrays.asList(40, 81, 41));
+        assertEquals(" <b>1.</b> E5-PASS <b>2.</b> F5", b.moveListHtml());
+        b.setGame("Pente");
+        b.showPosition(Arrays.asList(180, 181));
+        assertEquals(" <b>1.</b> K10-L10", b.moveListHtml());
+        b.setGame("Connect6");
+        b.showPosition(Arrays.asList(180, 181, 182));
+        assertEquals("<b>1.</b> K10 - L10-M10", b.moveListHtml());
+    }
+
+    @Test
+    public void goAndRenjuBoardColoursMatchTheCatalog() {
+        DBBoardView b = newBoard();
+        assertEquals(DbGames.boardArgb(19), b.goColor);
+        assertEquals(DbGames.boardArgb(31), b.renjuColor);
     }
 
     @Test

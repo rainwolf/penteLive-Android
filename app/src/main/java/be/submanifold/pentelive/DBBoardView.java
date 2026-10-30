@@ -26,7 +26,9 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import be.submanifold.pentelive.db.BoardReplay;
+import be.submanifold.pentelive.db.DbBoardGeometry;
 import be.submanifold.pentelive.db.DbGames;
+import be.submanifold.pentelive.db.MoveLabel;
 import be.submanifold.pentelive.db.SelectionFlash;
 
 import java.util.ArrayList;
@@ -45,6 +47,8 @@ public class DBBoardView extends View {
             boatPenteColor = Color.parseColor("#25BAFF"), dkeryoColor = Color.parseColor("#FFA500"),
             oPenteColor = Color.parseColor("#52be80"), swap2PenteColor = Color.parseColor("#E5AA70"),
             swap2KeryoColor = Color.parseColor("#50C878");
+    /** Live BoardView goColor / renjuColor; literal so they hold in JVM tests too. */
+    public final int goColor = 0xFFFAC832, renjuColor = 0xFFD98880;
     private final Paint blackPaint = makePaint(blackColor);
     private final Paint whitePaint = makePaint(whiteColor);
     private final Paint pentePaint = makePaint(penteColor);
@@ -82,7 +86,7 @@ public class DBBoardView extends View {
     private float translateX = 0, translateY = 0, stoneX, stoneY;
 
 
-    private byte myColor = 2, stoneI, stoneJ;
+    private byte myColor = 2;
     public int playedMove = -1;
 
     public int difficulty;
@@ -98,8 +102,13 @@ public class DBBoardView extends View {
     private List<Integer> movesList = new ArrayList<>();
     private Map<Integer, Integer> candidateDots;
     private boolean dotsVisible = true;
-    /** DB game id for {@link #game}, resolved once per setGame; null for Go/Renju (no replay). */
+    /** DB game id for {@link #game}, resolved once per setGame; null for an unknown game (no replay). */
     private Integer dbGameId;
+
+    /** Board grid size: 9/13/19 for Go, 15 for Renju, 19 otherwise (and for an unknown game). */
+    int grid() {
+        return dbGameId == null ? 19 : DbGames.gridSize(dbGameId);
+    }
 
     /** Reports user placements and AI moves; the controller owns the position. */
     public interface BoardListener {
@@ -152,7 +161,6 @@ public class DBBoardView extends View {
 
 
     private boolean replayed = false;
-    private final char[] coordinateLetters = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
 
     public String getGame() {
@@ -191,6 +199,10 @@ public class DBBoardView extends View {
                 setBackgroundColor(penteColor);
             } else if (game.equals("O-Pente")) {
                 setBackgroundColor(oPenteColor);
+            } else if (dbGameId != null && DbGames.isGo(dbGameId)) {
+                setBackgroundColor(goColor);
+            } else if (dbGameId != null && DbGames.blackMovesFirst(dbGameId)) {
+                setBackgroundColor(renjuColor);
             }
 
         }
@@ -241,9 +253,8 @@ public class DBBoardView extends View {
      */
     public void setSelectedCell(int cell, int heatArgb) {
         stopFlash();
-        boolean connect6 = game != null && game.contains("Connect6");
         selectedCell = cell;
-        selectedStoneArgb = SelectionFlash.stoneArgb(SelectionFlash.sideToMove(connect6, movesList.size()));
+        selectedStoneArgb = SelectionFlash.stoneArgb(placementColour());
         selectedHeatArgb = heatArgb;
         flashPhase = 0f;
         flashAnimated = animationsEnabled();
@@ -291,9 +302,10 @@ public class DBBoardView extends View {
 
     private void drawSelection(Canvas canvas) {
         if (selectedCell < 0) return;
-        int i = selectedCell % 19, j = selectedCell / 19;
-        float cx = size * i / 19 + size / 38, cy = size * j / 19 + size / 38;
-        float radius = size / 39;
+        int n = grid();
+        int i = selectedCell % n, j = selectedCell / n;
+        float cx = DbBoardGeometry.centre(i, size, n), cy = DbBoardGeometry.centre(j, size, n);
+        float radius = DbBoardGeometry.stoneRadius(size, n);
         Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
         fill.setStyle(Paint.Style.FILL);
         fill.setColor(flashAnimated ? SelectionFlash.colourAt(flashPhase, selectedStoneArgb, selectedHeatArgb)
@@ -364,12 +376,7 @@ public class DBBoardView extends View {
 //            myColor = 1;
 //        }
         if (movesList != null) {
-            if (game.contains("Connect6")) {
-                int i = movesList.size();
-                myColor = (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2);
-            } else {
-                myColor = (byte) (1 + (movesList.size() % 2));
-            }
+            myColor = (byte) placementColour();
         }
         if (scaling == 2) {
             drawZoomedLine(canvas, stoneX, stoneY);
@@ -379,6 +386,20 @@ public class DBBoardView extends View {
 //            drawStone(canvas, stoneX, stoneY, myColor);
 //        }
 
+    }
+
+    /** Stone colour of the side to move: Connect6 pattern, black first for Go/Renju, else white first. */
+    int placementColour() {
+        if (dbGameId != null) return SelectionFlash.sideToMove(dbGameId, movesList.size());
+        return SelectionFlash.sideToMove(game != null && game.contains("Connect6"), movesList.size());
+    }
+
+    /** The empty cell under (x, y) on a board {@code boardSize} wide, or -1 (outside, occupied, blocked). */
+    int placementCell(float x, float y, float boardSize) {
+        int n = grid();
+        int cell = DbBoardGeometry.cellAt(x, y, boardSize, n);
+        if (cell < 0) return -1;
+        return abstractBoard[cell % n][cell / n] == 0 ? cell : -1;
     }
 
     /** Horizontal fling on the board; finger moving left = onSwipeLeft, right = onSwipeRight. */
@@ -494,9 +515,7 @@ public class DBBoardView extends View {
         }
         playedMove = -1;
         stoneX = x;
-        stoneI = (byte) (19 * stoneX / size);
         stoneY = y;
-        stoneJ = (byte) (19 * stoneY / size);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Keep the scrolling parent from stealing a vertical aim-drag (it would cancel
@@ -522,9 +541,7 @@ public class DBBoardView extends View {
                 break;
         }
 
-        if (abstractBoard[stoneI][stoneJ] == 0) {
-            playedMove = 19 * stoneJ + stoneI;
-        }
+        playedMove = placementCell(x, y, realSize);
         if (scaling == 1 && playedMove > -1) {
             reportPlacement(playedMove);
         }
@@ -561,21 +578,32 @@ public class DBBoardView extends View {
 
 
     private void drawBoard(Canvas canvas) {
-        float step = size / 19, margin = step / 2;
+        int n = grid();
+        float step = size / n, margin = step / 2;
         Paint linePaint = blackPaint;
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
-        for (int i = 0; i < 19; i++) {
+        for (int i = 0; i < n; i++) {
             canvas.drawLine(margin + step * i, margin, margin + step * i, size - margin, linePaint);
             canvas.drawLine(margin, margin + step * i, size - margin, margin + step * i, linePaint);
         }
-        canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
-        canvas.drawCircle(margin + 6 * step, size - (margin + 6 * step), margin / 2, linePaint);
-        canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
-        canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
-        for (byte i = 0; i < 19; i++) {
-            for (byte j = 0; j < 19; j++) {
+        if (dbGameId != null && DbBoardGeometry.filledStarPoints(dbGameId)) {
+            Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            dotPaint.setStyle(Paint.Style.FILL);
+            dotPaint.setColor(Color.BLACK);
+            float dot = DbGames.isGo(dbGameId) ? margin / 3 : margin / 2;
+            for (int p : DbBoardGeometry.starPoints(dbGameId)) {
+                canvas.drawCircle(DbBoardGeometry.centre(p % n, size, n), DbBoardGeometry.centre(p / n, size, n), dot, dotPaint);
+            }
+        } else {
+            canvas.drawCircle(margin + 6 * step, margin + 6 * step, margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6 * step), margin + 6 * step, margin / 2, linePaint);
+            canvas.drawCircle(margin + 6 * step, size - (margin + 6 * step), margin / 2, linePaint);
+            canvas.drawCircle(size - (margin + 6 * step), size - (margin + 6 * step), margin / 2, linePaint);
+            canvas.drawCircle(size / 2, size / 2, margin / 2, linePaint);
+        }
+        for (byte i = 0; i < n; i++) {
+            for (byte j = 0; j < n; j++) {
                 drawStone(canvas, i, j, abstractBoard[i][j]);
             }
         }
@@ -594,8 +622,9 @@ public class DBBoardView extends View {
         if (stoneColor < 1) {
             return;
         }
-        float radius = size / 39;
-        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        int n = grid();
+        float radius = DbBoardGeometry.stoneRadius(size, n);
+        float cx = (float) Math.floor(n * x / size) * size / n + size / (2f * n), cy = (float) Math.floor(n * y / size) * size / n + size / (2f * n);
         float cgx = cx - size / 200, cgy = cy - size / 200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -617,11 +646,11 @@ public class DBBoardView extends View {
     }
 
     private void drawStone(Canvas canvas, int move, int stoneColor) {
-        int i = move % 19, j = move / 19;
-        double x = size * i / 19 + size / 38, y = size * j / 19 + size / 38;
-
-        float radius = size / 39;
-        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        int n = grid();
+        if (move < 0 || move >= n * n) return;
+        int i = move % n, j = move / n;
+        float radius = DbBoardGeometry.stoneRadius(size, n);
+        float cx = DbBoardGeometry.centre(i, size, n), cy = DbBoardGeometry.centre(j, size, n);
         float cgx = cx - size / 200, cgy = cy - size / 200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -649,8 +678,9 @@ public class DBBoardView extends View {
     }
 
     private void drawZoomedStone(Canvas canvas, float x, float y, byte stoneColor) {
-        float radius = size / 30;
-        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        int n = grid();
+        float radius = DbBoardGeometry.zoomedStoneRadius(size, n);
+        float cx = (float) Math.floor(n * x / size) * size / n + size / (2f * n), cy = (float) Math.floor(n * y / size) * size / n + size / (2f * n);
         float cgx = cx - size / 200, cgy = cy - size / 200;
         Paint stonePaint;
         stonePaint = new Paint();
@@ -672,8 +702,8 @@ public class DBBoardView extends View {
     }
 
     private void drawZoomedLine(Canvas canvas, float x, float y) {
-        float radius = size / 30;
-        float cx = (float) Math.floor(19 * x / size) * size / 19 + size / 38, cy = (float) Math.floor(19 * y / size) * size / 19 + size / 38;
+        int n = grid();
+        float cx = (float) Math.floor(n * x / size) * size / n + size / (2f * n), cy = (float) Math.floor(n * y / size) * size / n + size / (2f * n);
         Paint linePaint;
         linePaint = new Paint();
         linePaint.setStrokeWidth(4);
@@ -684,7 +714,8 @@ public class DBBoardView extends View {
     }
 
     private void drawStone(Canvas canvas, byte i, byte j, byte stoneColor) {
-        drawStone(canvas, size * i / 19 + size / 38, size * j / 19 + size / 38, stoneColor);
+        int n = grid();
+        drawStone(canvas, DbBoardGeometry.centre(i, size, n), DbBoardGeometry.centre(j, size, n), stoneColor);
     }
 
     private void drawRedDot(Canvas canvas) {
@@ -694,9 +725,11 @@ public class DBBoardView extends View {
         stonePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         stonePaint.setColor(Color.RED);
         float radius = size / 100;
-        byte j = (byte) (redDot / 19);
-        byte i = (byte) (redDot % 19);
-        float cx = size * i / 19 + size / 38, cy = size * j / 19 + size / 38;
+        int n = grid();
+        if (redDot >= n * n) return;
+        int j = redDot / n;
+        int i = redDot % n;
+        float cx = DbBoardGeometry.centre(i, size, n), cy = DbBoardGeometry.centre(j, size, n);
         canvas.drawCircle(cx, cy, radius, stonePaint);
     }
 
@@ -723,6 +756,22 @@ public class DBBoardView extends View {
     }
 
     public void setTextViewHTML(TextView text, String html) {
+        String str = moveListHtml();
+
+        CharSequence sequence = Html.fromHtml(str + html, Html.FROM_HTML_MODE_LEGACY);
+        SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+        URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+        for (URLSpan span : urls) {
+            makeLinkClickable(strBuilder, span);
+        }
+        text.setText(strBuilder);
+        text.setMovementMethod(new ScrollingMovementMethod());
+        text.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    /** Numbered move list ("1. K10-L10 2. ..."), labels via MoveLabel (a Go pass reads PASS). */
+    String moveListHtml() {
+        int n = grid();
         String str = "";
         if (game.contains("Connect6")) {
             for (int i = 0; i < movesList.size(); i++) {
@@ -737,7 +786,7 @@ public class DBBoardView extends View {
                         str += "-";
                     }
                 }
-                str += coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
+                str += MoveLabel.label(movesList.get(i), n);
             }
         } else {
             for (int i = 0; i < movesList.size(); i++) {
@@ -746,19 +795,10 @@ public class DBBoardView extends View {
                 } else {
                     str = str + "-";
                 }
-                str = str + coordinateLetters[movesList.get(i) % 19] + "" + (19 - (movesList.get(i) / 19));
+                str = str + MoveLabel.label(movesList.get(i), n);
             }
         }
-
-        CharSequence sequence = Html.fromHtml(str + html, Html.FROM_HTML_MODE_LEGACY);
-        SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
-        URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
-        for (URLSpan span : urls) {
-            makeLinkClickable(strBuilder, span);
-        }
-        text.setText(strBuilder);
-        text.setMovementMethod(new ScrollingMovementMethod());
-        text.setMovementMethod(LinkMovementMethod.getInstance());
+        return str;
     }
 
     private void replayGame(byte[][] abstractBoard) {
@@ -767,11 +807,16 @@ public class DBBoardView extends View {
             return;
         }
         BoardReplay.Result r = BoardReplay.replay(dbGameId, movesList);
-        for (int x = 0; x < 19; x++) {
-            System.arraycopy(r.boardXY[x], 0, abstractBoard[x], 0, 19);
+        int n = r.boardXY.length;
+        for (int x = 0; x < n; x++) {
+            System.arraycopy(r.boardXY[x], 0, abstractBoard[x], 0, n);
         }
         whiteCaptures = r.whiteCaptures;
         blackCaptures = r.blackCaptures;
+        // Go ko: the retake cell is blocked (not drawn, not tappable) until another stone is played.
+        if (r.koMove >= 0) {
+            abstractBoard[r.koMove % n][r.koMove / n] = -1;
+        }
         // G-Pente tournament-rule restriction: block taps in the centre zone for the third stone.
         if (game.contains("G-Pente") && movesList.size() == 2) {
             for (int i = 7; i < 12; ++i) {
@@ -856,6 +901,10 @@ public class DBBoardView extends View {
     }
 
     public void resetState() {
+        if (dbGameId != null) {
+            showPosition(DbGames.seed(dbGameId)); // Go starts empty, Renju at 112
+            return;
+        }
         List<Integer> seed = new ArrayList<>();
         if (!allowsOffCenterFirstStone(game)) {
             seed.add(180);
