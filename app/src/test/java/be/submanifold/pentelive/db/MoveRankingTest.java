@@ -70,6 +70,13 @@ public class MoveRankingTest {
     }
 
     @Test
+    public void winrateSortPutsSmallSampleHighPercentageBelowLargeSample() {
+        // 7/10 = 70% has Wilson lower bound ~0.40; 120/200 = 60% has ~0.53
+        List<NextMove> s = MoveRanking.sorted(Arrays.asList(m(1, 10, 7), m(2, 200, 120)), MoveSort.WINRATE);
+        assertEquals(Arrays.asList(2, 1), moves(s));
+    }
+
+    @Test
     public void gamesSortOfEqualCountsKeepsWilsonOrder() {
         List<NextMove> s = MoveRanking.sorted(Arrays.asList(m(1, 20, 5), m(2, 20, 15)), MoveSort.GAMES);
         assertEquals(Arrays.asList(2, 1), moves(s));

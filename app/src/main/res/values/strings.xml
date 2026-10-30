@@ -606,7 +606,7 @@
     <string name="db_sort_popularity">Popularity</string>
     <string name="db_sort_label">Sort</string>
     <string name="db_sort_info_description">About win %</string>
-    <string name="db_sort_info_message">Win % ranks moves by a confidence-adjusted win rate (Wilson lower bound), so a move with a high percentage from few games ranks below a slightly lower percentage from many games. That is why the percentages are not strictly descending. Moves with fewer than %1$d games are listed after all others.\n\nPopularity sorts by number of games.</string>
+    <string name="db_sort_info_message">Win %% is sorted by how sure we can be of the win rate, not by the raw percentage. A move that won 7 of 10 games (70%%) can rank below one that won 120 of 200 (60%%), because 10 games is too few to trust. Moves with fewer than %1$d games always come last.\n\nPopularity sorts by number of games.</string>
     <string name="db_show_n_moves">Show N moves</string>
     <string name="db_show_n">Show %1$d</string>
     <string name="db_show_all">Show all</string>
