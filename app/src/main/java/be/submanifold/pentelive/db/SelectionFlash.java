@@ -1,5 +1,8 @@
 package be.submanifold.pentelive.db;
 
+import be.submanifold.pente.rules.Variant;
+import be.submanifold.pente.rules.Variants;
+
 /** Pure helpers for the selected-move flash on the board. */
 public final class SelectionFlash {
     public static final int WHITE = 1;
@@ -15,6 +18,14 @@ public final class SelectionFlash {
             return r == 0 || r == 3 ? WHITE : BLACK;
         }
         return 1 + (moveCount % 2);
+    }
+
+    /** Side to move in DB game {@code gameId}: Connect6 pattern, black first for Go/Renju, else white first. */
+    public static int sideToMove(int gameId, int moveCount) {
+        Variant v = Variants.fromGameId(gameId);
+        if (v != null && v.isConnect6()) return sideToMove(true, moveCount);
+        if (DbGames.blackMovesFirst(gameId)) return BLACK - (moveCount % 2);
+        return sideToMove(false, moveCount);
     }
 
     /** ARGB fill of the side-to-move stone. */

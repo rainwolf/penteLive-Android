@@ -219,12 +219,16 @@ public final class DbController {
         view = null;
     }
 
-    /** Plays cell; an off-board or occupied cell is ignored (results stay as they are). */
+    /**
+     * Plays cell; an off-board (the Go pass sentinel included), occupied or Go ko-retake cell is ignored
+     * (results stay as they are). Passes are never entered here, only kept from an opened line (web parity).
+     */
     public void onBoardMove(int cell) {
         if (!supported) return;
         int size = DbGames.gridSize(gameId);
         if (cell < 0 || cell >= size * size) return;
-        if (CaptureIcons.occupied(gameId, history.moves()).contains(cell)) return;
+        BoardReplay.Result position = BoardReplay.replay(gameId, history.moves());
+        if (position.boardXY[cell % size][cell / size] != 0 || position.koMove == cell) return;
         history.play(cell);
         positionChanged();
     }
@@ -435,9 +439,11 @@ public final class DbController {
         if (r.kind != DbResult.Kind.OK) return new StatsOutcome(r.kind, false, null, null);
         if (r.value.blocked) return new StatsOutcome(DbResult.Kind.OK, true, null, null);
         Set<Integer> occupied = CaptureIcons.occupied(game, moves);
+        int cells = DbGames.gridSize(game) * DbGames.gridSize(game);
         List<NextMove> usable = new ArrayList<>();
         for (NextMove m : r.value.nextMoves) {
-            if (m != null && !occupied.contains(m.move)) usable.add(m);
+            // Off-board candidates (a pass, or a backend-rotated pass on small boards) get no row or dot.
+            if (m != null && m.move >= 0 && m.move < cells && !occupied.contains(m.move)) usable.add(m);
         }
         return new StatsOutcome(DbResult.Kind.OK, false,
                 Collections.unmodifiableList(MoveRanking.sorted(usable)), occupied);

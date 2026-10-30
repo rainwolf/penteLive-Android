@@ -12,11 +12,14 @@ public final class BoardReplay {
         public final byte[][] boardXY;
         public final int whiteCaptures;
         public final int blackCaptures;
+        /** Go: the cell the side to move may not retake (ko), else -1. Board-relative (y*n + x). */
+        public final int koMove;
 
-        Result(byte[][] boardXY, int whiteCaptures, int blackCaptures) {
+        Result(byte[][] boardXY, int whiteCaptures, int blackCaptures, int koMove) {
             this.boardXY = boardXY;
             this.whiteCaptures = whiteCaptures;
             this.blackCaptures = blackCaptures;
+            this.koMove = koMove;
         }
     }
 
@@ -36,6 +39,6 @@ public final class BoardReplay {
                 xy[x][y] = s.board[y][x];
             }
         }
-        return new Result(xy, s.whiteCaptures, s.blackCaptures);
+        return new Result(xy, s.whiteCaptures, s.blackCaptures, v.isGo() ? s.koMove : -1);
     }
 }

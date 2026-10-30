@@ -55,4 +55,20 @@ public class MoveGridTest {
             assertEquals(want[i], c.get(i).number);
         }
     }
+
+    @Test
+    public void goNineByNineLabelsAndPasses() {
+        List<MoveGrid.Cell> c = MoveGrid.cells(21, Arrays.asList(40, 81, 0), 3);
+        assertEquals("E5", c.get(0).label);
+        assertEquals("PASS", c.get(1).label);
+        assertEquals("A9", c.get(2).label);
+        assertEquals("1.", c.get(0).number);
+        assertEquals("", c.get(1).number);
+        assertEquals("2.", c.get(2).number);
+    }
+
+    @Test
+    public void renjuLabelsOnFifteen() {
+        assertEquals("H8", MoveGrid.cells(31, Arrays.asList(112), 1).get(0).label);
+    }
 }

@@ -42,4 +42,19 @@ public class SelectionFlashTest {
         assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(true, 2));
         assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(true, 3));
     }
+
+    @Test
+    public void sideToMovePerGame() {
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(21, 0)); // Go: black first
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(21, 1));
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(19, 2));
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(31, 0)); // Renju: black first
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(81, 1));
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(1, 0)); // Pente: white first
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(1, 1));
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(13, 0)); // Connect6 pattern
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(13, 1));
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(13, 2));
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(13, 3));
+    }
 }

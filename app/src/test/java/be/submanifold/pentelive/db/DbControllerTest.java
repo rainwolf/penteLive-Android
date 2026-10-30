@@ -274,6 +274,102 @@ public class DbControllerTest {
     }
 
     @Test
+    public void goStartsEmptyAndTapsMapToNineByNine() {
+        DbController c = controller(21, null);
+        c.attach(view);
+        settle();
+        assertEquals(Collections.<Integer>emptyList(), c.moves());
+        c.onBoardMove(40);
+        assertEquals(Arrays.asList(40), c.moves());
+        c.onBoardMove(81);  // the pass sentinel is not a board cell
+        c.onBoardMove(-1);
+        c.onBoardMove(100); // a 19x19-only cell
+        assertEquals(Arrays.asList(40), c.moves());
+        settle();
+        assertEquals(Arrays.asList(40), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(21), fake.statsGames.get(fake.statsGames.size() - 1));
+        assertTrue(c.back());
+        assertEquals(Collections.<Integer>emptyList(), c.moves());
+    }
+
+    @Test
+    public void goCapturedCellIsPlayableAgain() {
+        // B A9, W B9, B C9, W E5, B B8 captures W B9; white may play B9 again.
+        DbController c = controller(21, Arrays.asList(0, 1, 2, 40, 10));
+        c.attach(view);
+        settle();
+        c.onBoardMove(40); // occupied: ignored
+        assertEquals(5, c.moves().size());
+        c.onBoardMove(1);
+        assertEquals(Arrays.asList(0, 1, 2, 40, 10, 1), c.moves());
+    }
+
+    @Test
+    public void goKoRetakeIsIgnored() {
+        // Black takes the ko at (1,1) = cell 10 by playing (1,2) = 11; white may not retake at once.
+        List<Integer> ko = Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11);
+        DbController c = controller(21, ko);
+        c.attach(view);
+        settle();
+        c.onBoardMove(10);
+        assertEquals(ko, c.moves());
+        c.onBoardMove(70); // elsewhere is fine, and clears the ko for the next turn
+        assertEquals(10, c.moves().size());
+    }
+
+    @Test
+    public void renjuStartsAtCentre112AndBlocksOccupied() {
+        DbController c = controller(31, null);
+        c.attach(view);
+        settle();
+        assertEquals(Arrays.asList(112), c.moves());
+        c.onBoardMove(112);
+        assertEquals(Arrays.asList(112), c.moves());
+        c.onBoardMove(224);
+        assertEquals(Arrays.asList(112, 224), c.moves());
+        c.onBoardMove(225); // off the 15x15 board
+        assertEquals(Arrays.asList(112, 224), c.moves());
+    }
+
+    @Test
+    public void smallBoardDropsOffBoardCandidates() {
+        fake.reply(Arrays.asList(40), 200, FakeDbApi.stats(30, 60, 81, 50, 90, 40, -3, 30, 40, 20));
+        DbController c = controller(21, Arrays.asList(40));
+        c.attach(view);
+        settle();
+        List<DbController.MoveRow> rows = view.rows.get(view.rows.size() - 1);
+        assertEquals(1, rows.size());
+        assertEquals(30, rows.get(0).move.move);
+        assertEquals(Collections.singleton(30), view.dots.get(view.dots.size() - 1).keySet());
+    }
+
+    @Test
+    public void injectedGoGameKeepsPassesInTheLine() {
+        // Live "to DB" with a Go (9x9) game: moves include a pass.
+        DbStart start = DbStart.resolve("Go (9x9)", Arrays.asList(40, 81, 41), null, null);
+        DbController c = controller(start.gameOverride, start.initialMoves);
+        c.attach(view);
+        settle();
+        assertEquals(Arrays.asList(40, 81, 41), c.moves());
+        assertEquals(Arrays.asList(40, 81, 41), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(21), fake.statsGames.get(0));
+        assertFalse(view.log.contains("showUnsupported"));
+        c.onBoardMove(42);
+        assertEquals(Arrays.asList(40, 81, 41, 42), c.moves());
+    }
+
+    @Test
+    public void injectedRenjuGameKeepsItsLine() {
+        DbStart start = DbStart.resolve("Speed Renju", Arrays.asList(112, 113), null, null);
+        DbController c = controller(start.gameOverride, start.initialMoves);
+        c.attach(view);
+        settle();
+        assertEquals(32, c.gameId());
+        assertEquals(Arrays.asList(112, 113), fake.lastStatsMoves());
+        assertEquals(Integer.valueOf(32), fake.statsGames.get(0));
+    }
+
+    @Test
     public void changingGameResetsToSeedAndRefetches() {
         DbController c = started();
         c.onBoardMove(181);
