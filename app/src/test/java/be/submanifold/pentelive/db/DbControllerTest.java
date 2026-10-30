@@ -332,6 +332,19 @@ public class DbControllerTest {
     }
 
     @Test
+    public void goKoCellIsNotACandidate() {
+        List<Integer> ko = Arrays.asList(9, 2, 1, 20, 19, 12, 80, 10, 11);
+        fake.reply(ko, 200, FakeDbApi.stats(10, 60, 70, 50));
+        DbController c = controller(21, ko);
+        c.attach(view);
+        settle();
+        List<DbController.MoveRow> rows = view.rows.get(view.rows.size() - 1);
+        assertEquals(1, rows.size());
+        assertEquals(70, rows.get(0).move.move);
+        assertEquals(Collections.singleton(70), view.dots.get(view.dots.size() - 1).keySet());
+    }
+
+    @Test
     public void smallBoardDropsOffBoardCandidates() {
         fake.reply(Arrays.asList(40), 200, FakeDbApi.stats(30, 60, 81, 50, 90, 40, -3, 30, 40, 20));
         DbController c = controller(21, Arrays.asList(40));

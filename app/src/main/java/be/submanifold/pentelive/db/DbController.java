@@ -439,11 +439,13 @@ public final class DbController {
         if (r.kind != DbResult.Kind.OK) return new StatsOutcome(r.kind, false, null, null);
         if (r.value.blocked) return new StatsOutcome(DbResult.Kind.OK, true, null, null);
         Set<Integer> occupied = CaptureIcons.occupied(game, moves);
+        int ko = DbGames.isGo(game) ? BoardReplay.replay(game, moves).koMove : -1;
         int cells = DbGames.gridSize(game) * DbGames.gridSize(game);
         List<NextMove> usable = new ArrayList<>();
         for (NextMove m : r.value.nextMoves) {
             // Off-board candidates (a pass, or a backend-rotated pass on small boards) get no row or dot.
-            if (m != null && m.move >= 0 && m.move < cells && !occupied.contains(m.move)) usable.add(m);
+            if (m != null && m.move >= 0 && m.move < cells && !occupied.contains(m.move)
+                    && m.move != ko) usable.add(m);
         }
         return new StatsOutcome(DbResult.Kind.OK, false,
                 Collections.unmodifiableList(MoveRanking.sorted(usable)), occupied);

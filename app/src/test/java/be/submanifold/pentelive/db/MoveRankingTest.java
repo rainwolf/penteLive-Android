@@ -1,6 +1,8 @@
 package be.submanifold.pentelive.db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import be.submanifold.pentelive.db.DbDtos.NextMove;
 import java.util.ArrayList;
@@ -85,5 +87,24 @@ public class MoveRankingTest {
         List<Integer> out = new ArrayList<>();
         for (NextMove n : l) out.add(n.move);
         return out;
+    }
+
+    @Test
+    public void lowSampleThresholdIsSharedWithTheRanking() {
+        java.util.List<DbDtos.NextMove> in = java.util.Arrays.asList(
+                new DbDtos.NextMove(1, MoveRanking.LOW_SAMPLE_GAMES - 1, MoveRanking.LOW_SAMPLE_GAMES - 1, 100),
+                new DbDtos.NextMove(2, MoveRanking.LOW_SAMPLE_GAMES, 0, 0));
+        assertEquals(2, MoveRanking.sorted(in).get(0).move);
+    }
+
+    @Test
+    public void infoDialogTextTakesTheThresholdAsAFormatArgument() throws Exception {
+        String xml = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Paths.get("src/main/res/values/strings.xml")), java.nio.charset.StandardCharsets.UTF_8);
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+                "<string name=\"db_sort_info_message\">(.*?)</string>", java.util.regex.Pattern.DOTALL).matcher(xml);
+        org.junit.Assert.assertTrue(m.find());
+        assertTrue(m.group(1).contains("%1$d"));
+        assertFalse(m.group(1).contains("fewer than 5"));
     }
 }

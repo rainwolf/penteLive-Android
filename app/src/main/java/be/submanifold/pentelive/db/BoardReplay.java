@@ -27,7 +27,7 @@ public final class BoardReplay {
     }
 
     public static Result replay(int gameId, List<Integer> moves) {
-        Variant v = Variants.fromGameId(gameId);
+        Variant v = DbGames.variantOf(gameId);
         if (v == null) {
             throw new IllegalArgumentException("Unknown game id " + gameId);
         }

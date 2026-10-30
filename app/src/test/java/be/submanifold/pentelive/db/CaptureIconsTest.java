@@ -77,6 +77,17 @@ public class CaptureIconsTest {
     }
 
     @Test
+    public void turnBasedGoGameShowsCaptureCountsAndReplays() {
+        CaptureIcons.Counts go = CaptureIcons.of(71, Arrays.asList(0, 1, 2, 40, 10));
+        assertTrue(go.visible);
+        assertEquals(1, go.p1Count);
+        assertEquals(1, BoardReplay.replay(71, Arrays.asList(0, 1, 2, 40, 10)).whiteCaptures);
+        assertEquals(SelectionFlash.WHITE, SelectionFlash.sideToMove(71, 1));
+        assertEquals(SelectionFlash.BLACK, SelectionFlash.sideToMove(71, 0));
+        assertFalse(CaptureIcons.of(81, Arrays.asList(112)).visible);
+    }
+
+    @Test
     public void goOccupiedUsesNineByNineCellsAndSkipsPasses() {
         Set<Integer> occ = CaptureIcons.occupied(21, Arrays.asList(0, 1, 2, 40, 10, 81));
         assertEquals(new java.util.HashSet<>(Arrays.asList(0, 2, 40, 10)), occ);

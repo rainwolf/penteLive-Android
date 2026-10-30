@@ -423,5 +423,6 @@ public class DBBoardViewTest {
         String src = new String(Files.readAllBytes(Paths.get("src/main/java/be/submanifold/pentelive/DBBoardView.java")),
                 StandardCharsets.UTF_8);
         assertTrue(src.contains("Settings.Global.ANIMATOR_DURATION_SCALE"));
+        assertTrue(src.contains("ValueAnimator.areAnimatorsEnabled()"));
     }
 }

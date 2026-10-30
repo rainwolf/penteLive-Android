@@ -31,15 +31,16 @@ public class DatabaseActivityTitleTest {
     }
 
     @Test
-    public void titleIsNoLongerTheGenericDatabaseString() throws IOException {
-        assertFalse(src().contains("R.string.db_title"));
+    public void genericDatabaseStringOnlyBacksAnEmptyTitle() throws IOException {
+        assertTrue(src().contains("getString(R.string.db_title)"));
     }
 
     @Test
     public void titleComesFromTheGameName() throws IOException {
         String body = methodBody(src(), "private void updateTitle()");
-        assertTrue(body.contains("DbTitle.of(controller.gameId(), dbModel.gameLabel())"));
-        assertTrue(src().contains("toolbar.setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel()))"));
+        assertTrue(body.contains("DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title))"));
+        assertTrue(src().contains(
+                "toolbar.setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title)))"));
     }
 
     @Test

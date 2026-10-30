@@ -242,6 +242,7 @@ public class DBBoardView extends View {
 
     private boolean animationsEnabled() {
         if (animationsEnabledOverride != null) return animationsEnabledOverride.getAsBoolean();
+        if (!android.animation.ValueAnimator.areAnimatorsEnabled()) return false;
         float scale = android.provider.Settings.Global.getFloat(getContext().getContentResolver(),
                 android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f);
         return SelectionFlash.animationsEnabled(scale);
@@ -306,16 +307,19 @@ public class DBBoardView extends View {
         int i = selectedCell % n, j = selectedCell / n;
         float cx = DbBoardGeometry.centre(i, size, n), cy = DbBoardGeometry.centre(j, size, n);
         float radius = DbBoardGeometry.stoneRadius(size, n);
+        // Animations switched off mid-flash: draw the static ring.
+        boolean animated = flashAnimated
+                && (animationsEnabledOverride != null || android.animation.ValueAnimator.areAnimatorsEnabled());
         Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
         fill.setStyle(Paint.Style.FILL);
-        fill.setColor(flashAnimated ? SelectionFlash.colourAt(flashPhase, selectedStoneArgb, selectedHeatArgb)
+        fill.setColor(animated ? SelectionFlash.colourAt(flashPhase, selectedStoneArgb, selectedHeatArgb)
                 : selectedHeatArgb);
         canvas.drawCircle(cx, cy, radius, fill);
         Paint outline = new Paint(Paint.ANTI_ALIAS_FLAG);
         outline.setStyle(Paint.Style.STROKE);
         outline.setColor(Color.BLACK);
-        outline.setStrokeWidth(flashAnimated ? 1 : Math.max(2f, radius / 4));
-        canvas.drawCircle(cx, cy, flashAnimated ? radius : radius * 1.35f, outline);
+        outline.setStrokeWidth(animated ? 1 : Math.max(2f, radius / 4));
+        canvas.drawCircle(cx, cy, animated ? radius : radius * 1.35f, outline);
     }
 
     public void setDotsVisible(boolean visible) {

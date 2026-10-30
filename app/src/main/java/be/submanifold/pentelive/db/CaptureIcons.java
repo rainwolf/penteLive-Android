@@ -31,7 +31,7 @@ public final class CaptureIcons {
     }
 
     public static Counts of(int gameId, List<Integer> moves) {
-        Variant v = Variants.fromGameId(gameId);
+        Variant v = DbGames.variantOf(gameId);
         // Go shows captured stones; Renju, Gomoku and Connect6 have none (DbGames.showsCaptureIcons).
         boolean visible = v != null && !v.isRenju() && !v.isGomoku() && !v.isConnect6();
         if (!visible) {

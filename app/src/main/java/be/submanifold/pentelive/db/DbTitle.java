@@ -5,6 +5,12 @@ public final class DbTitle {
     private DbTitle() {
     }
 
+    /** As {@link #of(int, String)}, but {@code screenDefault} when that would be empty. */
+    public static String of(int gameId, String fallbackLabel, String screenDefault) {
+        String t = of(gameId, fallbackLabel);
+        return t.isEmpty() ? screenDefault : t;
+    }
+
     /** "Speed Pente", "Keryo-Pente", ...; the label (or "") for an unsupported game. */
     public static String of(int gameId, String fallbackLabel) {
         if (gameId == 0 || !DbGames.isSupported(gameId)) {

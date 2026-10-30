@@ -26,6 +26,14 @@ public class DbTitleTest {
     }
 
     @Test
+    public void emptyTitleFallsBackToTheScreenDefault() {
+        assertEquals("Database", DbTitle.of(0, null, "Database"));
+        assertEquals("Database", DbTitle.of(0, "", "Database"));
+        assertEquals("Mystery", DbTitle.of(0, "Mystery", "Database"));
+        assertEquals("Pente", DbTitle.of(DbGames.baseId("Pente"), null, "Database"));
+    }
+
+    @Test
     public void goAndRenjuUseTheirNames() {
         assertEquals("Go (9x9)", DbTitle.of(21, "ignored"));
         assertEquals("Speed Renju", DbTitle.of(32, null));

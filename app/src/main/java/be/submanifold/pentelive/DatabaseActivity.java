@@ -47,6 +47,7 @@ import be.submanifold.pentelive.db.FilterSummary;
 import be.submanifold.pentelive.db.DbGames;
 import be.submanifold.pentelive.db.DbStart;
 import be.submanifold.pentelive.db.DbTitle;
+import be.submanifold.pentelive.db.MoveRanking;
 import be.submanifold.pentelive.db.MoveSort;
 import be.submanifold.pentelive.db.DbView;
 import be.submanifold.pentelive.db.GameRowFormat;
@@ -152,7 +153,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
 
         updateAiButton();
 
-        toolbar.setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel()));
+        toolbar.setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title)));
         setSupportActionBar(toolbar);
         bindSortControls();
 
@@ -388,7 +389,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
             if (sortInfoDialog != null && sortInfoDialog.isShowing()) return;
             sortInfoDialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.db_sort_info_description)
-                    .setMessage(R.string.db_sort_info_message)
+                    .setMessage(getString(R.string.db_sort_info_message, MoveRanking.LOW_SAMPLE_GAMES))
                     .setPositiveButton(android.R.string.ok, null)
                     .create();
             sortInfoDialog.show();
@@ -396,7 +397,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
     }
 
     private void updateTitle() {
-        ((Toolbar) findViewById(R.id.toolbar)).setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel()));
+        ((Toolbar) findViewById(R.id.toolbar)).setTitle(DbTitle.of(controller.gameId(), dbModel.gameLabel(), getString(R.string.db_title)));
     }
 
     private void setStatus(CharSequence text) {

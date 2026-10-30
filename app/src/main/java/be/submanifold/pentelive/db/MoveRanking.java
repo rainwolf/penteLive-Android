@@ -8,6 +8,8 @@ import java.util.List;
 
 /** Wilson lower bound ranking of next moves (spec 3.6). */
 public final class MoveRanking {
+    /** Moves with fewer games than this are listed after all better-sampled moves. */
+    public static final int LOW_SAMPLE_GAMES = 5;
     private static final double Z = 1.96;
 
     private MoveRanking() {}
@@ -25,8 +27,8 @@ public final class MoveRanking {
         Collections.sort(out, new Comparator<NextMove>() {
             @Override
             public int compare(NextMove a, NextMove b) {
-                boolean ag = a.games >= 5;
-                boolean bg = b.games >= 5;
+                boolean ag = a.games >= LOW_SAMPLE_GAMES;
+                boolean bg = b.games >= LOW_SAMPLE_GAMES;
                 if (ag != bg) return ag ? -1 : 1;
                 int c = Double.compare(wilsonLowerBound(b.wins, b.games), wilsonLowerBound(a.wins, a.games));
                 if (c != 0) return c;

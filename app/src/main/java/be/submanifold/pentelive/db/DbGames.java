@@ -42,7 +42,8 @@ public final class DbGames {
     private DbGames() {
     }
 
-    private static Variant variantOf(int anyGameId) {
+    /** Variant of a base or turn-based (+50) DB game id; null for 0 and unknown ids. */
+    static Variant variantOf(int anyGameId) {
         int id = anyGameId > 50 ? anyGameId - 50 : anyGameId;
         return Variants.fromGameId(id);
     }

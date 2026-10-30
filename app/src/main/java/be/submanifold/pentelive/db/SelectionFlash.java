@@ -22,7 +22,7 @@ public final class SelectionFlash {
 
     /** Side to move in DB game {@code gameId}: Connect6 pattern, black first for Go/Renju, else white first. */
     public static int sideToMove(int gameId, int moveCount) {
-        Variant v = Variants.fromGameId(gameId);
+        Variant v = DbGames.variantOf(gameId);
         if (v != null && v.isConnect6()) return sideToMove(true, moveCount);
         if (DbGames.blackMovesFirst(gameId)) return BLACK - (moveCount % 2);
         return sideToMove(false, moveCount);
