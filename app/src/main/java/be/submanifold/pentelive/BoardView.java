@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.Shader;
 
 import androidx.appcompat.widget.Toolbar;
@@ -23,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.View;
+import androidx.core.view.ViewCompat;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -1249,6 +1251,15 @@ public class BoardView extends View {
         sb.setSpan(new RelativeSizeSpan(size), sb.length() - 1, sb.length(), 0);
         sb.append(" x " + game.getState().whiteCaptures);
         return sb;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // Keep the system Back gesture from stealing board swipes that start near the screen edge.
+        int[] r = SwipeGeometry.exclusionBand(w, h, getResources().getDisplayMetrics().density);
+        ViewCompat.setSystemGestureExclusionRects(this,
+                java.util.Collections.singletonList(new Rect(r[0], r[1], r[2], r[3])));
     }
 
     @Override

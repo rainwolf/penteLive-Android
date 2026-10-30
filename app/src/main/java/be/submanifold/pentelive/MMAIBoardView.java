@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
@@ -20,6 +21,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import androidx.core.view.ViewCompat;
 import android.view.ViewConfiguration;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -698,6 +700,15 @@ public class MMAIBoardView extends View {
             gameOver = false;
         }
         invalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // Keep the system Back gesture from stealing board swipes that start near the screen edge.
+        int[] r = SwipeGeometry.exclusionBand(w, h, getResources().getDisplayMetrics().density);
+        ViewCompat.setSystemGestureExclusionRects(this,
+                java.util.Collections.singletonList(new Rect(r[0], r[1], r[2], r[3])));
     }
 
     @Override
