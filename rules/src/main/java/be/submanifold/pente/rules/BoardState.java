@@ -4,8 +4,7 @@ package be.submanifold.pente.rules;
  * Immutable snapshot of a Pente-family board position.
  *
  * Cell encoding in {@link #board}: 0 empty, 1 white, 2 black, -1 forbidden.
- * Pente-only by design; Go positions are out of scope for v1.
- * // TODO(rules): GoRules seam — Go captures/territory are not modeled here.
+ * Go positions come from {@link GoReplay} (captures and {@link #koMove}; territory is not modeled).
  */
 public final class BoardState {
 

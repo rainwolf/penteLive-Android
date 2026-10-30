@@ -6,6 +6,9 @@ public final class DefaultPenteRules implements PenteRules {
 
     @Override
     public BoardState replay(List<Integer> moves, Variant v, int untilMove) {
+        if (v != null && v.isGo()) {
+            return GoReplay.replay(moves, v, untilMove);
+        }
         int size = Variants.gridSize(v);
         byte[][] board = new byte[size][size];
         int[] caps = new int[2];                 // caps[0] = white stones removed, caps[1] = black stones removed
@@ -13,13 +16,18 @@ public final class DefaultPenteRules implements PenteRules {
         int n = Math.min(untilMove, moves == null ? 0 : moves.size());
         for (int i = 0; i < n; i++) {
             int m = moves.get(i);
+            // Passes (size*size) and junk are skipped; colour still comes from i, so parity holds.
+            // Pente-family games never contain such moves.
+            if (m < 0 || m >= size * size) continue;
             int mi = m / size;
             int mj = m % size;
             // Per-move colour assignment mirrors the legacy replay* workers in Game.java:
             // every variant alternates one stone/turn (white on even index) EXCEPT Connect6,
-            // which places two stones/turn following the i%4 ∈ {0,3} → white pattern.
+            // which places two stones/turn following the i%4 ∈ {0,3} → white pattern, and Renju,
+            // which is black first (Game.replayRenjuGame: 2 - i%2).
             byte color = v.isConnect6()
                     ? (byte) ((((i % 4) == 0) || ((i % 4) == 3)) ? 1 : 2)
+                    : v.isRenju() ? (byte) (2 - (i % 2))
                     : (byte) (1 + (i % 2));
             board[mi][mj] = color;
             lastMove = m;
