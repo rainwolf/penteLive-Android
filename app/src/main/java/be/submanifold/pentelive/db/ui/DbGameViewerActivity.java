@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.TextView;
 
@@ -176,6 +177,16 @@ public class DbGameViewerActivity extends AppCompatActivity {
         });
         findViewById(R.id.forwardButton).setOnClickListener(v -> {
             if (vm.state == State.OK && vm.model.forward()) showPosition();
+        });
+        findViewById(R.id.backButton).setOnLongClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (vm.state == State.OK && vm.model.first()) showPosition();
+            return true;
+        });
+        findViewById(R.id.forwardButton).setOnLongClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (vm.state == State.OK && vm.model.last()) showPosition();
+            return true;
         });
 
         vm = new ViewModelProvider(this).get(ViewerViewModel.class);

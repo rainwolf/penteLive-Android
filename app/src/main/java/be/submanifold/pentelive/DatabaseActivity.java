@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.Gravity;
@@ -172,6 +173,17 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         });
         findViewById(R.id.backButton).setOnClickListener(v -> controller.back());
         findViewById(R.id.forwardButton).setOnClickListener(v -> controller.forward());
+        // Long press: jump to the start / end; returning true suppresses the click.
+        findViewById(R.id.backButton).setOnLongClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            controller.first();
+            return true;
+        });
+        findViewById(R.id.forwardButton).setOnLongClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            controller.last();
+            return true;
+        });
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.action_db_filters) {

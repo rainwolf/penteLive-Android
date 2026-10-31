@@ -60,6 +60,28 @@ public final class RedoHistory {
         return true;
     }
 
+    /** Jumps back to the floor position, keeping the undone moves for redo. */
+    public boolean toStart() {
+        if (moves.size() <= floor) {
+            return false;
+        }
+        while (moves.size() > floor) {
+            redo.addFirst(moves.remove(moves.size() - 1));
+        }
+        return true;
+    }
+
+    /** Replays the whole redo stack. */
+    public boolean toEnd() {
+        if (redo.isEmpty()) {
+            return false;
+        }
+        while (!redo.isEmpty()) {
+            moves.add(redo.removeFirst());
+        }
+        return true;
+    }
+
     public List<Integer> moves() {
         return Collections.unmodifiableList(new ArrayList<>(moves));
     }

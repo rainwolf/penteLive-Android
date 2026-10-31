@@ -45,4 +45,20 @@ public class NavButtonsSourceTest {
         }
         assertTrue(read(j + "MMAIActivity.java").contains("R.id.backButton"));
     }
+
+    @Test
+    public void longPressJumpsToStartAndEnd() throws IOException {
+        String j = "java/be/submanifold/pentelive/";
+        String board = read(j + "BoardActivity.java");
+        assertTrue(board.contains("navFirst();") && board.contains("navLast();"));
+        String db = read(j + "DatabaseActivity.java");
+        assertTrue(db.contains("controller.first()") && db.contains("controller.last()"));
+        String viewer = read(j + "db/ui/DbGameViewerActivity.java");
+        assertTrue(viewer.contains("vm.model.first()") && viewer.contains("vm.model.last()"));
+        for (String src : new String[] {board, db, viewer}) {
+            assertTrue(src.contains("setOnLongClickListener"));
+            assertTrue(src.contains("return true;"));
+        }
+        assertTrue(!read(j + "MMAIActivity.java").contains("setOnLongClickListener"));
+    }
 }
