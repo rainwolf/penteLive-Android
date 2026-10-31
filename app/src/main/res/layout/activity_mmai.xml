@@ -35,6 +35,16 @@
         android:layout_below="@id/boardView"
         android:layout_height="wrap_content">
         <Button
+            android:id="@+id/backButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:contentDescription="@string/nav_undo"
+            android:drawableStart="@drawable/ic_skip_previous"
+            android:drawableTint="?android:attr/textColorPrimary"
+            android:textStyle="bold" />
+        <Button
             android:layout_width="0dp"
             android:layout_weight="5"
             android:layout_height="wrap_content"

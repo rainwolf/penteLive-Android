@@ -158,7 +158,7 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
         bindSortControls();
 
 
-        // Swipe left goes back, swipe right redoes (the controller owns the position).
+        // Swipe left goes back, swipe right redoes (the controller owns the position); the buttons call the same methods.
         board.setOnSwipeListener(new DBBoardView.OnSwipeListener() {
             @Override
             public void onSwipeLeft() {
@@ -170,6 +170,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
                 controller.forward();
             }
         });
+        findViewById(R.id.backButton).setOnClickListener(v -> controller.back());
+        findViewById(R.id.forwardButton).setOnClickListener(v -> controller.forward());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.action_db_filters) {

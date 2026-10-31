@@ -253,7 +253,9 @@ public class MMAIActivity extends AppCompatActivity {
             board.setMyColor((byte) ("white".equals(PrefUtils.getFromPrefs(MMAIActivity.this, PrefUtils.PREFS_MMAICOLOR_KEY, "white")) ? 1 : 2));
             board.startGame();
         });
-        // Swipe left on the board undoes a move, like iOS. Swipe right does nothing.
+        // The undo button and a swipe left on the board (like iOS) both undo a move. Swipe right does nothing.
+        button = findViewById(R.id.backButton);
+        if (button != null) button.setOnClickListener(v -> board.undoMove());
         board.setOnSwipeListener(new MMAIBoardView.OnSwipeListener() {
             @Override
             public void onSwipeLeft() {

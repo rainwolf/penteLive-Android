@@ -159,7 +159,7 @@ public class DbGameViewerActivity extends AppCompatActivity {
         retry = findViewById(R.id.viewerRetry);
         progress = findViewById(R.id.viewerProgress);
 
-        // Spec 3.3: swipe left = back, swipe right = forward.
+        // Spec 3.3: swipe left = back, swipe right = forward; the buttons call the same model methods.
         board.setOnSwipeListener(new DBBoardView.OnSwipeListener() {
             @Override
             public void onSwipeLeft() {
@@ -170,6 +170,12 @@ public class DbGameViewerActivity extends AppCompatActivity {
             public void onSwipeRight() {
                 if (vm.state == State.OK && vm.model.forward()) showPosition();
             }
+        });
+        findViewById(R.id.backButton).setOnClickListener(v -> {
+            if (vm.state == State.OK && vm.model.back()) showPosition();
+        });
+        findViewById(R.id.forwardButton).setOnClickListener(v -> {
+            if (vm.state == State.OK && vm.model.forward()) showPosition();
         });
 
         vm = new ViewModelProvider(this).get(ViewerViewModel.class);
