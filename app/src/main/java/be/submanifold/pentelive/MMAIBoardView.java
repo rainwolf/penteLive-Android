@@ -10,6 +10,7 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -19,10 +20,8 @@ import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import androidx.core.view.ViewCompat;
-import android.view.ViewConfiguration;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -233,117 +232,118 @@ public class MMAIBoardView extends View {
     }
 
     private OnSwipeListener swipeListener;
-    private VelocityTracker velocityTracker;
-    private float swipeDownX, swipeDownY;
+    private BoardGesture gesture;
+    private float gestureX, gestureY;
+    private final Runnable loupeTick = new Runnable() {
+        @Override
+        public void run() {
+            if (gesture != null) {
+                applyGesture(gesture.tick(SystemClock.uptimeMillis()), gestureX, gestureY);
+            }
+        }
+    };
 
     public void setOnSwipeListener(OnSwipeListener listener) {
         swipeListener = listener;
     }
 
-    /**
-     * Detects a fast, mostly horizontal swipe. A slow drag to aim a stone is not a swipe (too slow),
-     * so placement is unaffected. Returns true when the gesture ended as a swipe: the zoom and
-     * tracking stone are cleared, nothing is placed, and the listener is called.
-     */
-    private boolean handleSwipe(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                if (velocityTracker != null) velocityTracker.recycle();
-                velocityTracker = VelocityTracker.obtain();
-                velocityTracker.addMovement(event);
-                swipeDownX = event.getX();
-                swipeDownY = event.getY();
-                return false;
-            case MotionEvent.ACTION_MOVE:
-                if (velocityTracker != null) velocityTracker.addMovement(event);
-                return false;
-            case MotionEvent.ACTION_CANCEL:
-                if (velocityTracker != null) {
-                    velocityTracker.recycle();
-                    velocityTracker = null;
-                }
-                return false;
-            case MotionEvent.ACTION_UP:
-                if (velocityTracker == null) return false;
-                velocityTracker.addMovement(event);
-                velocityTracker.computeCurrentVelocity(1000);
-                float vx = velocityTracker.getXVelocity();
-                velocityTracker.recycle();
-                velocityTracker = null;
-                ViewConfiguration vc = ViewConfiguration.get(getContext());
-                float dx = event.getX() - swipeDownX;
-                float dy = event.getY() - swipeDownY;
-                if (Math.abs(dx) < vc.getScaledTouchSlop() * 8
-                        || Math.abs(dx) < 2 * Math.abs(dy)
-                        || Math.abs(vx) < vc.getScaledMinimumFlingVelocity() * 8) {
-                    return false;
-                }
-                playedMove = -1;
-                scaling = 1;
-                translateX = 0;
-                translateY = 0;
-                invalidate();
-                if (dx < 0) swipeListener.onSwipeLeft();
-                else swipeListener.onSwipeRight();
-                return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // TODO Auto-generated method stub
-
-//        active = myColor == (1 + movesList.size()%2);
-        if (swipeListener != null && handleSwipe(event)) {
-            return true;
+        float x = event.getX();
+        float y = event.getY();
+        long t = event.getEventTime();
+        BoardGesture.Action action;
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                removeCallbacks(loupeTick);
+                gesture = new BoardGesture(getResources().getDisplayMetrics().density,
+                        swipeListener != null);
+                gestureX = x;
+                gestureY = y;
+                action = gesture.down(x, y, t);
+                postDelayed(loupeTick, BoardGesture.LOUPE_HOLD_MS);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (gesture == null) return true;
+                gestureX = x;
+                gestureY = y;
+                action = gesture.move(x, y, t);
+                break;
+            case MotionEvent.ACTION_UP:
+                removeCallbacks(loupeTick);
+                if (gesture == null) return true;
+                action = gesture.up(x, y, t);
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                removeCallbacks(loupeTick);
+                if (gesture == null) return true;
+                action = gesture.cancel();
+                break;
+            default:
+                return true;
         }
+        applyGesture(action, x, y);
+        return true;
+    }
 
-        float x, y;
-        x = event.getX();
-        y = event.getY();
+    private void resetLoupe() {
+        playedMove = -1;
+        scaling = 1;
+        translateX = 0;
+        translateY = 0;
+        invalidate();
+    }
+
+    private void applyGesture(BoardGesture.Action action, float x, float y) {
+        switch (action) {
+            case NONE:
+                return;
+            case CANCEL:
+                resetLoupe();
+                return;
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+                resetLoupe();
+                if (swipeListener != null) {
+                    if (action == BoardGesture.Action.SWIPE_LEFT) swipeListener.onSwipeLeft();
+                    else swipeListener.onSwipeRight();
+                }
+                return;
+            default:
+                break;
+        }
         float realSize = getWidth();
         if (x > realSize || y > realSize || x < 0 || y < 0) {
-            playedMove = -1;
-            scaling = 1;
-            translateX = 0;
-            translateY = 0;
-            invalidate();
-            return false;
+            resetLoupe();
+            return;
         }
         playedMove = -1;
         stoneX = x;
         stoneI = (byte) (19 * stoneX / size);
         stoneY = y;
         stoneJ = (byte) (19 * stoneY / size);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                scaling = 2;
-                translateX = -x / 2;
-                translateY = -y / 2;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                scaling = 2;
-                translateX = -x / 2;
-                translateY = -y / 2;
-                break;
-            case MotionEvent.ACTION_UP:
-                scaling = 1;
-                translateX = 0;
-                translateY = 0;
-                // Accessibility: report the release as a click. No OnClickListener is set on
-                // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
-                performClick();
-                break;
+        boolean place = action == BoardGesture.Action.PLACE;
+        if (place) {
+            scaling = 1;
+            translateX = 0;
+            translateY = 0;
+            // Accessibility: report release click. No OnClickListener set on
+            // view, so this only sends TYPE_VIEW_CLICKED; return value unused.
+            performClick();
+        } else {
+            scaling = 2;
+            translateX = -x / 2;
+            translateY = -y / 2;
         }
 
-        // A human placement is allowed iff the next move belongs to myColor. For
-        // one-stone games this is exactly the old `active` gate; for Connect6 it also
-        // allows the SECOND stone of the human's two-stone turn (owner unchanged).
+        // A human placement allowed iff next move belongs myColor. For
+        // one-stone games exactly old `active` gate; Connect6 it also
+        // allows SECOND stone human's two-stone turn (owner unchanged).
         if (!gameOver && owner(movesList.size()) == myColor && abstractBoard[stoneI][stoneJ] == 0) {
             playedMove = 19 * stoneJ + stoneI;
         }
-        if (scaling == 1) {
+        if (place) {
             if (playedMove > -1 && !gameOver) {
                 movesList.add(Integer.valueOf(playedMove));
                 replayGame(abstractBoard);
@@ -364,7 +364,6 @@ public class MMAIBoardView extends View {
             }
         }
         invalidate();
-        return true;
     }
 
     @Override

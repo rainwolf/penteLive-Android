@@ -21,8 +21,7 @@ import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
-import android.view.ViewConfiguration;
+import android.os.SystemClock;
 import android.view.View;
 import androidx.core.view.ViewCompat;
 import android.widget.Button;
@@ -33,7 +32,6 @@ import android.widget.TextView;
  * Created by waliedothman on 15/04/16.
  */
 public class BoardView extends View {
-    //    private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
 //    boolean dragging = true, swipeLeft = false;
 //    static final int SWIPE_THRESHOLD_VELOCITY = 300;
     private BoardActivity boardActivity;
@@ -147,83 +145,24 @@ public class BoardView extends View {
     }
 
     private OnSwipeListener swipeListener;
-    private VelocityTracker velocityTracker;
-    private float swipeDownX, swipeDownY;
-    // Board state at finger-down; the normal ACTION_DOWN code (replay to end, opening-pick resets)
-    // runs before we know it is a swipe, so a detected swipe restores this first.
-    private int downUntilMove, downDPenteMove4, downSwap2Move2, downSwap2Move3;
-    private boolean downReplayed;
-    private java.util.List<Integer> downRenjuPicks;
+    private BoardGesture gesture;
+    private float gestureX, gestureY;
+    // True once the touch-down side effects (replay to end, opening-pick resets, Renju 6th-stone
+    // lift) have run for the current gesture. They are deferred until the loupe shows or a tap
+    // places, so a horizontal swipe never triggers them (swipe-right used to land on the last move).
+    private boolean downWorkDone;
+    private final Runnable loupeTick = new Runnable() {
+        @Override
+        public void run() {
+            if (gesture != null) {
+                applyGesture(gesture.tick(SystemClock.uptimeMillis()), gestureX, gestureY);
+            }
+        }
+    };
 
     public void setOnSwipeListener(OnSwipeListener listener) {
         swipeListener = listener;
     }
-
-    /**
-     * Detects a fast, mostly horizontal swipe. A slow drag to aim a stone is not a swipe (too slow),
-     * so placement is unaffected. Returns true when the gesture ended as a swipe: the zoom and
-     * tracking stone are cleared, nothing is placed, and the listener is called.
-     */
-    private boolean handleSwipe(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                if (velocityTracker != null) velocityTracker.recycle();
-                velocityTracker = VelocityTracker.obtain();
-                velocityTracker.addMovement(event);
-                swipeDownX = event.getX();
-                swipeDownY = event.getY();
-                downReplayed = replayed;
-                downDPenteMove4 = dPenteMove4;
-                downSwap2Move2 = swap2Move2;
-                downSwap2Move3 = swap2Move3;
-                downRenjuPicks = renjuPicks == null ? null : new java.util.ArrayList<>(renjuPicks);
-                if (game != null) downUntilMove = game.getUntilMove();
-                return false;
-            case MotionEvent.ACTION_MOVE:
-                if (velocityTracker != null) velocityTracker.addMovement(event);
-                return false;
-            case MotionEvent.ACTION_CANCEL:
-                if (velocityTracker != null) {
-                    velocityTracker.recycle();
-                    velocityTracker = null;
-                }
-                return false;
-            case MotionEvent.ACTION_UP:
-                if (velocityTracker == null) return false;
-                velocityTracker.addMovement(event);
-                velocityTracker.computeCurrentVelocity(1000);
-                float vx = velocityTracker.getXVelocity();
-                velocityTracker.recycle();
-                velocityTracker = null;
-                ViewConfiguration vc = ViewConfiguration.get(getContext());
-                float dx = event.getX() - swipeDownX;
-                float dy = event.getY() - swipeDownY;
-                if (Math.abs(dx) < vc.getScaledTouchSlop() * 8
-                        || Math.abs(dx) < 2 * Math.abs(dy)
-                        || Math.abs(vx) < vc.getScaledMinimumFlingVelocity() * 8) {
-                    return false;
-                }
-                playedMove = -1;
-                scaling = 1;
-                translateX = 0;
-                translateY = 0;
-                if (game != null) {
-                    game.setUntilMove(downUntilMove);
-                    game.replayGameUntilMove(this);
-                }
-                replayed = downReplayed;
-                dPenteMove4 = downDPenteMove4;
-                swap2Move2 = downSwap2Move2;
-                swap2Move3 = downSwap2Move3;
-                renjuPicks = downRenjuPicks;
-                invalidate();
-                if (dx < 0) swipeListener.onSwipeLeft();
-                else swipeListener.onSwipeRight();
-                return true;
-        }
-        return false;
-    }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -442,8 +381,6 @@ public class BoardView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int index = event.getActionIndex();
-
         // Renju swap decision: the board is locked while the Swap / No swap / Place 10 buttons
         // are up — choose via the buttons only. Ignore all board touches (no zoom, no tracking
         // stone) until a button sets renjuChosen, so nothing carries over into placement.
@@ -452,13 +389,86 @@ public class BoardView extends View {
             return false;
         }
 
-        if (swipeListener != null && handleSwipe(event)) {
-            return true;
+        float x = event.getX();
+        float y = event.getY();
+        long t = event.getEventTime();
+        BoardGesture.Action action;
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                removeCallbacks(loupeTick);
+                downWorkDone = false;
+                gesture = new BoardGesture(getResources().getDisplayMetrics().density,
+                        swipeListener != null);
+                gestureX = x;
+                gestureY = y;
+                action = gesture.down(x, y, t);
+                postDelayed(loupeTick, BoardGesture.LOUPE_HOLD_MS);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (gesture == null) return true;
+                gestureX = x;
+                gestureY = y;
+                action = gesture.move(x, y, t);
+                break;
+            case MotionEvent.ACTION_UP:
+                removeCallbacks(loupeTick);
+                if (gesture == null) return true;
+                action = gesture.up(x, y, t);
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                removeCallbacks(loupeTick);
+                if (gesture == null) return true;
+                action = gesture.cancel();
+                break;
+            default:
+                return true;
         }
+        applyGesture(action, x, y);
+        return true;
+    }
 
-        float x, y;
-        x = event.getX();
-        y = event.getY();
+    private void resetLoupe() {
+        playedMove = -1;
+        scaling = 1;
+        translateX = 0;
+        translateY = 0;
+        invalidate();
+    }
+
+    private void applyGesture(BoardGesture.Action action, float x, float y) {
+        switch (action) {
+            case NONE:
+                return;
+            case CANCEL:
+                resetLoupe();
+                return;
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+                resetLoupe();
+                if (swipeListener != null) {
+                    if (action == BoardGesture.Action.SWIPE_LEFT) swipeListener.onSwipeLeft();
+                    else swipeListener.onSwipeRight();
+                }
+                return;
+            default:
+                break;
+        }
+        if (!downWorkDone) {
+            // Loupe showing for the first time, or a quick tap that never showed it: run the
+            // touch-down handling now.
+            if (!handleTouch(MotionEvent.ACTION_DOWN, x, y)) return;
+            downWorkDone = true;
+        }
+        if (action == BoardGesture.Action.MOVE_LOUPE) {
+            handleTouch(MotionEvent.ACTION_MOVE, x, y);
+        } else if (action == BoardGesture.Action.PLACE) {
+            if (!handleTouch(MotionEvent.ACTION_UP, x, y)) resetLoupe();
+        }
+    }
+
+    /** The placement / loupe handling; act is ACTION_DOWN (loupe shows), ACTION_MOVE or ACTION_UP (place). */
+    private boolean handleTouch(int act, float x, float y) {
         float realSize = getWidth();
         if (x > realSize || y > realSize || x < 0 || y < 0) {
             playedMove = -1;
@@ -476,7 +486,7 @@ public class BoardView extends View {
         if (stoneI >= gridSize || stoneJ >= gridSize) {
             return false;
         }
-        switch (event.getAction()) {
+        switch (act) {
             case MotionEvent.ACTION_DOWN:
                 if (!replayed && !game.isGoMarkStones()) {
                     if (game.isSwap2() && game.getMovesList().size() == 3 && swap2WillPass && swap2Move1 > -1) {
@@ -508,12 +518,11 @@ public class BoardView extends View {
                 translateX = -x / 2;
                 translateY = -y / 2;
                 break;
-            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 scaling = 1;
                 translateX = 0;
                 translateY = 0;
-                if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (act == MotionEvent.ACTION_UP) {
                     // Accessibility: report the release as a click. No OnClickListener is set on
                     // this view, so this only sends TYPE_VIEW_CLICKED; the return value is unused.
                     performClick();
@@ -522,7 +531,7 @@ public class BoardView extends View {
         }
 
         if (game != null && game.isRenju() && game.isActive() && renjuOfferMode) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (act == MotionEvent.ACTION_UP) {
                 int m = gridSize * stoneI + stoneJ;
                 if (renjuPicks == null) renjuPicks = new java.util.ArrayList<>();
                 if (game.getState().cell(stoneI, stoneJ) != 0) {
@@ -551,7 +560,7 @@ public class BoardView extends View {
         }
         if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
             // Two taps: 1st = the offered black 5th move; 2nd = an empty, distinct white 6th.
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (act == MotionEvent.ACTION_UP) {
                 int m = gridSize * stoneI + stoneJ;
                 if (renjuSelection == null) renjuSelection = new java.util.ArrayList<>();
                 boolean isOffer = false;
@@ -576,7 +585,7 @@ public class BoardView extends View {
                 // zoomed board while the new position is tracked. Releasing on its old cell
                 // re-places it there; releasing elsewhere moves it; an invalid release leaves it
                 // in hand (size 1) to be tapped down again.
-                if (event.getAction() == MotionEvent.ACTION_DOWN
+                if (act == MotionEvent.ACTION_DOWN
                         && renjuSelection != null && renjuSelection.size() >= 2) {
                     int six = renjuSelection.remove(renjuSelection.size() - 1);
                     game.getState().board[six / gridSize][six % gridSize] = 0;
