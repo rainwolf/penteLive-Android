@@ -171,17 +171,11 @@ public class DbGameViewerActivity extends AppCompatActivity {
                 if (vm.state == State.OK && vm.model.forward()) showPosition();
             }
         });
-        findViewById(R.id.firstButton).setOnClickListener(v -> {
-            if (vm.state == State.OK && vm.model.first()) showPosition();
-        });
         findViewById(R.id.backButton).setOnClickListener(v -> {
             if (vm.state == State.OK && vm.model.back()) showPosition();
         });
         findViewById(R.id.forwardButton).setOnClickListener(v -> {
             if (vm.state == State.OK && vm.model.forward()) showPosition();
-        });
-        findViewById(R.id.lastButton).setOnClickListener(v -> {
-            if (vm.state == State.OK && vm.model.last()) showPosition();
         });
 
         vm = new ViewModelProvider(this).get(ViewerViewModel.class);

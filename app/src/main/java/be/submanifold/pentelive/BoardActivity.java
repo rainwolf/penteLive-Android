@@ -199,7 +199,7 @@ public class BoardActivity extends AppCompatActivity {
                 }
             }
         });
-        // Swipe on the board and the first/back/forward/last buttons share navBack/navForward/navFirst/navLast.
+        // Swipe on the board and the back/forward buttons share navBack/navForward.
         // Swipe: finger left = back, finger right = forward (like iOS).
         board.setOnSwipeListener(new BoardView.OnSwipeListener() {
             @Override
@@ -212,14 +212,10 @@ public class BoardActivity extends AppCompatActivity {
                 navForward();
             }
         });
-        button = findViewById(R.id.firstButton);
-        if (button != null) button.setOnClickListener(v -> navFirst());
         button = findViewById(R.id.backButton);
         if (button != null) button.setOnClickListener(v -> navBack());
         button = findViewById(R.id.forwardButton);
         if (button != null) button.setOnClickListener(v -> navForward());
-        button = findViewById(R.id.lastButton);
-        if (button != null) button.setOnClickListener(v -> navLast());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
@@ -504,24 +500,6 @@ public class BoardActivity extends AppCompatActivity {
     private void navForward() {
         if (navBlocked()) return;
         goForward();
-    }
-
-    /** Repeats goBack until the first position (bounded; a pending Connect6/dPente stone is cleared first). */
-    private void navFirst() {
-        if (navBlocked() || game.getMovesList() == null) return;
-        int guard = game.getMovesList().size() + 3;
-        do {
-            goBack();
-        } while (game.getUntilMove() > 1 && --guard > 0);
-    }
-
-    /** Repeats goForward until the last position. */
-    private void navLast() {
-        if (navBlocked() || game.getMovesList() == null) return;
-        int guard = game.getMovesList().size() + 3;
-        while (game.getUntilMove() < game.getMovesList().size() && --guard > 0) {
-            goForward();
-        }
     }
 
     public void goBack() {

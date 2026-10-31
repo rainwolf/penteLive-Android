@@ -50,16 +50,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <Button
-                android:id="@+id/firstButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:contentDescription="@string/nav_first"
-                android:drawableStart="@drawable/ic_first_page"
-                android:drawableTint="?android:attr/textColorPrimary"
-                android:textStyle="bold" />
-            <Button
                 android:id="@+id/backButton"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -77,16 +67,6 @@
                 android:focusable="false"
                 android:contentDescription="@string/nav_forward"
                 android:drawableEnd="@drawable/ic_skip_next"
-                android:drawableTint="?android:attr/textColorPrimary"
-                android:textStyle="bold" />
-            <Button
-                android:id="@+id/lastButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:contentDescription="@string/nav_last"
-                android:drawableEnd="@drawable/ic_last_page"
                 android:drawableTint="?android:attr/textColorPrimary"
                 android:textStyle="bold" />
         </LinearLayout>

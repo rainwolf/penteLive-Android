@@ -24,9 +24,9 @@ public class NavButtonsSourceTest {
 
     @Test
     public void layoutsHaveTheButtons() throws IOException {
-        layoutHas("activity_board.xml", "firstButton", "backButton", "forwardButton", "lastButton");
-        layoutHas("activity_database.xml", "firstButton", "backButton", "forwardButton", "lastButton");
-        layoutHas("activity_db_game_viewer.xml", "firstButton", "backButton", "forwardButton", "lastButton");
+        layoutHas("activity_board.xml", "backButton", "forwardButton");
+        layoutHas("activity_database.xml", "backButton", "forwardButton");
+        layoutHas("activity_db_game_viewer.xml", "backButton", "forwardButton");
         layoutHas("activity_mmai.xml", "backButton");
     }
 
@@ -34,29 +34,15 @@ public class NavButtonsSourceTest {
     public void activitiesWireButtons() throws IOException {
         String j = "java/be/submanifold/pentelive/";
         String board = read(j + "BoardActivity.java");
-        for (String s : new String[] {"R.id.firstButton", "R.id.backButton", "R.id.forwardButton", "R.id.lastButton",
-                "navFirst()", "navBack()", "navForward()", "navLast()"}) {
+        for (String s : new String[] {"R.id.backButton", "R.id.forwardButton", "navBack()", "navForward()"}) {
             assertTrue("BoardActivity uses " + s, board.contains(s));
         }
         String db = read(j + "DatabaseActivity.java");
         String viewer = read(j + "db/ui/DbGameViewerActivity.java");
-        for (String s : new String[] {"R.id.firstButton", "R.id.backButton", "R.id.forwardButton", "R.id.lastButton"}) {
+        for (String s : new String[] {"R.id.backButton", "R.id.forwardButton"}) {
             assertTrue("DatabaseActivity uses " + s, db.contains(s));
             assertTrue("DbGameViewerActivity uses " + s, viewer.contains(s));
         }
-        assertTrue(db.contains("controller.first()") && db.contains("controller.last()"));
         assertTrue(read(j + "MMAIActivity.java").contains("R.id.backButton"));
-    }
-
-    @Test
-    public void boardNavButtonsAreCompactForCrowdedRenjuRow() throws IOException {
-        String s = read("res/layout/activity_board.xml");
-        for (String id : new String[] {"firstButton", "backButton", "forwardButton", "lastButton"}) {
-            int at = s.indexOf("@+id/" + id + "\"");
-            String tag = s.substring(at, s.indexOf("/>", at));
-            assertTrue(id + " minWidth 0", tag.contains("android:minWidth=\"0dp\""));
-            assertTrue(id + " no horizontal padding", tag.contains("android:paddingStart=\"0dp\"")
-                    && tag.contains("android:paddingEnd=\"0dp\""));
-        }
     }
 }

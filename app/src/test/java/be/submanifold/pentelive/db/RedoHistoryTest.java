@@ -95,37 +95,4 @@ public class RedoHistoryTest {
         assertTrue(b.forward());
         assertEquals(Arrays.asList(180, 181, 182), b.moves());
     }
-
-    @Test
-    public void toStartStopsAtFloorAndKeepsRedoOrder() {
-        RedoHistory h = new RedoHistory(Arrays.asList(180, 1, 2, 3), 1, false);
-        assertTrue(h.toStart());
-        assertEquals(Arrays.asList(180), h.moves());
-        assertEquals(Arrays.asList(1, 2, 3), h.redo());
-        assertFalse(h.toStart());
-        assertTrue(h.toEnd());
-        assertEquals(Arrays.asList(180, 1, 2, 3), h.moves());
-        assertTrue(h.redo().isEmpty());
-        assertFalse(h.toEnd());
-    }
-
-    @Test
-    public void toStartAndToEndConnect6() {
-        RedoHistory h = new RedoHistory(Arrays.asList(180, 1, 2, 3, 4), 1, true);
-        assertTrue(h.toStart());
-        assertEquals(Arrays.asList(180), h.moves());
-        assertTrue(h.forward());
-        assertEquals(Arrays.asList(180, 1, 2), h.moves());
-        assertTrue(h.toEnd());
-        assertEquals(Arrays.asList(180, 1, 2, 3, 4), h.moves());
-    }
-
-    @Test
-    public void toStartThenPlayClearsRedo() {
-        RedoHistory h = new RedoHistory(Arrays.asList(5, 6), 0, false);
-        h.toStart();
-        h.play(9);
-        assertEquals(Arrays.asList(9), h.moves());
-        assertFalse(h.toEnd());
-    }
 }

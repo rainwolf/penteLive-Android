@@ -256,18 +256,6 @@ public final class DbController {
         return true;
     }
 
-    public boolean first() {
-        if (!supported || !history.toStart()) return false;
-        positionChanged();
-        return true;
-    }
-
-    public boolean last() {
-        if (!supported || !history.toEnd()) return false;
-        positionChanged();
-        return true;
-    }
-
     /** Process-death restore: puts back the saved moves and redo stack, then fetches that position. */
     public void restore(List<Integer> savedMoves, List<Integer> savedRedo) {
         if (!supported) return;

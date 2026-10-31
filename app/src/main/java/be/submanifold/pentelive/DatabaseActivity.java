@@ -170,10 +170,8 @@ public class DatabaseActivity extends AppCompatActivity implements DbView, DBBoa
                 controller.forward();
             }
         });
-        findViewById(R.id.firstButton).setOnClickListener(v -> controller.first());
         findViewById(R.id.backButton).setOnClickListener(v -> controller.back());
         findViewById(R.id.forwardButton).setOnClickListener(v -> controller.forward());
-        findViewById(R.id.lastButton).setOnClickListener(v -> controller.last());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.action_db_filters) {
