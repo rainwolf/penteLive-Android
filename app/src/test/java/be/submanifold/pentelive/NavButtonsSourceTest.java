@@ -47,4 +47,16 @@ public class NavButtonsSourceTest {
         assertTrue(db.contains("controller.first()") && db.contains("controller.last()"));
         assertTrue(read(j + "MMAIActivity.java").contains("R.id.backButton"));
     }
+
+    @Test
+    public void boardNavButtonsAreCompactForCrowdedRenjuRow() throws IOException {
+        String s = read("res/layout/activity_board.xml");
+        for (String id : new String[] {"firstButton", "backButton", "forwardButton", "lastButton"}) {
+            int at = s.indexOf("@+id/" + id + "\"");
+            String tag = s.substring(at, s.indexOf("/>", at));
+            assertTrue(id + " minWidth 0", tag.contains("android:minWidth=\"0dp\""));
+            assertTrue(id + " no horizontal padding", tag.contains("android:paddingStart=\"0dp\"")
+                    && tag.contains("android:paddingEnd=\"0dp\""));
+        }
+    }
 }

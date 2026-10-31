@@ -30,6 +30,9 @@
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/firstButton"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -40,6 +43,9 @@
             android:textStyle="bold" />
         <Button
             android:id="@+id/backButton"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -87,6 +93,9 @@
             android:id="@+id/searchDBbutton" />
         <Button
             android:id="@+id/forwardButton"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -97,6 +106,9 @@
             android:textStyle="bold" />
         <Button
             android:id="@+id/lastButton"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
