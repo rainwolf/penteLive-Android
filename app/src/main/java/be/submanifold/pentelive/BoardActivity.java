@@ -601,11 +601,12 @@ public class BoardActivity extends AppCompatActivity {
     }
 
     private BackNavigation.Action backAction() {
-        boolean swap2Pending = game.isSwap2() && (game.getMovesList().isEmpty()
-                || (game.getMovesList().size() == 3 && board.swap2WillPass));
+        java.util.List<Integer> ml = game.getMovesList();
+        boolean empty = ml == null || ml.isEmpty();
+        boolean swap2Pending = game.isSwap2() && (empty || (ml.size() == 3 && board.swap2WillPass));
         boolean renjuPicking = game.isRenju() && (board.renjuOfferMode || "SELECTION".equals(game.renjuPhase));
         return BackNavigation.decide(game.isConnect6(), board.connect6Move1, game.isDPente(),
-                game.getMovesList().isEmpty(), board.playedMove, swap2Pending, renjuPicking);
+                empty, board.playedMove, swap2Pending, renjuPicking);
     }
 
     /** Drops the staged (placed, unsubmitted) stone and shows the latest position again. */
@@ -616,7 +617,8 @@ public class BoardActivity extends AppCompatActivity {
             game.replayGameUntilMove(board);
         }
         board.setReplayed(false);
-        ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
+        ((Button) findViewById(R.id.submitButton)).setText(game.isGo() && !game.isGoMarkStones()
+                ? R.string.pass : R.string.submit);
         board.invalidate();
     }
 

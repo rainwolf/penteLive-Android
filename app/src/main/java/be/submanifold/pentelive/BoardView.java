@@ -430,6 +430,11 @@ public class BoardView extends View {
 
     private void resetLoupe() {
         playedMove = -1;
+        resetZoom();
+    }
+
+    /** Zoom only: a swipe must keep the staged stone so back/forward can decide on it. */
+    private void resetZoom() {
         scaling = 1;
         translateX = 0;
         translateY = 0;
@@ -445,7 +450,7 @@ public class BoardView extends View {
                 return;
             case SWIPE_LEFT:
             case SWIPE_RIGHT:
-                resetLoupe();
+                if (!BoardGesture.swipeKeepsStagedStone(action)) resetLoupe(); else resetZoom();
                 if (swipeListener != null) {
                     if (action == BoardGesture.Action.SWIPE_LEFT) swipeListener.onSwipeLeft();
                     else swipeListener.onSwipeRight();
