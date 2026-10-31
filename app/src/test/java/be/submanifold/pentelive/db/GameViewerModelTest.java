@@ -184,4 +184,26 @@ public class GameViewerModelTest {
         assertFalse(CaptureIcons.of(81, m.allMoves()).visible);
         assertEquals("H8", MoveGrid.cells(81, m.allMoves(), 3).get(0).label);
     }
+
+    @Test
+    public void firstAndLastJump() {
+        GameViewerModel m = new GameViewerModel(7);
+        m.accept(detail(7, 1, 180, 181, 182));
+        assertFalse(m.last());
+        assertTrue(m.first());
+        assertEquals(0, m.cursor());
+        assertFalse(m.first());
+        assertTrue(m.last());
+        assertEquals(3, m.cursor());
+        m.jumpTo(1);
+        assertTrue(m.last());
+        assertEquals(3, m.cursor());
+    }
+
+    @Test
+    public void firstAndLastBeforeAcceptDoNothing() {
+        GameViewerModel m = new GameViewerModel(7);
+        assertFalse(m.first());
+        assertFalse(m.last());
+    }
 }

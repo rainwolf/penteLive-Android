@@ -31,10 +31,20 @@ public class BoardGestureTest {
     public void holdStillShowsLoupeViaTick() {
         BoardGesture g = g();
         g.down(500, 500, 0);
-        assertEquals(NONE, g.tick(100));
-        assertEquals(SHOW_LOUPE, g.tick(150));
+        assertEquals(NONE, g.tick(200));
+        assertEquals(SHOW_LOUPE, g.tick(250));
         assertTrue(g.loupeAllowed());
         assertEquals(PLACE, g.up(500, 500, 400));
+    }
+
+    @Test
+    public void shortPauseThenSlowSwipeIsStillASwipe() {
+        BoardGesture g = g();
+        g.down(500, 500, 0);
+        assertEquals(NONE, g.tick(200));
+        assertEquals(NONE, g.move(530, 500, 240));
+        assertTrue(g.swipeLatched());
+        assertEquals(SWIPE_RIGHT, g.up(700, 505, 600));
     }
 
     @Test
@@ -126,7 +136,7 @@ public class BoardGestureTest {
     public void aimingHorizontalDragStillPlaces() {
         BoardGesture g = g();
         g.down(500, 500, 0);
-        assertEquals(SHOW_LOUPE, g.tick(150));
+        assertEquals(SHOW_LOUPE, g.tick(250));
         assertEquals(MOVE_LOUPE, g.move(620, 500, 300));
         assertEquals(PLACE, g.up(620, 500, 320));
     }
@@ -201,14 +211,14 @@ public class BoardGestureTest {
     public void moveWithinSlopAfterHoldArmsLoupe() {
         BoardGesture g = g();
         g.down(500, 500, 0);
-        assertEquals(SHOW_LOUPE, g.move(503, 502, 200));
+        assertEquals(SHOW_LOUPE, g.move(503, 502, 300));
     }
 
     @Test
     public void secondPointerCancelDuringAimingCancels() {
         BoardGesture g = g();
         g.down(500, 500, 0);
-        g.tick(150);
+        g.tick(250);
         assertEquals(CANCEL, g.cancel());
         assertEquals(NONE, g.up(500, 500, 300));
     }

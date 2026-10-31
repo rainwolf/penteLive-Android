@@ -199,21 +199,27 @@ public class BoardActivity extends AppCompatActivity {
                 }
             }
         });
-        // Swipe on the board navigates moves like iOS: finger left = back, finger right = forward.
-        // Ignored while a swap2 / dPente choice or Go stone marking is in progress (as on iOS).
+        // Swipe on the board and the first/back/forward/last buttons share navBack/navForward/navFirst/navLast.
+        // Swipe: finger left = back, finger right = forward (like iOS).
         board.setOnSwipeListener(new BoardView.OnSwipeListener() {
             @Override
             public void onSwipeLeft() {
-                if (game.swap2Choice || game.dPenteChoice || game.isGoMarkStones()) return;
-                goBack();
+                navBack();
             }
 
             @Override
             public void onSwipeRight() {
-                if (game.swap2Choice || game.dPenteChoice || game.isGoMarkStones()) return;
-                goForward();
+                navForward();
             }
         });
+        button = findViewById(R.id.firstButton);
+        if (button != null) button.setOnClickListener(v -> navFirst());
+        button = findViewById(R.id.backButton);
+        if (button != null) button.setOnClickListener(v -> navBack());
+        button = findViewById(R.id.forwardButton);
+        if (button != null) button.setOnClickListener(v -> navForward());
+        button = findViewById(R.id.lastButton);
+        if (button != null) button.setOnClickListener(v -> navLast());
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
@@ -484,6 +490,39 @@ public class BoardActivity extends AppCompatActivity {
         }
     };
 
+
+    /** Move navigation is ignored while a swap2 / dPente choice or Go stone marking is in progress (as on iOS). */
+    private boolean navBlocked() {
+        return game.swap2Choice || game.dPenteChoice || game.isGoMarkStones();
+    }
+
+    private void navBack() {
+        if (navBlocked()) return;
+        goBack();
+    }
+
+    private void navForward() {
+        if (navBlocked()) return;
+        goForward();
+    }
+
+    /** Repeats goBack until the first position (bounded; a pending Connect6/dPente stone is cleared first). */
+    private void navFirst() {
+        if (navBlocked() || game.getMovesList() == null) return;
+        int guard = game.getMovesList().size() + 3;
+        do {
+            goBack();
+        } while (game.getUntilMove() > 1 && --guard > 0);
+    }
+
+    /** Repeats goForward until the last position. */
+    private void navLast() {
+        if (navBlocked() || game.getMovesList() == null) return;
+        int guard = game.getMovesList().size() + 3;
+        while (game.getUntilMove() < game.getMovesList().size() && --guard > 0) {
+            goForward();
+        }
+    }
 
     public void goBack() {
         String str;

@@ -60,6 +60,11 @@
     <string name="clear">Löschen</string>
     <string name="no_search_results">Keine Suchergebnisse</string>
     <string name="search">Suchen</string>
+    <string name="nav_first">Erster Zug</string>
+    <string name="nav_back">Vorheriger Zug</string>
+    <string name="nav_forward">Nächster Zug</string>
+    <string name="nav_last">Letzter Zug</string>
+    <string name="nav_undo">Zug zurücknehmen</string>
     <string name="play_as">Spielen als:</string>
     <string name="opponent">Gegner</string>
     <string-array name="restriction_array">

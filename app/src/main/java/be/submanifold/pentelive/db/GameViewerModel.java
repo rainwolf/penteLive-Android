@@ -82,6 +82,20 @@ public final class GameViewerModel {
         return true;
     }
 
+    /** Jumps to the empty board. */
+    public boolean first() {
+        if (cursor <= 0) return false;
+        cursor = 0;
+        return true;
+    }
+
+    /** Jumps to the final position. */
+    public boolean last() {
+        if (cursor >= moves.length) return false;
+        cursor = moves.length;
+        return true;
+    }
+
     public void jumpTo(int index) {
         cursor = Math.max(0, Math.min(index, moves.length));
     }

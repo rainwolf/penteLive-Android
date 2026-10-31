@@ -17,7 +17,7 @@ public final class BoardGesture {
     /** At release |dx| must still be at least this times |dy|. */
     public static final float UP_RATIO = 1.0f;
     /** Holding still this long arms the loupe. */
-    public static final long LOUPE_HOLD_MS = 150;
+    public static final long LOUPE_HOLD_MS = 250;
 
     public enum State { IDLE, PENDING, AIMING, SWIPING }
 

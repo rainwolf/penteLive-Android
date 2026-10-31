@@ -1186,4 +1186,22 @@ public class DbControllerTest {
             assertEquals(d.get(r.move.move), Integer.valueOf(r.argb));
         }
     }
+
+    @Test
+    public void firstAndLastJumpThroughHistory() {
+        DbController c = started();
+        c.onBoardMove(181);
+        c.onBoardMove(182);
+        assertFalse(c.last());
+        assertTrue(c.first());
+        assertEquals(Arrays.asList(180), c.moves());
+        assertFalse(c.first());
+        settle();
+        int calls = fake.statsCalls.size();
+        assertTrue(c.last());
+        settle();
+        assertEquals(Arrays.asList(180, 181, 182), c.moves());
+        assertEquals(calls + 1, fake.statsCalls.size());
+        assertEquals(Arrays.asList(180, 181, 182), fake.lastStatsMoves());
+    }
 }
