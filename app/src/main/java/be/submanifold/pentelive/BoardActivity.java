@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.HapticFeedbackConstants;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -213,9 +214,24 @@ public class BoardActivity extends AppCompatActivity {
             }
         });
         button = findViewById(R.id.backButton);
-        if (button != null) button.setOnClickListener(v -> navBack());
+        if (button != null) {
+            button.setOnClickListener(v -> navBack());
+            // Long press jumps to the first position; returning true keeps the click from also firing.
+            button.setOnLongClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                navFirst();
+                return true;
+            });
+        }
         button = findViewById(R.id.forwardButton);
-        if (button != null) button.setOnClickListener(v -> navForward());
+        if (button != null) {
+            button.setOnClickListener(v -> navForward());
+            button.setOnLongClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                navLast();
+                return true;
+            });
+        }
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
@@ -502,6 +518,35 @@ public class BoardActivity extends AppCompatActivity {
         goForward();
     }
 
+    /** Long-press back: clears a pending Connect6/dPente stone like goBack, then jumps to the same floor goBack stops at. */
+    private void navFirst() {
+        if (navBlocked() || game.getMovesList() == null) return;
+        if (game.isDPente() && game.getMovesList().isEmpty()) {
+            for (int i = 0; i < 4; i++) goBack(); // one pending pick per call
+            return;
+        }
+        if (game.isConnect6() && board.connect6Move1 > -1) {
+            goBack();
+        }
+        if (game.getUntilMove() > 1) {
+            game.setUntilMove(1);
+            game.replayGameUntilMove(board);
+            board.setReplayed(false);
+        }
+        afterBack();
+    }
+
+    /** Long-press forward: one jump to the last position, with goForward's side effects. */
+    private void navLast() {
+        if (navBlocked() || game.getMovesList() == null) return;
+        if (game.getUntilMove() < game.getMovesList().size()) {
+            game.setUntilMove(game.getMovesList().size());
+            game.replayGameUntilMove(board);
+            board.setReplayed(false);
+        }
+        afterForward();
+    }
+
     public void goBack() {
         String str;
         if (game.isConnect6() && board.connect6Move1 > -1) {
@@ -541,6 +586,10 @@ public class BoardActivity extends AppCompatActivity {
             game.replayGameUntilMove(board);
             board.setReplayed(false);
         }
+        afterBack();
+    }
+
+    private void afterBack() {
         ((Button) findViewById(R.id.submitButton)).setText(getString(R.string.submit));
 //                ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.getState().blackCaptures + "\n\u25EF x " + game.getState().whiteCaptures);
         board.playedMove = -1;
@@ -566,12 +615,15 @@ public class BoardActivity extends AppCompatActivity {
             board.setReplayed(false);
 //                    ((TextView) findViewById(R.id.capturesLabel)).setText("\u2B24 x " + game.getState().blackCaptures + "\n\u25EF x " + game.getState().whiteCaptures);
         }
+        afterForward();
+    }
+
+    private void afterForward() {
         if (game.messages.get(game.getUntilMove()) != null) {
             messageIcon.startAnimation(rotation);
         } else {
             messageIcon.clearAnimation();
         }
-
     }
 
     @Override
