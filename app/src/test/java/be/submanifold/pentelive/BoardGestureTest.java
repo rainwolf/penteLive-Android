@@ -280,4 +280,12 @@ public class BoardGestureTest {
         g.down(500, 500, 0);
         assertEquals(PLACE, g.up(510, 560, 30));
     }
+
+    @Test
+    public void swipesKeepStagedStoneButOtherActionsDoNot() {
+        assertTrue(BoardGesture.swipeKeepsStagedStone(SWIPE_LEFT));
+        assertTrue(BoardGesture.swipeKeepsStagedStone(SWIPE_RIGHT));
+        assertFalse(BoardGesture.swipeKeepsStagedStone(CANCEL));
+        assertFalse(BoardGesture.swipeKeepsStagedStone(PLACE));
+    }
 }

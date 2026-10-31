@@ -31,6 +31,11 @@ public final class BoardGesture {
         CANCEL
     }
 
+    /** A swipe never ran touch-down work, so any staged stone is still valid and must survive it. */
+    public static boolean swipeKeepsStagedStone(Action a) {
+        return a == Action.SWIPE_LEFT || a == Action.SWIPE_RIGHT;
+    }
+
     private final float slopPx;
     private final float swipeMinPx;
     private final boolean swipesEnabled;

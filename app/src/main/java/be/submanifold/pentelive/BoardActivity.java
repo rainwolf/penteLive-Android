@@ -525,8 +525,12 @@ public class BoardActivity extends AppCompatActivity {
             for (int i = 0; i < 4; i++) goBack(); // one pending pick per call
             return;
         }
-        if (game.isConnect6() && board.connect6Move1 > -1) {
-            goBack();
+        BackNavigation.Action action = backAction();
+        if (action == BackNavigation.Action.CLEAR_CONNECT6) {
+            board.connect6Move1 = -1;
+        }
+        if (action == BackNavigation.Action.CLEAR_CONNECT6 || action == BackNavigation.Action.CLEAR_PLACED_STONE) {
+            clearPlacedStone();
         }
         if (game.getUntilMove() > 1) {
             game.setUntilMove(1);
@@ -549,10 +553,17 @@ public class BoardActivity extends AppCompatActivity {
 
     public void goBack() {
         String str;
-        if (game.isConnect6() && board.connect6Move1 > -1) {
+        BackNavigation.Action action = backAction();
+        if (action == BackNavigation.Action.CLEAR_CONNECT6) {
             board.connect6Move1 = -1;
+            clearPlacedStone(); // also drops the staged stone(s) from the board and the submit label
             board.invalidate();
-        } else if (game.isDPente() && game.getMovesList().isEmpty()) {
+            return;
+        } else if (action == BackNavigation.Action.CLEAR_PLACED_STONE) {
+            clearPlacedStone();
+            board.invalidate();
+            return;
+        } else if (action == BackNavigation.Action.CLEAR_DPENTE_PICK) {
             if (board.dPenteMove4 > -1) {
                 board.dPenteMove4 = -1;
                 str = getString(R.string.submit) + ": " + coordinateLetters[board.dPenteMove1 % 19] + "" + (19 - (board.dPenteMove1 / 19)) +
@@ -587,6 +598,28 @@ public class BoardActivity extends AppCompatActivity {
             board.setReplayed(false);
         }
         afterBack();
+    }
+
+    private BackNavigation.Action backAction() {
+        java.util.List<Integer> ml = game.getMovesList();
+        boolean empty = ml == null || ml.isEmpty();
+        boolean swap2Pending = game.isSwap2() && (empty || (ml.size() == 3 && board.swap2WillPass));
+        boolean renjuPicking = game.isRenju() && (board.renjuOfferMode || "SELECTION".equals(game.renjuPhase));
+        return BackNavigation.decide(game.isConnect6(), board.connect6Move1, game.isDPente(),
+                empty, board.playedMove, swap2Pending, renjuPicking);
+    }
+
+    /** Drops the staged (placed, unsubmitted) stone and shows the latest position again. */
+    private void clearPlacedStone() {
+        board.playedMove = -1;
+        if (game.getMovesList() != null) {
+            game.setUntilMove(game.getMovesList().size());
+            game.replayGameUntilMove(board);
+        }
+        board.setReplayed(false);
+        ((Button) findViewById(R.id.submitButton)).setText(game.isGo() && !game.isGoMarkStones()
+                ? R.string.pass : R.string.submit);
+        board.invalidate();
     }
 
     private void afterBack() {
