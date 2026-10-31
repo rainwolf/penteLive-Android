@@ -212,4 +212,62 @@ public class BoardGestureTest {
         assertEquals(CANCEL, g.cancel());
         assertEquals(NONE, g.up(500, 500, 300));
     }
+
+    @Test
+    public void aimDisabledHoldThenSwipeLeft() {
+        BoardGesture g = new BoardGesture(1f, true, false);
+        g.down(500, 500, 0);
+        assertEquals(NONE, g.tick(200));
+        assertEquals(NONE, g.move(505, 500, 210));
+        assertEquals(NONE, g.move(380, 502, 400));
+        assertTrue(g.swipeLatched());
+        assertEquals(SWIPE_LEFT, g.up(380, 502, 420));
+    }
+
+    @Test
+    public void aimDisabledSlantedDragNeverAims() {
+        BoardGesture g = new BoardGesture(1f, true, false);
+        g.down(500, 500, 0);
+        assertEquals(NONE, g.move(500, 600, 50));
+        assertFalse(g.loupeAllowed());
+        assertEquals(NONE, g.up(500, 600, 80));
+    }
+
+    @Test
+    public void aimDisabledTapPlacesNothing() {
+        BoardGesture g = new BoardGesture(1f, true, false);
+        g.down(500, 500, 0);
+        assertEquals(NONE, g.tick(300));
+        assertEquals(NONE, g.up(501, 500, 320));
+    }
+
+    @Test
+    public void aimDisabledNoSwipesIsInert() {
+        BoardGesture g = new BoardGesture(1f, false, false);
+        assertEquals(NONE, g.down(500, 500, 0));
+        assertEquals(NONE, g.up(500, 500, 50));
+    }
+
+    @Test
+    public void upWithoutMoveClassifiesAsSwipe() {
+        BoardGesture g = g();
+        g.down(500, 500, 0);
+        assertEquals(SWIPE_LEFT, g.up(400, 502, 30));
+        g.down(500, 500, 100);
+        assertEquals(SWIPE_RIGHT, g.up(600, 500, 130));
+    }
+
+    @Test
+    public void upWithoutMoveShortHorizontalCancels() {
+        BoardGesture g = g();
+        g.down(500, 500, 0);
+        assertEquals(CANCEL, g.up(480, 500, 30));
+    }
+
+    @Test
+    public void upWithoutMoveSteepPlaces() {
+        BoardGesture g = g();
+        g.down(500, 500, 0);
+        assertEquals(PLACE, g.up(510, 560, 30));
+    }
 }

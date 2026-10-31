@@ -34,6 +34,7 @@ public final class BoardGesture {
     private final float slopPx;
     private final float swipeMinPx;
     private final boolean swipesEnabled;
+    private final boolean aimEnabled;
 
     private State state = State.IDLE;
     private float downX, downY;
@@ -41,6 +42,12 @@ public final class BoardGesture {
     private int latchedSign;
 
     public BoardGesture(float density, boolean swipesEnabled) {
+        this(density, swipesEnabled, true);
+    }
+
+    /** aimEnabled false (read-only viewer): never aims or places; only swipes can result. */
+    public BoardGesture(float density, boolean swipesEnabled, boolean aimEnabled) {
+        this.aimEnabled = aimEnabled;
         this.slopPx = SLOP_DP * density;
         this.swipeMinPx = SWIPE_MIN_DP * density;
         this.swipesEnabled = swipesEnabled;
@@ -52,6 +59,10 @@ public final class BoardGesture {
         downT = tMs;
         latchedSign = 0;
         if (!swipesEnabled) {
+            if (!aimEnabled) {
+                state = State.IDLE;
+                return Action.NONE;
+            }
             state = State.AIMING;
             return Action.SHOW_LOUPE;
         }
@@ -65,7 +76,7 @@ public final class BoardGesture {
                 float dx = x - downX;
                 float dy = y - downY;
                 if (Math.hypot(dx, dy) < slopPx) {
-                    if (tMs - downT >= LOUPE_HOLD_MS) {
+                    if (aimEnabled && tMs - downT >= LOUPE_HOLD_MS) {
                         state = State.AIMING;
                         return Action.SHOW_LOUPE;
                     }
@@ -76,6 +87,7 @@ public final class BoardGesture {
                     latchedSign = dx < 0 ? -1 : 1;
                     return Action.NONE;
                 }
+                if (!aimEnabled) return Action.NONE;
                 state = State.AIMING;
                 return Action.SHOW_LOUPE;
             }
@@ -88,7 +100,7 @@ public final class BoardGesture {
 
     /** Driven by a postDelayed runnable: a perfectly still finger may send no move events. */
     public Action tick(long tMs) {
-        if (state == State.PENDING && tMs - downT >= LOUPE_HOLD_MS) {
+        if (aimEnabled && state == State.PENDING && tMs - downT >= LOUPE_HOLD_MS) {
             state = State.AIMING;
             return Action.SHOW_LOUPE;
         }
@@ -99,7 +111,19 @@ public final class BoardGesture {
         State s = state;
         state = State.IDLE;
         switch (s) {
-            case PENDING:
+            case PENDING: {
+                // A release that never produced a MOVE past the slop may still be a swipe.
+                float dx = x - downX;
+                float dy = y - downY;
+                if (Math.hypot(dx, dy) >= slopPx
+                        && Math.abs(dx) >= LATCH_RATIO * Math.abs(dy)) {
+                    if (Math.abs(dx) >= swipeMinPx) {
+                        return dx < 0 ? Action.SWIPE_LEFT : Action.SWIPE_RIGHT;
+                    }
+                    return Action.CANCEL;
+                }
+                return aimEnabled ? Action.PLACE : Action.NONE;
+            }
             case AIMING:
                 return Action.PLACE;
             case SWIPING: {

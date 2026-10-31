@@ -450,7 +450,7 @@ public class DBBoardView extends View {
                 removeCallbacks(loupeTick);
                 downWorkDone = false;
                 gesture = new BoardGesture(getResources().getDisplayMetrics().density,
-                        swipeListener != null);
+                        swipeListener != null, placementEnabled);
                 gestureX = x;
                 gestureY = y;
                 // Keep the scrolling parent from stealing a vertical aim-drag (it would cancel
