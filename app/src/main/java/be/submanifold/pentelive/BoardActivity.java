@@ -505,7 +505,7 @@ public class BoardActivity extends AppCompatActivity {
 
     /** Move navigation is ignored while a swap2 / dPente choice or Go stone marking is in progress (as on iOS). */
     private boolean navBlocked() {
-        return game.swap2Choice || game.dPenteChoice || game.isGoMarkStones();
+        return (game.swap2Choice && swap2Picks() <= 0) || game.dPenteChoice || game.isGoMarkStones();
     }
 
     private void navBack() {
@@ -523,6 +523,10 @@ public class BoardActivity extends AppCompatActivity {
         if (navBlocked() || game.getMovesList() == null) return;
         if (game.isDPente() && game.getMovesList().isEmpty()) {
             for (int i = 0; i < 4; i++) goBack(); // one pending pick per call
+            return;
+        }
+        if (swap2Picks() > 0 || renjuPickCount() > 0) {
+            while (swap2Picks() > 0 || renjuPickCount() > 0) goBack(); // one pending pick per call
             return;
         }
         BackNavigation.Action action = backAction();
@@ -588,6 +592,18 @@ public class BoardActivity extends AppCompatActivity {
             }
             board.invalidate();
             return;
+        } else if (action == BackNavigation.Action.CLEAR_SWAP2_PICK) {
+            clearSwap2Pick();
+            return;
+        } else if (action == BackNavigation.Action.CLEAR_RENJU_SELECTION_PICK) {
+            clearRenjuSelectionPick();
+            return;
+        } else if (action == BackNavigation.Action.CLEAR_RENJU_OFFER_PICK) {
+            board.renjuPicks.remove(board.renjuPicks.size() - 1);
+            board.playedMove = -1;
+            board.renjuCandidates = board.renjuPicks;
+            board.invalidate(); // onDraw restyles the submit count
+            return;
         } else if (game.getUntilMove() > 1) {
             if (game.isConnect6()) {
                 game.setUntilMove(game.getUntilMove() - 2);
@@ -603,10 +619,75 @@ public class BoardActivity extends AppCompatActivity {
     private BackNavigation.Action backAction() {
         java.util.List<Integer> ml = game.getMovesList();
         boolean empty = ml == null || ml.isEmpty();
-        boolean swap2Pending = game.isSwap2() && (empty || (ml.size() == 3 && board.swap2WillPass));
-        boolean renjuPicking = game.isRenju() && (board.renjuOfferMode || "SELECTION".equals(game.renjuPhase));
         return BackNavigation.decide(game.isConnect6(), board.connect6Move1, game.isDPente(),
-                empty, board.playedMove, swap2Pending, renjuPicking);
+                empty, board.playedMove, swap2Picks(), renjuSelectionPicks(), renjuOfferPicks());
+    }
+
+    /** swap2 opening picks so far, or -1 when not in a swap2 opening (empty list, or the 2-stone pass). */
+    private int swap2Picks() {
+        java.util.List<Integer> ml = game.getMovesList();
+        boolean empty = ml == null || ml.isEmpty();
+        if (!game.isSwap2() || !(empty || (ml.size() == 3 && board.swap2WillPass))) return -1;
+        return (board.swap2Move1 > -1 ? 1 : 0) + (board.swap2Move2 > -1 ? 1 : 0) + (board.swap2Move3 > -1 ? 1 : 0);
+    }
+
+    /** Renju SELECTION stones picked so far, or -1 outside SELECTION. */
+    private int renjuSelectionPicks() {
+        if (!game.isRenju() || !"SELECTION".equals(game.renjuPhase)) return -1;
+        return board.renjuSelection == null ? 0 : board.renjuSelection.size();
+    }
+
+    /** Renju OFFERS picked so far, or -1 outside offer mode. */
+    private int renjuOfferPicks() {
+        if (!game.isRenju() || !board.renjuOfferMode) return -1;
+        return board.renjuPicks == null ? 0 : board.renjuPicks.size();
+    }
+
+    private int renjuPickCount() {
+        return Math.max(0, renjuSelectionPicks()) + Math.max(0, renjuOfferPicks());
+    }
+
+    /** Removes the last swap2 pick and restores the submit label and (pass case) the staged stone. */
+    private void clearSwap2Pick() {
+        int gs = game.getGridSize();
+        if (board.swap2Move3 > -1) board.swap2Move3 = -1;
+        else if (board.swap2Move2 > -1) board.swap2Move2 = -1;
+        else board.swap2Move1 = -1;
+        String str = getString(R.string.submit);
+        if (board.swap2Move1 > -1) {
+            str += ": " + coordinateLetters[board.swap2Move1 % gs] + (gs - (board.swap2Move1 / gs));
+            if (board.swap2Move2 > -1) {
+                str += "-" + coordinateLetters[board.swap2Move2 % gs] + (gs - (board.swap2Move2 / gs));
+            } else {
+                str += "-...";
+            }
+        }
+        ((Button) findViewById(R.id.submitButton)).setText(str);
+        board.playedMove = -1;
+        if (game.getMovesList().size() == 3 && board.swap2WillPass) {
+            // the 2-stone pass draws its first pick into the replayed position
+            game.replayGameUntilMove(board);
+            if (board.swap2Move1 > -1) {
+                game.replayGame((byte) (board.swap2Move1 / 19), (byte) (board.swap2Move1 % 19), board, (byte) 255, (byte) 255);
+            }
+            board.setReplayed(false);
+        }
+        board.invalidate();
+    }
+
+    /** Removes the last Renju SELECTION stone (6th, else 5th) and rebuilds the position as the tap handler would. */
+    private void clearRenjuSelectionPick() {
+        board.renjuSelection.remove(board.renjuSelection.size() - 1);
+        board.playedMove = -1;
+        game.setUntilMove(game.getMovesList().size());
+        game.replayGameUntilMove(board); // drops the 6th (and the 5th) from the snapshot
+        board.setReplayed(false);
+        if (board.renjuSelection.size() == 1) {
+            int m5 = board.renjuSelection.get(0);
+            int gs = game.getGridSize();
+            game.getState().board[m5 / gs][m5 % gs] = 2; // black 5th as a live stone
+        } // else: onDraw re-applies the offers mask and candidates
+        board.invalidate(); // onDraw restyles the submit label/state
     }
 
     /** Drops the staged (placed, unsubmitted) stone and shows the latest position again. */

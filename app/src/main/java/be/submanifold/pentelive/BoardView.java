@@ -175,7 +175,9 @@ public class BoardView extends View {
         // (The offer-mode path avoids this by aliasing renjuCandidates in onTouchEvent.) The block
         // further below re-runs this idempotently and handles the post-draw layout chrome.
         if (game != null && game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
-            if (renjuSelection == null || renjuSelection.isEmpty()) {
+            if (!renjuAtLatest()) {
+                renjuCandidates = null; // no pick overlay on past positions
+            } else if (renjuSelection == null || renjuSelection.isEmpty()) {
                 applyRenjuSelectionMask();
                 renjuOfferCandidates.clear();
                 if (game.renjuOffers != null) for (int o : game.renjuOffers) renjuOfferCandidates.add(o);
@@ -267,13 +269,15 @@ public class BoardView extends View {
             // opening a double-submit window. onDraw only READS the flag.
             if (game.isRenju() && game.isActive() && renjuOfferMode) {
                 renjuBoxRadius = 0;
-                renjuCandidates = renjuPicks;
+                renjuCandidates = renjuAtLatest() ? renjuPicks : null;
                 parentLayout.findViewById(R.id.dPenteLayout).setVisibility(INVISIBLE);
                 parentLayout.findViewById(R.id.submitLayout).setVisibility(VISIBLE);
             }
             if (game.isRenju() && game.isActive() && "SELECTION".equals(game.renjuPhase)) {
                 renjuBoxRadius = 0;
-                if (renjuSelection == null || renjuSelection.isEmpty()) {
+                if (!renjuAtLatest()) {
+                    renjuCandidates = null;
+                } else if (renjuSelection == null || renjuSelection.isEmpty()) {
                     // black-5th pick: lock the board to the 10 offers (mask every other empty
                     // cell -1 so only an offer can show a stone) and draw the offers as the
                     // existing translucent dead-stone candidates. Idempotent per frame.
@@ -761,6 +765,11 @@ public class BoardView extends View {
         return super.performClick();
     }
 
+
+    // Pick overlays (offers, SELECTION mask) belong to the latest position only.
+    private boolean renjuAtLatest() {
+        return game.getMovesList() == null || game.getUntilMove() >= game.getMovesList().size();
+    }
 
     // SELECTION: lock the board to the 10 offered cells (black 5th). Mark every EMPTY non-offer
     // cell as -1 ("forbidden" in BoardState's cell encoding; drawStone renders nothing for <1),
