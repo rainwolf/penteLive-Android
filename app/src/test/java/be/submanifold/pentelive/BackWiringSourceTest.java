@@ -43,4 +43,21 @@ public class BackWiringSourceTest {
         String body = s.substring(i, s.indexOf("board.invalidate();", i));
         assertTrue(body.contains("R.string.pass"));
     }
+
+    @Test
+    public void goBackHandlesSwap2AndRenjuPicks() throws Exception {
+        String s = read("BoardActivity.java");
+        int i = s.indexOf("public void goBack()");
+        String body = s.substring(i, s.indexOf("private BackNavigation.Action backAction()", i));
+        assertTrue(body.contains("CLEAR_SWAP2_PICK"));
+        assertTrue(body.contains("CLEAR_RENJU_SELECTION_PICK"));
+        assertTrue(body.contains("CLEAR_RENJU_OFFER_PICK"));
+    }
+
+    @Test
+    public void renjuPickOverlaysOnlyOnLatestPosition() throws Exception {
+        String s = read("BoardView.java");
+        assertTrue(s.contains("private boolean renjuAtLatest()"));
+        assertTrue(s.contains("renjuAtLatest() ? renjuPicks : null"));
+    }
 }
